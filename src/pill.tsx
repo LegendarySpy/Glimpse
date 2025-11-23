@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { useSharedAnalyser } from "./hooks/useSharedAnalyser";
 
 export interface PillOverlayProps {
@@ -57,6 +58,23 @@ const STOP_ICON = [
 
 // --- Component ---
 
+type RecordingStatus = "idle" | "listening" | "saving" | "complete" | "error";
+
+interface RecordingStartPayload {
+  started_at: string;
+}
+
+interface RecordingCompletePayload {
+  path: string;
+  started_at: string;
+  ended_at: string;
+  duration_ms: number;
+}
+
+interface RecordingErrorPayload {
+  message: string;
+}
+
 const PillOverlay: React.FC<PillOverlayProps> = ({
   className = "",
   style = {},
@@ -70,6 +88,8 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const { analyser, isListening, error, start, stop } = useSharedAnalyser();
+  const [status, setStatus] = useState<RecordingStatus>("idle");
+  const [statusDetail, setStatusDetail] = useState<string | null>(null);
 
   // Sync Ref for Animation Loop
   const isListeningRef = useRef<boolean>(false);
@@ -80,17 +100,47 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
   // --- Initialization & Cleanup ---
 
-  const toggleListening = async () => {
-    if (isListeningRef.current) {
+  useEffect(() => {
+    const unlisteners: Promise<UnlistenFn>[] = [
+      listen<RecordingStartPayload>("recording:start", async () => {
+        setStatus("listening");
+        setStatusDetail(null);
+        try {
+          await start();
+        } catch (err) {
+          console.error(err);
+          setStatus("error");
+          setStatusDetail("Microphone permission needed");
+        }
+      }),
+      listen("recording:stop", () => {
+        setStatus("saving");
+        setStatusDetail(null);
+        stop();
+      }),
+      listen<RecordingCompletePayload>("recording:complete", () => {
+        setStatus("complete");
+        setStatusDetail(null);
+      }),
+      listen<RecordingErrorPayload>("recording:error", (event) => {
+        setStatus("error");
+        setStatusDetail(event.payload.message);
+        stop();
+      }),
+    ];
+
+    return () => {
+      unlisteners.forEach(async (promise) => {
+        try {
+          const unlisten = await promise;
+          unlisten();
+        } catch (_err) {
+          // Already cleaned up.
+        }
+      });
       stop();
-    } else {
-      try {
-        await start();
-      } catch (_error) {
-        // Error is handled within the shared analyser; ignore here.
-      }
-    }
-  };
+    };
+  }, [start, stop]);
 
   // --- Rendering Helpers ---
 
@@ -358,15 +408,30 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     fadeOut();
   }, [analyser, animate, fadeOut, isListening, stopAnimation]);
 
+  const statusLabel: Record<RecordingStatus, string> = {
+    idle: "Hold your shortcut to record",
+    listening: "Listening…",
+    saving: "Saving…",
+    complete: "Saved",
+    error: "Recorder error",
+  };
+
+  const statusTone: Record<RecordingStatus, string> = {
+    idle: "text-gray-500",
+    listening: "text-rose-400",
+    saving: "text-sky-400",
+    complete: "text-emerald-400",
+    error: "text-red-500",
+  };
+
   return (
     <div
-      className={`relative group cursor-pointer ${className}`}
+      className={`relative group select-none ${className}`}
       style={{
         width: `${PILL_WIDTH}px`,
         height: `${PILL_HEIGHT}px`,
         ...style
       }}
-      onClick={toggleListening}
     >
       {/* Physical Pill Container */}
       <div
@@ -394,6 +459,16 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
               </span>
             </div>
           </div>
+        )}
+      </div>
+      <div className="mt-3 text-center">
+        <p className={`text-[10px] uppercase tracking-[0.35em] ${statusTone[status]}`}>
+          {statusLabel[status]}
+        </p>
+        {statusDetail && (
+          <p className="mt-1 text-[10px] text-gray-400 break-words px-4">
+            {statusDetail}
+          </p>
         )}
       </div>
     </div>

@@ -25,15 +25,15 @@
         "transparent": true,
         "shadow": false,
         "center": false,
-        "focus": true,
-        "visible": true
+        "focus": false,
+        "visible": false
       },
       {
         "label": "settings",
         "title": "Glimpse Settings",
         "width": 400,
         "height": 300,
-        "resizable": false,
+        "resizable": true,
         "visible": false
       }
     ],

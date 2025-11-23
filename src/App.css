@@ -20,6 +20,16 @@ body {
   overflow: hidden;
 }
 
+html.settings-html,
+body.settings-body {
+  overflow-y: auto;
+}
+
+.settings-view {
+  background-color: #050505;
+  color: inherit;
+}
+
 *,
 *::before,
 *::after {
