@@ -1473,6 +1473,7 @@ dependencies = [
  "tauri-plugin-global-shortcut",
  "tauri-plugin-opener",
  "thiserror 1.0.69",
+ "webrtc-vad",
 ]
 
 [[package]]
@@ -4858,6 +4859,15 @@ dependencies = [
  "pkg-config",
  "soup3-sys",
  "system-deps",
+]
+
+[[package]]
+name = "webrtc-vad"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5777afdabaa79362aeabe21662fe873d7c020b8199d6855fede5ade0167badfb"
+dependencies = [
+ "cc",
 ]
 
 [[package]]

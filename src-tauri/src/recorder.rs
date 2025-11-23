@@ -1,4 +1,4 @@
-use std::{borrow::Cow, fs, path::PathBuf, sync::Arc};
+use std::{borrow::Cow, f32::consts::PI, fs, path::PathBuf, sync::Arc};
 
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, Local};
@@ -7,6 +7,7 @@ use cpal::{SampleFormat, Stream};
 use crossbeam_channel::{bounded, unbounded, Sender};
 use mp3lame_encoder::{Bitrate, Builder as LameBuilder, FlushNoGap, InterleavedPcm, MonoPcm, Quality};
 use parking_lot::Mutex;
+use webrtc_vad::{Vad, VadMode};
 
 pub struct RecorderManager {
     tx: Sender<RecorderCommand>,
@@ -161,16 +162,36 @@ impl RecorderCore {
     fn stop(&mut self) -> Result<Option<CompletedRecording>> {
         if let Some(active) = self.active.take() {
             drop(active.stream);
-            let mut samples = Arc::try_unwrap(active.buffer)
+            let raw_samples = Arc::try_unwrap(active.buffer)
                 .map(|mutex| mutex.into_inner())
                 .unwrap_or_else(|arc| arc.lock().clone());
 
-            normalize_samples(&mut samples);
+            let mut mono = samples_to_mono_f32(&raw_samples, active.channels as usize);
+            if mono.is_empty() {
+                return Ok(Some(CompletedRecording {
+                    samples: raw_samples,
+                    sample_rate: active.sample_rate,
+                    channels: active.channels,
+                    started_at: active.started_at,
+                    ended_at: Local::now(),
+                }));
+            }
+
+            apply_filters(&mut mono, active.sample_rate);
+            apply_compression(&mut mono);
+            apply_frame_normalization(&mut mono, active.sample_rate);
+            let trimmed = trim_silence(&mono, active.sample_rate);
+            let processed = if trimmed.is_empty() { mono } else { trimmed };
+
+            let samples: Vec<i16> = processed
+                .into_iter()
+                .map(|sample| (sample.clamp(-1.0, 1.0) * i16::MAX as f32).round() as i16)
+                .collect();
 
             Ok(Some(CompletedRecording {
                 samples,
                 sample_rate: active.sample_rate,
-                channels: active.channels,
+                channels: 1,
                 started_at: active.started_at,
                 ended_at: Local::now(),
             }))
@@ -218,7 +239,7 @@ fn encode_to_mp3(samples: &[i16], sample_rate: u32, channels: u16) -> Result<Vec
         .set_num_channels(constrained_channels as u8)
         .map_err(|err| anyhow!("Invalid channel count: {err}"))?;
     builder
-        .set_brate(Bitrate::Kbps192)
+        .set_brate(Bitrate::Kbps128)
         .map_err(|err| anyhow!("Failed to set bitrate: {err}"))?;
     builder
         .set_quality(Quality::VeryNice)
@@ -254,6 +275,290 @@ fn encode_to_mp3(samples: &[i16], sample_rate: u32, channels: u16) -> Result<Vec
         .map_err(|err| anyhow!("Flush error: {err}"))?;
 
     Ok(output)
+}
+
+fn samples_to_mono_f32(samples: &[i16], channels: usize) -> Vec<f32> {
+    if samples.is_empty() {
+        return Vec::new();
+    }
+
+    if channels <= 1 {
+        return samples
+            .iter()
+            .map(|s| *s as f32 / i16::MAX as f32)
+            .collect();
+    }
+
+    let frames = samples.len() / channels;
+    let mut mono = Vec::with_capacity(frames);
+    for frame in 0..frames {
+        let mut acc = 0f32;
+        for ch in 0..channels {
+            let idx = frame * channels + ch;
+            if let Some(sample) = samples.get(idx) {
+                acc += *sample as f32;
+            }
+        }
+        mono.push(acc / channels as f32 / i16::MAX as f32);
+    }
+    mono
+}
+
+fn apply_filters(samples: &mut [f32], sample_rate: u32) {
+    apply_high_pass(samples, sample_rate, 120.0);
+    apply_low_pass(samples, sample_rate, 8_000.0);
+}
+
+fn apply_high_pass(samples: &mut [f32], sample_rate: u32, cutoff: f32) {
+    if samples.is_empty() {
+        return;
+    }
+    let clamped_cutoff = cutoff.min(sample_rate as f32 / 2.0 - 10.0).max(20.0);
+    let rc = 1.0 / (2.0 * PI * clamped_cutoff);
+    let dt = 1.0 / sample_rate as f32;
+    let alpha = rc / (rc + dt);
+    let mut prev_y = samples[0];
+    let mut prev_x = samples[0];
+    for sample in samples.iter_mut() {
+        let y = alpha * (prev_y + *sample - prev_x);
+        prev_y = y;
+        prev_x = *sample;
+        *sample = y;
+    }
+}
+
+fn apply_low_pass(samples: &mut [f32], sample_rate: u32, cutoff: f32) {
+    if samples.is_empty() {
+        return;
+    }
+    let clamped_cutoff = cutoff.min(sample_rate as f32 / 2.0 - 10.0).max(200.0);
+    let rc = 1.0 / (2.0 * PI * clamped_cutoff);
+    let dt = 1.0 / sample_rate as f32;
+    let alpha = dt / (rc + dt);
+    let mut prev = samples[0];
+    for sample in samples.iter_mut() {
+        prev = prev + alpha * (*sample - prev);
+        *sample = prev;
+    }
+}
+
+fn apply_compression(samples: &mut [f32]) {
+    if samples.is_empty() {
+        return;
+    }
+
+    let threshold = 0.2f32;
+    let ratio = 2.0f32;
+    let attack = 0.2f32;
+    let release = 0.02f32;
+    let mut gain = 1.0f32;
+
+    for sample in samples.iter_mut() {
+        let input_level = sample.abs();
+        let mut target_gain = 1.0f32;
+        if input_level > threshold {
+            let over = input_level / threshold;
+            let compressed = threshold * (1.0 + (over - 1.0) / ratio);
+            target_gain = (compressed / input_level).clamp(0.1, 1.0);
+        }
+        let coeff = if target_gain < gain { attack } else { release };
+        gain += (target_gain - gain) * coeff;
+        *sample *= gain;
+    }
+}
+
+fn apply_frame_normalization(samples: &mut [f32], sample_rate: u32) {
+    if samples.is_empty() {
+        return;
+    }
+
+    let frame_size = (sample_rate as usize / 100).max(256);
+    let target_rms = 0.22f32;
+    let smoothing = 0.1f32;
+    let mut gain = 1.0f32;
+
+    for chunk in samples.chunks_mut(frame_size) {
+        let rms = (
+            chunk
+                .iter()
+                .map(|s| s * s)
+                .sum::<f32>()
+                / chunk.len().max(1) as f32
+        )
+            .sqrt();
+        let desired = if rms > 1e-4 {
+            (target_rms / rms).clamp(0.5, 4.0)
+        } else {
+            4.0
+        };
+        gain += (desired - gain) * smoothing;
+        for sample in chunk.iter_mut() {
+            *sample *= gain;
+        }
+    }
+}
+
+fn trim_silence(samples: &[f32], sample_rate: u32) -> Vec<f32> {
+    if samples.is_empty() {
+        return Vec::new();
+    }
+
+    let vad_rate = match sample_rate {
+        8000 | 16000 | 32000 | 48000 => sample_rate,
+        _ => 16000,
+    };
+
+    let analysis = if vad_rate == sample_rate {
+        samples.to_vec()
+    } else {
+        resample_linear(samples, sample_rate, vad_rate)
+    };
+
+    let frame_ms = 30usize;
+    let frame_len = (vad_rate as usize * frame_ms) / 1000;
+    if frame_len == 0 || analysis.len() < frame_len {
+        return samples.to_vec();
+    }
+
+    let analysis_i16: Vec<i16> = analysis
+        .iter()
+        .map(|s| (*s).clamp(-1.0, 1.0))
+        .map(|s| (s * i16::MAX as f32).round() as i16)
+        .collect();
+
+    let mut vad = match Vad::new(vad_rate as i32) {
+        Ok(mut instance) => {
+            let _ = instance.fvad_set_mode(VadMode::LowBitrate);
+            instance
+        }
+        Err(_) => return samples.to_vec(),
+    };
+
+    let mut speech_frames = Vec::new();
+    for chunk in analysis_i16.chunks(frame_len) {
+        if chunk.len() < frame_len {
+            break;
+        }
+        let voiced = vad.is_voice_segment(chunk).unwrap_or(true);
+        speech_frames.push(voiced);
+    }
+
+    if speech_frames.is_empty() || speech_frames.iter().all(|flag| !*flag) {
+        return samples.to_vec();
+    }
+
+    let hang_duration_ms = 350f32;
+    let hang_frames = ((hang_duration_ms / frame_ms as f32).ceil()) as usize;
+    let pre_roll = 4usize;
+    let min_gap_ms = 600f32;
+    let min_gap_frames = ((min_gap_ms / frame_ms as f32).ceil()) as usize;
+    let mut keep_mask = vec![false; speech_frames.len()];
+    let mut hang = 0usize;
+    for (idx, speech) in speech_frames.iter().enumerate() {
+        if *speech {
+            keep_mask[idx] = true;
+            hang = hang_frames;
+        } else if hang > 0 {
+            keep_mask[idx] = true;
+            hang -= 1;
+        }
+    }
+
+    // restore short pauses to avoid over-trimming
+    if min_gap_frames > 0 {
+        let mut run_start = None;
+        for idx in 0..keep_mask.len() {
+            if !keep_mask[idx] {
+                run_start.get_or_insert(idx);
+            } else if let Some(start) = run_start.take() {
+                if idx - start <= min_gap_frames {
+                    for gap_idx in start..idx {
+                        keep_mask[gap_idx] = true;
+                    }
+                }
+            }
+        }
+        if let Some(start) = run_start.take() {
+            if keep_mask.len() - start <= min_gap_frames {
+                for gap_idx in start..keep_mask.len() {
+                    keep_mask[gap_idx] = true;
+                }
+            }
+        }
+    }
+
+    for idx in 0..keep_mask.len() {
+        if keep_mask[idx] {
+            for back in 1..=pre_roll.min(idx) {
+                keep_mask[idx - back] = true;
+            }
+        }
+    }
+
+    let samples_per_vad_sample = sample_rate as f32 / vad_rate as f32;
+    let mut intervals: Vec<(usize, usize)> = Vec::new();
+    let mut current: Option<(usize, usize)> = None;
+    for (idx, keep) in keep_mask.iter().enumerate() {
+        let start = ((idx * frame_len) as f32 * samples_per_vad_sample) as usize;
+        let end = (((idx + 1) * frame_len) as f32 * samples_per_vad_sample).ceil() as usize;
+        if *keep {
+            if let Some(interval) = current.as_mut() {
+                interval.1 = end;
+            } else {
+                current = Some((start, end));
+            }
+        } else if let Some(interval) = current.take() {
+            intervals.push(interval);
+        }
+    }
+    if let Some(interval) = current.take() {
+        intervals.push(interval);
+    }
+
+    if intervals.is_empty() {
+        return samples.to_vec();
+    }
+
+    let mut output = Vec::new();
+    for (start, end) in intervals {
+        let clamped_start = start.min(samples.len());
+        let clamped_end = end.min(samples.len());
+        if clamped_start < clamped_end {
+            output.extend_from_slice(&samples[clamped_start..clamped_end]);
+        }
+    }
+
+    if output.is_empty() {
+        samples.to_vec()
+    } else {
+        output
+    }
+}
+
+fn resample_linear(input: &[f32], in_rate: u32, out_rate: u32) -> Vec<f32> {
+    if input.is_empty() {
+        return Vec::new();
+    }
+    if in_rate == out_rate {
+        return input.to_vec();
+    }
+
+    let ratio = out_rate as f64 / in_rate as f64;
+    let out_len = ((input.len() as f64) * ratio).max(1.0).round() as usize;
+    if out_len <= 1 {
+        return vec![input[0]];
+    }
+
+    let mut output = Vec::with_capacity(out_len);
+    for i in 0..out_len {
+        let src_pos = i as f64 / ratio;
+        let idx = src_pos.floor() as usize;
+        let frac = src_pos - idx as f64;
+        let next_idx = (idx + 1).min(input.len() - 1);
+        let sample = input[idx] as f64 * (1.0 - frac) + input[next_idx] as f64 * frac;
+        output.push(sample as f32);
+    }
+    output
 }
 
 fn push_f32_samples(data: &[f32], buffer: &Arc<Mutex<Vec<i16>>>) {
@@ -295,31 +600,3 @@ fn downmix_to_mono(samples: &[i16], channels: usize) -> Vec<i16> {
     mono
 }
 
-fn normalize_samples(samples: &mut [i16]) {
-    if samples.is_empty() {
-        return;
-    }
-
-    let peak = samples
-        .iter()
-        .map(|sample| (i32::from(*sample)).abs() as f32)
-        .fold(0.0f32, f32::max);
-
-    if peak <= 0.0 {
-        return;
-    }
-
-    let target = i16::MAX as f32 * 0.92; // leave a little headroom to avoid clipping
-    let gain = (target / peak).clamp(0.25, 20.0);
-
-    if (gain - 1.0).abs() < 0.01 {
-        return;
-    }
-
-    for sample in samples.iter_mut() {
-        let scaled = (*sample as f32) * gain;
-        *sample = scaled
-            .clamp(-(i16::MAX as f32), i16::MAX as f32)
-            .round() as i16;
-    }
-}
