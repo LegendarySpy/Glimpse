@@ -1,11 +1,15 @@
+mod assistive;
 mod recorder;
 mod settings;
+mod transcription;
 
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
 use recorder::{CompletedRecording, RecorderManager, RecordingSaved};
+use reqwest::Client;
 use serde::Serialize;
 use settings::UserSettings;
 use tauri::async_runtime;
@@ -21,9 +25,13 @@ const EVENT_RECORDING_START: &str = "recording:start";
 const EVENT_RECORDING_STOP: &str = "recording:stop";
 const EVENT_RECORDING_COMPLETE: &str = "recording:complete";
 const EVENT_RECORDING_ERROR: &str = "recording:error";
+const EVENT_TRANSCRIPTION_START: &str = "transcription:start";
+const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
+const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    dotenvy::dotenv().ok();
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
@@ -60,6 +68,7 @@ type GlimpseResult<T> = Result<T>;
 
 struct AppState {
     recorder: RecorderManager,
+    http: Client,
     settings: parking_lot::Mutex<UserSettings>,
     tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
     shortcut_down: AtomicBool,
@@ -67,8 +76,13 @@ struct AppState {
 
 impl AppState {
     fn new(settings: UserSettings) -> Self {
+        let http = Client::builder()
+            .timeout(Duration::from_secs(120))
+            .build()
+            .expect("Failed to build HTTP client");
         Self {
             recorder: RecorderManager::new(),
+            http,
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
             shortcut_down: AtomicBool::new(false),
@@ -85,6 +99,10 @@ impl AppState {
 
     fn recorder(&self) -> &RecorderManager {
         &self.recorder
+    }
+
+    fn http(&self) -> Client {
+        self.http.clone()
     }
 
     fn store_tray(&self, tray: TrayIcon<AppRuntime>) {
@@ -197,7 +215,6 @@ fn handle_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
 fn show_overlay(app: &AppHandle<AppRuntime>) {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
         let _ = window.show();
-        let _ = window.set_focus();
     }
 }
 
@@ -233,6 +250,8 @@ fn emit_complete(app: &AppHandle<AppRuntime>, saved: RecordingSaved) {
         ended_at: saved.ended_at.to_rfc3339(),
         duration_ms: (saved.ended_at - saved.started_at).num_milliseconds(),
     });
+
+    queue_transcription(app, saved);
 }
 
 fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
@@ -243,6 +262,76 @@ fn emit_event<T: Serialize + Clone>(app: &AppHandle<AppRuntime>, event: &str, pa
     if let Err(err) = app.emit(event, payload) {
         eprintln!("Failed to emit {event}: {err}");
     }
+}
+
+fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved) {
+    emit_transcription_start(app, &saved);
+
+    let http = app.state::<AppState>().http();
+    let app_handle = app.clone();
+    let saved_for_task = saved.clone();
+
+    async_runtime::spawn(async move {
+        let config = transcription::TranscriptionConfig::from_env();
+        match transcription::request_transcription(&http, &saved_for_task, &config).await {
+            Ok(result) => {
+                let mut pasted = false;
+                if config.auto_paste && !result.transcript.trim().is_empty() {
+                    let text = result.transcript.clone();
+                    match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await {
+                        Ok(Ok(())) => pasted = true,
+                        Ok(Err(err)) => {
+                            emit_transcription_error(&app_handle, format!("Auto paste failed: {err}"), "auto_paste");
+                        }
+                        Err(err) => {
+                            emit_transcription_error(&app_handle, format!("Auto paste task error: {err}"), "auto_paste");
+                        }
+                    }
+                }
+
+                emit_transcription_complete(&app_handle, result.transcript, result.confidence, pasted);
+            }
+            Err(err) => emit_transcription_error(&app_handle, format!("Transcription failed: {err}"), "api"),
+        }
+    });
+}
+
+fn emit_transcription_start(app: &AppHandle<AppRuntime>, saved: &RecordingSaved) {
+    emit_event(
+        app,
+        EVENT_TRANSCRIPTION_START,
+        TranscriptionStartPayload {
+            path: saved.path.display().to_string(),
+        },
+    );
+}
+
+fn emit_transcription_complete(
+    app: &AppHandle<AppRuntime>,
+    transcript: String,
+    confidence: Option<f32>,
+    auto_paste: bool,
+) {
+    emit_event(
+        app,
+        EVENT_TRANSCRIPTION_COMPLETE,
+        TranscriptionCompletePayload {
+            transcript,
+            confidence,
+            auto_paste,
+        },
+    );
+}
+
+fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage: &str) {
+    emit_event(
+        app,
+        EVENT_TRANSCRIPTION_ERROR,
+        TranscriptionErrorPayload {
+            message,
+            stage: stage.to_string(),
+        },
+    );
 }
 
 fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
@@ -335,4 +424,22 @@ struct RecordingCompletePayload {
 #[derive(Serialize, Clone)]
 struct RecordingErrorPayload {
     message: String,
+}
+
+#[derive(Serialize, Clone)]
+struct TranscriptionStartPayload {
+    path: String,
+}
+
+#[derive(Serialize, Clone)]
+struct TranscriptionCompletePayload {
+    transcript: String,
+    confidence: Option<f32>,
+    auto_paste: bool,
+}
+
+#[derive(Serialize, Clone)]
+struct TranscriptionErrorPayload {
+    message: String,
+    stage: String,
 }

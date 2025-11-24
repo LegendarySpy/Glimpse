@@ -58,7 +58,7 @@ const STOP_ICON = [
 
 // --- Component ---
 
-type RecordingStatus = "idle" | "listening" | "saving" | "complete" | "error";
+type RecordingStatus = "idle" | "listening" | "saving" | "transcribing" | "complete" | "pasted" | "error";
 
 interface RecordingStartPayload {
   started_at: string;
@@ -73,6 +73,21 @@ interface RecordingCompletePayload {
 
 interface RecordingErrorPayload {
   message: string;
+}
+
+interface TranscriptionStartPayload {
+  path: string;
+}
+
+interface TranscriptionCompletePayload {
+  transcript: string;
+  confidence?: number | null;
+  auto_paste: boolean;
+}
+
+interface TranscriptionErrorPayload {
+  message: string;
+  stage: string;
 }
 
 const PillOverlay: React.FC<PillOverlayProps> = ({
@@ -126,6 +141,23 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         setStatus("error");
         setStatusDetail(event.payload.message);
         stop();
+      }),
+      listen<TranscriptionStartPayload>("transcription:start", () => {
+        setStatus("transcribing");
+        setStatusDetail("Sending audio to Glimpse Server…");
+      }),
+      listen<TranscriptionCompletePayload>("transcription:complete", (event) => {
+        if (event.payload.auto_paste) {
+          setStatus("pasted");
+          setStatusDetail("Transcript pasted into the focused app");
+        } else {
+          setStatus("complete");
+          setStatusDetail("Transcript ready. Press ⌘+V if needed.");
+        }
+      }),
+      listen<TranscriptionErrorPayload>("transcription:error", (event) => {
+        setStatus("error");
+        setStatusDetail(event.payload.message);
       }),
     ];
 
@@ -412,7 +444,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     idle: "Hold your shortcut to record",
     listening: "Listening…",
     saving: "Saving…",
+    transcribing: "Transcribing…",
     complete: "Saved",
+    pasted: "Pasted",
     error: "Recorder error",
   };
 
@@ -420,7 +454,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     idle: "text-gray-500",
     listening: "text-rose-400",
     saving: "text-sky-400",
+    transcribing: "text-purple-400",
     complete: "text-emerald-400",
+    pasted: "text-emerald-300",
     error: "text-red-500",
   };
 
