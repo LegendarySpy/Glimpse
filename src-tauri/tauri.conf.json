@@ -31,10 +31,12 @@
       {
         "label": "settings",
         "title": "Glimpse Settings",
-        "width": 400,
-        "height": 300,
+        "width": 900,
+        "height": 650,
         "resizable": true,
-        "visible": false
+        "visible": false,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay"
       }
     ],
     "security": {

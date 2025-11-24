@@ -30,7 +30,7 @@ function App() {
 
   if (windowLabel === "settings") {
     return (
-      <div className="settings-view h-screen w-screen overflow-y-auto">
+      <div className="settings-view h-screen w-screen overflow-hidden">
         <Settings />
       </div>
     );

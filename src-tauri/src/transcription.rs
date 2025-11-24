@@ -27,6 +27,10 @@ impl TranscriptionConfig {
         }
     }
 
+    pub fn from_settings(_settings: &crate::settings::UserSettings) -> Self {
+        Self::from_env()
+    }
+
     pub fn endpoint_url(&self) -> String {
         format!("{}/transcribe", self.endpoint.trim_end_matches('/'))
     }
@@ -42,6 +46,27 @@ fn env_flag(key: &str, default: bool) -> bool {
 pub struct TranscriptionSuccess {
     pub transcript: String,
     pub confidence: Option<f32>,
+}
+
+pub fn normalize_transcript(input: &str) -> String {
+    let mut normalized = String::with_capacity(input.len());
+    let mut seen_non_space = false;
+    let mut had_space = false;
+
+    for ch in input.chars() {
+        if ch.is_whitespace() {
+            if seen_non_space && !had_space {
+                normalized.push(' ');
+            }
+            had_space = true;
+        } else {
+            normalized.push(ch);
+            had_space = false;
+            seen_non_space = true;
+        }
+    }
+
+    normalized.trim().to_string()
 }
 
 #[derive(Debug, Deserialize)]
@@ -94,7 +119,7 @@ pub async fn request_transcription(
         let parsed: ApiResponse = serde_json::from_str(&text)
             .with_context(|| format!("Unexpected transcription response: {text}"))?;
         return Ok(TranscriptionSuccess {
-            transcript: parsed.transcript,
+            transcript: normalize_transcript(&parsed.transcript),
             confidence: parsed.confidence,
         });
     }

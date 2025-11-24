@@ -1,17 +1,21 @@
 mod assistive;
+mod downloader;
+mod local_transcription;
+mod model_manager;
 mod recorder;
 mod settings;
 mod transcription;
 
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
 use recorder::{CompletedRecording, RecorderManager, RecordingSaved};
 use reqwest::Client;
 use serde::Serialize;
-use settings::UserSettings;
+use settings::{default_local_model, TranscriptionMode, UserSettings};
 use tauri::async_runtime;
 use tauri::Emitter;
 use tauri::menu::{MenuBuilder, MenuItem};
@@ -39,7 +43,13 @@ pub fn run() {
             app.set_activation_policy(ActivationPolicy::Accessory);
 
             let handle = app.handle();
-            let settings = UserSettings::load(&handle).unwrap_or_default();
+            let mut settings = UserSettings::load(&handle).unwrap_or_default();
+            if model_manager::definition(&settings.local_model).is_none() {
+                settings.local_model = default_local_model();
+                if let Err(err) = settings.save(&handle) {
+                    eprintln!("Failed to persist default local model: {err}");
+                }
+            }
             app.manage(AppState::new(settings));
 
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
@@ -57,7 +67,14 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_settings, update_shortcut])
+        .invoke_handler(tauri::generate_handler![
+            get_settings,
+            update_settings,
+            model_manager::list_models,
+            model_manager::check_model_status,
+            model_manager::download_model,
+            model_manager::delete_model
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -69,6 +86,7 @@ type GlimpseResult<T> = Result<T>;
 struct AppState {
     recorder: RecorderManager,
     http: Client,
+    local_transcriber: Arc<local_transcription::LocalTranscriber>,
     settings: parking_lot::Mutex<UserSettings>,
     tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
     shortcut_down: AtomicBool,
@@ -83,6 +101,7 @@ impl AppState {
         Self {
             recorder: RecorderManager::new(),
             http,
+            local_transcriber: Arc::new(local_transcription::LocalTranscriber::new()),
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
             shortcut_down: AtomicBool::new(false),
@@ -105,6 +124,10 @@ impl AppState {
         self.http.clone()
     }
 
+    fn local_transcriber(&self) -> Arc<local_transcription::LocalTranscriber> {
+        Arc::clone(&self.local_transcriber)
+    }
+
     fn store_tray(&self, tray: TrayIcon<AppRuntime>) {
         *self.tray.lock() = Some(tray);
     }
@@ -124,8 +147,10 @@ fn get_settings(state: tauri::State<AppState>) -> Result<UserSettings, String> {
 }
 
 #[tauri::command]
-fn update_shortcut(
+fn update_settings(
     shortcut: String,
+    transcription_mode: TranscriptionMode,
+    local_model: String,
     app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<UserSettings, String> {
@@ -133,8 +158,14 @@ fn update_shortcut(
         return Err("Shortcut cannot be empty".into());
     }
 
+    if model_manager::definition(&local_model).is_none() {
+        return Err("Unknown model selection".into());
+    }
+
     let mut next = state.current_settings();
-    next.shortcut = shortcut.clone();
+    next.shortcut = shortcut;
+    next.transcription_mode = transcription_mode;
+    next.local_model = local_model;
 
     next.save(&app).map_err(|err| err.to_string())?;
     state.set_settings(next.clone());
@@ -233,17 +264,19 @@ fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecor
         }
     };
 
+    let recording_for_transcription = recording.clone();
+
     async_runtime::spawn(async move {
         let task = async_runtime::spawn_blocking(move || recorder::persist_recording(base_dir, recording));
         match task.await {
-            Ok(Ok(saved)) => emit_complete(&app, saved),
+            Ok(Ok(saved)) => emit_complete(&app, saved, recording_for_transcription),
             Ok(Err(err)) => emit_error(&app, format!("Unable to save recording: {err}")),
             Err(err) => emit_error(&app, format!("Recording task failed: {err}")),
         }
     });
 }
 
-fn emit_complete(app: &AppHandle<AppRuntime>, saved: RecordingSaved) {
+fn emit_complete(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recording: CompletedRecording) {
     emit_event(app, EVENT_RECORDING_COMPLETE, RecordingCompletePayload {
         path: saved.path.display().to_string(),
         started_at: saved.started_at.to_rfc3339(),
@@ -251,7 +284,7 @@ fn emit_complete(app: &AppHandle<AppRuntime>, saved: RecordingSaved) {
         duration_ms: (saved.ended_at - saved.started_at).num_milliseconds(),
     });
 
-    queue_transcription(app, saved);
+    queue_transcription(app, saved, recording);
 }
 
 fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
@@ -264,16 +297,44 @@ fn emit_event<T: Serialize + Clone>(app: &AppHandle<AppRuntime>, event: &str, pa
     }
 }
 
-fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved) {
+fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recording: CompletedRecording) {
     emit_transcription_start(app, &saved);
 
     let http = app.state::<AppState>().http();
     let app_handle = app.clone();
     let saved_for_task = saved.clone();
+    let recording_for_task = recording.clone();
 
     async_runtime::spawn(async move {
-        let config = transcription::TranscriptionConfig::from_env();
-        match transcription::request_transcription(&http, &saved_for_task, &config).await {
+        let settings = app_handle.state::<AppState>().current_settings();
+        let config = transcription::TranscriptionConfig::from_settings(&settings);
+        let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
+        let result = if use_local {
+            let model_key = settings.local_model.clone();
+            match model_manager::ensure_model_ready(&app_handle, &model_key) {
+                Ok(ready_model) => {
+                    let transcriber = app_handle.state::<AppState>().local_transcriber();
+                    let local_recording = recording_for_task.clone();
+                    match async_runtime::spawn_blocking(move || {
+                        transcriber.transcribe(
+                            &ready_model,
+                            &local_recording.samples,
+                            local_recording.sample_rate,
+                        )
+                    })
+                    .await
+                    {
+                        Ok(inner) => inner,
+                        Err(err) => Err(anyhow!("Local transcription task failed: {err}")),
+                    }
+                }
+                Err(err) => Err(err),
+            }
+        } else {
+            transcription::request_transcription(&http, &saved_for_task, &config).await
+        };
+
+        match result {
             Ok(result) => {
                 let mut pasted = false;
                 if config.auto_paste && !result.transcript.trim().is_empty() {
@@ -291,7 +352,10 @@ fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved) {
 
                 emit_transcription_complete(&app_handle, result.transcript, result.confidence, pasted);
             }
-            Err(err) => emit_transcription_error(&app_handle, format!("Transcription failed: {err}"), "api"),
+            Err(err) => {
+                let stage = if use_local { "local" } else { "api" };
+                emit_transcription_error(&app_handle, format!("Transcription failed: {err}"), stage);
+            }
         }
     });
 }
@@ -385,6 +449,7 @@ fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>
 fn toggle_settings_window<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     if let Some(window) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
         window.show()?;
+        window.maximize()?;
         window.set_focus()?;
         Ok(())
     } else {

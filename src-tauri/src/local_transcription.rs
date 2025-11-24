@@ -1,0 +1,170 @@
+use std::path::PathBuf;
+
+use anyhow::{anyhow, Result};
+use parking_lot::Mutex;
+use transcribe_rs::{
+    engines::{
+        parakeet::{ParakeetEngine, ParakeetModelParams},
+        whisper::WhisperEngine,
+    },
+    TranscriptionEngine,
+};
+
+use crate::{
+    model_manager::{LocalModelEngine, ReadyModel},
+    transcription::{normalize_transcript, TranscriptionSuccess},
+};
+
+pub struct LocalTranscriber {
+    inner: Mutex<Option<LoadedEngine>>,
+}
+
+struct LoadedEngine {
+    key: String,
+    path: PathBuf,
+    engine: EngineInstance,
+}
+
+enum EngineInstance {
+    Parakeet {
+        engine: ParakeetEngine,
+    },
+    Whisper {
+        engine: WhisperEngine,
+    },
+}
+
+struct PreparedAudio {
+    pub data: Vec<f32>,
+}
+
+impl LocalTranscriber {
+    pub fn new() -> Self {
+        Self {
+            inner: Mutex::new(None),
+        }
+    }
+
+    pub fn transcribe(
+        &self,
+        model: &ReadyModel,
+        samples: &[i16],
+        sample_rate: u32,
+    ) -> Result<TranscriptionSuccess> {
+        self.ensure_engine(model)?;
+        let prepared = prepare_audio(samples, sample_rate);
+
+        let mut guard = self.inner.lock();
+        let loaded = guard
+            .as_mut()
+            .ok_or_else(|| anyhow!("Local model not available"))?;
+
+        let transcript = match &mut loaded.engine {
+            EngineInstance::Parakeet { engine, .. } => {
+                let result = engine
+                    .transcribe_samples(prepared.data.clone(), None)
+                    .map_err(|err| anyhow!("Parakeet transcription failed: {err}"))?;
+                result.text
+            }
+            EngineInstance::Whisper { engine } => {
+                let result = engine
+                    .transcribe_samples(prepared.data.clone(), None)
+                    .map_err(|err| anyhow!("Whisper transcription failed: {err}"))?;
+                result.text
+            }
+        };
+
+        Ok(TranscriptionSuccess {
+            transcript: normalize_transcript(&transcript),
+            confidence: None,
+        })
+    }
+
+    fn ensure_engine(&self, model: &ReadyModel) -> Result<()> {
+        {
+            let guard = self.inner.lock();
+            if let Some(current) = guard.as_ref() {
+                if current.key == model.key && current.path == model.path {
+                    return Ok(());
+                }
+            }
+        }
+
+        let engine = match &model.engine {
+            LocalModelEngine::Parakeet { quantized } => {
+                let mut engine = ParakeetEngine::new();
+                let params = if *quantized {
+                    ParakeetModelParams::int8()
+                } else {
+                    ParakeetModelParams::fp32()
+                };
+                engine
+                    .load_model_with_params(model.path.as_path(), params)
+                    .map_err(|err| anyhow!("Failed to load Parakeet model: {err}"))?;
+                EngineInstance::Parakeet { engine }
+            }
+            LocalModelEngine::Whisper => {
+                let mut engine = WhisperEngine::new();
+                engine
+                    .load_model(model.path.as_path())
+                    .map_err(|err| anyhow!("Failed to load Whisper model: {err}"))?;
+                EngineInstance::Whisper { engine }
+            }
+        };
+
+        let mut guard = self.inner.lock();
+        *guard = Some(LoadedEngine {
+            key: model.key.clone(),
+            path: model.path.clone(),
+            engine,
+        });
+
+        Ok(())
+    }
+}
+
+impl Default for LocalTranscriber {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+fn prepare_audio(samples: &[i16], sample_rate: u32) -> PreparedAudio {
+    let normalized: Vec<f32> = samples
+        .iter()
+        .map(|sample| *sample as f32 / i16::MAX as f32)
+        .collect();
+
+    if sample_rate == 16_000 {
+        PreparedAudio { data: normalized }
+    } else {
+        PreparedAudio {
+            data: resample_linear(&normalized, sample_rate.max(1), 16_000),
+        }
+    }
+}
+
+fn resample_linear(samples: &[f32], from_rate: u32, to_rate: u32) -> Vec<f32> {
+    if samples.is_empty() {
+        return Vec::new();
+    }
+    if from_rate == 0 || to_rate == 0 || from_rate == to_rate {
+        return samples.to_vec();
+    }
+
+    let ratio = to_rate as f64 / from_rate as f64;
+    let target_len = ((samples.len() as f64) * ratio).ceil().max(1.0) as usize;
+    let last_index = samples.len() - 1;
+    let mut output = Vec::with_capacity(target_len);
+
+    for idx in 0..target_len {
+        let src_pos = idx as f64 / ratio;
+        let base = src_pos.floor() as usize;
+        let frac = (src_pos - base as f64) as f32;
+        let current = samples[base.min(last_index)];
+        let next = samples[(base + 1).min(last_index)];
+        output.push(current + (next - current) * frac);
+    }
+
+    output
+}

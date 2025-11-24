@@ -18,11 +18,13 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
+  background-color: #050505;
 }
 
 html.settings-html,
 body.settings-body {
-  overflow-y: auto;
+  overflow: hidden; /* We will handle scrolling in the content area */
 }
 
 .settings-view {
