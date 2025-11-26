@@ -8,17 +8,39 @@ const SETTINGS_FILE_NAME: &str = "settings.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSettings {
-    pub shortcut: String,
+    #[serde(default = "default_hold_shortcut")]
+    pub hold_shortcut: String,
+    #[serde(default = "default_true")]
+    pub hold_enabled: bool,
+    #[serde(default = "default_toggle_shortcut")]
+    pub toggle_shortcut: String,
+    #[serde(default = "default_true")]
+    pub toggle_enabled: bool,
     #[serde(default = "default_transcription_mode")]
     pub transcription_mode: TranscriptionMode,
     #[serde(default = "default_local_model")]
     pub local_model: String,
 }
 
+fn default_hold_shortcut() -> String {
+    "Control+Space".to_string()
+}
+
+fn default_toggle_shortcut() -> String {
+    "Control+Shift+Space".to_string()
+}
+
+fn default_true() -> bool {
+    true
+}
+
 impl Default for UserSettings {
     fn default() -> Self {
         Self {
-            shortcut: "Control+Space".to_string(),
+            hold_shortcut: default_hold_shortcut(),
+            hold_enabled: true,
+            toggle_shortcut: default_toggle_shortcut(),
+            toggle_enabled: true,
             transcription_mode: default_transcription_mode(),
             local_model: default_local_model(),
         }

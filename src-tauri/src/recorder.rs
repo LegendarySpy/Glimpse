@@ -226,6 +226,14 @@ pub fn persist_recording(base_dir: PathBuf, recording: CompletedRecording) -> Re
 }
 
 fn encode_to_mp3(samples: &[i16], sample_rate: u32, channels: u16) -> Result<Vec<u8>> {
+    // Minimum samples needed for MP3 encoding (at least one frame worth)
+    // MP3 frames are typically 1152 samples for MPEG-1
+    const MIN_SAMPLES: usize = 1152;
+    
+    if samples.len() < MIN_SAMPLES {
+        return Err(anyhow!("Recording too short (minimum ~50ms required)"));
+    }
+    
     let mut builder = LameBuilder::new().ok_or_else(|| anyhow!("Failed to initialize MP3 encoder"))?;
     builder
         .set_sample_rate(sample_rate)

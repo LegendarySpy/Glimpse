@@ -14,8 +14,8 @@
       {
         "label": "main",
         "title": "glimpse",
-        "width": 125,
-        "height": 40,
+        "width": 220,
+        "height": 140,
         "x": 0,
         "y": 0,
         "resizable": false,

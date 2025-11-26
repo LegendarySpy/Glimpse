@@ -1,20 +1,16 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useSharedAnalyser } from "./hooks/useSharedAnalyser";
 
-export interface PillOverlayProps {
-  /** Optional class name for the outer wrapper */
-  className?: string;
-  /** Optional inline styles for the outer wrapper */
-  style?: React.CSSProperties;
-  /** Audio sensitivity (default: 6.5) */
-  sensitivity?: number;
-  /** Rate at which the bars fall (0.0 - 1.0, default: 0.85) */
-  decay?: number;
-  /** Color of the idle dots (default: rgba(40, 40, 40, alpha)) */
-  baseColor?: string;
-  /** Color of the active waveform (default: rgba(255, 255, 255, alpha)) */
-  activeColor?: string;
+// --- Types ---
+
+type PillStatus = "idle" | "listening" | "processing" | "error";
+
+interface ToastMessage {
+  type: "error" | "info";
+  message: string;
+  autoDismiss?: boolean;
 }
 
 interface GridInfo {
@@ -25,69 +21,144 @@ interface GridInfo {
   offsetY: number;
 }
 
-// --- Constants & Assets ---
+// --- Constants ---
 
-const PILL_WIDTH = 125;
-const PILL_HEIGHT = 40;
+const PILL_WIDTH = 107;
+const PILL_HEIGHT = 27;
 const DOT_SPACING = 3;
-const BASE_RADIUS = 0.9;
-const ICON_RADIUS = 1.2;
-const WAVE_RADIUS = 1.0;
+const DOT_RADIUS = {
+  base: 0.9,
+  icon: 1.2,
+  wave: 1.0,
+  loader: 1.0,
+};
 
-// Bitmaps for Icons (1 = dot on, 0 = dot off)
-const MIC_ICON = [
-  [0, 0, 0, 0, 0],
-  [0, 1, 1, 1, 0],
-  [0, 1, 0, 1, 0],
-  [0, 1, 0, 1, 0],
-  [0, 1, 1, 1, 0],
-  [0, 0, 1, 0, 0],
-  [1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 1],
-  [0, 1, 1, 1, 0]
-];
+// --- Icon Bitmaps ---
 
-const STOP_ICON = [
-  [1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1]
-];
+const ICONS = {
+  mic: [
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+    [1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  stop: [
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1],
+  ],
+  warning: [
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+  ],
+};
 
+const COLORS = {
+  base: "40, 40, 40",
+  white: "255, 255, 255",
+  red: "239, 68, 68",
+};
 
-// --- Component ---
+// --- Event Payloads ---
 
-type RecordingStatus = "idle" | "listening" | "saving" | "transcribing" | "complete" | "pasted" | "error";
+interface RecordingStartPayload { started_at: string; }
+interface RecordingErrorPayload { message: string; }
+interface TranscriptionStartPayload { path: string; }
+interface TranscriptionCompletePayload { transcript: string; confidence?: number | null; auto_paste: boolean; }
+interface TranscriptionErrorPayload { message: string; stage: string; }
 
-interface RecordingStartPayload {
-  started_at: string;
+// --- Toast Component ---
+
+interface ToastProps {
+  toast: ToastMessage;
+  onDismiss: () => void;
+  isLeaving: boolean;
 }
 
-interface RecordingCompletePayload {
-  path: string;
-  started_at: string;
-  ended_at: string;
-  duration_ms: number;
-}
+const TOAST_MAX_HEIGHT = 80; // Max height before expanding width
+const TOAST_MIN_WIDTH = 120;
+const TOAST_MAX_WIDTH = 280;
 
-interface RecordingErrorPayload {
-  message: string;
-}
+const Toast: React.FC<ToastProps> = ({ toast, onDismiss, isLeaving }) => {
+  const [hasShaken, setHasShaken] = useState(false);
+  const [needsWider, setNeedsWider] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-interface TranscriptionStartPayload {
-  path: string;
-}
+  useEffect(() => {
+    // Shake only on initial mount for errors
+    if (toast.type === "error" && !hasShaken) {
+      const timer = setTimeout(() => setHasShaken(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.type, hasShaken]);
 
-interface TranscriptionCompletePayload {
-  transcript: string;
-  confidence?: number | null;
-  auto_paste: boolean;
-}
+  // Check if content exceeds max height and needs wider width
+  useEffect(() => {
+    if (contentRef.current) {
+      const checkHeight = () => {
+        const height = contentRef.current?.scrollHeight || 0;
+        setNeedsWider(height > TOAST_MAX_HEIGHT);
+      };
+      checkHeight();
+      // Recheck after fonts load
+      const timer = setTimeout(checkHeight, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.message]);
 
-interface TranscriptionErrorPayload {
-  message: string;
-  stage: string;
+  const isError = toast.type === "error";
+  const shouldShake = isError && !hasShaken;
+
+  return (
+    <div
+      className={`
+        relative px-3 py-2.5 rounded-2xl select-none transition-all duration-200 ease-out
+        ${isError ? "bg-[#0c0c0c] border border-red-500/40" : "bg-[#0c0c0c] border border-white/10"}
+        ${shouldShake ? "animate-shake" : ""}
+        ${isLeaving ? "animate-toast-out" : "animate-toast-in"}
+      `}
+      style={{ 
+        minWidth: TOAST_MIN_WIDTH,
+        maxWidth: needsWider ? TOAST_MAX_WIDTH : 200,
+        maxHeight: TOAST_MAX_HEIGHT + 20, // Some padding for the container
+      }}
+    >
+      {/* Close button */}
+      <button
+        onClick={onDismiss}
+        className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#1a1a1a] border border-[#333] 
+                   flex items-center justify-center text-[10px] text-gray-400 hover:text-white 
+                   hover:border-gray-500 hover:bg-[#252525] transition-all z-10"
+      >
+        ✕
+      </button>
+      
+      {/* Content */}
+      <div ref={contentRef} className="flex items-start gap-2.5 overflow-hidden" style={{ maxHeight: TOAST_MAX_HEIGHT }}>
+        <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${isError ? "bg-red-500 animate-pulse" : "bg-white/50"}`} />
+        <p className="text-[11px] text-gray-200 leading-relaxed pr-2">{toast.message}</p>
+      </div>
+    </div>
+  );
+};
+
+// --- Main Pill Component ---
+
+export interface PillOverlayProps {
+  className?: string;
+  style?: React.CSSProperties;
+  sensitivity?: number;
+  decay?: number;
 }
 
 const PillOverlay: React.FC<PillOverlayProps> = ({
@@ -95,417 +166,597 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   style = {},
   sensitivity = 2,
   decay = 0.85,
-  baseColor = "40, 40, 40", // passed as RGB string for alpha manipulation
-  activeColor = "255, 255, 255",
 }) => {
+  // Refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<GridInfo>({ spacing: DOT_SPACING, cols: 0, rows: 0, offsetX: 0, offsetY: 0 });
+  const heightsRef = useRef<number[]>([]);
+  const animationRef = useRef<number | null>(null);
+  const loaderTimeRef = useRef<number>(0);
+
+  // State
+  const [status, setStatus] = useState<PillStatus>("idle");
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [toastLeaving, setToastLeaving] = useState(false);
+  const [recordingMode, setRecordingMode] = useState<"hold" | "toggle" | null>(null);
+  const [isErrorFlashing, setIsErrorFlashing] = useState(false);
+  
+  // Audio
+  const { analyser, isListening, start, stop } = useSharedAnalyser();
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const { analyser, isListening, error, start, stop } = useSharedAnalyser();
-  const [status, setStatus] = useState<RecordingStatus>("idle");
-  const [statusDetail, setStatusDetail] = useState<string | null>(null);
-
-  // Sync Ref for Animation Loop
-  const isListeningRef = useRef<boolean>(false);
-
-  // Layout State
-  const gridInfoRef = useRef<GridInfo>({ spacing: 8, cols: 0, rows: 0, offsetX: 0, offsetY: 0 });
-  const currentHeights = useRef<number[]>([]);
-
-  // --- Initialization & Cleanup ---
-
-  useEffect(() => {
-    const unlisteners: Promise<UnlistenFn>[] = [
-      listen<RecordingStartPayload>("recording:start", async () => {
-        setStatus("listening");
-        setStatusDetail(null);
-        try {
-          await start();
-        } catch (err) {
-          console.error(err);
-          setStatus("error");
-          setStatusDetail("Microphone permission needed");
-        }
-      }),
-      listen("recording:stop", () => {
-        setStatus("saving");
-        setStatusDetail(null);
-        stop();
-      }),
-      listen<RecordingCompletePayload>("recording:complete", () => {
-        setStatus("complete");
-        setStatusDetail(null);
-      }),
-      listen<RecordingErrorPayload>("recording:error", (event) => {
-        setStatus("error");
-        setStatusDetail(event.payload.message);
-        stop();
-      }),
-      listen<TranscriptionStartPayload>("transcription:start", () => {
-        setStatus("transcribing");
-        setStatusDetail("Sending audio to Glimpse Server…");
-      }),
-      listen<TranscriptionCompletePayload>("transcription:complete", (event) => {
-        if (event.payload.auto_paste) {
-          setStatus("pasted");
-          setStatusDetail("Transcript pasted into the focused app");
-        } else {
-          setStatus("complete");
-          setStatusDetail("Transcript ready. Press ⌘+V if needed.");
-        }
-      }),
-      listen<TranscriptionErrorPayload>("transcription:error", (event) => {
-        setStatus("error");
-        setStatusDetail(event.payload.message);
-      }),
-    ];
-
-    return () => {
-      unlisteners.forEach(async (promise) => {
-        try {
-          const unlisten = await promise;
-          unlisten();
-        } catch (_err) {
-          // Already cleaned up.
-        }
-      });
-      stop();
-    };
-  }, [start, stop]);
-
-  // --- Rendering Helpers ---
-
-  const getMaskOpacity = useCallback((x: number, y: number, width: number, height: number, radius: number): number => {
-    const leftCenter = radius;
-    const rightCenter = width - radius;
-    let distToEdge = 0;
-
-    if (x < leftCenter) {
-      // Left Cap
-      const dist = Math.sqrt(Math.pow(x - leftCenter, 2) + Math.pow(y - height / 2, 2));
-      distToEdge = radius - dist;
-    } else if (x > rightCenter) {
-      // Right Cap
-      const dist = Math.sqrt(Math.pow(x - rightCenter, 2) + Math.pow(y - height / 2, 2));
-      distToEdge = radius - dist;
-    } else {
-      // Body
-      distToEdge = Math.min(y, height - y);
-    }
-
-    const fadeRange = 15; // px
-    return Math.max(0, Math.min(1, distToEdge / fadeRange));
-  }, []);
-
-  const getIconPixel = useCallback((c: number, r: number, iconGrid: number[][], centerCol: number, centerRow: number): boolean => {
-    const iconH = iconGrid.length;
-    const iconW = iconGrid[0].length;
-
-    const startC = centerCol - Math.floor(iconW / 2);
-    const startR = centerRow - Math.floor(iconH / 2);
-
-    const localC = c - startC;
-    const localR = r - startR;
-
-    return (localC >= 0 && localC < iconW && localR >= 0 && localR < iconH)
-      ? iconGrid[localR][localC] === 1
-      : false;
-  }, []);
-
-  // --- Main Draw Loop ---
-
-  const drawFrame = useCallback((audioData: Uint8Array, usingCachedHeights = false) => {
-    if (!canvasRef.current || !containerRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Canvas dimensions (logical)
-    const width = canvas.width / (window.devicePixelRatio || 1);
-    const height = canvas.height / (window.devicePixelRatio || 1);
-
-    ctx.clearRect(0, 0, width, height);
-
-    const { cols, rows, spacing, offsetX, offsetY } = gridInfoRef.current;
-    const pillRadius = height / 2;
-    const centerCol = Math.floor(cols / 2);
-    const centerRow = Math.floor(rows / 2);
-
-    // 1. Calculate Heights
-    if (!usingCachedHeights && audioData.length > 0) {
-      for (let i = 0; i <= centerCol; i++) {
-        const distFromCenter = i / centerCol;
-        // Map freq index: heavily weight low freqs to center
-        const freqIndex = Math.floor(audioData.length * 0.4 * (distFromCenter * distFromCenter));
-
-        let sample = audioData[freqIndex] || 0;
-        if (audioData[freqIndex + 1]) sample = (sample + audioData[freqIndex + 1]) / 2;
-
-        let val = (sample / 255) * sensitivity;
-        if (distFromCenter < 0.2) val *= 1.25; // Bass boost
-        val = Math.min(val, 1.0);
-
-        // Left Side
-        const leftIdx = centerCol - i;
-        if (leftIdx >= 0 && leftIdx < cols) {
-          if (val > currentHeights.current[leftIdx]) {
-            currentHeights.current[leftIdx] += (val - currentHeights.current[leftIdx]) * 0.5;
-          } else {
-            currentHeights.current[leftIdx] += (val - currentHeights.current[leftIdx]) * (1 - decay);
-          }
-        }
-
-        // Mirror to Right
-        const rightIdx = centerCol + i;
-        if (rightIdx < cols && rightIdx !== leftIdx) {
-          currentHeights.current[rightIdx] = currentHeights.current[leftIdx];
-        }
-      }
-    }
-
-    // 2. Render Grid
-    for (let c = 0; c < cols; c++) {
-      const amp = currentHeights.current[c] || 0;
-      const activeRadiusPixels = amp * (height * 0.45);
-
-      for (let r = 0; r < rows; r++) {
-        const cx = offsetX + c * spacing + spacing / 2;
-        const cy = offsetY + r * spacing + spacing / 2;
-
-        const maskAlpha = getMaskOpacity(cx, cy, width, height, pillRadius);
-        if (maskAlpha <= 0.05) continue;
-
-        const distFromCenterY = Math.abs(cy - height / 2);
-        // Only trigger wave visual if amplitude is significant to avoid "ghost line"
-        const isWaveActive = activeRadiusPixels > 0.5 && distFromCenterY < activeRadiusPixels;
-
-        // Icon Determination
-        let isIconDot = false;
-        if (isListeningRef.current) {
-          isIconDot = getIconPixel(c, r, STOP_ICON, centerCol, centerRow);
-        } else {
-          isIconDot = getIconPixel(c, r, MIC_ICON, centerCol, centerRow);
-        }
-
-        // Style Determination
-        ctx.beginPath();
-        let radius = BASE_RADIUS;
-        let fillStyle = `rgba(${baseColor}, ${maskAlpha})`;
-        let shadowBlur = 0;
-        let shadowColor = "transparent";
-
-        if (isIconDot) {
-          radius = ICON_RADIUS;
-          shadowBlur = 8;
-          if (isListeningRef.current) {
-            fillStyle = `rgba(255, 50, 50, ${maskAlpha})`; // Red Stop
-            shadowColor = "rgba(255, 50, 50, 0.5)";
-          } else {
-            fillStyle = `rgba(${activeColor}, ${maskAlpha})`; // White Mic
-            shadowColor = `rgba(${activeColor}, 0.5)`;
-          }
-
-        } else if (isWaveActive) {
-          radius = WAVE_RADIUS;
-          const waveEdgeDist = 1 - (distFromCenterY / (activeRadiusPixels + 0.1));
-          const brightness = 0.5 + (waveEdgeDist * 0.5);
-          fillStyle = `rgba(${activeColor}, ${brightness * maskAlpha})`;
-
-          if (brightness > 0.8) {
-            shadowBlur = 4;
-            shadowColor = `rgba(${activeColor}, 0.4)`;
-          }
-        }
-
-        ctx.fillStyle = fillStyle;
-        ctx.shadowBlur = shadowBlur;
-        ctx.shadowColor = shadowColor;
-        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }, [activeColor, baseColor, decay, getIconPixel, getMaskOpacity, sensitivity]);
-
-  const stopAnimation = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  }, []);
-
-  const fadeOut = useCallback(() => {
-    let active = false;
-    const heights = currentHeights.current;
-
-    for (let i = 0; i < heights.length; i++) {
-      heights[i] *= 0.8;
-      if (heights[i] > 0.01) active = true;
-    }
-
-    drawFrame(new Uint8Array(0), true);
-
-    if (active) {
-      requestAnimationFrame(fadeOut);
-    } else {
-      currentHeights.current.fill(0);
-      drawFrame(new Uint8Array(0));
-    }
-  }, [drawFrame]);
-
-  const animate = useCallback(() => {
-    if (!analyserRef.current || !isListeningRef.current) return;
-
-    const bufferLength = analyserRef.current.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    analyserRef.current.getByteFrequencyData(dataArray);
-
-    drawFrame(dataArray);
-    animationFrameRef.current = requestAnimationFrame(animate);
-  }, [drawFrame]);
-
-  // --- Handlers ---
-
-  const handleResize = useCallback(() => {
-    if (!canvasRef.current || !containerRef.current) return;
-
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    const dpr = window.devicePixelRatio || 1;
-    const rect = container.getBoundingClientRect();
-
-    // Set resolution
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-
-    // Normalize coordinate system
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.scale(dpr, dpr);
-
-    // Set Display size
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    // Grid Calculations
-    const spacing = DOT_SPACING; // Fixed spacing for the matrix look
-    const cols = Math.floor(rect.width / spacing);
-    const rows = Math.floor(rect.height / spacing);
-    const offsetX = (rect.width - cols * spacing) / 2;
-    const offsetY = (rect.height - rows * spacing) / 2;
-
-    gridInfoRef.current = { spacing, cols, rows, offsetX, offsetY };
-
-    if (currentHeights.current.length !== cols) {
-      currentHeights.current = new Array(cols).fill(0);
-    }
-
-    // Force a redraw if idle to ensure icons appear
-    if (!isListeningRef.current) {
-      drawFrame(new Uint8Array(0));
-    }
-  }, [drawFrame]);
-
-  useEffect(() => {
-    const observer = new ResizeObserver(() => {
-      handleResize();
-    });
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    handleResize();
-
-    return () => {
-      observer.disconnect();
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [handleResize]);
 
   useEffect(() => {
     analyserRef.current = analyser;
   }, [analyser]);
 
+  // --- Hide overlay window ---
+  const hideOverlay = useCallback(async () => {
+    try {
+      const window = getCurrentWindow();
+      await window.hide();
+    } catch (err) {
+      console.error("Failed to hide window:", err);
+    }
+  }, []);
+
+  // --- Dismiss handler (closes toast AND hides window) ---
+  const dismissOverlay = useCallback(() => {
+    if (toast) {
+      // Animate out then hide
+      setToastLeaving(true);
+      setTimeout(() => {
+        setToast(null);
+        setToastLeaving(false);
+        setStatus("idle");
+        setIsErrorFlashing(false);
+        hideOverlay();
+      }, 150);
+    } else {
+      hideOverlay();
+    }
+  }, [toast, hideOverlay]);
+
+  // --- Keyboard handler (Esc to dismiss) ---
   useEffect(() => {
-    isListeningRef.current = isListening;
-    if (isListening && analyser) {
-      stopAnimation();
-      animationFrameRef.current = requestAnimationFrame(animate);
-      return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && (toast || status === "error")) {
+        e.preventDefault();
+        dismissOverlay();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toast, status, dismissOverlay]);
+
+  // --- Drawing Utilities ---
+
+  const getMaskOpacity = useCallback((x: number, y: number, width: number, height: number): number => {
+    const radius = height / 2;
+    const leftCenter = radius;
+    const rightCenter = width - radius;
+    let distToEdge = 0;
+
+    if (x < leftCenter) {
+      const dist = Math.sqrt((x - leftCenter) ** 2 + (y - height / 2) ** 2);
+      distToEdge = radius - dist;
+    } else if (x > rightCenter) {
+      const dist = Math.sqrt((x - rightCenter) ** 2 + (y - height / 2) ** 2);
+      distToEdge = radius - dist;
+    } else {
+      distToEdge = Math.min(y, height - y);
     }
 
-    stopAnimation();
-    fadeOut();
-  }, [analyser, animate, fadeOut, isListening, stopAnimation]);
+    return Math.max(0, Math.min(1, distToEdge / 15));
+  }, []);
 
-  const statusLabel: Record<RecordingStatus, string> = {
-    idle: "Hold your shortcut to record",
-    listening: "Listening…",
-    saving: "Saving…",
-    transcribing: "Transcribing…",
-    complete: "Saved",
-    pasted: "Pasted",
-    error: "Recorder error",
+  const isIconPixel = useCallback((col: number, row: number, icon: number[][], centerCol: number, centerRow: number): boolean => {
+    const iconH = icon.length;
+    const iconW = icon[0].length;
+    const startCol = centerCol - Math.floor(iconW / 2);
+    const startRow = centerRow - Math.floor(iconH / 2);
+    const localCol = col - startCol;
+    const localRow = row - startRow;
+
+    if (localCol >= 0 && localCol < iconW && localRow >= 0 && localRow < iconH) {
+      return icon[localRow][localCol] === 1;
+    }
+    return false;
+  }, []);
+
+  // --- Draw Functions ---
+
+  const drawStaticIcon = useCallback((icon: number[][], color: string, glowColor?: string) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
+    const centerCol = Math.floor(cols / 2);
+    const centerRow = Math.floor(rows / 2);
+
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        const cx = offsetX + c * spacing + spacing / 2;
+        const cy = offsetY + r * spacing + spacing / 2;
+        const maskAlpha = getMaskOpacity(cx, cy, width, height);
+        if (maskAlpha <= 0.05) continue;
+
+        const isIcon = isIconPixel(c, r, icon, centerCol, centerRow);
+
+        ctx.beginPath();
+        if (isIcon) {
+          ctx.fillStyle = `rgba(${color}, ${maskAlpha})`;
+          ctx.shadowBlur = glowColor ? 8 : 0;
+          ctx.shadowColor = glowColor ? `rgba(${glowColor}, 0.5)` : "transparent";
+          ctx.arc(cx, cy, DOT_RADIUS.icon, 0, Math.PI * 2);
+        } else {
+          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha})`;
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+          ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+  }, [getMaskOpacity, isIconPixel]);
+
+  const drawProcessingFrame = useCallback((time: number) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
+
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const waveSpeed = 0.003;
+    const waveLength = cols * 0.3;
+    const pulseSpeed = 0.002;
+
+    for (let c = 0; c < cols; c++) {
+      const wavePhase = (c / waveLength) - (time * waveSpeed);
+      const waveValue = Math.sin(wavePhase * Math.PI * 2);
+      const pulseValue = 0.5 + 0.5 * Math.sin(time * pulseSpeed * Math.PI * 2);
+      const amplitude = (0.3 + 0.7 * ((waveValue + 1) / 2)) * pulseValue;
+      const activeRadius = amplitude * (height * 0.35);
+
+      for (let r = 0; r < rows; r++) {
+        const cx = offsetX + c * spacing + spacing / 2;
+        const cy = offsetY + r * spacing + spacing / 2;
+        const maskAlpha = getMaskOpacity(cx, cy, width, height);
+        if (maskAlpha <= 0.05) continue;
+
+        const distFromCenterY = Math.abs(cy - height / 2);
+        const isActive = distFromCenterY < activeRadius;
+
+        ctx.beginPath();
+        if (isActive) {
+          const brightness = 1 - (distFromCenterY / (activeRadius + 0.1));
+          ctx.fillStyle = `rgba(${COLORS.white}, ${brightness * maskAlpha})`;
+          ctx.arc(cx, cy, DOT_RADIUS.loader, 0, Math.PI * 2);
+        } else {
+          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha * 0.5})`;
+          ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+  }, [getMaskOpacity]);
+
+  const drawErrorFrame = useCallback((time: number) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
+    const centerCol = Math.floor(cols / 2);
+    const centerRow = Math.floor(rows / 2);
+
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Fast flash effect
+    const flash = Math.sin(time * 0.02 * Math.PI * 2);
+    const intensity = 0.5 + 0.5 * Math.max(0, flash);
+
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        const cx = offsetX + c * spacing + spacing / 2;
+        const cy = offsetY + r * spacing + spacing / 2;
+        const maskAlpha = getMaskOpacity(cx, cy, width, height);
+        if (maskAlpha <= 0.05) continue;
+
+        const isIcon = isIconPixel(c, r, ICONS.warning, centerCol, centerRow);
+
+        ctx.beginPath();
+        if (isIcon) {
+          ctx.fillStyle = `rgba(${COLORS.red}, ${maskAlpha})`;
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = `rgba(${COLORS.red}, 0.6)`;
+          ctx.arc(cx, cy, DOT_RADIUS.icon, 0, Math.PI * 2);
+        } else {
+          ctx.fillStyle = `rgba(${COLORS.red}, ${intensity * maskAlpha * 0.6})`;
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+          ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+  }, [getMaskOpacity, isIconPixel]);
+
+  const drawAudioFrame = useCallback((audioData: Uint8Array, showStopIcon: boolean) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
+    const centerCol = Math.floor(cols / 2);
+    const centerRow = Math.floor(rows / 2);
+
+    if (audioData.length > 0) {
+      for (let i = 0; i <= centerCol; i++) {
+        const distFromCenter = i / centerCol;
+        const freqIndex = Math.floor(audioData.length * 0.4 * (distFromCenter * distFromCenter));
+        let sample = audioData[freqIndex] || 0;
+        if (audioData[freqIndex + 1]) sample = (sample + audioData[freqIndex + 1]) / 2;
+
+        let val = (sample / 255) * sensitivity;
+        if (distFromCenter < 0.2) val *= 1.25;
+        val = Math.min(val, 1.0);
+
+        const leftIdx = centerCol - i;
+        if (leftIdx >= 0 && leftIdx < cols) {
+          if (val > heightsRef.current[leftIdx]) {
+            heightsRef.current[leftIdx] += (val - heightsRef.current[leftIdx]) * 0.5;
+          } else {
+            heightsRef.current[leftIdx] += (val - heightsRef.current[leftIdx]) * (1 - decay);
+          }
+        }
+
+        const rightIdx = centerCol + i;
+        if (rightIdx < cols && rightIdx !== leftIdx) {
+          heightsRef.current[rightIdx] = heightsRef.current[leftIdx];
+        }
+      }
+    }
+
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let c = 0; c < cols; c++) {
+      const amp = heightsRef.current[c] || 0;
+      const activeRadiusPixels = amp * (height * 0.45);
+
+      for (let r = 0; r < rows; r++) {
+        const cx = offsetX + c * spacing + spacing / 2;
+        const cy = offsetY + r * spacing + spacing / 2;
+        const maskAlpha = getMaskOpacity(cx, cy, width, height);
+        if (maskAlpha <= 0.05) continue;
+
+        const distFromCenterY = Math.abs(cy - height / 2);
+        const isWaveActive = activeRadiusPixels > 0.5 && distFromCenterY < activeRadiusPixels;
+        const isIcon = showStopIcon && isIconPixel(c, r, ICONS.stop, centerCol, centerRow);
+
+        ctx.beginPath();
+        if (isIcon) {
+          ctx.fillStyle = `rgba(${COLORS.red}, ${maskAlpha})`;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = `rgba(${COLORS.red}, 0.5)`;
+          ctx.arc(cx, cy, DOT_RADIUS.icon, 0, Math.PI * 2);
+        } else if (isWaveActive) {
+          const waveEdgeDist = 1 - (distFromCenterY / (activeRadiusPixels + 0.1));
+          const brightness = 0.5 + (waveEdgeDist * 0.5);
+          ctx.fillStyle = `rgba(${COLORS.white}, ${brightness * maskAlpha})`;
+          ctx.shadowBlur = brightness > 0.8 ? 4 : 0;
+          ctx.shadowColor = brightness > 0.8 ? `rgba(${COLORS.white}, 0.4)` : "transparent";
+          ctx.arc(cx, cy, DOT_RADIUS.wave, 0, Math.PI * 2);
+        } else {
+          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha})`;
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+          ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+  }, [decay, getMaskOpacity, isIconPixel, sensitivity]);
+
+  // --- Animation Controller ---
+
+  const stopAllAnimations = useCallback(() => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  }, []);
+
+  const runAnimation = useCallback((type: "processing" | "listening" | "error", showStopIcon = false) => {
+    stopAllAnimations();
+    loaderTimeRef.current = 0;
+
+    const tick = () => {
+      loaderTimeRef.current += 16;
+
+      switch (type) {
+        case "processing":
+          drawProcessingFrame(loaderTimeRef.current);
+          break;
+        case "listening":
+          if (analyserRef.current) {
+            const bufferLength = analyserRef.current.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyserRef.current.getByteFrequencyData(dataArray);
+            drawAudioFrame(dataArray, showStopIcon);
+          }
+          break;
+        case "error":
+          drawErrorFrame(loaderTimeRef.current);
+          break;
+      }
+
+      animationRef.current = requestAnimationFrame(tick);
+    };
+
+    animationRef.current = requestAnimationFrame(tick);
+  }, [drawAudioFrame, drawErrorFrame, drawProcessingFrame, stopAllAnimations]);
+
+  const fadeOutWave = useCallback(() => {
+    let hasActivity = false;
+    for (let i = 0; i < heightsRef.current.length; i++) {
+      heightsRef.current[i] *= 0.8;
+      if (heightsRef.current[i] > 0.01) hasActivity = true;
+    }
+
+    if (hasActivity) {
+      drawAudioFrame(new Uint8Array(0), false);
+      animationRef.current = requestAnimationFrame(fadeOutWave);
+    } else {
+      heightsRef.current.fill(0);
+      drawStaticIcon(ICONS.mic, COLORS.white, COLORS.white);
+    }
+  }, [drawAudioFrame, drawStaticIcon]);
+
+  // --- Show Error ---
+  const showError = useCallback((message: string) => {
+    setStatus("error");
+    setToast({ type: "error", message, autoDismiss: false });
+    setIsErrorFlashing(true);
+    
+    // Stop flashing after animation, keep error state
+    setTimeout(() => setIsErrorFlashing(false), 1200);
+  }, []);
+
+  // --- Show Info Toast (auto-dismisses) - for future use ---
+  // const showInfo = useCallback((message: string, duration = 2000) => {
+  //   setToast({ type: "info", message, autoDismiss: true });
+  //   setTimeout(() => {
+  //     setToastLeaving(true);
+  //     setTimeout(() => {
+  //       setToast(null);
+  //       setToastLeaving(false);
+  //     }, 150);
+  //   }, duration);
+  // }, []);
+
+  // --- Event Listeners ---
+
+  useEffect(() => {
+    const unlisteners: Promise<UnlistenFn>[] = [
+      listen<{ mode: string }>("recording:mode_change", (event) => {
+        setRecordingMode(event.payload.mode as "hold" | "toggle");
+      }),
+      listen<RecordingStartPayload>("recording:start", async () => {
+        setStatus("listening");
+        setToast(null);
+        try {
+          await start();
+        } catch (err) {
+          console.error(err);
+          showError("Microphone permission needed");
+        }
+      }),
+      listen("recording:stop", () => {
+        setStatus("processing");
+        setRecordingMode(null);
+        stop();
+      }),
+      listen<RecordingErrorPayload>("recording:error", (event) => {
+        showError(event.payload.message);
+        stop();
+      }),
+      listen<TranscriptionStartPayload>("transcription:start", () => {
+        setStatus("processing");
+      }),
+      listen<TranscriptionCompletePayload>("transcription:complete", () => {
+        // Success - hide the overlay
+        setStatus("idle");
+        hideOverlay();
+      }),
+      listen<TranscriptionErrorPayload>("transcription:error", (event) => {
+        showError(event.payload.message);
+      }),
+    ];
+
+    return () => {
+      unlisteners.forEach(async (p) => {
+        try { (await p)(); } catch {}
+      });
+      stop();
+    };
+  }, [start, stop, showError, hideOverlay]);
+
+  // --- Canvas Setup ---
+
+  const setupCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.scale(dpr, dpr);
+
+    const cols = Math.floor(rect.width / DOT_SPACING);
+    const rows = Math.floor(rect.height / DOT_SPACING);
+    gridRef.current = {
+      spacing: DOT_SPACING,
+      cols,
+      rows,
+      offsetX: (rect.width - cols * DOT_SPACING) / 2,
+      offsetY: (rect.height - rows * DOT_SPACING) / 2,
+    };
+
+    if (heightsRef.current.length !== cols) {
+      heightsRef.current = new Array(cols).fill(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(setupCanvas);
+    if (containerRef.current) observer.observe(containerRef.current);
+    setupCanvas();
+
+    return () => {
+      observer.disconnect();
+      stopAllAnimations();
+    };
+  }, [setupCanvas, stopAllAnimations]);
+
+  // --- Visual State Management ---
+
+  useEffect(() => {
+    stopAllAnimations();
+
+    switch (status) {
+      case "idle":
+        drawStaticIcon(ICONS.mic, COLORS.white, COLORS.white);
+        break;
+
+      case "listening":
+        if (isListening && analyser) {
+          runAnimation("listening", recordingMode === "toggle");
+        }
+        break;
+
+      case "processing":
+        runAnimation("processing");
+        break;
+
+      case "error":
+        if (isErrorFlashing) {
+          runAnimation("error");
+        } else {
+          // Static error state with warning icon
+          drawStaticIcon(ICONS.warning, COLORS.red, COLORS.red);
+        }
+        break;
+    }
+  }, [status, isListening, analyser, recordingMode, isErrorFlashing, drawStaticIcon, runAnimation, stopAllAnimations]);
+
+  useEffect(() => {
+    if (status === "listening" && isListening && analyser) {
+      runAnimation("listening", recordingMode === "toggle");
+    } else if (status === "listening" && !isListening) {
+      fadeOutWave();
+    }
+  }, [isListening, analyser, status, recordingMode, runAnimation, fadeOutWave]);
+
+  // --- Render ---
+
+  const getStatusLabel = () => {
+    switch (status) {
+      case "idle": return "Ready";
+      case "listening": return recordingMode === "toggle" ? "Tap to stop" : "Release to stop";
+      case "processing": return "Processing…";
+      case "error": return "Error";
+    }
   };
 
-  const statusTone: Record<RecordingStatus, string> = {
+  const statusColors: Record<PillStatus, string> = {
     idle: "text-gray-500",
     listening: "text-rose-400",
-    saving: "text-sky-400",
-    transcribing: "text-purple-400",
-    complete: "text-emerald-400",
-    pasted: "text-emerald-300",
-    error: "text-red-500",
+    processing: "text-gray-400",
+    error: "text-red-400",
   };
 
   return (
     <div
-      className={`relative group select-none ${className}`}
-      style={{
-        width: `${PILL_WIDTH}px`,
-        height: `${PILL_HEIGHT}px`,
-        ...style
-      }}
+      className={`relative w-full h-full flex flex-col justify-end select-none ${className}`}
+      style={style}
+      onContextMenu={(e) => e.preventDefault()}
     >
-      {/* Physical Pill Container */}
-      <div
-        ref={containerRef}
-        className="relative w-full h-full rounded-full bg-[#050505] z-10 overflow-hidden"
-        style={{
-          boxShadow: `
-              inset 0 1px 1px rgba(255,255,255,0.15),
-              inset 0 -2px 5px rgba(0,0,0,0.8)
-            `
-        }}
-      >
-        {/* Canvas Layer */}
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full z-10 block"
-        />
-
-        {/* Error Message Overlay */}
-        {error && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-30 pointer-events-none">
-            <div className="px-4 py-1 rounded-full bg-red-500/10 border border-red-500/20 backdrop-blur-sm">
-              <span className="text-[10px] font-mono text-red-400 tracking-widest">
-                {error}
-              </span>
-            </div>
+      {/* Pill - fixed at bottom, never moves */}
+      <div className="relative flex flex-col items-center pb-2">
+        {/* Toast - absolutely positioned above pill, doesn't affect pill layout */}
+        {toast && (
+          <div 
+            className="absolute left-1/2 flex justify-center pointer-events-auto"
+            style={{
+              bottom: PILL_HEIGHT + 20 + 16, // pill height + status text area + gap
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <Toast 
+              toast={toast} 
+              onDismiss={dismissOverlay}
+              isLeaving={toastLeaving}
+            />
           </div>
         )}
-      </div>
-      <div className="mt-3 text-center">
-        <p className={`text-[10px] uppercase tracking-[0.35em] ${statusTone[status]}`}>
-          {statusLabel[status]}
-        </p>
-        {statusDetail && (
-          <p className="mt-1 text-[10px] text-gray-400 break-words px-4">
-            {statusDetail}
+
+        <div
+          ref={containerRef}
+          className={`relative rounded-full bg-[#050505] overflow-hidden ${isErrorFlashing ? "animate-shake" : ""}`}
+          style={{
+            width: PILL_WIDTH,
+            height: PILL_HEIGHT,
+            boxShadow: status === "error" 
+              ? "0 0 20px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(255,255,255,0.1), inset 0 -2px 5px rgba(0,0,0,0.8)"
+              : "0 8px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 5px rgba(0,0,0,0.8)",
+          }}
+        >
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full block"
+          />
+        </div>
+
+        {/* Status Text */}
+        <div className="mt-2 text-center">
+          <p className={`text-[9px] uppercase tracking-[0.25em] ${statusColors[status]}`}>
+            {getStatusLabel()}
           </p>
-        )}
+        </div>
       </div>
     </div>
   );

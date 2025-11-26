@@ -20,7 +20,7 @@ use tauri::async_runtime;
 use tauri::Emitter;
 use tauri::menu::{MenuBuilder, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
-use tauri::{ActivationPolicy, AppHandle, Manager, Runtime, WebviewWindow, Wry};
+use tauri::{ActivationPolicy, AppHandle, Manager, WebviewWindow, Wry};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 const MAIN_WINDOW_LABEL: &str = "main";
@@ -29,6 +29,7 @@ const EVENT_RECORDING_START: &str = "recording:start";
 const EVENT_RECORDING_STOP: &str = "recording:stop";
 const EVENT_RECORDING_COMPLETE: &str = "recording:complete";
 const EVENT_RECORDING_ERROR: &str = "recording:error";
+const EVENT_RECORDING_MODE_CHANGE: &str = "recording:mode_change";
 const EVENT_TRANSCRIPTION_START: &str = "transcription:start";
 const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
 const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
@@ -61,8 +62,8 @@ pub fn run() {
                 handle.state::<AppState>().store_tray(tray);
             }
 
-            if let Err(err) = register_shortcut(&handle) {
-                eprintln!("Failed to register shortcut: {err}");
+            if let Err(err) = register_shortcuts(&handle) {
+                eprintln!("Failed to register shortcuts: {err}");
             }
 
             Ok(())
@@ -89,7 +90,10 @@ struct AppState {
     local_transcriber: Arc<local_transcription::LocalTranscriber>,
     settings: parking_lot::Mutex<UserSettings>,
     tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
-    shortcut_down: AtomicBool,
+    hold_shortcut_down: AtomicBool,
+    toggle_recording_active: AtomicBool,
+    /// Tracks which mode started the current recording: "hold" or "toggle"
+    active_recording_mode: parking_lot::Mutex<Option<String>>,
 }
 
 impl AppState {
@@ -104,7 +108,9 @@ impl AppState {
             local_transcriber: Arc::new(local_transcription::LocalTranscriber::new()),
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
-            shortcut_down: AtomicBool::new(false),
+            hold_shortcut_down: AtomicBool::new(false),
+            toggle_recording_active: AtomicBool::new(false),
+            active_recording_mode: parking_lot::Mutex::new(None),
         }
     }
 
@@ -132,12 +138,28 @@ impl AppState {
         *self.tray.lock() = Some(tray);
     }
 
-    fn mark_shortcut_down(&self) -> bool {
-        self.shortcut_down.swap(true, Ordering::SeqCst)
+    fn mark_hold_shortcut_down(&self) -> bool {
+        self.hold_shortcut_down.swap(true, Ordering::SeqCst)
     }
 
-    fn clear_shortcut_state(&self) -> bool {
-        self.shortcut_down.swap(false, Ordering::SeqCst)
+    fn clear_hold_shortcut_state(&self) -> bool {
+        self.hold_shortcut_down.swap(false, Ordering::SeqCst)
+    }
+
+    fn is_toggle_recording_active(&self) -> bool {
+        self.toggle_recording_active.load(Ordering::SeqCst)
+    }
+
+    fn set_toggle_recording_active(&self, active: bool) {
+        self.toggle_recording_active.store(active, Ordering::SeqCst);
+    }
+
+    fn set_active_recording_mode(&self, mode: Option<&str>) {
+        *self.active_recording_mode.lock() = mode.map(String::from);
+    }
+
+    fn get_active_recording_mode(&self) -> Option<String> {
+        self.active_recording_mode.lock().clone()
     }
 }
 
@@ -148,14 +170,34 @@ fn get_settings(state: tauri::State<AppState>) -> Result<UserSettings, String> {
 
 #[tauri::command]
 fn update_settings(
-    shortcut: String,
+    hold_shortcut: String,
+    hold_enabled: bool,
+    toggle_shortcut: String,
+    toggle_enabled: bool,
     transcription_mode: TranscriptionMode,
     local_model: String,
     app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<UserSettings, String> {
-    if shortcut.trim().is_empty() {
-        return Err("Shortcut cannot be empty".into());
+    if hold_enabled && hold_shortcut.trim().is_empty() {
+        return Err("Hold shortcut cannot be empty when enabled".into());
+    }
+
+    if toggle_enabled && toggle_shortcut.trim().is_empty() {
+        return Err("Toggle shortcut cannot be empty when enabled".into());
+    }
+
+    if !hold_enabled && !toggle_enabled {
+        return Err("At least one recording mode must be enabled".into());
+    }
+
+    // Prevent same keybind for both shortcuts
+    if hold_enabled && toggle_enabled {
+        let hold_normalized = hold_shortcut.trim().to_lowercase();
+        let toggle_normalized = toggle_shortcut.trim().to_lowercase();
+        if hold_normalized == toggle_normalized {
+            return Err("Hold and Toggle shortcuts cannot be the same".into());
+        }
     }
 
     if model_manager::definition(&local_model).is_none() {
@@ -163,56 +205,105 @@ fn update_settings(
     }
 
     let mut next = state.current_settings();
-    next.shortcut = shortcut;
+    next.hold_shortcut = hold_shortcut;
+    next.hold_enabled = hold_enabled;
+    next.toggle_shortcut = toggle_shortcut;
+    next.toggle_enabled = toggle_enabled;
     next.transcription_mode = transcription_mode;
     next.local_model = local_model;
 
     next.save(&app).map_err(|err| err.to_string())?;
     state.set_settings(next.clone());
 
-    register_shortcut(&app).map_err(|err| err.to_string())?;
+    register_shortcuts(&app).map_err(|err| err.to_string())?;
 
     Ok(next)
 }
 
-fn register_shortcut(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
-    let shortcut_text = app.state::<AppState>().current_settings().shortcut;
+fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
+    let settings = app.state::<AppState>().current_settings();
     let manager = app.global_shortcut();
 
     if let Err(err) = manager.unregister_all() {
         eprintln!("Failed to clear shortcuts: {err}");
     }
 
-    manager.on_shortcut(shortcut_text.as_str(), move |app, _shortcut, event| {
-        if event.state == ShortcutState::Pressed {
-            if let Err(err) = handle_shortcut_press(app) {
-                eprintln!("Shortcut press error: {err}");
+    // Check if shortcuts overlap (one is a subset of the other)
+    let hold_keys: std::collections::HashSet<&str> = settings.hold_shortcut.split('+').map(|s| s.trim()).collect();
+    let toggle_keys: std::collections::HashSet<&str> = settings.toggle_shortcut.split('+').map(|s| s.trim()).collect();
+    let hold_is_subset_of_toggle = settings.hold_enabled && settings.toggle_enabled && hold_keys.is_subset(&toggle_keys);
+    let _toggle_is_subset_of_hold = settings.hold_enabled && settings.toggle_enabled && toggle_keys.is_subset(&hold_keys);
+
+    // Register hold-to-record shortcut if enabled
+    if settings.hold_enabled {
+        let hold_shortcut = settings.hold_shortcut.clone();
+        let check_toggle_overlap = hold_is_subset_of_toggle;
+        let toggle_shortcut_clone = settings.toggle_shortcut.clone();
+        manager.on_shortcut(hold_shortcut.as_str(), move |app, shortcut, event| {
+            // If hold shortcut is a subset of toggle, check if toggle keys are also pressed
+            // In that case, ignore this event and let the toggle handler deal with it
+            if check_toggle_overlap {
+                // The shortcut system should handle this, but we add extra safety
+                let pressed_shortcut = shortcut.to_string();
+                if pressed_shortcut.to_lowercase() == toggle_shortcut_clone.to_lowercase() {
+                    return;
+                }
             }
-        } else if event.state == ShortcutState::Released {
-            if let Err(err) = handle_shortcut_release(app) {
-                eprintln!("Shortcut release error: {err}");
+            
+            if event.state == ShortcutState::Pressed {
+                if let Err(err) = handle_hold_shortcut_press(app) {
+                    eprintln!("Hold shortcut press error: {err}");
+                }
+            } else if event.state == ShortcutState::Released {
+                if let Err(err) = handle_hold_shortcut_release(app) {
+                    eprintln!("Hold shortcut release error: {err}");
+                }
             }
-        }
-    })?;
+        })?;
+    }
+
+    // Register toggle-to-record shortcut if enabled
+    if settings.toggle_enabled {
+        let toggle_shortcut = settings.toggle_shortcut.clone();
+        manager.on_shortcut(toggle_shortcut.as_str(), move |app, _shortcut, event| {
+            if event.state == ShortcutState::Pressed {
+                if let Err(err) = handle_toggle_shortcut_press(app) {
+                    eprintln!("Toggle shortcut press error: {err}");
+                }
+            }
+            // Toggle mode doesn't use release event
+        })?;
+    }
 
     Ok(())
 }
 
-fn handle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
+fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
-    if state.mark_shortcut_down() {
+    
+    // If any recording is already active, ignore
+    if state.is_toggle_recording_active() || state.get_active_recording_mode().is_some() {
+        return Ok(());
+    }
+    
+    // Prevent duplicate press events
+    if state.mark_hold_shortcut_down() {
         return Ok(());
     }
 
     match state.recorder().start() {
         Ok(started) => {
+            state.set_active_recording_mode(Some("hold"));
             show_overlay(app);
+            emit_event(app, EVENT_RECORDING_MODE_CHANGE, RecordingModePayload {
+                mode: "hold".to_string(),
+            });
             emit_event(app, EVENT_RECORDING_START, RecordingStartPayload {
                 started_at: started.to_rfc3339(),
             });
         }
         Err(err) => {
-            state.clear_shortcut_state();
+            state.clear_hold_shortcut_state();
             emit_error(app, format!("Unable to start recording: {err}"));
         }
     }
@@ -220,24 +311,105 @@ fn handle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     Ok(())
 }
 
-fn handle_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
+/// Minimum recording duration in milliseconds to process (prevents accidental taps)
+const MIN_RECORDING_DURATION_MS: i64 = 300;
+
+fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
-    if !state.clear_shortcut_state() {
+    if !state.clear_hold_shortcut_state() {
+        return Ok(());
+    }
+
+    // Only stop if we're in hold mode
+    if state.get_active_recording_mode().as_deref() != Some("hold") {
         return Ok(());
     }
 
     match state.recorder().stop() {
         Ok(Some(recording)) => {
-            hide_overlay(app);
+            let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
+            
+            // If recording is too short, discard it and hide overlay immediately
+            if duration_ms < MIN_RECORDING_DURATION_MS {
+                state.set_active_recording_mode(None);
+                hide_overlay(app);
+                return Ok(());
+            }
+            
+            state.set_active_recording_mode(None);
+            // Don't hide overlay yet - it should remain visible during saving/transcription
             emit_event(app, EVENT_RECORDING_STOP, RecordingStopPayload {
                 ended_at: recording.ended_at.to_rfc3339(),
             });
             persist_recording_async(app.clone(), recording);
         }
         Ok(None) => {
+            state.set_active_recording_mode(None);
             hide_overlay(app);
         }
         Err(err) => emit_error(app, format!("Unable to stop recording: {err}")),
+    }
+
+    Ok(())
+}
+
+fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
+    let state = app.state::<AppState>();
+    
+    // If hold recording is active, ignore toggle shortcut
+    if state.get_active_recording_mode().as_deref() == Some("hold") {
+        return Ok(());
+    }
+    
+    if state.is_toggle_recording_active() {
+        // Stop toggle recording
+        state.set_toggle_recording_active(false);
+        
+        match state.recorder().stop() {
+            Ok(Some(recording)) => {
+                let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
+                
+                // If recording is too short, discard it and hide overlay immediately
+                if duration_ms < MIN_RECORDING_DURATION_MS {
+                    state.set_active_recording_mode(None);
+                    hide_overlay(app);
+                    return Ok(());
+                }
+                
+                state.set_active_recording_mode(None);
+                // Don't hide overlay yet - it should remain visible during saving/transcription
+                emit_event(app, EVENT_RECORDING_STOP, RecordingStopPayload {
+                    ended_at: recording.ended_at.to_rfc3339(),
+                });
+                persist_recording_async(app.clone(), recording);
+            }
+            Ok(None) => {
+                state.set_active_recording_mode(None);
+                hide_overlay(app);
+            }
+            Err(err) => {
+                state.set_active_recording_mode(None);
+                emit_error(app, format!("Unable to stop recording: {err}"));
+            }
+        }
+    } else {
+        // Start toggle recording
+        match state.recorder().start() {
+            Ok(started) => {
+                state.set_toggle_recording_active(true);
+                state.set_active_recording_mode(Some("toggle"));
+                show_overlay(app);
+                emit_event(app, EVENT_RECORDING_MODE_CHANGE, RecordingModePayload {
+                    mode: "toggle".to_string(),
+                });
+                emit_event(app, EVENT_RECORDING_START, RecordingStartPayload {
+                    started_at: started.to_rfc3339(),
+                });
+            }
+            Err(err) => {
+                emit_error(app, format!("Unable to start recording: {err}"));
+            }
+        }
     }
 
     Ok(())
@@ -351,10 +523,20 @@ fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recor
                 }
 
                 emit_transcription_complete(&app_handle, result.transcript, result.confidence, pasted);
+                
+                // Hide overlay immediately on success
+                hide_overlay(&app_handle);
             }
             Err(err) => {
                 let stage = if use_local { "local" } else { "api" };
                 emit_transcription_error(&app_handle, format!("Transcription failed: {err}"), stage);
+                
+                // Hide overlay after a delay so user can see the error
+                let app_for_hide = app_handle.clone();
+                async_runtime::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_millis(2500)).await;
+                    hide_overlay(&app_for_hide);
+                });
             }
         }
     });
@@ -408,7 +590,7 @@ fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
 }
 
 fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>> {
-    let open_settings = MenuItem::with_id(app, "open_settings", "Open Settings", true, None::<&str>)?;
+    let open_settings = MenuItem::with_id(app, "open_settings", "Open Glimpse", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit_glimpse", "Quit Glimpse", true, None::<&str>)?;
 
     let menu = MenuBuilder::new(app)
@@ -446,11 +628,23 @@ fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>
         .build(app)
 }
 
-fn toggle_settings_window<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
+fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
     if let Some(window) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
+        // Show app in dock when settings window is open
+        let _ = app.set_activation_policy(ActivationPolicy::Regular);
+        
         window.show()?;
-        window.maximize()?;
         window.set_focus()?;
+        
+        // Listen for window close to hide from dock again
+        let app_handle = app.clone();
+        window.on_window_event(move |event| {
+            if let tauri::WindowEvent::CloseRequested { .. } = event {
+                // Hide from dock when settings is closed
+                let _ = app_handle.set_activation_policy(ActivationPolicy::Accessory);
+            }
+        });
+        
         Ok(())
     } else {
         Err(anyhow!("Settings window is not available")).map_err(Into::into)
@@ -466,6 +660,11 @@ fn position_overlay(window: &WebviewWindow<AppRuntime>) {
             let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
         }
     }
+}
+
+#[derive(Serialize, Clone)]
+struct RecordingModePayload {
+    mode: String,
 }
 
 #[derive(Serialize, Clone)]

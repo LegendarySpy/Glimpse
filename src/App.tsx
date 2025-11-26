@@ -1,7 +1,7 @@
 import { useState, useEffect, ComponentType } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import PillOverlay from "./pill";
-import Settings from "./Settings";
+import Home from "./Home";
 import "./App.css";
 
 function App() {
@@ -31,7 +31,7 @@ function App() {
   if (windowLabel === "settings") {
     return (
       <div className="settings-view h-screen w-screen overflow-hidden">
-        <Settings />
+        <Home />
       </div>
     );
   }
@@ -44,7 +44,7 @@ function App() {
   const ActiveOverlay = overlayRegistry[windowLabel] ?? PillOverlay;
   return (
     <div className="flex h-full w-full items-center justify-center">
-      <ActiveOverlay className="drop-shadow-[0_10px_25px_rgba(0,0,0,0.45)]" />
+      <ActiveOverlay />
     </div>
   );
 }

@@ -11,6 +11,7 @@
   background-color: transparent;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html,
@@ -19,16 +20,17 @@ body {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
-  background-color: #050505;
+  background-color: transparent;
 }
 
 html.settings-html,
 body.settings-body {
-  overflow: hidden; /* We will handle scrolling in the content area */
+  overflow: hidden;
+  background-color: #030303;
 }
 
 .settings-view {
-  background-color: #050505;
+  background-color: #030303;
   color: inherit;
 }
 
@@ -47,4 +49,79 @@ body {
 
 #root {
   min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Smooth animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Error shake animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Toast animations - appears from above */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.2s ease-out forwards;
+}
+
+.animate-toast-out {
+  animation: toast-out 0.15s ease-in forwards;
 }

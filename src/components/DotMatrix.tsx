@@ -1,13 +1,15 @@
 import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 
 interface DotMatrixProps {
     rows?: number;
     cols?: number;
-    activeDots?: number[]; // Indices of dots to be "active" (brighter)
+    activeDots?: number[];
     className?: string;
     dotSize?: number;
     gap?: number;
     color?: string;
+    animated?: boolean;
 }
 
 const DotMatrix: React.FC<DotMatrixProps> = ({
@@ -18,25 +20,33 @@ const DotMatrix: React.FC<DotMatrixProps> = ({
     dotSize = 2,
     gap = 4,
     color = "currentColor",
+    animated = false,
 }) => {
     const dots = useMemo(() => {
         const total = rows * cols;
         return Array.from({ length: total }).map((_, i) => {
             const isActive = activeDots.includes(i);
+            const DotComponent = animated ? motion.div : "div";
+            
             return (
-                <div
+                <DotComponent
                     key={i}
                     style={{
                         width: dotSize,
                         height: dotSize,
                         backgroundColor: color,
-                        opacity: isActive ? 1 : 0.2,
+                        opacity: isActive ? 1 : 0.15,
                         borderRadius: "50%",
                     }}
+                    {...(animated && isActive ? {
+                        initial: { scale: 0.8, opacity: 0 },
+                        animate: { scale: 1, opacity: 1 },
+                        transition: { delay: i * 0.002, duration: 0.2 }
+                    } : {})}
                 />
             );
         });
-    }, [rows, cols, activeDots, dotSize, color]);
+    }, [rows, cols, activeDots, dotSize, color, animated]);
 
     return (
         <div
