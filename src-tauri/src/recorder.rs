@@ -5,7 +5,9 @@ use chrono::{DateTime, Local};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{SampleFormat, Stream};
 use crossbeam_channel::{bounded, unbounded, Sender};
-use mp3lame_encoder::{Bitrate, Builder as LameBuilder, FlushNoGap, InterleavedPcm, MonoPcm, Quality};
+use mp3lame_encoder::{
+    Bitrate, Builder as LameBuilder, FlushNoGap, InterleavedPcm, MonoPcm, Quality,
+};
 use parking_lot::Mutex;
 use webrtc_vad::{Vad, VadMode};
 
@@ -47,8 +49,8 @@ impl RecorderManager {
                 let mut core = RecorderCore::default();
                 while let Ok(cmd) = rx.recv() {
                     match cmd {
-                        RecorderCommand::Start { respond } => {
-                            let _ = respond.send(core.start());
+                        RecorderCommand::Start { device_id, respond } => {
+                            let _ = respond.send(core.start(device_id));
                         }
                         RecorderCommand::Stop { respond } => {
                             let _ = respond.send(core.stop());
@@ -61,10 +63,13 @@ impl RecorderManager {
         Self { tx }
     }
 
-    pub fn start(&self) -> Result<DateTime<Local>> {
+    pub fn start(&self, device_id: Option<String>) -> Result<DateTime<Local>> {
         let (respond_tx, respond_rx) = bounded(1);
         self.tx
-            .send(RecorderCommand::Start { respond: respond_tx })
+            .send(RecorderCommand::Start {
+                device_id,
+                respond: respond_tx,
+            })
             .map_err(|err| anyhow!("Recorder channel closed: {err}"))?;
         respond_rx
             .recv()
@@ -74,7 +79,9 @@ impl RecorderManager {
     pub fn stop(&self) -> Result<Option<CompletedRecording>> {
         let (respond_tx, respond_rx) = bounded(1);
         self.tx
-            .send(RecorderCommand::Stop { respond: respond_tx })
+            .send(RecorderCommand::Stop {
+                respond: respond_tx,
+            })
             .map_err(|err| anyhow!("Recorder channel closed: {err}"))?;
         respond_rx
             .recv()
@@ -84,6 +91,7 @@ impl RecorderManager {
 
 enum RecorderCommand {
     Start {
+        device_id: Option<String>,
         respond: Sender<Result<DateTime<Local>>>,
     },
     Stop {
@@ -97,15 +105,22 @@ struct RecorderCore {
 }
 
 impl RecorderCore {
-    fn start(&mut self) -> Result<DateTime<Local>> {
+    fn start(&mut self, device_id: Option<String>) -> Result<DateTime<Local>> {
         if self.active.is_some() {
             return Err(anyhow!("Recording is already in progress"));
         }
 
         let host = cpal::default_host();
-        let device = host
-            .default_input_device()
-            .context("No default input device found")?;
+        let device = if let Some(id) = device_id {
+            host.input_devices()
+                .context("Failed to list input devices")?
+                .find(|d| d.name().map(|n| n == id).unwrap_or(false))
+                .or_else(|| host.default_input_device())
+                .context("Selected device not found and no default available")?
+        } else {
+            host.default_input_device()
+                .context("No default input device found")?
+        };
         let config = device
             .default_input_config()
             .context("No supported input configuration found")?;
@@ -201,7 +216,10 @@ impl RecorderCore {
     }
 }
 
-pub fn persist_recording(base_dir: PathBuf, recording: CompletedRecording) -> Result<RecordingSaved> {
+pub fn persist_recording(
+    base_dir: PathBuf,
+    recording: CompletedRecording,
+) -> Result<RecordingSaved> {
     if recording.samples.is_empty() {
         return Err(anyhow!("Recording buffer is empty"));
     }
@@ -214,7 +232,11 @@ pub fn persist_recording(base_dir: PathBuf, recording: CompletedRecording) -> Re
         .with_context(|| format!("Failed to create recording folder at {}", folder.display()))?;
     let file_path = folder.join(format!("{}.mp3", timestamp));
 
-    let mp3_bytes = encode_to_mp3(&recording.samples, recording.sample_rate, recording.channels)?;
+    let mp3_bytes = encode_to_mp3(
+        &recording.samples,
+        recording.sample_rate,
+        recording.channels,
+    )?;
     fs::write(&file_path, mp3_bytes)
         .with_context(|| format!("Failed to write recording file at {}", file_path.display()))?;
 
@@ -229,12 +251,13 @@ fn encode_to_mp3(samples: &[i16], sample_rate: u32, channels: u16) -> Result<Vec
     // Minimum samples needed for MP3 encoding (at least one frame worth)
     // MP3 frames are typically 1152 samples for MPEG-1
     const MIN_SAMPLES: usize = 1152;
-    
+
     if samples.len() < MIN_SAMPLES {
         return Err(anyhow!("Recording too short (minimum ~50ms required)"));
     }
-    
-    let mut builder = LameBuilder::new().ok_or_else(|| anyhow!("Failed to initialize MP3 encoder"))?;
+
+    let mut builder =
+        LameBuilder::new().ok_or_else(|| anyhow!("Failed to initialize MP3 encoder"))?;
     builder
         .set_sample_rate(sample_rate)
         .map_err(|err| anyhow!("Invalid sample rate: {err}"))?;
@@ -386,14 +409,7 @@ fn apply_frame_normalization(samples: &mut [f32], sample_rate: u32) {
     let mut gain = 1.0f32;
 
     for chunk in samples.chunks_mut(frame_size) {
-        let rms = (
-            chunk
-                .iter()
-                .map(|s| s * s)
-                .sum::<f32>()
-                / chunk.len().max(1) as f32
-        )
-            .sqrt();
+        let rms = (chunk.iter().map(|s| s * s).sum::<f32>() / chunk.len().max(1) as f32).sqrt();
         let desired = if rms > 1e-4 {
             (target_rms / rms).clamp(0.5, 4.0)
         } else {
@@ -607,4 +623,3 @@ fn downmix_to_mono(samples: &[i16], channels: usize) -> Vec<i16> {
     }
     mono
 }
-

@@ -38,6 +38,8 @@ core-graphics = "0.23"
 mime_guess = "2"
 transcribe-rs = "0.1.4"
 tokio = { version = "1", features = ["time"] }
+uuid = { version = "1.18.1", features = ["v4"] }
+minimp3 = "0.5"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"

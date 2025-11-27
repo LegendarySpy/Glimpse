@@ -127,7 +127,7 @@ const Toast: React.FC<ToastProps> = ({ toast, onDismiss, isLeaving }) => {
         ${shouldShake ? "animate-shake" : ""}
         ${isLeaving ? "animate-toast-out" : "animate-toast-in"}
       `}
-      style={{ 
+      style={{
         minWidth: TOAST_MIN_WIDTH,
         maxWidth: needsWider ? TOAST_MAX_WIDTH : 200,
         maxHeight: TOAST_MAX_HEIGHT + 20, // Some padding for the container
@@ -142,7 +142,7 @@ const Toast: React.FC<ToastProps> = ({ toast, onDismiss, isLeaving }) => {
       >
         ✕
       </button>
-      
+
       {/* Content */}
       <div ref={contentRef} className="flex items-start gap-2.5 overflow-hidden" style={{ maxHeight: TOAST_MAX_HEIGHT }}>
         <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${isError ? "bg-red-500 animate-pulse" : "bg-white/50"}`} />
@@ -181,7 +181,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const [toastLeaving, setToastLeaving] = useState(false);
   const [recordingMode, setRecordingMode] = useState<"hold" | "toggle" | null>(null);
   const [isErrorFlashing, setIsErrorFlashing] = useState(false);
-  
+
   // Audio
   const { analyser, isListening, start, stop } = useSharedAnalyser();
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -544,7 +544,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     setStatus("error");
     setToast({ type: "error", message, autoDismiss: false });
     setIsErrorFlashing(true);
-    
+
     // Stop flashing after animation, keep error state
     setTimeout(() => setIsErrorFlashing(false), 1200);
   }, []);
@@ -602,7 +602,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
     return () => {
       unlisteners.forEach(async (p) => {
-        try { (await p)(); } catch {}
+        try { (await p)(); } catch { }
       });
       stop();
     };
@@ -719,15 +719,15 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       <div className="relative flex flex-col items-center pb-2">
         {/* Toast - absolutely positioned above pill, doesn't affect pill layout */}
         {toast && (
-          <div 
+          <div
             className="absolute left-1/2 flex justify-center pointer-events-auto"
             style={{
               bottom: PILL_HEIGHT + 20 + 16, // pill height + status text area + gap
               transform: 'translateX(-50%)',
             }}
           >
-            <Toast 
-              toast={toast} 
+            <Toast
+              toast={toast}
               onDismiss={dismissOverlay}
               isLeaving={toastLeaving}
             />
@@ -740,7 +740,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
           style={{
             width: PILL_WIDTH,
             height: PILL_HEIGHT,
-            boxShadow: status === "error" 
+            boxShadow: status === "error"
               ? "0 0 20px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(255,255,255,0.1), inset 0 -2px 5px rgba(0,0,0,0.8)"
               : "0 8px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 5px rgba(0,0,0,0.8)",
           }}

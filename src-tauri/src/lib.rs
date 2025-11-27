@@ -1,9 +1,11 @@
 mod assistive;
+mod audio;
 mod downloader;
 mod local_transcription;
 mod model_manager;
 mod recorder;
 mod settings;
+mod storage;
 mod transcription;
 
 use std::path::PathBuf;
@@ -51,7 +53,7 @@ pub fn run() {
                     eprintln!("Failed to persist default local model: {err}");
                 }
             }
-            app.manage(AppState::new(settings));
+            app.manage(AppState::new(settings, &handle));
 
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
                 position_overlay(&window);
@@ -71,10 +73,18 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_settings,
             update_settings,
+            get_app_info,
+            get_transcriptions,
+            delete_transcription,
+            retry_transcription,
             model_manager::list_models,
             model_manager::check_model_status,
             model_manager::download_model,
-            model_manager::delete_model
+            model_manager::list_models,
+            model_manager::check_model_status,
+            model_manager::download_model,
+            model_manager::delete_model,
+            audio::list_input_devices
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -88,6 +98,7 @@ struct AppState {
     recorder: RecorderManager,
     http: Client,
     local_transcriber: Arc<local_transcription::LocalTranscriber>,
+    storage: Arc<storage::StorageManager>,
     settings: parking_lot::Mutex<UserSettings>,
     tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
     hold_shortcut_down: AtomicBool,
@@ -97,15 +108,26 @@ struct AppState {
 }
 
 impl AppState {
-    fn new(settings: UserSettings) -> Self {
+    fn new(settings: UserSettings, app_handle: &AppHandle<AppRuntime>) -> Self {
         let http = Client::builder()
             .timeout(Duration::from_secs(120))
             .build()
             .expect("Failed to build HTTP client");
+        
+        let storage_path = app_handle
+            .path()
+            .app_data_dir()
+            .expect("Failed to resolve app data directory")
+            .join("transcriptions.json");
+        
+        let storage = storage::StorageManager::new(storage_path)
+            .expect("Failed to initialize transcription storage");
+        
         Self {
             recorder: RecorderManager::new(),
             http,
             local_transcriber: Arc::new(local_transcription::LocalTranscriber::new()),
+            storage: Arc::new(storage),
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
             hold_shortcut_down: AtomicBool::new(false),
@@ -132,6 +154,10 @@ impl AppState {
 
     fn local_transcriber(&self) -> Arc<local_transcription::LocalTranscriber> {
         Arc::clone(&self.local_transcriber)
+    }
+
+    fn storage(&self) -> Arc<storage::StorageManager> {
+        Arc::clone(&self.storage)
     }
 
     fn store_tray(&self, tray: TrayIcon<AppRuntime>) {
@@ -170,47 +196,51 @@ fn get_settings(state: tauri::State<AppState>) -> Result<UserSettings, String> {
 
 #[tauri::command]
 fn update_settings(
-    hold_shortcut: String,
-    hold_enabled: bool,
-    toggle_shortcut: String,
-    toggle_enabled: bool,
-    transcription_mode: TranscriptionMode,
-    local_model: String,
+    holdShortcut: String,
+    holdEnabled: bool,
+    toggleShortcut: String,
+    toggleEnabled: bool,
+    transcriptionMode: TranscriptionMode,
+    localModel: String,
+    microphoneDevice: Option<String>,
+    language: String,
     app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<UserSettings, String> {
-    if hold_enabled && hold_shortcut.trim().is_empty() {
+    if holdEnabled && holdShortcut.trim().is_empty() {
         return Err("Hold shortcut cannot be empty when enabled".into());
     }
 
-    if toggle_enabled && toggle_shortcut.trim().is_empty() {
+    if toggleEnabled && toggleShortcut.trim().is_empty() {
         return Err("Toggle shortcut cannot be empty when enabled".into());
     }
 
-    if !hold_enabled && !toggle_enabled {
+    if !holdEnabled && !toggleEnabled {
         return Err("At least one recording mode must be enabled".into());
     }
 
     // Prevent same keybind for both shortcuts
-    if hold_enabled && toggle_enabled {
-        let hold_normalized = hold_shortcut.trim().to_lowercase();
-        let toggle_normalized = toggle_shortcut.trim().to_lowercase();
+    if holdEnabled && toggleEnabled {
+        let hold_normalized = holdShortcut.trim().to_lowercase();
+        let toggle_normalized = toggleShortcut.trim().to_lowercase();
         if hold_normalized == toggle_normalized {
             return Err("Hold and Toggle shortcuts cannot be the same".into());
         }
     }
 
-    if model_manager::definition(&local_model).is_none() {
+    if model_manager::definition(&localModel).is_none() {
         return Err("Unknown model selection".into());
     }
 
     let mut next = state.current_settings();
-    next.hold_shortcut = hold_shortcut;
-    next.hold_enabled = hold_enabled;
-    next.toggle_shortcut = toggle_shortcut;
-    next.toggle_enabled = toggle_enabled;
-    next.transcription_mode = transcription_mode;
-    next.local_model = local_model;
+    next.hold_shortcut = holdShortcut;
+    next.hold_enabled = holdEnabled;
+    next.toggle_shortcut = toggleShortcut;
+    next.toggle_enabled = toggleEnabled;
+    next.transcription_mode = transcriptionMode;
+    next.local_model = localModel;
+    next.microphone_device = microphoneDevice;
+    next.language = language;
 
     next.save(&app).map_err(|err| err.to_string())?;
     state.set_settings(next.clone());
@@ -218,6 +248,209 @@ fn update_settings(
     register_shortcuts(&app).map_err(|err| err.to_string())?;
 
     Ok(next)
+}
+
+#[derive(Serialize)]
+struct AppInfo {
+    version: String,
+    data_dir_size_bytes: u64,
+    data_dir_path: String,
+}
+
+#[tauri::command]
+fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
+    let version = env!("CARGO_PKG_VERSION").to_string();
+    
+    let data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    
+    let data_dir_path = data_dir.display().to_string();
+    
+    // Calculate directory size
+    let data_dir_size_bytes = calculate_dir_size(&data_dir).unwrap_or(0);
+    
+    Ok(AppInfo {
+        version,
+        data_dir_size_bytes,
+        data_dir_path,
+    })
+}
+
+fn calculate_dir_size(path: &std::path::Path) -> Result<u64> {
+    let mut total_size = 0u64;
+    
+    if !path.exists() {
+        return Ok(0);
+    }
+    
+    if path.is_file() {
+        return Ok(path.metadata()?.len());
+    }
+    
+    if path.is_dir() {
+        for entry in std::fs::read_dir(path)? {
+            let entry = entry?;
+            let metadata = entry.metadata()?;
+            
+            if metadata.is_file() {
+                total_size += metadata.len();
+            } else if metadata.is_dir() {
+                total_size += calculate_dir_size(&entry.path())?;
+            }
+        }
+    }
+    
+    Ok(total_size)
+}
+
+
+#[tauri::command]
+fn get_transcriptions(state: tauri::State<AppState>) -> Result<Vec<storage::TranscriptionRecord>, String> {
+    Ok(state.storage().get_all())
+}
+
+#[tauri::command]
+fn delete_transcription(id: String, state: tauri::State<AppState>) -> Result<bool, String> {
+    match state.storage().delete(&id) {
+        Ok(Some(audio_path)) => {
+            // Also delete the audio file
+            let path = PathBuf::from(audio_path);
+            if path.exists() {
+                let _ = std::fs::remove_file(path);
+            }
+            Ok(true)
+        }
+        Ok(None) => Ok(false),
+        Err(err) => Err(format!("Failed to delete transcription: {err}")),
+    }
+}
+
+#[tauri::command]
+async fn retry_transcription(
+    id: String,
+    app: AppHandle<AppRuntime>,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    let record = state
+        .storage()
+        .get_by_id(&id)
+        .ok_or_else(|| "Transcription not found".to_string())?;
+
+    if record.status != storage::TranscriptionStatus::Error {
+        return Err("Can only retry failed transcriptions".to_string());
+    }
+
+    let audio_path = PathBuf::from(&record.audio_path);
+    if !audio_path.exists() {
+        return Err("Audio file not found".to_string());
+    }
+
+    // Create a RecordingSaved struct from the record
+    let saved = RecordingSaved {
+        path: audio_path,
+        started_at: record.timestamp,
+        ended_at: record.timestamp,
+    };
+
+    // Delete the old failed record
+    let _ = state.storage().delete(&id);
+
+    // Queue transcription with current settings
+    emit_transcription_start(&app, &saved);
+
+    let http = state.http();
+    let app_handle = app.clone();
+    let saved_for_task = saved.clone();
+
+    async_runtime::spawn(async move {
+        let settings = app_handle.state::<AppState>().current_settings();
+        let config = transcription::TranscriptionConfig::from_settings(&settings);
+        let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
+
+        let result = if use_local {
+            // For local transcription, we need to load the audio file
+            match load_audio_for_transcription(&saved_for_task.path) {
+                Ok((samples, sample_rate)) => {
+                    let model_key = settings.local_model.clone();
+                    match model_manager::ensure_model_ready(&app_handle, &model_key) {
+                        Ok(ready_model) => {
+                            let transcriber = app_handle.state::<AppState>().local_transcriber();
+                            match async_runtime::spawn_blocking(move || {
+                                transcriber.transcribe(&ready_model, &samples, sample_rate)
+                            })
+                            .await
+                            {
+                                Ok(inner) => inner,
+                                Err(err) => Err(anyhow!("Local transcription task failed: {err}")),
+                            }
+                        }
+                        Err(err) => Err(err),
+                    }
+                }
+                Err(err) => Err(err),
+            }
+        } else {
+            transcription::request_transcription(&http, &saved_for_task, &config).await
+        };
+
+        match result {
+            Ok(result) => {
+                let mut pasted = false;
+                if config.auto_paste && !result.transcript.trim().is_empty() {
+                    let text = result.transcript.clone();
+                    match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await
+                    {
+                        Ok(Ok(())) => pasted = true,
+                        Ok(Err(err)) => {
+                            emit_transcription_error(
+                                &app_handle,
+                                format!("Auto paste failed: {err}"),
+                                "auto_paste",
+                                saved_for_task.path.display().to_string(),
+                            );
+                        }
+                        Err(err) => {
+                            emit_transcription_error(
+                                &app_handle,
+                                format!("Auto paste task error: {err}"),
+                                "auto_paste",
+                                saved_for_task.path.display().to_string(),
+                            );
+                        }
+                    }
+                }
+
+                emit_transcription_complete(
+                    &app_handle,
+                    result.transcript,
+                    result.confidence,
+                    pasted,
+                    saved_for_task.path.display().to_string(),
+                );
+
+                hide_overlay(&app_handle);
+            }
+            Err(err) => {
+                let stage = if use_local { "local" } else { "api" };
+                emit_transcription_error(
+                    &app_handle,
+                    format!("Transcription failed: {err}"),
+                    stage,
+                    saved_for_task.path.display().to_string(),
+                );
+
+                let app_for_hide = app_handle.clone();
+                async_runtime::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_millis(2500)).await;
+                    hide_overlay(&app_for_hide);
+                });
+            }
+        }
+    });
+
+    Ok(())
 }
 
 fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
@@ -291,7 +524,8 @@ fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> 
         return Ok(());
     }
 
-    match state.recorder().start() {
+    let settings = state.current_settings();
+    match state.recorder().start(settings.microphone_device) {
         Ok(started) => {
             state.set_active_recording_mode(Some("hold"));
             show_overlay(app);
@@ -394,7 +628,8 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
         }
     } else {
         // Start toggle recording
-        match state.recorder().start() {
+        let settings = state.current_settings();
+        match state.recorder().start(settings.microphone_device) {
             Ok(started) => {
                 state.set_toggle_recording_active(true);
                 state.set_active_recording_mode(Some("toggle"));
@@ -514,22 +749,33 @@ fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recor
                     match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await {
                         Ok(Ok(())) => pasted = true,
                         Ok(Err(err)) => {
-                            emit_transcription_error(&app_handle, format!("Auto paste failed: {err}"), "auto_paste");
+                            emit_transcription_error(&app_handle, format!("Auto paste failed: {err}"), "auto_paste", saved_for_task.path.display().to_string());
                         }
                         Err(err) => {
-                            emit_transcription_error(&app_handle, format!("Auto paste task error: {err}"), "auto_paste");
+                            emit_transcription_error(&app_handle, format!("Auto paste task error: {err}"), "auto_paste", saved_for_task.path.display().to_string());
                         }
                     }
                 }
 
-                emit_transcription_complete(&app_handle, result.transcript, result.confidence, pasted);
+                emit_transcription_complete(
+                    &app_handle,
+                    result.transcript,
+                    result.confidence,
+                    pasted,
+                    saved_for_task.path.display().to_string(),
+                );
                 
                 // Hide overlay immediately on success
                 hide_overlay(&app_handle);
             }
             Err(err) => {
                 let stage = if use_local { "local" } else { "api" };
-                emit_transcription_error(&app_handle, format!("Transcription failed: {err}"), stage);
+                emit_transcription_error(
+                    &app_handle,
+                    format!("Transcription failed: {err}"),
+                    stage,
+                    saved_for_task.path.display().to_string(),
+                );
                 
                 // Hide overlay after a delay so user can see the error
                 let app_for_hide = app_handle.clone();
@@ -557,27 +803,90 @@ fn emit_transcription_complete(
     transcript: String,
     confidence: Option<f32>,
     auto_paste: bool,
+    audio_path: String,
 ) {
     emit_event(
         app,
         EVENT_TRANSCRIPTION_COMPLETE,
         TranscriptionCompletePayload {
-            transcript,
+            transcript: transcript.clone(),
             confidence,
             auto_paste,
         },
     );
+    
+    // Save successful transcription to storage with the provided audio path
+    let _ = app.state::<AppState>().storage().save_transcription(
+        transcript,
+        audio_path,
+        storage::TranscriptionStatus::Success,
+        None,
+        confidence,
+    );
 }
 
-fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage: &str) {
+fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage: &str, audio_path: String) {
     emit_event(
         app,
         EVENT_TRANSCRIPTION_ERROR,
         TranscriptionErrorPayload {
-            message,
+            message: message.clone(),
             stage: stage.to_string(),
         },
     );
+    
+    // Save failed transcription to storage with the provided audio path
+    let _ = app.state::<AppState>().storage().save_transcription(
+        String::new(),
+        audio_path,
+        storage::TranscriptionStatus::Error,
+        Some(message),
+        None,
+    );
+}
+
+fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
+    use std::io::Read;
+    use minimp3::{Decoder, Frame};
+    
+    // Read the MP3 file
+    let mut file = std::fs::File::open(path)
+        .with_context(|| format!("Failed to open audio file at {}", path.display()))?;
+    let mut mp3_data = Vec::new();
+    file.read_to_end(&mut mp3_data)
+        .context("Failed to read MP3 file")?;
+
+    // Decode MP3 to raw samples
+    let mut decoder = Decoder::new(&mp3_data[..]);
+    let mut samples = Vec::new();
+    let mut sample_rate = 16000; // Default, will be updated from first frame
+    
+    loop {
+        match decoder.next_frame() {
+            Ok(Frame { data, sample_rate: sr, channels, .. }) => {
+                sample_rate = sr as u32;
+                
+                // Convert to mono if needed and collect samples
+                if channels == 1 {
+                    samples.extend_from_slice(&data);
+                } else {
+                    // Downmix stereo/multi-channel to mono
+                    for chunk in data.chunks(channels) {
+                        let mono_sample: i32 = chunk.iter().map(|&s| s as i32).sum();
+                        samples.push((mono_sample / channels as i32) as i16);
+                    }
+                }
+            }
+            Err(minimp3::Error::Eof) => break,
+            Err(e) => return Err(anyhow!("MP3 decoding error: {}", e)),
+        }
+    }
+    
+    if samples.is_empty() {
+        return Err(anyhow!("No audio data decoded from MP3 file"));
+    }
+    
+    Ok((samples, sample_rate))
 }
 
 fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {

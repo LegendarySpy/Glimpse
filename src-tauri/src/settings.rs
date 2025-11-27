@@ -20,6 +20,9 @@ pub struct UserSettings {
     pub transcription_mode: TranscriptionMode,
     #[serde(default = "default_local_model")]
     pub local_model: String,
+    pub microphone_device: Option<String>,
+    #[serde(default = "default_language")]
+    pub language: String,
 }
 
 fn default_hold_shortcut() -> String {
@@ -43,6 +46,8 @@ impl Default for UserSettings {
             toggle_enabled: true,
             transcription_mode: default_transcription_mode(),
             local_model: default_local_model(),
+            microphone_device: None,
+            language: default_language(),
         }
     }
 }
@@ -66,6 +71,10 @@ fn default_transcription_mode() -> TranscriptionMode {
 
 pub fn default_local_model() -> String {
     "parakeet_tdt_int8".to_string()
+}
+
+fn default_language() -> String {
+    "en".to_string()
 }
 
 impl UserSettings {

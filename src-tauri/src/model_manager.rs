@@ -31,6 +31,7 @@ pub struct ModelDefinition {
     pub engine: LocalModelEngine,
     pub variant: &'static str,
     pub storage: ModelStorage,
+    pub tags: &'static [&'static str],
 }
 
 #[derive(Debug, Clone)]
@@ -90,16 +91,6 @@ const PARAKEET_TDT_INT8_FILES: [ModelFileDescriptor; 5] = [
     },
 ];
 
-const WHISPER_TINY_Q5_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
-    url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin",
-    name: "ggml-tiny-q5_1.bin",
-}];
-
-const WHISPER_BASE_Q5_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
-    url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin",
-    name: "ggml-base-q5_1.bin",
-}];
-
 const WHISPER_SMALL_Q5_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
     url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin",
     name: "ggml-small-q5_1.bin",
@@ -120,6 +111,7 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         engine: LocalModelEngine::Parakeet { quantized: true },
         variant: "Int8 Quantized",
         storage: ModelStorage::Directory,
+        tags: &["Multilingual", "Fast"],
     },
     ModelDefinition {
         key: "parakeet_tdt_fp32",
@@ -130,46 +122,30 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         engine: LocalModelEngine::Parakeet { quantized: false },
         variant: "FP32 Precision",
         storage: ModelStorage::Directory,
+        tags: &["Multilingual", "High Accuracy"],
     },
-    ModelDefinition {
-        key: "whisper_tiny_q5",
-        label: "Whisper Tiny",
-        description: "Ultra-fast Whisper model for short monospeakers.",
-        size_mb: 80.0,
-        files: &WHISPER_TINY_Q5_FILES,
-        engine: LocalModelEngine::Whisper,
-        variant: "Q5_1",
-        storage: ModelStorage::File { artifact: "ggml-tiny-q5_1.bin" },
-    },
-    ModelDefinition {
-        key: "whisper_base_q5",
-        label: "Whisper Base",
-        description: "Balanced Whisper model that stays lightweight on CPU.",
-        size_mb: 150.0,
-        files: &WHISPER_BASE_Q5_FILES,
-        engine: LocalModelEngine::Whisper,
-        variant: "Q5_1",
-        storage: ModelStorage::File { artifact: "ggml-base-q5_1.bin" },
-    },
+
     ModelDefinition {
         key: "whisper_small_q5",
         label: "Whisper Small",
-        description: "Great accuracy for English meetings while still CPU-friendly.",
+        description: "CPU-friendly, supports custom words.",
         size_mb: 480.0,
         files: &WHISPER_SMALL_Q5_FILES,
         engine: LocalModelEngine::Whisper,
         variant: "Q5_1",
         storage: ModelStorage::File { artifact: "ggml-small-q5_1.bin" },
+        tags: &["English", "Custom Words", "CPU Friendly"],
     },
     ModelDefinition {
         key: "whisper_medium_q4",
         label: "Whisper Medium",
-        description: "Best quality local Whisper model with multilingual support.",
+        description: "Best quality local Whisper model with multilingual support, supports custom words.",
         size_mb: 1500.0,
         files: &WHISPER_MEDIUM_Q4_FILES,
         engine: LocalModelEngine::Whisper,
         variant: "Q4_1",
         storage: ModelStorage::File { artifact: "ggml-medium-q4_1.bin" },
+        tags: &["Multilingual", "Custom Words", "Balanced"],
     },
 ];
 
@@ -213,6 +189,7 @@ pub struct ModelInfo {
     pub file_count: usize,
     pub engine: String,
     pub variant: String,
+    pub tags: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -294,6 +271,7 @@ pub fn list_models() -> Vec<ModelInfo> {
             file_count: def.files.len(),
             engine: engine_label(&def.engine).to_string(),
             variant: def.variant.to_string(),
+            tags: def.tags.iter().map(|s| s.to_string()).collect(),
         })
         .collect()
 }
