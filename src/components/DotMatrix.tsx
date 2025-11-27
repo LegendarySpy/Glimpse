@@ -27,7 +27,7 @@ const DotMatrix: React.FC<DotMatrixProps> = ({
         return Array.from({ length: total }).map((_, i) => {
             const isActive = activeDots.includes(i);
             const DotComponent = animated ? motion.div : "div";
-            
+
             return (
                 <DotComponent
                     key={i}
@@ -62,4 +62,4 @@ const DotMatrix: React.FC<DotMatrixProps> = ({
     );
 };
 
-export default DotMatrix;
+export default React.memo(DotMatrix);

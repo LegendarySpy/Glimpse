@@ -203,4 +203,4 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
     );
 };
 
-export default TranscriptionItem;
+export default React.memo(TranscriptionItem);

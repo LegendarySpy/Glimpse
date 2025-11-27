@@ -111,4 +111,4 @@ const TranscriptionList: React.FC = () => {
     );
 };
 
-export default TranscriptionList;
+export default React.memo(TranscriptionList);

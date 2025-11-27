@@ -17,9 +17,6 @@ import {
     User,
     Mic,
     ChevronDown,
-    FolderOpen,
-    RotateCw,
-    Check,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
 
@@ -367,7 +364,9 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         toggleShortcut,
         toggleEnabled,
         transcriptionMode,
-        localModel
+        localModel,
+        microphoneDevice,
+        language,
     ]);
 
     const handleDownload = async (modelKey: string) => {
@@ -549,7 +548,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
                         {/* Main Content */}
                         <main className="flex flex-1 flex-col bg-[#161618] overflow-hidden">
-                            <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                            <div className="flex-1 overflow-y-auto p-6 settings-scroll">
                                 <AnimatePresence mode="wait">
                                     {activeTab === "account" && (
                                         <motion.div
