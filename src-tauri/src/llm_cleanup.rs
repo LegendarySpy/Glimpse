@@ -61,13 +61,22 @@ fn parse_output(response: &str) -> Option<String> {
 fn get_endpoint(settings: &UserSettings) -> Result<String> {
     let base = match settings.llm_provider {
         LlmProvider::None => return Err(anyhow!("LLM cleanup is disabled")),
-        LlmProvider::LmStudio => settings.llm_endpoint.as_str().is_empty()
+        LlmProvider::LmStudio => settings
+            .llm_endpoint
+            .as_str()
+            .is_empty()
             .then_some("http://localhost:1234")
             .unwrap_or(&settings.llm_endpoint),
-        LlmProvider::Ollama => settings.llm_endpoint.as_str().is_empty()
+        LlmProvider::Ollama => settings
+            .llm_endpoint
+            .as_str()
+            .is_empty()
             .then_some("http://localhost:11434")
             .unwrap_or(&settings.llm_endpoint),
-        LlmProvider::OpenAI => settings.llm_endpoint.as_str().is_empty()
+        LlmProvider::OpenAI => settings
+            .llm_endpoint
+            .as_str()
+            .is_empty()
             .then_some("https://api.openai.com")
             .unwrap_or(&settings.llm_endpoint),
         LlmProvider::Custom => {
@@ -80,7 +89,10 @@ fn get_endpoint(settings: &UserSettings) -> Result<String> {
             &settings.llm_endpoint
         }
     };
-    Ok(format!("{}/v1/chat/completions", base.trim_end_matches('/')))
+    Ok(format!(
+        "{}/v1/chat/completions",
+        base.trim_end_matches('/')
+    ))
 }
 
 fn get_model(settings: &UserSettings) -> String {
@@ -92,10 +104,15 @@ fn get_model(settings: &UserSettings) -> String {
         LlmProvider::Ollama => "llama3.2",
         LlmProvider::OpenAI => "gpt-4o-mini",
         _ => "default",
-    }.to_string()
+    }
+    .to_string()
 }
 
-pub async fn cleanup_transcription(client: &Client, text: &str, settings: &UserSettings) -> Result<String> {
+pub async fn cleanup_transcription(
+    client: &Client,
+    text: &str,
+    settings: &UserSettings,
+) -> Result<String> {
     if !settings.llm_cleanup_enabled || matches!(settings.llm_provider, LlmProvider::None) {
         return Err(anyhow!("LLM cleanup not configured"));
     }
@@ -109,8 +126,14 @@ pub async fn cleanup_transcription(client: &Client, text: &str, settings: &UserS
     let body = ChatRequest {
         model: get_model(settings),
         messages: vec![
-            Message { role: "system".into(), content: SYSTEM_PROMPT.into() },
-            Message { role: "user".into(), content: user_content },
+            Message {
+                role: "system".into(),
+                content: SYSTEM_PROMPT.into(),
+            },
+            Message {
+                role: "user".into(),
+                content: user_content,
+            },
         ],
         temperature: 0.2,
         max_tokens: Some(4096),
@@ -128,7 +151,9 @@ pub async fn cleanup_transcription(client: &Client, text: &str, settings: &UserS
     }
 
     let chat: ChatResponse = resp.json().await.context("Failed to parse response")?;
-    let raw = chat.choices.first()
+    let raw = chat
+        .choices
+        .first()
         .map(|c| c.message.content.clone())
         .unwrap_or_default();
 
@@ -141,4 +166,3 @@ pub async fn cleanup_transcription(client: &Client, text: &str, settings: &UserS
 pub fn is_cleanup_available(settings: &UserSettings) -> bool {
     settings.llm_cleanup_enabled && !matches!(settings.llm_provider, LlmProvider::None)
 }
-

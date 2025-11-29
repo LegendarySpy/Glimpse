@@ -111,7 +111,10 @@ pub async fn request_transcription(
         request.header("x-api-key", &config.api_key)
     };
 
-    let response = request.send().await.context("Failed to reach transcription API")?;
+    let response = request
+        .send()
+        .await
+        .context("Failed to reach transcription API")?;
     let status = response.status();
     let text = response.text().await.unwrap_or_default();
 
@@ -127,7 +130,9 @@ pub async fn request_transcription(
     if let Ok(parsed) = serde_json::from_str::<ApiErrorResponse>(&text) {
         Err(anyhow!(parsed.error))
     } else if text.is_empty() {
-        Err(anyhow!(format!("Transcription API returned status {status}")))
+        Err(anyhow!(format!(
+            "Transcription API returned status {status}"
+        )))
     } else {
         Err(anyhow!(text))
     }

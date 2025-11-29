@@ -1052,9 +1052,9 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                             onChange={(e) => setLlmEndpoint(e.target.value)}
                                                                             placeholder={
                                                                                 llmProvider === "lmstudio" ? "http://localhost:1234" :
-                                                                                llmProvider === "ollama" ? "http://localhost:11434" :
-                                                                                llmProvider === "openai" ? "https://api.openai.com" :
-                                                                                "https://your-llm-endpoint.com"
+                                                                                    llmProvider === "ollama" ? "http://localhost:11434" :
+                                                                                        llmProvider === "openai" ? "https://api.openai.com" :
+                                                                                            "https://your-llm-endpoint.com"
                                                                             }
                                                                             className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
                                                                         />
@@ -1087,9 +1087,9 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                             onChange={(e) => setLlmModel(e.target.value)}
                                                                             placeholder={
                                                                                 llmProvider === "lmstudio" ? "Uses loaded model" :
-                                                                                llmProvider === "ollama" ? "llama3.2" :
-                                                                                llmProvider === "openai" ? "gpt-4o-mini" :
-                                                                                "model-name"
+                                                                                    llmProvider === "ollama" ? "llama3.2" :
+                                                                                        llmProvider === "openai" ? "gpt-4o-mini" :
+                                                                                            "model-name"
                                                                             }
                                                                             className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
                                                                         />
@@ -1117,100 +1117,100 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                     <h3 className="text-[12px] font-medium text-[#a0a0ab]">Transcription Engines</h3>
                                                 </div>
                                                 <div className="space-y-2">
-                                                {modelCatalog.map((model, index) => {
-                                                    const modelStat = modelStatus[model.key];
-                                                    const progress = downloadState[model.key];
-                                                    const installed = modelStat?.installed;
-                                                    // Only show as active if it's both selected AND installed
-                                                    const isActive = localModel === model.key && installed;
-                                                    const isDownloading = progress?.status === "downloading";
-                                                    const showError = progress?.status === "error";
-                                                    const percent = progress?.percent ?? (installed ? 100 : 0);
+                                                    {modelCatalog.map((model, index) => {
+                                                        const modelStat = modelStatus[model.key];
+                                                        const progress = downloadState[model.key];
+                                                        const installed = modelStat?.installed;
+                                                        // Only show as active if it's both selected AND installed
+                                                        const isActive = localModel === model.key && installed;
+                                                        const isDownloading = progress?.status === "downloading";
+                                                        const showError = progress?.status === "error";
+                                                        const percent = progress?.percent ?? (installed ? 100 : 0);
 
-                                                    return (
-                                                        <motion.div
-                                                            key={model.key}
-                                                            initial={{ opacity: 0, y: 6 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            transition={{ delay: index * 0.04 }}
-                                                            className={`rounded-xl border p-4 transition-colors ${isActive
-                                                                ? "border-amber-400/30 bg-amber-400/[0.04]"
-                                                                : "border-[#1e1e22] bg-[#111113] hover:border-[#2a2a30]"
-                                                                }`}
-                                                        >
-                                                            <div className="flex items-start justify-between gap-3">
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <h3 className="text-[13px] font-medium text-[#e8e8eb]">{model.label}</h3>
-                                                                        {isActive && (
-                                                                            <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider bg-amber-400/20 text-amber-400">Active</span>
+                                                        return (
+                                                            <motion.div
+                                                                key={model.key}
+                                                                initial={{ opacity: 0, y: 6 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                transition={{ delay: index * 0.04 }}
+                                                                className={`rounded-xl border p-4 transition-colors ${isActive
+                                                                    ? "border-amber-400/30 bg-amber-400/[0.04]"
+                                                                    : "border-[#1e1e22] bg-[#111113] hover:border-[#2a2a30]"
+                                                                    }`}
+                                                            >
+                                                                <div className="flex items-start justify-between gap-3">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <h3 className="text-[13px] font-medium text-[#e8e8eb]">{model.label}</h3>
+                                                                            {isActive && (
+                                                                                <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider bg-amber-400/20 text-amber-400">Active</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex flex-wrap gap-1.5 mt-1 mb-1.5">
+                                                                            {model.tags.map(tag => (
+                                                                                <span key={tag} className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#1a1a1e] text-[#6b6b76] border border-[#2a2a30]">
+                                                                                    {tag}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                        <p className="text-[11px] text-[#6b6b76] line-clamp-1">{model.description}</p>
+                                                                        <div className="mt-2 flex items-center gap-2">
+
+                                                                            <span className="text-[10px] text-[#4a4a54]">{model.variant}</span>
+                                                                            <span className="text-[10px] text-[#4a4a54]">•</span>
+                                                                            <span className="text-[10px] text-[#4a4a54]">{formatBytes(model.size_mb * 1024 * 1024)}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex shrink-0 items-center gap-2">
+                                                                        {installed && !isActive && (
+                                                                            <motion.button
+                                                                                onClick={() => setLocalModel(model.key)}
+                                                                                className="rounded-lg bg-[#1a1a1e] border border-[#2a2a30] px-3 py-1.5 text-[10px] font-medium text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb] transition-colors"
+                                                                                whileTap={{ scale: 0.97 }}
+                                                                            >
+                                                                                Use
+                                                                            </motion.button>
                                                                         )}
-                                                                    </div>
-                                                                    <div className="flex flex-wrap gap-1.5 mt-1 mb-1.5">
-                                                                        {model.tags.map(tag => (
-                                                                            <span key={tag} className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#1a1a1e] text-[#6b6b76] border border-[#2a2a30]">
-                                                                                {tag}
-                                                                            </span>
-                                                                        ))}
-                                                                    </div>
-                                                                    <p className="text-[11px] text-[#6b6b76] line-clamp-1">{model.description}</p>
-                                                                    <div className="mt-2 flex items-center gap-2">
-
-                                                                        <span className="text-[10px] text-[#4a4a54]">{model.variant}</span>
-                                                                        <span className="text-[10px] text-[#4a4a54]">•</span>
-                                                                        <span className="text-[10px] text-[#4a4a54]">{formatBytes(model.size_mb * 1024 * 1024)}</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex shrink-0 items-center gap-2">
-                                                                    {installed && !isActive && (
                                                                         <motion.button
-                                                                            onClick={() => setLocalModel(model.key)}
-                                                                            className="rounded-lg bg-[#1a1a1e] border border-[#2a2a30] px-3 py-1.5 text-[10px] font-medium text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb] transition-colors"
-                                                                            whileTap={{ scale: 0.97 }}
+                                                                            onClick={() => (installed ? handleDelete(model.key) : handleDownload(model.key))}
+                                                                            disabled={isDownloading}
+                                                                            className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${installed
+                                                                                ? "border-red-500/20 text-red-400 hover:bg-red-500/10"
+                                                                                : "border-[#2a2a30] text-[#6b6b76] hover:bg-[#1a1a1e] hover:text-[#a0a0ab]"
+                                                                                } ${isDownloading ? "opacity-50 cursor-wait" : ""}`}
+                                                                            whileTap={!isDownloading ? { scale: 0.95 } : {}}
                                                                         >
-                                                                            Use
+                                                                            {isDownloading ? (
+                                                                                <Loader2 size={12} className="animate-spin" />
+                                                                            ) : installed ? (
+                                                                                <Trash2 size={12} />
+                                                                            ) : (
+                                                                                <Download size={12} />
+                                                                            )}
                                                                         </motion.button>
-                                                                    )}
-                                                                    <motion.button
-                                                                        onClick={() => (installed ? handleDelete(model.key) : handleDownload(model.key))}
-                                                                        disabled={isDownloading}
-                                                                        className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${installed
-                                                                            ? "border-red-500/20 text-red-400 hover:bg-red-500/10"
-                                                                            : "border-[#2a2a30] text-[#6b6b76] hover:bg-[#1a1a1e] hover:text-[#a0a0ab]"
-                                                                            } ${isDownloading ? "opacity-50 cursor-wait" : ""}`}
-                                                                        whileTap={!isDownloading ? { scale: 0.95 } : {}}
-                                                                    >
-                                                                        {isDownloading ? (
-                                                                            <Loader2 size={12} className="animate-spin" />
-                                                                        ) : installed ? (
-                                                                            <Trash2 size={12} />
-                                                                        ) : (
-                                                                            <Download size={12} />
-                                                                        )}
-                                                                    </motion.button>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
 
-                                                            {/* Progress bar - 3 rows tall, only when downloading or not installed */}
-                                                            {(isDownloading || !installed) && (
-                                                                <div className="mt-3">
-                                                                    <ModelProgress percent={percent} status={progress?.status ?? "idle"} />
-                                                                    {isDownloading && (
-                                                                        <p className="mt-1.5 text-[10px] text-[#6b6b76] tabular-nums truncate">
-                                                                            {progress?.percent?.toFixed(0)}% · {(progress as Extract<DownloadEvent, { status: "downloading" }>).file}
-                                                                        </p>
-                                                                    )}
-                                                                    {showError && (
-                                                                        <p className="mt-1.5 text-[10px] text-red-400 flex items-center gap-1">
-                                                                            <AlertCircle size={10} />
-                                                                            {(progress as Extract<DownloadEvent, { status: "error" }>).message}
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                        </motion.div>
-                                                    );
-                                                })}
+                                                                {/* Progress bar - 3 rows tall, only when downloading or not installed */}
+                                                                {(isDownloading || !installed) && (
+                                                                    <div className="mt-3">
+                                                                        <ModelProgress percent={percent} status={progress?.status ?? "idle"} />
+                                                                        {isDownloading && (
+                                                                            <p className="mt-1.5 text-[10px] text-[#6b6b76] tabular-nums truncate">
+                                                                                {progress?.percent?.toFixed(0)}% · {(progress as Extract<DownloadEvent, { status: "downloading" }>).file}
+                                                                            </p>
+                                                                        )}
+                                                                        {showError && (
+                                                                            <p className="mt-1.5 text-[10px] text-red-400 flex items-center gap-1">
+                                                                                <AlertCircle size={10} />
+                                                                                {(progress as Extract<DownloadEvent, { status: "error" }>).message}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </motion.div>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -1242,7 +1242,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                         <p className="text-[13px] text-[#e8e8eb]">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "—"}</p>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div className="mt-4 pt-3 border-t border-[#1e1e22]">
                                                     <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1.5">Data Location</p>
                                                     <div className="flex items-center gap-2">

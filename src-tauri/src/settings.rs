@@ -11,7 +11,7 @@ pub struct UserSettings {
     // Onboarding state
     #[serde(default)]
     pub onboarding_completed: bool,
-    
+
     #[serde(default = "default_hold_shortcut")]
     pub hold_shortcut: String,
     #[serde(default = "default_true")]

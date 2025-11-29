@@ -41,7 +41,11 @@ pub async fn download_file<R: Runtime>(
     target_dir: &Path,
 ) -> Result<()> {
     let target_path = target_dir.join(file_name);
-    let mut res = client.get(url).send().await.context("Failed to make request")?;
+    let mut res = client
+        .get(url)
+        .send()
+        .await
+        .context("Failed to make request")?;
     let total_size = res.content_length().unwrap_or(0);
 
     if !res.status().is_success() {
@@ -61,13 +65,16 @@ pub async fn download_file<R: Runtime>(
             0.0
         };
 
-        app.emit("download:progress", DownloadProgressPayload {
-            model: model_name.to_string(),
-            file: file_name.to_string(),
-            downloaded,
-            total: total_size,
-            percent,
-        })?;
+        app.emit(
+            "download:progress",
+            DownloadProgressPayload {
+                model: model_name.to_string(),
+                file: file_name.to_string(),
+                downloaded,
+                total: total_size,
+                percent,
+            },
+        )?;
     }
 
     Ok(())
@@ -85,7 +92,16 @@ pub async fn download_model_files<R: Runtime>(
     }
 
     for descriptor in files {
-        if let Err(err) = download_file(app, client, descriptor.url, descriptor.name, model, target_dir).await {
+        if let Err(err) = download_file(
+            app,
+            client,
+            descriptor.url,
+            descriptor.name,
+            model,
+            target_dir,
+        )
+        .await
+        {
             let _ = app.emit(
                 "download:error",
                 DownloadErrorPayload {
@@ -97,6 +113,11 @@ pub async fn download_model_files<R: Runtime>(
         }
     }
 
-    let _ = app.emit("download:complete", DownloadCompletePayload { model: model.to_string() });
+    let _ = app.emit(
+        "download:complete",
+        DownloadCompletePayload {
+            model: model.to_string(),
+        },
+    );
     Ok(())
 }

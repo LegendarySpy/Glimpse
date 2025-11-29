@@ -72,7 +72,8 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "entitlements": "./Entitlements.plist"
+      "entitlements": "./Entitlements.plist",
+      "hardenedRuntime": true
     }
   }
 }

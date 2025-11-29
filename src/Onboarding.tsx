@@ -29,7 +29,7 @@ interface OnboardingProps {
 const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
     const [pattern, setPattern] = useState(0);
     const intervalRef = useRef<number | null>(null);
-    
+
     const sizes = {
         sm: { dot: 5, gap: 4 },
         md: { dot: 10, gap: 7 },
@@ -57,7 +57,7 @@ const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
     const gridSize = sizes.dot * 2 + sizes.gap;
 
     return (
-        <div 
+        <div
             className="relative"
             style={{ width: gridSize, height: gridSize }}
         >
@@ -65,7 +65,7 @@ const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
                 const row = Math.floor(i / 2);
                 const col = i % 2;
                 const isActive = currentPattern[i];
-                
+
                 return (
                     <motion.div
                         key={i}
@@ -118,10 +118,10 @@ const StatusBadge = ({ granted, checking }: { granted: boolean; checking?: boole
             </span>
         );
     }
-    
+
     if (granted) {
         return (
-            <motion.span 
+            <motion.span
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -131,7 +131,7 @@ const StatusBadge = ({ granted, checking }: { granted: boolean; checking?: boole
             </motion.span>
         );
     }
-    
+
     return (
         <span className="text-[11px] text-[#5a5a64]">
             Not enabled

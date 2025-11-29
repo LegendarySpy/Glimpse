@@ -119,7 +119,11 @@ impl StorageManager {
     }
 
     /// Update an existing transcription with LLM cleaned text
-    pub fn update_with_llm_cleanup(&self, id: &str, cleaned_text: String) -> Result<Option<TranscriptionRecord>> {
+    pub fn update_with_llm_cleanup(
+        &self,
+        id: &str,
+        cleaned_text: String,
+    ) -> Result<Option<TranscriptionRecord>> {
         let mut records = self.records.lock();
         if let Some(record) = records.iter_mut().find(|r| r.id == id) {
             // Store raw text if not already stored

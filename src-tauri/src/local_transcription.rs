@@ -26,12 +26,8 @@ struct LoadedEngine {
 }
 
 enum EngineInstance {
-    Parakeet {
-        engine: ParakeetEngine,
-    },
-    Whisper {
-        engine: WhisperEngine,
-    },
+    Parakeet { engine: ParakeetEngine },
+    Whisper { engine: WhisperEngine },
 }
 
 struct PreparedAudio {

@@ -16,14 +16,17 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
-use recorder::{CompletedRecording, RecorderManager, RecordingRejectionReason, RecordingSaved, validate_recording};
+use recorder::{
+    validate_recording, CompletedRecording, RecorderManager, RecordingRejectionReason,
+    RecordingSaved,
+};
 use reqwest::Client;
 use serde::Serialize;
 use settings::{default_local_model, LlmProvider, TranscriptionMode, UserSettings};
 use tauri::async_runtime;
-use tauri::Emitter;
 use tauri::menu::{MenuBuilder, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
+use tauri::Emitter;
 use tauri::{ActivationPolicy, AppHandle, Manager, WebviewWindow, Wry};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
@@ -65,7 +68,7 @@ pub fn run() {
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
                 position_overlay(&window);
                 let _ = window.hide();
-                
+
                 // When main window loses focus (cmd+tab), hide toast too
                 let app_handle = handle.clone();
                 window.on_window_event(move |event| {
@@ -81,7 +84,7 @@ pub fn run() {
             // Toast window starts hidden - will be positioned when shown
             if let Some(toast_window) = handle.get_webview_window(TOAST_WINDOW_LABEL) {
                 let _ = toast_window.hide();
-                
+
                 // When toast loses focus, hide both windows
                 let app_handle = handle.clone();
                 toast_window.on_window_event(move |event| {
@@ -166,16 +169,16 @@ impl AppState {
             .timeout(Duration::from_secs(120))
             .build()
             .expect("Failed to build HTTP client");
-        
+
         let storage_path = app_handle
             .path()
             .app_data_dir()
             .expect("Failed to resolve app data directory")
             .join("transcriptions.json");
-        
+
         let storage = storage::StorageManager::new(storage_path)
             .expect("Failed to initialize transcription storage");
-        
+
         Self {
             recorder: RecorderManager::new(),
             http,
@@ -388,17 +391,17 @@ struct AppInfo {
 #[tauri::command]
 fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
     let version = env!("CARGO_PKG_VERSION").to_string();
-    
+
     let data_dir = app
         .path()
         .app_data_dir()
         .map_err(|e| format!("Failed to get app data dir: {}", e))?;
-    
+
     let data_dir_path = data_dir.display().to_string();
-    
+
     // Calculate directory size
     let data_dir_size_bytes = calculate_dir_size(&data_dir).unwrap_or(0);
-    
+
     Ok(AppInfo {
         version,
         data_dir_size_bytes,
@@ -408,20 +411,20 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
 
 fn calculate_dir_size(path: &std::path::Path) -> Result<u64> {
     let mut total_size = 0u64;
-    
+
     if !path.exists() {
         return Ok(0);
     }
-    
+
     if path.is_file() {
         return Ok(path.metadata()?.len());
     }
-    
+
     if path.is_dir() {
         for entry in std::fs::read_dir(path)? {
             let entry = entry?;
             let metadata = entry.metadata()?;
-            
+
             if metadata.is_file() {
                 total_size += metadata.len();
             } else if metadata.is_dir() {
@@ -429,13 +432,14 @@ fn calculate_dir_size(path: &std::path::Path) -> Result<u64> {
             }
         }
     }
-    
+
     Ok(total_size)
 }
 
-
 #[tauri::command]
-fn get_transcriptions(state: tauri::State<AppState>) -> Result<Vec<storage::TranscriptionRecord>, String> {
+fn get_transcriptions(
+    state: tauri::State<AppState>,
+) -> Result<Vec<storage::TranscriptionRecord>, String> {
     Ok(state.storage().get_all())
 }
 
@@ -527,19 +531,24 @@ async fn retry_transcription(
             Ok(result) => {
                 let raw_transcript = result.transcript.clone();
                 let confidence = result.confidence;
-                
+
                 // Apply LLM cleanup if enabled (same as normal transcription flow)
-                let (final_transcript, llm_cleaned) = if llm_cleanup::is_cleanup_available(&settings) {
-                    match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings).await {
-                        Ok(cleaned) => (cleaned, true),
-                        Err(err) => {
-                            eprintln!("LLM cleanup failed during retry, using raw transcript: {err}");
-                            (raw_transcript.clone(), false)
+                let (final_transcript, llm_cleaned) =
+                    if llm_cleanup::is_cleanup_available(&settings) {
+                        match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings)
+                            .await
+                        {
+                            Ok(cleaned) => (cleaned, true),
+                            Err(err) => {
+                                eprintln!(
+                                    "LLM cleanup failed during retry, using raw transcript: {err}"
+                                );
+                                (raw_transcript.clone(), false)
+                            }
                         }
-                    }
-                } else {
-                    (raw_transcript.clone(), false)
-                };
+                    } else {
+                        (raw_transcript.clone(), false)
+                    };
 
                 let mut pasted = false;
                 if config.auto_paste && !final_transcript.trim().is_empty() {
@@ -616,7 +625,7 @@ async fn retry_llm_cleanup(
 
     // Use raw text if available, otherwise use current text
     let text_to_clean = record.raw_text.unwrap_or(record.text);
-    
+
     let http = state.http();
     let storage = state.storage();
     let record_id = id.clone();
@@ -628,18 +637,24 @@ async fn retry_llm_cleanup(
                     eprintln!("Failed to save LLM cleanup: {err}");
                 }
                 // Emit event to refresh UI
-                let _ = app.emit(EVENT_TRANSCRIPTION_COMPLETE, TranscriptionCompletePayload {
-                    transcript: String::new(),
-                    confidence: None,
-                    auto_paste: false,
-                });
+                let _ = app.emit(
+                    EVENT_TRANSCRIPTION_COMPLETE,
+                    TranscriptionCompletePayload {
+                        transcript: String::new(),
+                        confidence: None,
+                        auto_paste: false,
+                    },
+                );
             }
             Err(err) => {
                 eprintln!("LLM cleanup failed: {err}");
-                let _ = app.emit(EVENT_TRANSCRIPTION_ERROR, TranscriptionErrorPayload {
-                    message: format!("LLM cleanup failed: {err}"),
-                    stage: "llm_cleanup".to_string(),
-                });
+                let _ = app.emit(
+                    EVENT_TRANSCRIPTION_ERROR,
+                    TranscriptionErrorPayload {
+                        message: format!("LLM cleanup failed: {err}"),
+                        stage: "llm_cleanup".to_string(),
+                    },
+                );
             }
         }
     });
@@ -656,10 +671,20 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     }
 
     // Check if shortcuts overlap (one is a subset of the other)
-    let hold_keys: std::collections::HashSet<&str> = settings.hold_shortcut.split('+').map(|s| s.trim()).collect();
-    let toggle_keys: std::collections::HashSet<&str> = settings.toggle_shortcut.split('+').map(|s| s.trim()).collect();
-    let hold_is_subset_of_toggle = settings.hold_enabled && settings.toggle_enabled && hold_keys.is_subset(&toggle_keys);
-    let _toggle_is_subset_of_hold = settings.hold_enabled && settings.toggle_enabled && toggle_keys.is_subset(&hold_keys);
+    let hold_keys: std::collections::HashSet<&str> = settings
+        .hold_shortcut
+        .split('+')
+        .map(|s| s.trim())
+        .collect();
+    let toggle_keys: std::collections::HashSet<&str> = settings
+        .toggle_shortcut
+        .split('+')
+        .map(|s| s.trim())
+        .collect();
+    let hold_is_subset_of_toggle =
+        settings.hold_enabled && settings.toggle_enabled && hold_keys.is_subset(&toggle_keys);
+    let _toggle_is_subset_of_hold =
+        settings.hold_enabled && settings.toggle_enabled && toggle_keys.is_subset(&hold_keys);
 
     // Register hold-to-record shortcut if enabled
     if settings.hold_enabled {
@@ -676,7 +701,7 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
                     return;
                 }
             }
-            
+
             if event.state == ShortcutState::Pressed {
                 if let Err(err) = handle_hold_shortcut_press(app) {
                     eprintln!("Hold shortcut press error: {err}");
@@ -707,12 +732,12 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
 
 fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
-    
+
     // If any recording is already active, ignore
     if state.is_toggle_recording_active() || state.get_active_recording_mode().is_some() {
         return Ok(());
     }
-    
+
     // Prevent duplicate press events
     if state.mark_hold_shortcut_down() {
         return Ok(());
@@ -723,12 +748,20 @@ fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> 
         Ok(started) => {
             state.set_active_recording_mode(Some("hold"));
             show_overlay(app);
-            emit_event(app, EVENT_RECORDING_MODE_CHANGE, RecordingModePayload {
-                mode: "hold".to_string(),
-            });
-            emit_event(app, EVENT_RECORDING_START, RecordingStartPayload {
-                started_at: started.to_rfc3339(),
-            });
+            emit_event(
+                app,
+                EVENT_RECORDING_MODE_CHANGE,
+                RecordingModePayload {
+                    mode: "hold".to_string(),
+                },
+            );
+            emit_event(
+                app,
+                EVENT_RECORDING_START,
+                RecordingStartPayload {
+                    started_at: started.to_rfc3339(),
+                },
+            );
         }
         Err(err) => {
             state.clear_hold_shortcut_state();
@@ -756,19 +789,23 @@ fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
     match state.recorder().stop() {
         Ok(Some(recording)) => {
             let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
-            
+
             // If recording is too short, discard it and hide overlay immediately
             if duration_ms < MIN_RECORDING_DURATION_MS {
                 state.set_active_recording_mode(None);
                 hide_overlay(app);
                 return Ok(());
             }
-            
+
             state.set_active_recording_mode(None);
             // Don't hide overlay yet - it should remain visible during saving/transcription
-            emit_event(app, EVENT_RECORDING_STOP, RecordingStopPayload {
-                ended_at: recording.ended_at.to_rfc3339(),
-            });
+            emit_event(
+                app,
+                EVENT_RECORDING_STOP,
+                RecordingStopPayload {
+                    ended_at: recording.ended_at.to_rfc3339(),
+                },
+            );
             persist_recording_async(app.clone(), recording);
         }
         Ok(None) => {
@@ -783,32 +820,36 @@ fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
 
 fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
-    
+
     // If hold recording is active, ignore toggle shortcut
     if state.get_active_recording_mode().as_deref() == Some("hold") {
         return Ok(());
     }
-    
+
     if state.is_toggle_recording_active() {
         // Stop toggle recording
         state.set_toggle_recording_active(false);
-        
+
         match state.recorder().stop() {
             Ok(Some(recording)) => {
                 let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
-                
+
                 // If recording is too short, discard it and hide overlay immediately
                 if duration_ms < MIN_RECORDING_DURATION_MS {
                     state.set_active_recording_mode(None);
                     hide_overlay(app);
                     return Ok(());
                 }
-                
+
                 state.set_active_recording_mode(None);
                 // Don't hide overlay yet - it should remain visible during saving/transcription
-                emit_event(app, EVENT_RECORDING_STOP, RecordingStopPayload {
-                    ended_at: recording.ended_at.to_rfc3339(),
-                });
+                emit_event(
+                    app,
+                    EVENT_RECORDING_STOP,
+                    RecordingStopPayload {
+                        ended_at: recording.ended_at.to_rfc3339(),
+                    },
+                );
                 persist_recording_async(app.clone(), recording);
             }
             Ok(None) => {
@@ -828,12 +869,20 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
                 state.set_toggle_recording_active(true);
                 state.set_active_recording_mode(Some("toggle"));
                 show_overlay(app);
-                emit_event(app, EVENT_RECORDING_MODE_CHANGE, RecordingModePayload {
-                    mode: "toggle".to_string(),
-                });
-                emit_event(app, EVENT_RECORDING_START, RecordingStartPayload {
-                    started_at: started.to_rfc3339(),
-                });
+                emit_event(
+                    app,
+                    EVENT_RECORDING_MODE_CHANGE,
+                    RecordingModePayload {
+                        mode: "toggle".to_string(),
+                    },
+                );
+                emit_event(
+                    app,
+                    EVENT_RECORDING_START,
+                    RecordingStartPayload {
+                        started_at: started.to_rfc3339(),
+                    },
+                );
             }
             Err(err) => {
                 emit_error(app, format!("Unable to start recording: {err}"));
@@ -964,7 +1013,8 @@ fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecor
     let recording_for_transcription = recording.clone();
 
     async_runtime::spawn(async move {
-        let task = async_runtime::spawn_blocking(move || recorder::persist_recording(base_dir, recording));
+        let task =
+            async_runtime::spawn_blocking(move || recorder::persist_recording(base_dir, recording));
         match task.await {
             Ok(Ok(saved)) => emit_complete(&app, saved, recording_for_transcription),
             Ok(Err(err)) => emit_error(&app, format!("Unable to save recording: {err}")),
@@ -973,18 +1023,29 @@ fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecor
     });
 }
 
-fn emit_complete(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recording: CompletedRecording) {
-    emit_event(app, EVENT_RECORDING_COMPLETE, RecordingCompletePayload {
-        path: saved.path.display().to_string(),
-        started_at: saved.started_at.to_rfc3339(),
-        ended_at: saved.ended_at.to_rfc3339(),
-        duration_ms: (saved.ended_at - saved.started_at).num_milliseconds(),
-    });
+fn emit_complete(
+    app: &AppHandle<AppRuntime>,
+    saved: RecordingSaved,
+    recording: CompletedRecording,
+) {
+    emit_event(
+        app,
+        EVENT_RECORDING_COMPLETE,
+        RecordingCompletePayload {
+            path: saved.path.display().to_string(),
+            started_at: saved.started_at.to_rfc3339(),
+            ended_at: saved.ended_at.to_rfc3339(),
+            duration_ms: (saved.ended_at - saved.started_at).num_milliseconds(),
+        },
+    );
 
     // Validate recording before transcription to avoid wasting API calls on empty/silent recordings
     if let Err(rejection) = validate_recording(&recording) {
         let reason = match rejection {
-            RecordingRejectionReason::TooShort { duration_ms, min_ms } => {
+            RecordingRejectionReason::TooShort {
+                duration_ms,
+                min_ms,
+            } => {
                 format!("Recording too short ({duration_ms}ms < {min_ms}ms minimum)")
             }
             RecordingRejectionReason::TooQuiet { rms, threshold } => {
@@ -993,17 +1054,15 @@ fn emit_complete(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recording: 
             RecordingRejectionReason::NoSpeechDetected => {
                 "No speech detected in recording".to_string()
             }
-            RecordingRejectionReason::EmptyBuffer => {
-                "Recording buffer is empty".to_string()
-            }
+            RecordingRejectionReason::EmptyBuffer => "Recording buffer is empty".to_string(),
         };
         eprintln!("Recording rejected: {reason}");
-        
+
         // Clean up the audio file since we won't transcribe it
         if let Err(err) = std::fs::remove_file(&saved.path) {
             eprintln!("Failed to remove rejected recording file: {err}");
         }
-        
+
         // Hide the overlay and show a brief toast (optional - can be silent rejection)
         hide_overlay(app);
         return;
@@ -1013,7 +1072,13 @@ fn emit_complete(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recording: 
 }
 
 fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
-    emit_event(app, EVENT_RECORDING_ERROR, RecordingErrorPayload { message: message.clone() });
+    emit_event(
+        app,
+        EVENT_RECORDING_ERROR,
+        RecordingErrorPayload {
+            message: message.clone(),
+        },
+    );
     stop_active_recording(app);
     // Show simplified error toast
     let toast_message = simplify_recording_error(&message);
@@ -1026,7 +1091,11 @@ fn emit_event<T: Serialize + Clone>(app: &AppHandle<AppRuntime>, event: &str, pa
     }
 }
 
-fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recording: CompletedRecording) {
+fn queue_transcription(
+    app: &AppHandle<AppRuntime>,
+    saved: RecordingSaved,
+    recording: CompletedRecording,
+) {
     emit_transcription_start(app, &saved);
 
     let http = app.state::<AppState>().http();
@@ -1067,30 +1136,44 @@ fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recor
             Ok(result) => {
                 let raw_transcript = result.transcript.clone();
                 let confidence = result.confidence;
-                
+
                 // Apply LLM cleanup if enabled
-                let (final_transcript, llm_cleaned) = if llm_cleanup::is_cleanup_available(&settings) {
-                    match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings).await {
-                        Ok(cleaned) => (cleaned, true),
-                        Err(err) => {
-                            eprintln!("LLM cleanup failed, using raw transcript: {err}");
-                            (raw_transcript.clone(), false)
+                let (final_transcript, llm_cleaned) =
+                    if llm_cleanup::is_cleanup_available(&settings) {
+                        match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings)
+                            .await
+                        {
+                            Ok(cleaned) => (cleaned, true),
+                            Err(err) => {
+                                eprintln!("LLM cleanup failed, using raw transcript: {err}");
+                                (raw_transcript.clone(), false)
+                            }
                         }
-                    }
-                } else {
-                    (raw_transcript.clone(), false)
-                };
+                    } else {
+                        (raw_transcript.clone(), false)
+                    };
 
                 let mut pasted = false;
                 if config.auto_paste && !final_transcript.trim().is_empty() {
                     let text = final_transcript.clone();
-                    match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await {
+                    match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await
+                    {
                         Ok(Ok(())) => pasted = true,
                         Ok(Err(err)) => {
-                            emit_transcription_error(&app_handle, format!("Auto paste failed: {err}"), "auto_paste", saved_for_task.path.display().to_string());
+                            emit_transcription_error(
+                                &app_handle,
+                                format!("Auto paste failed: {err}"),
+                                "auto_paste",
+                                saved_for_task.path.display().to_string(),
+                            );
                         }
                         Err(err) => {
-                            emit_transcription_error(&app_handle, format!("Auto paste task error: {err}"), "auto_paste", saved_for_task.path.display().to_string());
+                            emit_transcription_error(
+                                &app_handle,
+                                format!("Auto paste task error: {err}"),
+                                "auto_paste",
+                                saved_for_task.path.display().to_string(),
+                            );
                         }
                     }
                 }
@@ -1104,7 +1187,7 @@ fn queue_transcription(app: &AppHandle<AppRuntime>, saved: RecordingSaved, recor
                     saved_for_task.path.display().to_string(),
                     llm_cleaned,
                 );
-                
+
                 // Hide overlay immediately on success
                 hide_overlay(&app_handle);
             }
@@ -1148,7 +1231,7 @@ fn emit_transcription_complete(
             auto_paste,
         },
     );
-    
+
     // Save successful transcription to storage with the provided audio path
     let _ = app.state::<AppState>().storage().save_transcription(
         transcript,
@@ -1177,15 +1260,18 @@ fn emit_transcription_complete_with_cleanup(
             auto_paste,
         },
     );
-    
+
     // Save transcription to storage with cleanup info
     if llm_cleaned {
-        let _ = app.state::<AppState>().storage().save_transcription_with_cleanup(
-            raw_transcript,
-            final_transcript,
-            audio_path,
-            confidence,
-        );
+        let _ = app
+            .state::<AppState>()
+            .storage()
+            .save_transcription_with_cleanup(
+                raw_transcript,
+                final_transcript,
+                audio_path,
+                confidence,
+            );
     } else {
         let _ = app.state::<AppState>().storage().save_transcription(
             final_transcript,
@@ -1197,7 +1283,12 @@ fn emit_transcription_complete_with_cleanup(
     }
 }
 
-fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage: &str, audio_path: String) {
+fn emit_transcription_error(
+    app: &AppHandle<AppRuntime>,
+    message: String,
+    stage: &str,
+    audio_path: String,
+) {
     emit_event(
         app,
         EVENT_TRANSCRIPTION_ERROR,
@@ -1206,16 +1297,16 @@ fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage:
             stage: stage.to_string(),
         },
     );
-    
+
     stop_active_recording(app);
-    
+
     // Get mode for context-aware message
     let settings = app.state::<AppState>().current_settings();
     let is_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
-    
+
     // Create user-friendly toast message
     let toast_message = format_transcription_error(&message, is_local);
-    
+
     // Save failed transcription to storage with the clean error message
     let record_result = app.state::<AppState>().storage().save_transcription(
         String::new(),
@@ -1224,7 +1315,7 @@ fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage:
         Some(toast_message.clone()),
         None,
     );
-    
+
     let retry_id = if !is_local {
         match record_result {
             Ok(record) => Some(record.id),
@@ -1239,7 +1330,7 @@ fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage:
         }
         None
     };
-    
+
     emit_toast(
         app,
         ToastPayload {
@@ -1249,16 +1340,19 @@ fn emit_transcription_error(app: &AppHandle<AppRuntime>, message: String, stage:
             auto_dismiss: None,
             duration: None,
             retry_id,
-            mode: Some(if is_local { "local".into() } else { "cloud".into() }),
+            mode: Some(if is_local {
+                "local".into()
+            } else {
+                "cloud".into()
+            }),
         },
     );
 }
 
-
 /// Creates user-friendly error message based on transcription mode
 fn format_transcription_error(message: &str, is_local: bool) -> String {
     let msg_lower = message.to_lowercase();
-    
+
     if is_local {
         // Local mode errors - tell user what to fix
         if msg_lower.contains("not fully installed") || msg_lower.contains("missing:") {
@@ -1279,7 +1373,7 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
             return "Request timed out. Recording saved. Tap Retry to send again.".to_string();
         }
     }
-    
+
     // Generic errors
     if msg_lower.contains("microphone") || msg_lower.contains("audio input") {
         return "Microphone error".to_string();
@@ -1290,7 +1384,7 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
     if msg_lower.contains("auto paste") {
         return "Pasted to clipboard instead".to_string();
     }
-    
+
     // Default
     if is_local {
         "Transcription failed".to_string()
@@ -1302,25 +1396,25 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
 /// Simplifies recording error messages
 fn simplify_recording_error(message: &str) -> String {
     let msg_lower = message.to_lowercase();
-    
+
     if msg_lower.contains("microphone") || msg_lower.contains("audio") {
         return "Microphone unavailable".to_string();
     }
     if msg_lower.contains("permission") {
         return "Microphone permission needed".to_string();
     }
-    
+
     if message.len() <= 30 {
         return message.to_string();
     }
-    
+
     "Recording failed".to_string()
 }
 
 fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
-    use std::io::Read;
     use minimp3::{Decoder, Frame};
-    
+    use std::io::Read;
+
     // Read the MP3 file
     let mut file = std::fs::File::open(path)
         .with_context(|| format!("Failed to open audio file at {}", path.display()))?;
@@ -1332,12 +1426,17 @@ fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
     let mut decoder = Decoder::new(&mp3_data[..]);
     let mut samples = Vec::new();
     let mut sample_rate = 16000; // Default, will be updated from first frame
-    
+
     loop {
         match decoder.next_frame() {
-            Ok(Frame { data, sample_rate: sr, channels, .. }) => {
+            Ok(Frame {
+                data,
+                sample_rate: sr,
+                channels,
+                ..
+            }) => {
                 sample_rate = sr as u32;
-                
+
                 // Convert to mono if needed and collect samples
                 if channels == 1 {
                     samples.extend_from_slice(&data);
@@ -1353,11 +1452,11 @@ fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
             Err(e) => return Err(anyhow!("MP3 decoding error: {}", e)),
         }
     }
-    
+
     if samples.is_empty() {
         return Err(anyhow!("No audio data decoded from MP3 file"));
     }
-    
+
     Ok((samples, sample_rate))
 }
 
@@ -1371,7 +1470,8 @@ fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
 }
 
 fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>> {
-    let open_settings = MenuItem::with_id(app, "open_settings", "Open Glimpse", true, None::<&str>)?;
+    let open_settings =
+        MenuItem::with_id(app, "open_settings", "Open Glimpse", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit_glimpse", "Quit Glimpse", true, None::<&str>)?;
 
     let menu = MenuBuilder::new(app)
@@ -1386,9 +1486,11 @@ fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>
         .icon(icon)
         .menu(&menu)
         .on_tray_icon_event(|tray, event| match event {
-            TrayIconEvent::Click { button, button_state, .. }
-                if button == MouseButton::Left && button_state == MouseButtonState::Up =>
-            {
+            TrayIconEvent::Click {
+                button,
+                button_state,
+                ..
+            } if button == MouseButton::Left && button_state == MouseButtonState::Up => {
                 if let Err(err) = toggle_settings_window(tray.app_handle()) {
                     eprintln!("Failed to toggle settings window: {err}");
                 }
@@ -1413,10 +1515,10 @@ fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
     if let Some(window) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
         // Show app in dock when settings window is open
         let _ = app.set_activation_policy(ActivationPolicy::Regular);
-        
+
         window.show()?;
         window.set_focus()?;
-        
+
         // Listen for window close to hide from dock again
         let app_handle = app.clone();
         window.on_window_event(move |event| {
@@ -1425,7 +1527,7 @@ fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
                 let _ = app_handle.set_activation_policy(ActivationPolicy::Accessory);
             }
         });
-        
+
         Ok(())
     } else {
         Err(anyhow!("Settings window is not available")).map_err(Into::into)

@@ -43,11 +43,11 @@ mod macos {
         if let Some(result) = check_accessibility_native() {
             return result;
         }
-        
+
         // Fallback: check via osascript (less reliable but works as backup)
         check_accessibility_osascript()
     }
-    
+
     /// Native check using AXIsProcessTrusted
     fn check_accessibility_native() -> Option<bool> {
         // Link to the ApplicationServices framework
@@ -55,19 +55,19 @@ mod macos {
         extern "C" {
             fn AXIsProcessTrusted() -> u8;
         }
-        
+
         let result = unsafe { AXIsProcessTrusted() };
         eprintln!("[Glimpse] AXIsProcessTrusted() returned: {}", result);
         Some(result != 0)
     }
-    
+
     /// Fallback check using osascript to test if we can send keystrokes
     fn check_accessibility_osascript() -> bool {
         // Try a simple AppleScript that requires accessibility
         let output = Command::new("osascript")
             .args(["-e", "tell application \"System Events\" to return 1"])
             .output();
-        
+
         match output {
             Ok(result) => {
                 let success = result.status.success();
@@ -84,7 +84,7 @@ mod macos {
         let result = Command::new("open")
             .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
             .spawn();
-        
+
         match result {
             Ok(_) => Ok(()),
             Err(e) => Err(format!("Failed to open System Settings: {}", e)),
@@ -96,7 +96,7 @@ mod macos {
         let result = Command::new("open")
             .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")
             .spawn();
-        
+
         match result {
             Ok(_) => Ok(()),
             Err(e) => Err(format!("Failed to open System Settings: {}", e)),

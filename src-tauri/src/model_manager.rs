@@ -124,7 +124,6 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         storage: ModelStorage::Directory,
         tags: &["Multilingual", "High Accuracy"],
     },
-
     ModelDefinition {
         key: "whisper_small_q5",
         label: "Whisper Small",
@@ -133,18 +132,23 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         files: &WHISPER_SMALL_Q5_FILES,
         engine: LocalModelEngine::Whisper,
         variant: "Q5_1",
-        storage: ModelStorage::File { artifact: "ggml-small-q5_1.bin" },
+        storage: ModelStorage::File {
+            artifact: "ggml-small-q5_1.bin",
+        },
         tags: &["English", "Custom Words", "CPU Friendly"],
     },
     ModelDefinition {
         key: "whisper_medium_q4",
         label: "Whisper Medium",
-        description: "Best quality local Whisper model with multilingual support, supports custom words.",
+        description:
+            "Best quality local Whisper model with multilingual support, supports custom words.",
         size_mb: 1500.0,
         files: &WHISPER_MEDIUM_Q4_FILES,
         engine: LocalModelEngine::Whisper,
         variant: "Q4_1",
-        storage: ModelStorage::File { artifact: "ggml-medium-q4_1.bin" },
+        storage: ModelStorage::File {
+            artifact: "ggml-medium-q4_1.bin",
+        },
         tags: &["Multilingual", "Custom Words", "Balanced"],
     },
 ];
@@ -277,7 +281,10 @@ pub fn list_models() -> Vec<ModelInfo> {
 }
 
 #[tauri::command]
-pub fn check_model_status<R: Runtime>(app: AppHandle<R>, model: String) -> Result<ModelStatus, String> {
+pub fn check_model_status<R: Runtime>(
+    app: AppHandle<R>,
+    model: String,
+) -> Result<ModelStatus, String> {
     let def = definition(&model).ok_or_else(|| "Unknown model".to_string())?;
     let dir = get_model_dir(&app, &model).map_err(|err| err.to_string())?;
     Ok(ModelStatus::from_definition(&dir, def))
