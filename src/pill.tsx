@@ -7,12 +7,6 @@ import { useSharedAnalyser } from "./hooks/useSharedAnalyser";
 
 type PillStatus = "idle" | "listening" | "processing" | "error";
 
-interface ToastMessage {
-  type: "error" | "info";
-  message: string;
-  autoDismiss?: boolean;
-}
-
 interface GridInfo {
   spacing: number;
   cols: number;
@@ -77,81 +71,6 @@ interface TranscriptionStartPayload { path: string; }
 interface TranscriptionCompletePayload { transcript: string; confidence?: number | null; auto_paste: boolean; }
 interface TranscriptionErrorPayload { message: string; stage: string; }
 
-// --- Toast Component ---
-
-interface ToastProps {
-  toast: ToastMessage;
-  onDismiss: () => void;
-  isLeaving: boolean;
-}
-
-const TOAST_MAX_HEIGHT = 80; // Max height before expanding width
-const TOAST_MIN_WIDTH = 120;
-const TOAST_MAX_WIDTH = 280;
-
-const Toast: React.FC<ToastProps> = ({ toast, onDismiss, isLeaving }) => {
-  const [hasShaken, setHasShaken] = useState(false);
-  const [needsWider, setNeedsWider] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Shake only on initial mount for errors
-    if (toast.type === "error" && !hasShaken) {
-      const timer = setTimeout(() => setHasShaken(true), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.type, hasShaken]);
-
-  // Check if content exceeds max height and needs wider width
-  useEffect(() => {
-    if (contentRef.current) {
-      const checkHeight = () => {
-        const height = contentRef.current?.scrollHeight || 0;
-        setNeedsWider(height > TOAST_MAX_HEIGHT);
-      };
-      checkHeight();
-      // Recheck after fonts load
-      const timer = setTimeout(checkHeight, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.message]);
-
-  const isError = toast.type === "error";
-  const shouldShake = isError && !hasShaken;
-
-  return (
-    <div
-      className={`
-        relative px-3 py-2.5 rounded-2xl select-none transition-all duration-200 ease-out
-        ${isError ? "bg-[#0c0c0c] border border-red-500/40" : "bg-[#0c0c0c] border border-white/10"}
-        ${shouldShake ? "animate-shake" : ""}
-        ${isLeaving ? "animate-toast-out" : "animate-toast-in"}
-      `}
-      style={{
-        minWidth: TOAST_MIN_WIDTH,
-        maxWidth: needsWider ? TOAST_MAX_WIDTH : 200,
-        maxHeight: TOAST_MAX_HEIGHT + 20, // Some padding for the container
-      }}
-    >
-      {/* Close button */}
-      <button
-        onClick={onDismiss}
-        className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#1a1a1a] border border-[#333] 
-                   flex items-center justify-center text-[10px] text-gray-400 hover:text-white 
-                   hover:border-gray-500 hover:bg-[#252525] transition-all z-10"
-      >
-        ✕
-      </button>
-
-      {/* Content */}
-      <div ref={contentRef} className="flex items-start gap-2.5 overflow-hidden" style={{ maxHeight: TOAST_MAX_HEIGHT }}>
-        <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${isError ? "bg-red-500 animate-pulse" : "bg-white/50"}`} />
-        <p className="text-[11px] text-gray-200 leading-relaxed pr-2">{toast.message}</p>
-      </div>
-    </div>
-  );
-};
-
 // --- Main Pill Component ---
 
 export interface PillOverlayProps {
@@ -177,8 +96,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
   // State
   const [status, setStatus] = useState<PillStatus>("idle");
-  const [toast, setToast] = useState<ToastMessage | null>(null);
-  const [toastLeaving, setToastLeaving] = useState(false);
   const [recordingMode, setRecordingMode] = useState<"hold" | "toggle" | null>(null);
   const [isErrorFlashing, setIsErrorFlashing] = useState(false);
 
@@ -200,27 +117,17 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, []);
 
-  // --- Dismiss handler (closes toast AND hides window) ---
+  // --- Dismiss handler (hides window and resets state) ---
   const dismissOverlay = useCallback(() => {
-    if (toast) {
-      // Animate out then hide
-      setToastLeaving(true);
-      setTimeout(() => {
-        setToast(null);
-        setToastLeaving(false);
-        setStatus("idle");
-        setIsErrorFlashing(false);
-        hideOverlay();
-      }, 150);
-    } else {
-      hideOverlay();
-    }
-  }, [toast, hideOverlay]);
+    setStatus("idle");
+    setIsErrorFlashing(false);
+    hideOverlay();
+  }, [hideOverlay]);
 
-  // --- Keyboard handler (Esc to dismiss) ---
+  // --- Keyboard handler (Esc to dismiss on error) ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && (toast || status === "error")) {
+      if (e.key === "Escape" && status === "error") {
         e.preventDefault();
         dismissOverlay();
       }
@@ -228,7 +135,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toast, status, dismissOverlay]);
+  }, [status, dismissOverlay]);
 
   // --- Drawing Utilities ---
 
@@ -539,27 +446,13 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, [drawAudioFrame, drawStaticIcon]);
 
-  // --- Show Error ---
-  const showError = useCallback((message: string) => {
+  // --- Set Error State (visual only, toast handled separately) ---
+  const setErrorState = useCallback(() => {
     setStatus("error");
-    setToast({ type: "error", message, autoDismiss: false });
     setIsErrorFlashing(true);
-
     // Stop flashing after animation, keep error state
     setTimeout(() => setIsErrorFlashing(false), 1200);
   }, []);
-
-  // --- Show Info Toast (auto-dismisses) - for future use ---
-  // const showInfo = useCallback((message: string, duration = 2000) => {
-  //   setToast({ type: "info", message, autoDismiss: true });
-  //   setTimeout(() => {
-  //     setToastLeaving(true);
-  //     setTimeout(() => {
-  //       setToast(null);
-  //       setToastLeaving(false);
-  //     }, 150);
-  //   }, duration);
-  // }, []);
 
   // --- Event Listeners ---
 
@@ -570,12 +463,11 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       }),
       listen<RecordingStartPayload>("recording:start", async () => {
         setStatus("listening");
-        setToast(null);
         try {
           await start();
         } catch (err) {
           console.error(err);
-          showError("Microphone permission needed");
+          setErrorState();
         }
       }),
       listen("recording:stop", () => {
@@ -583,8 +475,8 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         setRecordingMode(null);
         stop();
       }),
-      listen<RecordingErrorPayload>("recording:error", (event) => {
-        showError(event.payload.message);
+      listen<RecordingErrorPayload>("recording:error", () => {
+        setErrorState();
         stop();
       }),
       listen<TranscriptionStartPayload>("transcription:start", () => {
@@ -595,8 +487,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         setStatus("idle");
         hideOverlay();
       }),
-      listen<TranscriptionErrorPayload>("transcription:error", (event) => {
-        showError(event.payload.message);
+      listen<TranscriptionErrorPayload>("transcription:error", () => {
+        setErrorState();
+        stop();
       }),
     ];
 
@@ -606,7 +499,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       });
       stop();
     };
-  }, [start, stop, showError, hideOverlay]);
+  }, [start, stop, setErrorState, hideOverlay]);
 
   // --- Canvas Setup ---
 
@@ -717,32 +610,13 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     >
       {/* Pill - fixed at bottom, never moves */}
       <div className="relative flex flex-col items-center pb-2">
-        {/* Toast - absolutely positioned above pill, doesn't affect pill layout */}
-        {toast && (
-          <div
-            className="absolute left-1/2 flex justify-center pointer-events-auto"
-            style={{
-              bottom: PILL_HEIGHT + 20 + 16, // pill height + status text area + gap
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <Toast
-              toast={toast}
-              onDismiss={dismissOverlay}
-              isLeaving={toastLeaving}
-            />
-          </div>
-        )}
-
         <div
           ref={containerRef}
           className={`relative rounded-full bg-[#050505] overflow-hidden ${isErrorFlashing ? "animate-shake" : ""}`}
           style={{
             width: PILL_WIDTH,
             height: PILL_HEIGHT,
-            boxShadow: status === "error"
-              ? "0 0 20px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(255,255,255,0.1), inset 0 -2px 5px rgba(0,0,0,0.8)"
-              : "0 8px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 5px rgba(0,0,0,0.8)",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 5px rgba(0,0,0,0.8)",
           }}
         >
           <canvas

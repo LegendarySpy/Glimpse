@@ -169,7 +169,15 @@ const MatrixPill: React.FC<MatrixPillProps> = ({
 
       if (!audioContextRef.current) throw new Error("Audio Context not supported");
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Disable voice processing to prevent macOS Mic Mode menu bar button
+      // These settings are for standard audio recording, not VoIP
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        }
+      });
 
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 1024;

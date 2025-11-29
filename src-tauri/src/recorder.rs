@@ -11,6 +11,15 @@ use mp3lame_encoder::{
 use parking_lot::Mutex;
 use webrtc_vad::{Vad, VadMode};
 
+/// Reason why a recording was rejected
+#[derive(Debug, Clone)]
+pub enum RecordingRejectionReason {
+    TooShort { duration_ms: i64, min_ms: i64 },
+    TooQuiet { rms: f32, threshold: f32 },
+    NoSpeechDetected,
+    EmptyBuffer,
+}
+
 pub struct RecorderManager {
     tx: Sender<RecorderCommand>,
 }
@@ -214,6 +223,143 @@ impl RecorderCore {
             Ok(None)
         }
     }
+}
+
+/// Configuration for recording validation
+pub struct ValidationConfig {
+    /// Minimum duration in milliseconds (default: 300ms)
+    pub min_duration_ms: i64,
+    /// Minimum RMS energy threshold (default: 0.005)
+    pub min_rms_energy: f32,
+    /// Minimum percentage of frames that must contain speech (default: 5%)
+    pub min_speech_percentage: f32,
+}
+
+impl Default for ValidationConfig {
+    fn default() -> Self {
+        Self {
+            min_duration_ms: 300,
+            min_rms_energy: 0.0005,
+            min_speech_percentage: 5.0,
+        }
+    }
+}
+
+/// Validates if a recording contains meaningful audio worth transcribing.
+/// Returns Ok(()) if valid, or Err with the rejection reason.
+pub fn validate_recording(recording: &CompletedRecording) -> Result<(), RecordingRejectionReason> {
+    validate_recording_with_config(recording, &ValidationConfig::default())
+}
+
+/// Validates a recording with custom configuration.
+pub fn validate_recording_with_config(
+    recording: &CompletedRecording,
+    config: &ValidationConfig,
+) -> Result<(), RecordingRejectionReason> {
+    // Check 1: Empty buffer
+    if recording.samples.is_empty() {
+        return Err(RecordingRejectionReason::EmptyBuffer);
+    }
+
+    // Check 2: Minimum duration
+    let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
+    if duration_ms < config.min_duration_ms {
+        return Err(RecordingRejectionReason::TooShort {
+            duration_ms,
+            min_ms: config.min_duration_ms,
+        });
+    }
+
+    // Convert to f32 for analysis
+    let samples_f32: Vec<f32> = recording
+        .samples
+        .iter()
+        .map(|s| *s as f32 / i16::MAX as f32)
+        .collect();
+
+    // Check 3: RMS energy level (catches silence/very quiet recordings)
+    let rms = calculate_rms(&samples_f32);
+    if rms < config.min_rms_energy {
+        return Err(RecordingRejectionReason::TooQuiet {
+            rms,
+            threshold: config.min_rms_energy,
+        });
+    }
+
+    // Check 4: Voice Activity Detection - ensure at least some speech is present
+    let speech_percentage = calculate_speech_percentage(&samples_f32, recording.sample_rate);
+    if speech_percentage < config.min_speech_percentage {
+        return Err(RecordingRejectionReason::NoSpeechDetected);
+    }
+
+    Ok(())
+}
+
+/// Calculate Root Mean Square energy of audio samples
+fn calculate_rms(samples: &[f32]) -> f32 {
+    if samples.is_empty() {
+        return 0.0;
+    }
+    let sum_squares: f32 = samples.iter().map(|s| s * s).sum();
+    (sum_squares / samples.len() as f32).sqrt()
+}
+
+/// Calculate percentage of frames containing speech using VAD
+fn calculate_speech_percentage(samples: &[f32], sample_rate: u32) -> f32 {
+    if samples.is_empty() {
+        return 0.0;
+    }
+
+    // Resample to VAD-compatible rate if needed
+    let vad_rate = match sample_rate {
+        8000 | 16000 | 32000 | 48000 => sample_rate,
+        _ => 16000,
+    };
+
+    let analysis = if vad_rate == sample_rate {
+        samples.to_vec()
+    } else {
+        resample_linear(samples, sample_rate, vad_rate)
+    };
+
+    let frame_ms = 30usize;
+    let frame_len = (vad_rate as usize * frame_ms) / 1000;
+    if frame_len == 0 || analysis.len() < frame_len {
+        return 0.0;
+    }
+
+    let analysis_i16: Vec<i16> = analysis
+        .iter()
+        .map(|s| (*s).clamp(-1.0, 1.0))
+        .map(|s| (s * i16::MAX as f32).round() as i16)
+        .collect();
+
+    let mut vad = match Vad::new(vad_rate as i32) {
+        Ok(mut instance) => {
+            // Use aggressive mode to be more strict about detecting speech
+            let _ = instance.fvad_set_mode(VadMode::Aggressive);
+            instance
+        }
+        Err(_) => return 100.0, // If VAD fails, assume it's valid
+    };
+
+    let mut speech_frames = 0;
+    let mut total_frames = 0;
+    for chunk in analysis_i16.chunks(frame_len) {
+        if chunk.len() < frame_len {
+            break;
+        }
+        total_frames += 1;
+        if vad.is_voice_segment(chunk).unwrap_or(false) {
+            speech_frames += 1;
+        }
+    }
+
+    if total_frames == 0 {
+        return 0.0;
+    }
+
+    (speech_frames as f32 / total_frames as f32) * 100.0
 }
 
 pub fn persist_recording(

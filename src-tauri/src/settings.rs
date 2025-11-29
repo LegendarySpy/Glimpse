@@ -8,6 +8,10 @@ const SETTINGS_FILE_NAME: &str = "settings.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSettings {
+    // Onboarding state
+    #[serde(default)]
+    pub onboarding_completed: bool,
+    
     #[serde(default = "default_hold_shortcut")]
     pub hold_shortcut: String,
     #[serde(default = "default_true")]
@@ -23,6 +27,19 @@ pub struct UserSettings {
     pub microphone_device: Option<String>,
     #[serde(default = "default_language")]
     pub language: String,
+    // LLM cleanup settings
+    #[serde(default)]
+    pub llm_cleanup_enabled: bool,
+    #[serde(default = "default_llm_provider")]
+    pub llm_provider: LlmProvider,
+    #[serde(default)]
+    pub llm_endpoint: String,
+    #[serde(default)]
+    pub llm_api_key: String,
+    #[serde(default)]
+    pub llm_model: String,
+    #[serde(default)]
+    pub user_context: String,
 }
 
 fn default_hold_shortcut() -> String {
@@ -40,6 +57,7 @@ fn default_true() -> bool {
 impl Default for UserSettings {
     fn default() -> Self {
         Self {
+            onboarding_completed: false,
             hold_shortcut: default_hold_shortcut(),
             hold_enabled: true,
             toggle_shortcut: default_toggle_shortcut(),
@@ -48,6 +66,12 @@ impl Default for UserSettings {
             local_model: default_local_model(),
             microphone_device: None,
             language: default_language(),
+            llm_cleanup_enabled: false,
+            llm_provider: default_llm_provider(),
+            llm_endpoint: String::new(),
+            llm_api_key: String::new(),
+            llm_model: String::new(),
+            user_context: String::new(),
         }
     }
 }
@@ -67,6 +91,21 @@ impl Default for TranscriptionMode {
 
 fn default_transcription_mode() -> TranscriptionMode {
     TranscriptionMode::Cloud
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum LlmProvider {
+    #[default]
+    None,
+    LmStudio,
+    Ollama,
+    OpenAI,
+    Custom,
+}
+
+fn default_llm_provider() -> LlmProvider {
+    LlmProvider::None
 }
 
 pub fn default_local_model() -> String {

@@ -53,7 +53,15 @@ const startSharedAnalyser = async () => {
       await audioContext.resume();
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Disable voice processing to prevent macOS Mic Mode menu bar button
+    // These settings are for standard audio recording, not VoIP
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+      }
+    });
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 1024;
     analyser.smoothingTimeConstant = 0.8;

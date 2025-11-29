@@ -1,11 +1,22 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Search, X } from "lucide-react";
 import { useTranscriptions } from "../hooks/useTranscriptions";
 import TranscriptionItem from "./TranscriptionItem";
 import DotMatrix from "./DotMatrix";
 
 const TranscriptionList: React.FC = () => {
-    const { transcriptions, isLoading, deleteTranscription, retryTranscription } = useTranscriptions();
+    const { transcriptions, isLoading, deleteTranscription, retryTranscription, retryLlmCleanup, undoLlmCleanup } = useTranscriptions();
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredTranscriptions = useMemo(() => {
+        if (!searchQuery.trim()) return transcriptions;
+        const query = searchQuery.toLowerCase();
+        return transcriptions.filter(record => 
+            record.text.toLowerCase().includes(query) ||
+            record.raw_text?.toLowerCase().includes(query)
+        );
+    }, [transcriptions, searchQuery]);
 
     if (isLoading && transcriptions.length === 0) {
         return (
@@ -53,34 +64,74 @@ const TranscriptionList: React.FC = () => {
             animate={{ opacity: 1 }}
             className="w-full max-w-2xl"
         >
-            {/* Header */}
-            <div className="flex items-center gap-2 px-4 pb-3 mb-2">
-                <DotMatrix
-                    rows={1}
-                    cols={3}
-                    activeDots={[0, 1, 2]}
-                    dotSize={3}
-                    gap={2}
-                    color="#fbbf24"
-                    className="opacity-60"
-                />
-                <h2 className="text-[11px] text-[#6b6b76] uppercase tracking-wider font-semibold">
-                    Recent Transcriptions
-                </h2>
+            {/* Header with Search */}
+            <div className="flex items-center justify-between px-4 pb-3 mb-2">
+                <div className="flex items-center gap-2">
+                    <DotMatrix
+                        rows={1}
+                        cols={3}
+                        activeDots={[0, 1, 2]}
+                        dotSize={3}
+                        gap={2}
+                        color="#fbbf24"
+                        className="opacity-60"
+                    />
+                    <h2 className="text-[11px] text-[#6b6b76] uppercase tracking-wider font-semibold">
+                        Recent Transcriptions
+                    </h2>
+                </div>
+
+                {/* Search Input */}
+                <div className="relative">
+                    <div className="flex items-center gap-2 bg-[#0a0a0c] border border-[#1a1a1e] rounded-lg px-2.5 py-1.5 focus-within:border-[#2a2a30] transition-colors">
+                        <Search size={12} className="text-[#4a4a54] shrink-0" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search..."
+                            className="bg-transparent text-[11px] text-[#c8c8d2] placeholder-[#4a4a54] outline-none w-28 focus:w-36 transition-all"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                            >
+                                <X size={12} />
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* List Container */}
             <div className="bg-[#0a0a0c] rounded-xl border border-[#1a1a1e] overflow-hidden">
                 <div className="max-h-[460px] overflow-y-auto custom-scrollbar">
                     <AnimatePresence mode="popLayout">
-                        {transcriptions.map((record) => (
-                            <TranscriptionItem
-                                key={record.id}
-                                record={record}
-                                onDelete={deleteTranscription}
-                                onRetry={retryTranscription}
-                            />
-                        ))}
+                        {filteredTranscriptions.length > 0 ? (
+                            filteredTranscriptions.map((record) => (
+                                <TranscriptionItem
+                                    key={record.id}
+                                    record={record}
+                                    onDelete={deleteTranscription}
+                                    onRetry={retryTranscription}
+                                    onRetryLlm={retryLlmCleanup}
+                                    onUndoLlm={undoLlmCleanup}
+                                />
+                            ))
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex flex-col items-center justify-center py-8 px-4"
+                            >
+                                <Search size={20} className="text-[#3a3a42] mb-2" />
+                                <p className="text-[12px] text-[#4a4a54] text-center">
+                                    No results for "{searchQuery}"
+                                </p>
+                            </motion.div>
+                        )}
                     </AnimatePresence>
                 </div>
             </div>
@@ -88,7 +139,11 @@ const TranscriptionList: React.FC = () => {
             {/* Footer with count */}
             <div className="flex items-center justify-between px-4 pt-2">
                 <span className="text-[9px] text-[#3a3a42] uppercase tracking-wider">
-                    {transcriptions.length} {transcriptions.length === 1 ? 'transcription' : 'transcriptions'}
+                    {searchQuery ? (
+                        `${filteredTranscriptions.length} of ${transcriptions.length} transcriptions`
+                    ) : (
+                        `${transcriptions.length} ${transcriptions.length === 1 ? 'transcription' : 'transcriptions'}`
+                    )}
                 </span>
             </div>
 

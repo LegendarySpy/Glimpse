@@ -62,6 +62,12 @@ const Home = () => {
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#0e0e10] font-sans text-white select-none">
+            {/* Top titlebar - invisible drag region */}
+            <div 
+                data-tauri-drag-region 
+                className="fixed top-0 left-0 right-0 h-8 z-50"
+            />
+
             {/* Tactile Sidebar */}
             <motion.aside
                 initial={false}
@@ -74,10 +80,10 @@ const Home = () => {
                 }}
                 className="relative flex flex-col border-r border-[#1a1a1e] bg-[#0a0a0c]"
             >
-                <div data-tauri-drag-region className="h-7 w-full shrink-0" />
+                <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
                 {/* Logo */}
-                <div className="pl-6 pb-6 pt-2">
+                <div className="pl-6 pb-6 pt-1">
                     <motion.div className="flex items-center gap-3 h-6" layout>
                         <div className="shrink-0">
                             <DotMatrix
@@ -156,7 +162,7 @@ const Home = () => {
 
             {/* Main Content - Clean, flowing layout */}
             <main className="flex flex-1 flex-col bg-[#0e0e10] overflow-hidden">
-                <div data-tauri-drag-region className="h-7 w-full shrink-0" />
+                <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
                 <div className="flex-1 flex flex-col items-center justify-center px-12 pb-16">
                     <AnimatePresence mode="wait">

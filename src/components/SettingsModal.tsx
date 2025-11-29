@@ -17,10 +17,16 @@ import {
     User,
     Mic,
     ChevronDown,
+    Wand2,
+    Server,
+    Key,
+    RotateCcw,
+    FolderOpen,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
 
 type TranscriptionMode = "cloud" | "local";
+type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "custom";
 
 type StoredSettings = {
     hold_shortcut: string;
@@ -31,6 +37,12 @@ type StoredSettings = {
     local_model: string;
     microphone_device: string | null;
     language: string;
+    llm_cleanup_enabled: boolean;
+    llm_provider: LlmProvider;
+    llm_endpoint: string;
+    llm_api_key: string;
+    llm_model: string;
+    user_context: string;
 };
 
 type AppInfo = {
@@ -120,6 +132,12 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account">("general");
     const [shortcutsExpanded, setShortcutsExpanded] = useState(false);
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
+    // LLM cleanup settings
+    const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
+    const [llmProvider, setLlmProvider] = useState<LlmProvider>("none");
+    const [llmEndpoint, setLlmEndpoint] = useState("");
+    const [llmApiKey, setLlmApiKey] = useState("");
+    const [llmModel, setLlmModel] = useState("");
 
     useEffect(() => {
         if (transcriptionMode === "cloud" && activeTab === "models") {
@@ -161,6 +179,11 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                     setLocalModel(settings.local_model);
                     setMicrophoneDevice(settings.microphone_device);
                     setLanguage(settings.language);
+                    setLlmCleanupEnabled(settings.llm_cleanup_enabled ?? false);
+                    setLlmProvider(settings.llm_provider ?? "none");
+                    setLlmEndpoint(settings.llm_endpoint ?? "");
+                    setLlmApiKey(settings.llm_api_key ?? "");
+                    setLlmModel(settings.llm_model ?? "");
                 } catch (err) {
                     console.error("Failed to load settings:", err);
                     setError("Failed to load settings");
@@ -348,6 +371,12 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                     localModel,
                     microphoneDevice,
                     language,
+                    llmCleanupEnabled,
+                    llmProvider,
+                    llmEndpoint,
+                    llmApiKey,
+                    llmModel,
+                    userContext: "", // Set from app context elsewhere
                 });
                 setError(null);
             } catch (err) {
@@ -367,6 +396,11 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         localModel,
         microphoneDevice,
         language,
+        llmCleanupEnabled,
+        llmProvider,
+        llmEndpoint,
+        llmApiKey,
+        llmModel,
     ]);
 
     const handleDownload = async (modelKey: string) => {
@@ -936,14 +970,153 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                             initial="hidden"
                                             animate="visible"
                                             exit="exit"
-                                            className="space-y-4"
+                                            className="space-y-5"
                                         >
                                             <header>
                                                 <h1 className="text-lg font-medium text-[#e8e8eb]">Local Models</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Download and manage offline transcription engines.</p>
+                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Manage transcription engines and AI cleanup.</p>
                                             </header>
 
-                                            <div className="space-y-2">
+                                            {/* LLM Cleanup Section */}
+                                            <div className="rounded-xl border border-[#1e1e22] bg-[#111113] overflow-hidden">
+                                                <div className="p-4">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
+                                                                <Wand2 size={14} className="text-[#6b6b76]" />
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="text-[13px] font-medium text-[#e8e8eb]">AI Cleanup</h3>
+                                                                <p className="text-[11px] text-[#4a4a54]">Use LLM to clean up transcriptions</p>
+                                                            </div>
+                                                        </div>
+                                                        <motion.button
+                                                            onClick={() => setLlmCleanupEnabled(!llmCleanupEnabled)}
+                                                            className={`relative w-10 h-5 rounded-full transition-colors ${llmCleanupEnabled ? "bg-amber-400" : "bg-[#2a2a30]"}`}
+                                                            whileTap={{ scale: 0.95 }}
+                                                        >
+                                                            <motion.div
+                                                                className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
+                                                                animate={{ left: llmCleanupEnabled ? "calc(100% - 18px)" : "2px" }}
+                                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                                            />
+                                                        </motion.button>
+                                                    </div>
+
+                                                    <AnimatePresence initial={false}>
+                                                        {llmCleanupEnabled && (
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: "auto", opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                                                                className="overflow-hidden"
+                                                            >
+                                                                <div className="pt-3 border-t border-[#1e1e22] space-y-3">
+                                                                    {/* Provider Selection */}
+                                                                    <div className="space-y-1.5">
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Provider</label>
+                                                                        <div className="grid grid-cols-4 gap-2">
+                                                                            <LlmProviderButton
+                                                                                label="LM Studio"
+                                                                                active={llmProvider === "lmstudio"}
+                                                                                onClick={() => setLlmProvider("lmstudio")}
+                                                                            />
+                                                                            <LlmProviderButton
+                                                                                label="Ollama"
+                                                                                active={llmProvider === "ollama"}
+                                                                                onClick={() => setLlmProvider("ollama")}
+                                                                            />
+                                                                            <LlmProviderButton
+                                                                                label="OpenAI"
+                                                                                active={llmProvider === "openai"}
+                                                                                onClick={() => setLlmProvider("openai")}
+                                                                            />
+                                                                            <LlmProviderButton
+                                                                                label="Custom"
+                                                                                active={llmProvider === "custom"}
+                                                                                onClick={() => setLlmProvider("custom")}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Endpoint (for Custom, or to override default) */}
+                                                                    <div className="space-y-1.5">
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                            <Server size={10} />
+                                                                            Endpoint {llmProvider !== "custom" && <span className="text-[#4a4a54]">(optional override)</span>}
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={llmEndpoint}
+                                                                            onChange={(e) => setLlmEndpoint(e.target.value)}
+                                                                            placeholder={
+                                                                                llmProvider === "lmstudio" ? "http://localhost:1234" :
+                                                                                llmProvider === "ollama" ? "http://localhost:11434" :
+                                                                                llmProvider === "openai" ? "https://api.openai.com" :
+                                                                                "https://your-llm-endpoint.com"
+                                                                            }
+                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                        />
+                                                                    </div>
+
+                                                                    {/* API Key (required for OpenAI, optional for others) */}
+                                                                    <div className="space-y-1.5">
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                            <Key size={10} />
+                                                                            API Key {llmProvider !== "openai" && <span className="text-[#4a4a54]">(if required)</span>}
+                                                                        </label>
+                                                                        <input
+                                                                            type="password"
+                                                                            value={llmApiKey}
+                                                                            onChange={(e) => setLlmApiKey(e.target.value)}
+                                                                            placeholder={llmProvider === "openai" ? "sk-..." : "Optional"}
+                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                        />
+                                                                    </div>
+
+                                                                    {/* Model Name */}
+                                                                    <div className="space-y-1.5">
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                            <Cpu size={10} />
+                                                                            Model {<span className="text-[#4a4a54]">(leave empty for default)</span>}
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={llmModel}
+                                                                            onChange={(e) => setLlmModel(e.target.value)}
+                                                                            placeholder={
+                                                                                llmProvider === "lmstudio" ? "Uses loaded model" :
+                                                                                llmProvider === "ollama" ? "llama3.2" :
+                                                                                llmProvider === "openai" ? "gpt-4o-mini" :
+                                                                                "model-name"
+                                                                            }
+                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="flex items-start gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-3 py-2">
+                                                                        <Info size={12} className="text-[#6b6b76] shrink-0 mt-0.5" />
+                                                                        <p className="text-[10px] text-[#6b6b76]">
+                                                                            Removes filler words, fixes repetitions, and cleans up speech disfluencies while preserving your meaning.
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            </div>
+
+                                            {/* Transcription Models Section */}
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#1a1a1e] border border-[#2a2a30]">
+                                                        <Cpu size={12} className="text-[#6b6b76]" />
+                                                    </div>
+                                                    <h3 className="text-[12px] font-medium text-[#a0a0ab]">Transcription Engines</h3>
+                                                </div>
+                                                <div className="space-y-2">
                                                 {modelCatalog.map((model, index) => {
                                                     const modelStat = modelStatus[model.key];
                                                     const progress = downloadState[model.key];
@@ -1023,8 +1196,8 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                 <div className="mt-3">
                                                                     <ModelProgress percent={percent} status={progress?.status ?? "idle"} />
                                                                     {isDownloading && (
-                                                                        <p className="mt-1.5 text-[10px] text-[#6b6b76] tabular-nums">
-                                                                            Downloading... {progress?.percent?.toFixed(0)}%
+                                                                        <p className="mt-1.5 text-[10px] text-[#6b6b76] tabular-nums truncate">
+                                                                            {progress?.percent?.toFixed(0)}% · {(progress as Extract<DownloadEvent, { status: "downloading" }>).file}
                                                                         </p>
                                                                     )}
                                                                     {showError && (
@@ -1038,6 +1211,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                         </motion.div>
                                                     );
                                                 })}
+                                                </div>
                                             </div>
                                         </motion.div>
                                     )}
@@ -1049,27 +1223,59 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                             initial="hidden"
                                             animate="visible"
                                             exit="exit"
-                                            className="space-y-4"
+                                            className="space-y-5"
                                         >
                                             <header>
-                                                <h1 className="text-lg font-medium text-[#e8e8eb]">About Glimpse</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Application information and details.</p>
+                                                <h1 className="text-lg font-medium text-[#e8e8eb]">About</h1>
+                                                <p className="mt-1 text-[12px] text-[#6b6b76]">App info and setup options.</p>
                                             </header>
 
+                                            {/* App Info Grid */}
+                                            <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1">Version</p>
+                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo?.version ?? "—"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1">Storage Used</p>
+                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "—"}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="mt-4 pt-3 border-t border-[#1e1e22]">
+                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1.5">Data Location</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <FolderOpen size={12} className="text-[#4a4a54] shrink-0" />
+                                                        <p className="text-[11px] text-[#6b6b76] font-mono truncate">
+                                                            {appInfo?.data_dir_path ?? "—"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Actions */}
                                             <div className="space-y-2">
-                                                <AboutItem
-                                                    label="Version"
-                                                    value={appInfo?.version ?? "Loading..."}
-                                                />
-                                                <AboutItem
-                                                    label="Data Directory Size"
-                                                    value={appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "Loading..."}
-                                                />
-                                                <AboutItem
-                                                    label="Data Directory"
-                                                    value={appInfo?.data_dir_path ?? "Loading..."}
-                                                    mono
-                                                />
+                                                <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] px-1">Setup</p>
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            await invoke("reset_onboarding");
+                                                            window.location.reload();
+                                                        } catch (err) {
+                                                            console.error("Failed to restart onboarding:", err);
+                                                        }
+                                                    }}
+                                                    className="w-full flex items-center gap-3 rounded-lg border border-[#1e1e22] bg-[#111113] p-3 text-left hover:bg-[#161618] hover:border-[#2a2a30] transition-colors"
+                                                >
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
+                                                        <RotateCcw size={14} className="text-[#6b6b76]" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[12px] font-medium text-[#e8e8eb]">Restart Onboarding</p>
+                                                        <p className="text-[10px] text-[#4a4a54]">Re-run the initial setup wizard</p>
+                                                    </div>
+                                                </button>
                                             </div>
                                         </motion.div>
                                     )}
@@ -1137,6 +1343,21 @@ const ModeButton = ({ icon, label, description, active, onClick }: {
     </motion.button>
 );
 
+const LlmProviderButton = ({ label, active, onClick }: {
+    label: string; active: boolean; onClick: () => void;
+}) => (
+    <motion.button
+        onClick={onClick}
+        className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${active
+            ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
+            : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
+            }`}
+        whileTap={{ scale: 0.97 }}
+    >
+        {label}
+    </motion.button>
+);
+
 const ModelProgress = ({ percent, status }: { percent: number; status: string }) => {
     const cols = 50;
     const rows = 3; // 3 dots tall as requested
@@ -1165,15 +1386,6 @@ const ModelProgress = ({ percent, status }: { percent: number; status: string })
             className="opacity-70"
         />
     );
-}; const AboutItem = ({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) => (
-    <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
-        <div className="flex flex-col gap-1.5">
-            <h3 className="text-[11px] font-medium uppercase tracking-wider text-[#4a4a54]">{label}</h3>
-            <p className={`text-[12px] text-[#e8e8eb] ${mono ? "font-mono text-[11px]" : ""} break-all`}>
-                {value}
-            </p>
-        </div>
-    </div>
-);
+};
 
 export default SettingsModal;

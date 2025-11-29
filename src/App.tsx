@@ -1,16 +1,60 @@
 import { useState, useEffect, ComponentType } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
 import PillOverlay from "./pill";
+import ToastOverlay from "./ToastOverlay";
 import Home from "./Home";
+import Onboarding from "./Onboarding";
 import "./App.css";
+
+type StoredSettings = {
+  onboarding_completed: boolean;
+  hold_shortcut: string;
+  hold_enabled: boolean;
+  toggle_shortcut: string;
+  toggle_enabled: boolean;
+  transcription_mode: string;
+  local_model: string;
+  microphone_device: string | null;
+  language: string;
+  llm_cleanup_enabled: boolean;
+  llm_provider: string;
+  llm_endpoint: string;
+  llm_api_key: string;
+  llm_model: string;
+  user_context: string;
+};
 
 function App() {
   const [windowLabel, setWindowLabel] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     const win = getCurrentWindow();
     setWindowLabel(win.label);
   }, []);
+
+  // Check onboarding status for settings window
+  useEffect(() => {
+    if (windowLabel === "settings") {
+      const checkOnboarding = async () => {
+        try {
+          const settings = await invoke<StoredSettings>("get_settings");
+          setShowOnboarding(!settings.onboarding_completed);
+        } catch (err) {
+          console.error("Failed to load settings:", err);
+          // On error, assume onboarding is complete to not block users
+          setShowOnboarding(false);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      checkOnboarding();
+    } else {
+      setIsLoading(false);
+    }
+  }, [windowLabel]);
 
   useEffect(() => {
     const body = document.body;
@@ -28,7 +72,29 @@ function App() {
     };
   }, [windowLabel]);
 
+  // Handle onboarding completion
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
   if (windowLabel === "settings") {
+    // Show loading state briefly while checking onboarding
+    if (isLoading) {
+      return (
+        <div className="settings-view h-screen w-screen overflow-hidden bg-[#0a0a0c]" />
+      );
+    }
+
+    // Show onboarding if not completed
+    if (showOnboarding) {
+      return (
+        <div className="settings-view h-screen w-screen overflow-hidden">
+          <Onboarding onComplete={handleOnboardingComplete} />
+        </div>
+      );
+    }
+
+    // Show main app
     return (
       <div className="settings-view h-screen w-screen overflow-hidden">
         <Home />
@@ -39,6 +105,7 @@ function App() {
   const overlayRegistry: Record<string, ComponentType<any>> = {
     main: PillOverlay,
     pill: PillOverlay,
+    toast: ToastOverlay,
   };
 
   const ActiveOverlay = overlayRegistry[windowLabel] ?? PillOverlay;

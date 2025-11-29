@@ -16,7 +16,8 @@
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.554.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tauri-plugin-macos-permissions-api": "^2.3.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

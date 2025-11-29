@@ -14,6 +14,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Tauri window drag region - enables window dragging */
+*[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+/* Ensure interactive elements within drag region are still clickable */
+*[data-tauri-drag-region] button,
+*[data-tauri-drag-region] a,
+*[data-tauri-drag-region] input,
+*[data-tauri-drag-region] [role="button"] {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
 html,
 body {
   width: 100%;
@@ -119,11 +134,11 @@ body {
   animation: shake 0.4s ease-in-out;
 }
 
-/* Toast animations - appears from above */
+/* Toast animations - appears from below (since toast window is above pill) */
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(0.95);
+    transform: translateY(12px) scale(0.92);
   }
   to {
     opacity: 1;
@@ -138,14 +153,48 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateY(-8px) scale(0.95);
+    transform: translateY(12px) scale(0.92);
   }
 }
 
 .animate-toast-in {
-  animation: toast-in 0.2s ease-out forwards;
+  animation: toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-toast-out {
   animation: toast-out 0.15s ease-in forwards;
+}
+
+/* Toast expand/collapse transition */
+.toast-content-expand {
+  transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+}
+
+/* Toast type-specific glow effects */
+.toast-glow-error {
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.1);
+}
+
+.toast-glow-info {
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1), 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+.toast-glow-success {
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1), 0 0 0 1px rgba(16, 185, 129, 0.1);
+}
+
+.toast-glow-warning {
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.1), 0 0 0 1px rgba(245, 158, 11, 0.1);
+}
+
+.toast-glow-update {
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(139, 92, 246, 0.1);
+}
+
+/* Line clamp utility for toast content */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

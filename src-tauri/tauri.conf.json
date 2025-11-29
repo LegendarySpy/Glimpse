@@ -14,7 +14,7 @@
       {
         "label": "main",
         "title": "glimpse",
-        "width": 220,
+        "width": 185,
         "height": 140,
         "x": 0,
         "y": 0,
@@ -37,6 +37,23 @@
         "visible": false,
         "hiddenTitle": true,
         "titleBarStyle": "Overlay"
+      },
+      {
+        "label": "toast",
+        "title": "Glimpse Toast",
+        "width": 185,
+        "height": 100,
+        "x": 0,
+        "y": 0,
+        "resizable": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "transparent": true,
+        "shadow": false,
+        "center": false,
+        "focus": false,
+        "visible": false
       }
     ],
     "security": {
@@ -53,6 +70,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "entitlements": "./Entitlements.plist"
+    }
   }
 }

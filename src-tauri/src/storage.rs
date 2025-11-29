@@ -12,11 +12,18 @@ use uuid::Uuid;
 pub struct TranscriptionRecord {
     pub id: String,
     pub timestamp: DateTime<Local>,
+    /// The final text (cleaned if LLM was used, otherwise raw)
     pub text: String,
+    /// The raw transcription before LLM cleanup (if applicable)
+    #[serde(default)]
+    pub raw_text: Option<String>,
     pub audio_path: String,
     pub status: TranscriptionStatus,
     pub error_message: Option<String>,
     pub confidence: Option<f32>,
+    /// Whether LLM cleanup was applied
+    #[serde(default)]
+    pub llm_cleaned: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
@@ -69,10 +76,12 @@ impl StorageManager {
             id: Uuid::new_v4().to_string(),
             timestamp: Local::now(),
             text,
+            raw_text: None,
             audio_path,
             status,
             error_message,
             confidence,
+            llm_cleaned: false,
         };
 
         let mut records = self.records.lock();
@@ -80,6 +89,66 @@ impl StorageManager {
         self.persist(&records)?;
 
         Ok(record)
+    }
+
+    /// Save a transcription with LLM cleanup applied
+    pub fn save_transcription_with_cleanup(
+        &self,
+        raw_text: String,
+        cleaned_text: String,
+        audio_path: String,
+        confidence: Option<f32>,
+    ) -> Result<TranscriptionRecord> {
+        let record = TranscriptionRecord {
+            id: Uuid::new_v4().to_string(),
+            timestamp: Local::now(),
+            text: cleaned_text,
+            raw_text: Some(raw_text),
+            audio_path,
+            status: TranscriptionStatus::Success,
+            error_message: None,
+            confidence,
+            llm_cleaned: true,
+        };
+
+        let mut records = self.records.lock();
+        records.push(record.clone());
+        self.persist(&records)?;
+
+        Ok(record)
+    }
+
+    /// Update an existing transcription with LLM cleaned text
+    pub fn update_with_llm_cleanup(&self, id: &str, cleaned_text: String) -> Result<Option<TranscriptionRecord>> {
+        let mut records = self.records.lock();
+        if let Some(record) = records.iter_mut().find(|r| r.id == id) {
+            // Store raw text if not already stored
+            if record.raw_text.is_none() {
+                record.raw_text = Some(record.text.clone());
+            }
+            record.text = cleaned_text;
+            record.llm_cleaned = true;
+            let updated = record.clone();
+            self.persist(&records)?;
+            Ok(Some(updated))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Revert a transcription to its raw text (undo LLM cleanup)
+    pub fn revert_to_raw(&self, id: &str) -> Result<Option<TranscriptionRecord>> {
+        let mut records = self.records.lock();
+        if let Some(record) = records.iter_mut().find(|r| r.id == id) {
+            if let Some(raw) = record.raw_text.take() {
+                record.text = raw;
+                record.llm_cleaned = false;
+                let updated = record.clone();
+                self.persist(&records)?;
+                return Ok(Some(updated));
+            }
+        }
+        Ok(None)
     }
 
     pub fn get_all(&self) -> Vec<TranscriptionRecord> {

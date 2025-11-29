@@ -6,10 +6,12 @@ export interface TranscriptionRecord {
     id: string;
     timestamp: string;
     text: string;
+    raw_text?: string;
     audio_path: string;
     status: "success" | "error";
     error_message?: string;
     confidence?: number;
+    llm_cleaned?: boolean;
 }
 
 export function useTranscriptions() {
@@ -52,6 +54,26 @@ export function useTranscriptions() {
         }
     }, []);
 
+    const retryLlmCleanup = useCallback(async (id: string) => {
+        try {
+            await invoke("retry_llm_cleanup", { id });
+            // The transcription will be refreshed when the event fires
+        } catch (err) {
+            console.error("Failed to retry LLM cleanup:", err);
+            throw err;
+        }
+    }, []);
+
+    const undoLlmCleanup = useCallback(async (id: string) => {
+        try {
+            await invoke("undo_llm_cleanup", { id });
+            // The transcription will be refreshed when the event fires
+        } catch (err) {
+            console.error("Failed to undo LLM cleanup:", err);
+            throw err;
+        }
+    }, []);
+
     // Load transcriptions on mount
     useEffect(() => {
         loadTranscriptions();
@@ -81,6 +103,8 @@ export function useTranscriptions() {
         error,
         deleteTranscription,
         retryTranscription,
+        retryLlmCleanup,
+        undoLlmCleanup,
         refresh: loadTranscriptions,
     };
 }
