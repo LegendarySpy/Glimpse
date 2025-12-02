@@ -29,7 +29,7 @@ bun tauri dev
 ```bash
 bun tauri build
 ```
-
+> Note when running production builds sometimes you may need to remove and re-enable accessibility features to make them work again.
 ## Roadmap
 
 - [ ] Custom dictionary for words and phrases
@@ -39,4 +39,7 @@ bun tauri build
 
 ## Thank you
 
+* [Tauri](https://v2.tauri.app/) — the framework Glimpse is built on
 * [Transcribe-rs](https://github.com/cjpais/transcribe-rs) — the underlying STT engine that powers Glimpse locally
+
+
