@@ -1,24 +1,42 @@
-# What's glimpse?
+# What's Glimpse?
 
-Glimpse is a productivity app built on Tauri to enable true cross-platform support. Its purpose is to make it easier & faster to create & build at the speed of speech. If you've used Superwhisper or Wisprflow, think of this as the open-source alternative.
+Glimpse is a productivity app built on Tauri for cross-platform support. Its purpose is to make it easier & faster to create & build at the speed of speech. If you've used Superwhisper or Wisprflow, think of this as the open-source alternative.
 
+> **Licensing & hosting**
+>
+> Glimpse is licensed under the **GNU Affero General Public License v3 (AGPL-3.0)**. You can self-host or modify it as long as changes remain open. A paid/hosted plan will be available for individuals or teams that prefer a managed instance.
 
+## Running locally
 
-## Road map
+### Prerequisites
 
-- [ ] A dictionary to add custom words or phrases
-- [ ] Better contextual awareness, understand where you pasting something and the tone with that.
-- [ ] Edit mode, ask Glimpse to edit what you have selected with full context awareness
+- macOS 13+
+- [Rust](https://rustup.rs/) 1.74+
+- [Bun](https://bun.sh/) (or npm/pnpm)
+- Xcode Command Line Tools (`xcode-select --install`)
 
-  
-  
+### Development
 
-Thank you to:
+```bash
+git clone https://github.com/LegendarySpy/Glimpse.git
+cd Glimpse
+bun install
+bun tauri dev
+```
 
-  
+### Production build
 
-* [Transcribe-rs](https://github.com/cjpais/transcribe-rs?tab=readme-ov-file) The underlying STT engine for this project
+```bash
+bun tauri build
+```
 
+## Roadmap
 
+- [ ] Custom dictionary for words and phrases
+- [ ] Contextual awareness (detect destination app and adjust tone)
+- [ ] Edit mode (rewrite selected text with full context)
+- [ ] Ask mode (query what's on your screen)
 
+## Thank you
 
+* [Transcribe-rs](https://github.com/cjpais/transcribe-rs) — the underlying STT engine that powers Glimpse locally
