@@ -29,6 +29,8 @@ type TranscriptionMode = "cloud" | "local";
 type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "custom";
 
 type StoredSettings = {
+    smart_shortcut: string;
+    smart_enabled: boolean;
     hold_shortcut: string;
     hold_enabled: boolean;
     toggle_shortcut: string;
@@ -112,10 +114,12 @@ interface SettingsModalProps {
 }
 
 const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
-    const [holdShortcut, setHoldShortcut] = useState("Control+Space");
-    const [holdEnabled, setHoldEnabled] = useState(true);
-    const [toggleShortcut, setToggleShortcut] = useState("Control+Shift+Space");
-    const [toggleEnabled, setToggleEnabled] = useState(true);
+    const [smartShortcut, setSmartShortcut] = useState("Control+Space");
+    const [smartEnabled, setSmartEnabled] = useState(true);
+    const [holdShortcut, setHoldShortcut] = useState("Control+Shift+Space");
+    const [holdEnabled, setHoldEnabled] = useState(false);
+    const [toggleShortcut, setToggleShortcut] = useState("Control+Alt+Space");
+    const [toggleEnabled, setToggleEnabled] = useState(false);
     const [transcriptionMode, setTranscriptionMode] = useState<TranscriptionMode>("cloud");
     const [localModel, setLocalModel] = useState("parakeet_tdt_int8");
     const [microphoneDevice, setMicrophoneDevice] = useState<string | null>(null);
@@ -126,7 +130,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     const [downloadState, setDownloadState] = useState<Record<string, DownloadEvent>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [captureActive, setCaptureActive] = useState<"hold" | "toggle" | null>(null);
+    const [captureActive, setCaptureActive] = useState<"smart" | "hold" | "toggle" | null>(null);
     const pressedModifiers = useRef<Set<string>>(new Set());
     const primaryKey = useRef<string | null>(null);
     const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account">("general");
@@ -171,6 +175,8 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 setLoading(true);
                 try {
                     const settings = await invoke<StoredSettings>("get_settings");
+                    setSmartShortcut(settings.smart_shortcut);
+                    setSmartEnabled(settings.smart_enabled);
                     setHoldShortcut(settings.hold_shortcut);
                     setHoldEnabled(settings.hold_enabled);
                     setToggleShortcut(settings.toggle_shortcut);
@@ -302,7 +308,9 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
             const combo = buildShortcut();
             if (combo) {
-                if (captureActive === "hold") {
+                if (captureActive === "smart") {
+                    setSmartShortcut(combo);
+                } else if (captureActive === "hold") {
                     setHoldShortcut(combo);
                 } else if (captureActive === "toggle") {
                     setToggleShortcut(combo);
@@ -363,6 +371,8 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         const saveSettings = async () => {
             try {
                 await invoke("update_settings", {
+                    smartShortcut,
+                    smartEnabled,
                     holdShortcut,
                     holdEnabled,
                     toggleShortcut,
@@ -388,6 +398,8 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         saveSettings();
     }, [
         loading,
+        smartShortcut,
+        smartEnabled,
         holdShortcut,
         holdEnabled,
         toggleShortcut,
@@ -646,6 +658,8 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                             exit={{ opacity: 0, height: 0, marginTop: 0 }}
                                                                             className="text-[11px] text-[#6b6b76] font-mono block"
                                                                         >
+                                                                            {smartEnabled ? `Smart: ${smartShortcut}` : ""}
+                                                                            {smartEnabled && (holdEnabled || toggleEnabled) ? " • " : ""}
                                                                             {holdEnabled ? `Hold: ${holdShortcut}` : ""}
                                                                             {holdEnabled && toggleEnabled ? " • " : ""}
                                                                             {toggleEnabled ? `Toggle: ${toggleShortcut}` : ""}
@@ -677,6 +691,76 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                 className="overflow-hidden"
                                                             >
                                                                 <div className="px-4 pb-4 space-y-3 border-t border-[#1e1e22] pt-4">
+                                                                    {/* Smart Mode Shortcut */}
+                                                                    <div className={`rounded-xl border p-4 transition-colors ${smartEnabled
+                                                                        ? "border-amber-400/30 bg-amber-400/5"
+                                                                        : "border-[#1e1e22]/50 bg-[#111113]/50"
+                                                                        }`}>
+                                                                        <div className="flex items-center justify-between">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <div className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${smartEnabled
+                                                                                    ? "bg-amber-400/10 border-amber-400/30"
+                                                                                    : "bg-[#1a1a1e]/50 border-[#2a2a30]/50"
+                                                                                    }`}>
+                                                                                    <Wand2 size={14} className={smartEnabled ? "text-amber-400" : "text-[#4a4a54]"} />
+                                                                                </div>
+                                                                                <div>
+                                                                                    <h3 className={`text-[13px] font-medium ${smartEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>Smart Mode</h3>
+                                                                                    <p className="text-[11px] text-[#4a4a54]">Quick tap = hold, long press = toggle</p>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <motion.button
+                                                                                    onClick={() => {
+                                                                                        if (!smartEnabled && !holdEnabled && !toggleEnabled) return;
+                                                                                        setSmartEnabled(!smartEnabled);
+                                                                                    }}
+                                                                                    disabled={smartEnabled && !holdEnabled && !toggleEnabled}
+                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${smartEnabled ? "bg-amber-400" : "bg-[#2a2a30]"
+                                                                                        } ${smartEnabled && !holdEnabled && !toggleEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                                                    whileTap={!(smartEnabled && !holdEnabled && !toggleEnabled) ? { scale: 0.95 } : {}}
+                                                                                >
+                                                                                    <motion.div
+                                                                                        className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
+                                                                                        animate={{ left: smartEnabled ? "calc(100% - 18px)" : "2px" }}
+                                                                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                                                                    />
+                                                                                </motion.button>
+                                                                                <motion.button
+                                                                                    onClick={() => {
+                                                                                        if (!smartEnabled) return;
+                                                                                        pressedModifiers.current.clear();
+                                                                                        primaryKey.current = null;
+                                                                                        setCaptureActive("smart");
+                                                                                        setError(null);
+                                                                                    }}
+                                                                                    disabled={!smartEnabled}
+                                                                                    className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all ${captureActive === "smart"
+                                                                                        ? "bg-amber-400 text-black"
+                                                                                        : smartEnabled
+                                                                                            ? "bg-[#1a1a1e] border border-[#2a2a30] text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb]"
+                                                                                            : "bg-[#1a1a1e]/50 border border-[#2a2a30]/50 text-[#4a4a54] cursor-not-allowed"
+                                                                                        }`}
+                                                                                    whileTap={smartEnabled ? { scale: 0.97 } : {}}
+                                                                                >
+                                                                                    {captureActive === "smart" ? "Listening..." : "Change"}
+                                                                                </motion.button>
+                                                                            </div>
+                                                                        </div>
+                                                                        <motion.div
+                                                                            className={`mt-3 inline-flex items-center rounded-lg border px-3 py-2 transition-colors ${smartEnabled
+                                                                                ? "border-amber-400/30 bg-amber-400/10"
+                                                                                : "border-[#2a2a30]/50 bg-[#1a1a1e]/50"
+                                                                                }`}
+                                                                            animate={captureActive === "smart" ? {
+                                                                                borderColor: ["rgba(251, 191, 36, 0.3)", "rgba(251, 191, 36, 0.8)", "rgba(251, 191, 36, 0.3)"]
+                                                                            } : {}}
+                                                                            transition={{ duration: 1.2, repeat: captureActive === "smart" ? Infinity : 0 }}
+                                                                        >
+                                                                            <span className={`font-mono text-[12px] ${smartEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>{smartShortcut}</span>
+                                                                        </motion.div>
+                                                                    </div>
+
                                                                     {/* Hold Shortcut */}
                                                                     <div className={`rounded-xl border p-4 transition-colors ${holdEnabled
                                                                         ? "border-[#1e1e22] bg-[#111113]"
@@ -698,13 +782,13 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                             <div className="flex items-center gap-2">
                                                                                 <motion.button
                                                                                     onClick={() => {
-                                                                                        if (!holdEnabled && !toggleEnabled) return;
+                                                                                        if (!holdEnabled && !toggleEnabled && !smartEnabled) return;
                                                                                         setHoldEnabled(!holdEnabled);
                                                                                     }}
-                                                                                    disabled={holdEnabled && !toggleEnabled}
+                                                                                    disabled={holdEnabled && !toggleEnabled && !smartEnabled}
                                                                                     className={`relative w-10 h-5 rounded-full transition-colors ${holdEnabled ? "bg-amber-400" : "bg-[#2a2a30]"
-                                                                                        } ${holdEnabled && !toggleEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                                                                                    whileTap={!(holdEnabled && !toggleEnabled) ? { scale: 0.95 } : {}}
+                                                                                        } ${holdEnabled && !toggleEnabled && !smartEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                                                    whileTap={!(holdEnabled && !toggleEnabled && !smartEnabled) ? { scale: 0.95 } : {}}
                                                                                 >
                                                                                     <motion.div
                                                                                         className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
@@ -768,13 +852,13 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                             <div className="flex items-center gap-2">
                                                                                 <motion.button
                                                                                     onClick={() => {
-                                                                                        if (!toggleEnabled && !holdEnabled) return;
+                                                                                        if (!toggleEnabled && !holdEnabled && !smartEnabled) return;
                                                                                         setToggleEnabled(!toggleEnabled);
                                                                                     }}
-                                                                                    disabled={toggleEnabled && !holdEnabled}
+                                                                                    disabled={toggleEnabled && !holdEnabled && !smartEnabled}
                                                                                     className={`relative w-10 h-5 rounded-full transition-colors ${toggleEnabled ? "bg-amber-400" : "bg-[#2a2a30]"
-                                                                                        } ${toggleEnabled && !holdEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                                                                                    whileTap={!(toggleEnabled && !holdEnabled) ? { scale: 0.95 } : {}}
+                                                                                        } ${toggleEnabled && !holdEnabled && !smartEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                                                    whileTap={!(toggleEnabled && !holdEnabled && !smartEnabled) ? { scale: 0.95 } : {}}
                                                                                 >
                                                                                     <motion.div
                                                                                         className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"

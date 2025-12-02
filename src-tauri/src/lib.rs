@@ -127,6 +127,7 @@ pub fn run() {
             delete_transcription,
             retry_transcription,
             retry_llm_cleanup,
+            undo_llm_cleanup,
             model_manager::list_models,
             model_manager::check_model_status,
             model_manager::download_model,
@@ -159,8 +160,11 @@ struct AppState {
     tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
     hold_shortcut_down: AtomicBool,
     toggle_recording_active: AtomicBool,
-    /// Tracks which mode started the current recording: "hold" or "toggle"
+    /// Tracks which mode started the current recording: "hold", "toggle", or "smart"
     active_recording_mode: parking_lot::Mutex<Option<String>>,
+    /// Smart mode state
+    smart_toggle_active: AtomicBool,
+    smart_press_time: parking_lot::Mutex<Option<chrono::DateTime<chrono::Local>>>,
 }
 
 impl AppState {
@@ -189,6 +193,8 @@ impl AppState {
             hold_shortcut_down: AtomicBool::new(false),
             toggle_recording_active: AtomicBool::new(false),
             active_recording_mode: parking_lot::Mutex::new(None),
+            smart_toggle_active: AtomicBool::new(false),
+            smart_press_time: parking_lot::Mutex::new(None),
         }
     }
 
@@ -242,6 +248,18 @@ impl AppState {
 
     fn get_active_recording_mode(&self) -> Option<String> {
         self.active_recording_mode.lock().clone()
+    }
+
+    fn set_smart_toggle_active(&self, active: bool) {
+        self.smart_toggle_active.store(active, Ordering::SeqCst);
+    }
+
+    fn set_smart_press_time(&self, time: Option<chrono::DateTime<chrono::Local>>) {
+        *self.smart_press_time.lock() = time;
+    }
+
+    fn get_smart_press_time(&self) -> Option<chrono::DateTime<chrono::Local>> {
+        *self.smart_press_time.lock()
     }
 }
 
@@ -304,7 +322,10 @@ fn reset_onboarding(
 // --- End Onboarding Commands ---
 
 #[tauri::command]
+#[allow(non_snake_case)]
 fn update_settings(
+    smartShortcut: String,
+    smartEnabled: bool,
     holdShortcut: String,
     holdEnabled: bool,
     toggleShortcut: String,
@@ -322,6 +343,10 @@ fn update_settings(
     app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<UserSettings, String> {
+    if smartEnabled && smartShortcut.trim().is_empty() {
+        return Err("Smart shortcut cannot be empty when enabled".into());
+    }
+
     if holdEnabled && holdShortcut.trim().is_empty() {
         return Err("Hold shortcut cannot be empty when enabled".into());
     }
@@ -330,16 +355,30 @@ fn update_settings(
         return Err("Toggle shortcut cannot be empty when enabled".into());
     }
 
-    if !holdEnabled && !toggleEnabled {
+    if !smartEnabled && !holdEnabled && !toggleEnabled {
         return Err("At least one recording mode must be enabled".into());
     }
 
-    // Prevent same keybind for both shortcuts
-    if holdEnabled && toggleEnabled {
-        let hold_normalized = holdShortcut.trim().to_lowercase();
-        let toggle_normalized = toggleShortcut.trim().to_lowercase();
-        if hold_normalized == toggle_normalized {
-            return Err("Hold and Toggle shortcuts cannot be the same".into());
+    // Collect all enabled shortcuts for conflict checking
+    let mut enabled_shortcuts: Vec<(&str, &str)> = vec![];
+    if smartEnabled {
+        enabled_shortcuts.push(("Smart", smartShortcut.trim()));
+    }
+    if holdEnabled {
+        enabled_shortcuts.push(("Hold", holdShortcut.trim()));
+    }
+    if toggleEnabled {
+        enabled_shortcuts.push(("Toggle", toggleShortcut.trim()));
+    }
+
+    // Check for duplicate shortcuts
+    for i in 0..enabled_shortcuts.len() {
+        for j in (i + 1)..enabled_shortcuts.len() {
+            let (name1, shortcut1) = enabled_shortcuts[i];
+            let (name2, shortcut2) = enabled_shortcuts[j];
+            if shortcut1.to_lowercase() == shortcut2.to_lowercase() {
+                return Err(format!("{} and {} shortcuts cannot be the same", name1, name2));
+            }
         }
     }
 
@@ -358,6 +397,8 @@ fn update_settings(
     }
 
     let mut next = state.current_settings();
+    next.smart_shortcut = smartShortcut;
+    next.smart_enabled = smartEnabled;
     next.hold_shortcut = holdShortcut;
     next.hold_enabled = holdEnabled;
     next.toggle_shortcut = toggleShortcut;
@@ -662,12 +703,55 @@ async fn retry_llm_cleanup(
     Ok(())
 }
 
+#[tauri::command]
+async fn undo_llm_cleanup(
+    id: String,
+    app: AppHandle<AppRuntime>,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    let storage = state.storage();
+    
+    match storage.revert_to_raw(&id) {
+        Ok(Some(_)) => {
+            // Emit event to refresh UI
+            let _ = app.emit(
+                EVENT_TRANSCRIPTION_COMPLETE,
+                TranscriptionCompletePayload {
+                    transcript: String::new(),
+                    confidence: None,
+                    auto_paste: false,
+                },
+            );
+            Ok(())
+        }
+        Ok(None) => Err("No raw text available to revert to".to_string()),
+        Err(err) => Err(format!("Failed to undo LLM cleanup: {err}")),
+    }
+}
+
 fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let settings = app.state::<AppState>().current_settings();
     let manager = app.global_shortcut();
 
     if let Err(err) = manager.unregister_all() {
         eprintln!("Failed to clear shortcuts: {err}");
+    }
+
+    // Register smart mode shortcut if enabled
+    // Smart mode: quick tap/release = hold behavior, long press = toggle behavior
+    if settings.smart_enabled {
+        let smart_shortcut = settings.smart_shortcut.clone();
+        manager.on_shortcut(smart_shortcut.as_str(), move |app, _shortcut, event| {
+            if event.state == ShortcutState::Pressed {
+                if let Err(err) = handle_smart_shortcut_press(app) {
+                    eprintln!("Smart shortcut press error: {err}");
+                }
+            } else if event.state == ShortcutState::Released {
+                if let Err(err) = handle_smart_shortcut_release(app) {
+                    eprintln!("Smart shortcut release error: {err}");
+                }
+            }
+        })?;
     }
 
     // Check if shortcuts overlap (one is a subset of the other)
@@ -774,6 +858,64 @@ fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> 
 
 /// Minimum recording duration in milliseconds to process (prevents accidental taps)
 const MIN_RECORDING_DURATION_MS: i64 = 300;
+
+/// Threshold in milliseconds for smart mode to decide between toggle (tap) and hold
+const SMART_MODE_TAP_THRESHOLD_MS: i64 = 200;
+
+fn handle_smart_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
+    let state = app.state::<AppState>();
+    
+    // If already recording in toggle mode, stop it
+    if state.is_toggle_recording_active() {
+        return handle_toggle_shortcut_press(app);
+    }
+    
+    // If already recording in hold mode, ignore (will stop on release)
+    if state.get_active_recording_mode().as_deref() == Some("hold") {
+        return Ok(());
+    }
+    
+    // Start recording immediately (for hold mode) and store press time
+    state.set_smart_press_time(Some(chrono::Local::now()));
+    handle_hold_shortcut_press(app)
+}
+
+fn handle_smart_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
+    let state = app.state::<AppState>();
+    
+    // Get press time to determine if this was a tap or hold
+    let press_time = state.get_smart_press_time();
+    state.set_smart_press_time(None);
+    
+    if let Some(start_time) = press_time {
+        let now = chrono::Local::now();
+        let held_duration_ms = (now - start_time).num_milliseconds();
+        
+        // Quick tap (< 200ms) = convert to toggle mode
+        if held_duration_ms < SMART_MODE_TAP_THRESHOLD_MS {
+            // Stop the hold recording and start toggle mode
+            if state.get_active_recording_mode().as_deref() == Some("hold") {
+                // Clear hold state but keep recording active
+                state.clear_hold_shortcut_state();
+                state.set_toggle_recording_active(true);
+                state.set_active_recording_mode(Some("toggle"));
+                emit_event(
+                    app,
+                    EVENT_RECORDING_MODE_CHANGE,
+                    RecordingModePayload {
+                        mode: "toggle".to_string(),
+                    },
+                );
+            }
+            return Ok(());
+        }
+        
+        // Long hold (>= 200ms) = normal hold mode, stop on release
+        handle_hold_shortcut_release(app)
+    } else {
+        Ok(())
+    }
+}
 
 fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
@@ -917,6 +1059,8 @@ fn stop_active_recording(app: &AppHandle<AppRuntime>) {
     state.set_active_recording_mode(None);
     state.set_toggle_recording_active(false);
     state.clear_hold_shortcut_state();
+    state.set_smart_toggle_active(false);
+    state.set_smart_press_time(None);
 }
 
 #[tauri::command]
@@ -955,6 +1099,7 @@ fn show_toast(app: &AppHandle<AppRuntime>, toast_type: &str, title: Option<&str>
     );
 }
 
+#[allow(dead_code)]
 fn show_toast_with_options(
     app: &AppHandle<AppRuntime>,
     toast_type: &str,
@@ -977,6 +1122,7 @@ fn show_toast_with_options(
     );
 }
 
+#[allow(dead_code)]
 fn hide_toast(app: &AppHandle<AppRuntime>) {
     emit_event(app, EVENT_TOAST_HIDE, ());
 }
@@ -1215,6 +1361,7 @@ fn emit_transcription_start(app: &AppHandle<AppRuntime>, saved: &RecordingSaved)
     );
 }
 
+#[allow(dead_code)]
 fn emit_transcription_complete(
     app: &AppHandle<AppRuntime>,
     transcript: String,

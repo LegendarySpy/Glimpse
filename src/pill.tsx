@@ -30,24 +30,6 @@ const DOT_RADIUS = {
 // --- Icon Bitmaps ---
 
 const ICONS = {
-  mic: [
-    [0, 0, 0, 0, 0],
-    [0, 1, 1, 1, 0],
-    [0, 1, 0, 1, 0],
-    [0, 1, 0, 1, 0],
-    [0, 1, 1, 1, 0],
-    [0, 0, 1, 0, 0],
-    [1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-  ],
-  stop: [
-    [1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1],
-  ],
   warning: [
     [0, 0, 1, 0, 0],
     [0, 0, 1, 0, 0],
@@ -174,48 +156,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
   // --- Draw Functions ---
 
-  const drawStaticIcon = useCallback((icon: number[][], color: string, glowColor?: string) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.width / dpr;
-    const height = canvas.height / dpr;
-    const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
-    const centerCol = Math.floor(cols / 2);
-    const centerRow = Math.floor(rows / 2);
-
-    ctx.shadowBlur = 0;
-    ctx.shadowColor = "transparent";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        const cx = offsetX + c * spacing + spacing / 2;
-        const cy = offsetY + r * spacing + spacing / 2;
-        const maskAlpha = getMaskOpacity(cx, cy, width, height);
-        if (maskAlpha <= 0.05) continue;
-
-        const isIcon = isIconPixel(c, r, icon, centerCol, centerRow);
-
-        ctx.beginPath();
-        if (isIcon) {
-          ctx.fillStyle = `rgba(${color}, ${maskAlpha})`;
-          ctx.shadowBlur = glowColor ? 8 : 0;
-          ctx.shadowColor = glowColor ? `rgba(${glowColor}, 0.5)` : "transparent";
-          ctx.arc(cx, cy, DOT_RADIUS.icon, 0, Math.PI * 2);
-        } else {
-          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha})`;
-          ctx.shadowBlur = 0;
-          ctx.shadowColor = "transparent";
-          ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
-        }
-        ctx.fill();
-      }
-    }
-  }, [getMaskOpacity, isIconPixel]);
-
   const drawProcessingFrame = useCallback((time: number) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -230,17 +170,12 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     ctx.shadowColor = "transparent";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const waveSpeed = 0.003;
-    const waveLength = cols * 0.3;
-    const pulseSpeed = 0.002;
-
+    // Smooth breathing wave that travels across
+    const speed = 0.0015;
+    const waveLength = cols * 0.4;
+    const breathe = 0.5 + 0.5 * Math.sin(time * 0.001);
+    
     for (let c = 0; c < cols; c++) {
-      const wavePhase = (c / waveLength) - (time * waveSpeed);
-      const waveValue = Math.sin(wavePhase * Math.PI * 2);
-      const pulseValue = 0.5 + 0.5 * Math.sin(time * pulseSpeed * Math.PI * 2);
-      const amplitude = (0.3 + 0.7 * ((waveValue + 1) / 2)) * pulseValue;
-      const activeRadius = amplitude * (height * 0.35);
-
       for (let r = 0; r < rows; r++) {
         const cx = offsetX + c * spacing + spacing / 2;
         const cy = offsetY + r * spacing + spacing / 2;
@@ -248,18 +183,40 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         if (maskAlpha <= 0.05) continue;
 
         const distFromCenterY = Math.abs(cy - height / 2);
+        
+        // Create a traveling wave across columns
+        const wavePhase = (c / waveLength) - (time * speed);
+        const wave = Math.sin(wavePhase * Math.PI * 2) * 0.5 + 0.5;
+        
+        // Wave height with breathing effect
+        const maxRadius = height * 0.4 * (0.6 + 0.4 * breathe);
+        const activeRadius = wave * maxRadius;
+        
         const isActive = distFromCenterY < activeRadius;
 
         ctx.beginPath();
         if (isActive) {
-          const brightness = 1 - (distFromCenterY / (activeRadius + 0.1));
+          // Smooth gradient from center to edge
+          const edgeFactor = 1 - (distFromCenterY / (activeRadius + 0.5));
+          const brightness = Math.pow(edgeFactor, 1.5) * (0.7 + 0.3 * wave);
+          
           ctx.fillStyle = `rgba(${COLORS.white}, ${brightness * maskAlpha})`;
+          if (brightness > 0.7) {
+            ctx.shadowBlur = 3;
+            ctx.shadowColor = `rgba(${COLORS.white}, 0.3)`;
+          }
           ctx.arc(cx, cy, DOT_RADIUS.loader, 0, Math.PI * 2);
         } else {
-          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha * 0.5})`;
+          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha * 0.4})`;
           ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
         }
         ctx.fill();
+        
+        // Reset shadow
+        if (isActive) {
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+        }
       }
     }
   }, [getMaskOpacity]);
@@ -310,7 +267,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, [getMaskOpacity, isIconPixel]);
 
-  const drawAudioFrame = useCallback((audioData: Uint8Array, showStopIcon: boolean) => {
+  const drawAudioFrame = useCallback((audioData: Uint8Array) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
@@ -320,7 +277,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     const height = canvas.height / dpr;
     const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
     const centerCol = Math.floor(cols / 2);
-    const centerRow = Math.floor(rows / 2);
 
     if (audioData.length > 0) {
       for (let i = 0; i <= centerCol; i++) {
@@ -365,15 +321,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
         const distFromCenterY = Math.abs(cy - height / 2);
         const isWaveActive = activeRadiusPixels > 0.5 && distFromCenterY < activeRadiusPixels;
-        const isIcon = showStopIcon && isIconPixel(c, r, ICONS.stop, centerCol, centerRow);
 
         ctx.beginPath();
-        if (isIcon) {
-          ctx.fillStyle = `rgba(${COLORS.red}, ${maskAlpha})`;
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = `rgba(${COLORS.red}, 0.5)`;
-          ctx.arc(cx, cy, DOT_RADIUS.icon, 0, Math.PI * 2);
-        } else if (isWaveActive) {
+        if (isWaveActive) {
           const waveEdgeDist = 1 - (distFromCenterY / (activeRadiusPixels + 0.1));
           const brightness = 0.5 + (waveEdgeDist * 0.5);
           ctx.fillStyle = `rgba(${COLORS.white}, ${brightness * maskAlpha})`;
@@ -389,7 +339,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         ctx.fill();
       }
     }
-  }, [decay, getMaskOpacity, isIconPixel, sensitivity]);
+  }, [decay, getMaskOpacity, sensitivity]);
 
   // --- Animation Controller ---
 
@@ -400,7 +350,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, []);
 
-  const runAnimation = useCallback((type: "processing" | "listening" | "error", showStopIcon = false) => {
+  const runAnimation = useCallback((type: "processing" | "listening" | "error") => {
     stopAllAnimations();
     loaderTimeRef.current = 0;
 
@@ -416,7 +366,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
             const bufferLength = analyserRef.current.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             analyserRef.current.getByteFrequencyData(dataArray);
-            drawAudioFrame(dataArray, showStopIcon);
+            drawAudioFrame(dataArray);
           }
           break;
         case "error":
@@ -438,13 +388,36 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
 
     if (hasActivity) {
-      drawAudioFrame(new Uint8Array(0), false);
+      drawAudioFrame(new Uint8Array(0));
       animationRef.current = requestAnimationFrame(fadeOutWave);
     } else {
       heightsRef.current.fill(0);
-      drawStaticIcon(ICONS.mic, COLORS.white, COLORS.white);
+      // Just clear to base dots - no icon
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.width / dpr;
+      const height = canvas.height / dpr;
+      const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          const cx = offsetX + c * spacing + spacing / 2;
+          const cy = offsetY + r * spacing + spacing / 2;
+          const maskAlpha = getMaskOpacity(cx, cy, width, height);
+          if (maskAlpha <= 0.05) continue;
+
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha})`;
+          ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     }
-  }, [drawAudioFrame, drawStaticIcon]);
+  }, [drawAudioFrame, getMaskOpacity]);
 
   // --- Set Error State (visual only, toast handled separately) ---
   const setErrorState = useCallback(() => {
@@ -545,6 +518,75 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     };
   }, [setupCanvas, stopAllAnimations]);
 
+  // --- Draw base dots (idle state) ---
+  const drawBaseDots = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        const cx = offsetX + c * spacing + spacing / 2;
+        const cy = offsetY + r * spacing + spacing / 2;
+        const maskAlpha = getMaskOpacity(cx, cy, width, height);
+        if (maskAlpha <= 0.05) continue;
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha})`;
+        ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }, [getMaskOpacity]);
+
+  const drawStaticIcon = useCallback((icon: number[][], color: string, glowColor?: string) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    const { cols, rows, spacing, offsetX, offsetY } = gridRef.current;
+    const centerCol = Math.floor(cols / 2);
+    const centerRow = Math.floor(rows / 2);
+
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        const cx = offsetX + c * spacing + spacing / 2;
+        const cy = offsetY + r * spacing + spacing / 2;
+        const maskAlpha = getMaskOpacity(cx, cy, width, height);
+        if (maskAlpha <= 0.05) continue;
+
+        const isIcon = isIconPixel(c, r, icon, centerCol, centerRow);
+
+        ctx.beginPath();
+        if (isIcon) {
+          ctx.fillStyle = `rgba(${color}, ${maskAlpha})`;
+          ctx.shadowBlur = glowColor ? 8 : 0;
+          ctx.shadowColor = glowColor ? `rgba(${glowColor}, 0.5)` : "transparent";
+          ctx.arc(cx, cy, DOT_RADIUS.icon, 0, Math.PI * 2);
+        } else {
+          ctx.fillStyle = `rgba(${COLORS.base}, ${maskAlpha})`;
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+          ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+  }, [getMaskOpacity, isIconPixel]);
+
   // --- Visual State Management ---
 
   useEffect(() => {
@@ -552,12 +594,12 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
     switch (status) {
       case "idle":
-        drawStaticIcon(ICONS.mic, COLORS.white, COLORS.white);
+        drawBaseDots();
         break;
 
       case "listening":
         if (isListening && analyser) {
-          runAnimation("listening", recordingMode === "toggle");
+          runAnimation("listening");
         }
         break;
 
@@ -574,22 +616,24 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         }
         break;
     }
-  }, [status, isListening, analyser, recordingMode, isErrorFlashing, drawStaticIcon, runAnimation, stopAllAnimations]);
+  }, [status, isListening, analyser, isErrorFlashing, drawBaseDots, drawStaticIcon, runAnimation, stopAllAnimations]);
 
   useEffect(() => {
     if (status === "listening" && isListening && analyser) {
-      runAnimation("listening", recordingMode === "toggle");
+      runAnimation("listening");
     } else if (status === "listening" && !isListening) {
       fadeOutWave();
     }
-  }, [isListening, analyser, status, recordingMode, runAnimation, fadeOutWave]);
+  }, [isListening, analyser, status, runAnimation, fadeOutWave]);
 
   // --- Render ---
 
   const getStatusLabel = () => {
     switch (status) {
       case "idle": return "Ready";
-      case "listening": return recordingMode === "toggle" ? "Tap to stop" : "Release to stop";
+      case "listening": 
+        return recordingMode === "hold" ? "Hold to record…" : 
+               recordingMode === "toggle" ? "Tap to stop…" : "Listening…";
       case "processing": return "Processing…";
       case "error": return "Error";
     }

@@ -12,13 +12,19 @@ pub struct UserSettings {
     #[serde(default)]
     pub onboarding_completed: bool,
 
+    // Smart mode settings (default enabled)
+    #[serde(default = "default_smart_shortcut")]
+    pub smart_shortcut: String,
+    #[serde(default = "default_true")]
+    pub smart_enabled: bool,
+
     #[serde(default = "default_hold_shortcut")]
     pub hold_shortcut: String,
-    #[serde(default = "default_true")]
+    #[serde(default)]
     pub hold_enabled: bool,
     #[serde(default = "default_toggle_shortcut")]
     pub toggle_shortcut: String,
-    #[serde(default = "default_true")]
+    #[serde(default)]
     pub toggle_enabled: bool,
     #[serde(default = "default_transcription_mode")]
     pub transcription_mode: TranscriptionMode,
@@ -42,12 +48,16 @@ pub struct UserSettings {
     pub user_context: String,
 }
 
-fn default_hold_shortcut() -> String {
+fn default_smart_shortcut() -> String {
     "Control+Space".to_string()
 }
 
-fn default_toggle_shortcut() -> String {
+fn default_hold_shortcut() -> String {
     "Control+Shift+Space".to_string()
+}
+
+fn default_toggle_shortcut() -> String {
+    "Control+Alt+Space".to_string()
 }
 
 fn default_true() -> bool {
@@ -58,10 +68,12 @@ impl Default for UserSettings {
     fn default() -> Self {
         Self {
             onboarding_completed: false,
+            smart_shortcut: default_smart_shortcut(),
+            smart_enabled: true,
             hold_shortcut: default_hold_shortcut(),
-            hold_enabled: true,
+            hold_enabled: false,
             toggle_shortcut: default_toggle_shortcut(),
-            toggle_enabled: true,
+            toggle_enabled: false,
             transcription_mode: default_transcription_mode(),
             local_model: default_local_model(),
             microphone_device: None,

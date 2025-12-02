@@ -14,9 +14,9 @@ import {
     ChevronRight,
     Check,
     ExternalLink,
-    Keyboard,
     User,
     Loader2,
+    Wand2,
 } from "lucide-react";
 
 type OnboardingStep = "welcome" | "microphone" | "accessibility" | "ready";
@@ -139,12 +139,53 @@ const StatusBadge = ({ granted, checking }: { granted: boolean; checking?: boole
     );
 };
 
+const modifierOrder = ["Control", "Shift", "Alt", "Command"];
+
+const normalizeModifier = (event: KeyboardEvent): string | null => {
+    switch (event.key) {
+        case "Control": return "Control";
+        case "Shift": return "Shift";
+        case "Alt": return "Alt";
+        case "Meta": return "Command";
+        default: return null;
+    }
+};
+
+const formatKey = (code: string): string | null => {
+    if (code.startsWith("Key")) return code.replace("Key", "");
+    if (code.startsWith("Digit")) return code.replace("Digit", "");
+    const specialKeys: Record<string, string> = {
+        Space: "Space", Backspace: "Backspace", Enter: "Enter", Tab: "Tab",
+        ArrowUp: "Up", ArrowDown: "Down", ArrowLeft: "Left", ArrowRight: "Right",
+        Escape: "Escape", Delete: "Delete", Insert: "Insert", Home: "Home", End: "End",
+        PageUp: "PageUp", PageDown: "PageDown", Backquote: "`", Minus: "-", Equal: "=",
+        BracketLeft: "[", BracketRight: "]", Backslash: "\\", Semicolon: ";",
+        Quote: "'", Comma: ",", Period: ".", Slash: "/",
+    };
+    if (specialKeys[code]) return specialKeys[code];
+    if (code.startsWith("F") && !isNaN(Number(code.slice(1)))) return code;
+    return null;
+};
+
+const formatShortcutForDisplay = (shortcut: string): string => {
+    return shortcut
+        .replace(/Control/g, "Ctrl")
+        .replace(/Command/g, "⌘")
+        .replace(/\+/g, " + ");
+};
+
 const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [step, setStep] = useState<OnboardingStep>("welcome");
     const [micPermission, setMicPermission] = useState(false);
     const [accessibilityPermission, setAccessibilityPermission] = useState(false);
     const [isCheckingMic, setIsCheckingMic] = useState(true);
     const [isCheckingAccessibility, setIsCheckingAccessibility] = useState(true);
+    
+    // Smart mode shortcut state
+    const [smartShortcut, setSmartShortcut] = useState("Control+Space");
+    const [captureActive, setCaptureActive] = useState(false);
+    const pressedModifiers = useRef<Set<string>>(new Set());
+    const primaryKey = useRef<string | null>(null);
 
     const steps: OnboardingStep[] = ["welcome", "microphone", "accessibility", "ready"];
     const currentStepIndex = steps.indexOf(step);
@@ -230,6 +271,25 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const handleComplete = async () => {
         try {
+            // Save the smart shortcut setting before completing onboarding
+            await invoke("update_settings", {
+                smartShortcut,
+                smartEnabled: true,
+                holdShortcut: "Control+Shift+Space",
+                holdEnabled: false,
+                toggleShortcut: "Control+Alt+Space",
+                toggleEnabled: false,
+                transcriptionMode: "cloud",
+                localModel: "parakeet_tdt_int8",
+                microphoneDevice: null,
+                language: "en",
+                llmCleanupEnabled: false,
+                llmProvider: "none",
+                llmEndpoint: "",
+                llmApiKey: "",
+                llmModel: "",
+                userContext: "",
+            });
             await invoke("complete_onboarding");
             onComplete();
         } catch {
@@ -243,6 +303,65 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
             setStep(steps[nextIndex]);
         }
     };
+
+    const finalizeCapture = () => {
+        setCaptureActive(false);
+        pressedModifiers.current.clear();
+        primaryKey.current = null;
+    };
+
+    const buildShortcut = () => {
+        if (!primaryKey.current) return null;
+        const orderedMods = Array.from(pressedModifiers.current).sort(
+            (a, b) => modifierOrder.indexOf(a) - modifierOrder.indexOf(b)
+        );
+        const formattedKey = formatKey(primaryKey.current);
+        if (!formattedKey) return null;
+        return [...orderedMods, formattedKey].join("+");
+    };
+
+    // Handle keyboard capture for shortcut editing
+    useEffect(() => {
+        if (!captureActive) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            event.preventDefault();
+            const modifier = normalizeModifier(event);
+            if (modifier) {
+                pressedModifiers.current.add(modifier);
+            } else if (event.code) {
+                primaryKey.current = event.code;
+            }
+        };
+
+        const handleKeyUp = (event: KeyboardEvent) => {
+            event.preventDefault();
+            if (!primaryKey.current && pressedModifiers.current.size === 0) return;
+
+            const combo = buildShortcut();
+            if (combo) {
+                setSmartShortcut(combo);
+            }
+            finalizeCapture();
+        };
+
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                event.preventDefault();
+                finalizeCapture();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown, true);
+        window.addEventListener("keyup", handleKeyUp, true);
+        window.addEventListener("keydown", handleEscape, true);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown, true);
+            window.removeEventListener("keyup", handleKeyUp, true);
+            window.removeEventListener("keydown", handleEscape, true);
+        };
+    }, [captureActive]);
 
     return (
         <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0a0a0c] text-white select-none">
@@ -429,30 +548,57 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             </h2>
 
                             <p className="text-sm text-[#6b6b76] mb-6">
-                                Use these shortcuts to start transcribing:
+                                Smart Mode is your default shortcut. Click to customize:
                             </p>
 
-                            <div className="grid grid-cols-2 gap-3 w-full mb-6">
-                                <div className="rounded-lg border border-[#1e1e22] bg-[#111113] p-3 text-left">
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <Keyboard size={11} className="text-amber-400" />
-                                        <span className="text-[10px] font-medium text-[#6b6b76] uppercase tracking-wide">Hold</span>
+                            <motion.button
+                                onClick={() => {
+                                    if (!captureActive) {
+                                        pressedModifiers.current.clear();
+                                        primaryKey.current = null;
+                                        setCaptureActive(true);
+                                    }
+                                }}
+                                className={`w-full max-w-xs rounded-xl border p-4 text-left transition-all ${
+                                    captureActive 
+                                        ? "border-amber-400 bg-amber-400/10" 
+                                        : "border-amber-400/30 bg-amber-400/5 hover:border-amber-400/50 hover:bg-amber-400/10"
+                                }`}
+                                animate={captureActive ? {
+                                    borderColor: ["rgba(251, 191, 36, 0.5)", "rgba(251, 191, 36, 1)", "rgba(251, 191, 36, 0.5)"]
+                                } : {}}
+                                transition={{ duration: 1.2, repeat: captureActive ? Infinity : 0 }}
+                            >
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/20">
+                                        <Wand2 size={14} className="text-amber-400" />
                                     </div>
-                                    <code className="text-xs text-[#e8e8eb]">Ctrl + Space</code>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[12px] font-medium text-[#e8e8eb]">Smart Mode</span>
+                                            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-400">Default</span>
+                                        </div>
+                                        <p className="text-[10px] text-[#6b6b76]">Quick tap = hold, long press = toggle</p>
+                                    </div>
                                 </div>
+                                <div className="flex items-center justify-between">
+                                    <code className={`text-sm font-mono ${captureActive ? "text-amber-400" : "text-[#e8e8eb]"}`}>
+                                        {captureActive ? "Press new shortcut..." : formatShortcutForDisplay(smartShortcut)}
+                                    </code>
+                                    <span className="text-[10px] text-[#6b6b76]">
+                                        {captureActive ? "Esc to cancel" : "Click to change"}
+                                    </span>
+                                </div>
+                            </motion.button>
 
-                                <div className="rounded-lg border border-[#1e1e22] bg-[#111113] p-3 text-left">
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <Keyboard size={11} className="text-amber-400" />
-                                        <span className="text-[10px] font-medium text-[#6b6b76] uppercase tracking-wide">Toggle</span>
-                                    </div>
-                                    <code className="text-xs text-[#e8e8eb]">Ctrl + Shift + Space</code>
-                                </div>
-                            </div>
+                            <p className="mt-4 text-[11px] text-[#4a4a54]">
+                                You can add more shortcuts in Settings later.
+                            </p>
 
                             <button
                                 onClick={handleComplete}
-                                className="flex items-center gap-2 rounded-lg bg-amber-400 px-6 py-2.5 text-sm font-semibold text-black hover:bg-amber-300 transition-colors"
+                                disabled={captureActive}
+                                className="mt-6 flex items-center gap-2 rounded-lg bg-amber-400 px-6 py-2.5 text-sm font-semibold text-black hover:bg-amber-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Sparkles size={15} />
                                 Get Started

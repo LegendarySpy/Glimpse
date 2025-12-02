@@ -5,6 +5,7 @@ use serde::Serialize;
 /// Status of a permission request
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
+#[allow(dead_code)]
 pub enum PermissionStatus {
     /// Permission has been granted
     Granted,
