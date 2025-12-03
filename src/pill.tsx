@@ -65,7 +65,7 @@ export interface PillOverlayProps {
 const PillOverlay: React.FC<PillOverlayProps> = ({
   className = "",
   style = {},
-  sensitivity = 2,
+  sensitivity = 3,
   decay = 0.85,
 }) => {
   // Refs
