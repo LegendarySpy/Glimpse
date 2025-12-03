@@ -35,6 +35,14 @@ function App() {
     setWindowLabel(win.label);
   }, []);
 
+  useEffect(() => {
+    const handleContextMenu = (event: MouseEvent) => {
+      event.preventDefault();
+    };
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => document.removeEventListener("contextmenu", handleContextMenu);
+  }, []);
+
   // Check onboarding status for settings window
   useEffect(() => {
     if (windowLabel === "settings") {

@@ -33,6 +33,8 @@
         "title": "Glimpse Settings",
         "width": 900,
         "height": 650,
+        "minWidth": 625,
+        "minHeight": 400,
         "resizable": true,
         "visible": false,
         "hiddenTitle": true,

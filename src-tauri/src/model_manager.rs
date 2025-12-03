@@ -96,9 +96,9 @@ const WHISPER_SMALL_Q5_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
     name: "ggml-small-q5_1.bin",
 }];
 
-const WHISPER_MEDIUM_Q4_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
-    url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q4_1.bin",
-    name: "ggml-medium-q4_1.bin",
+const WHISPER_MEDIUM_Q8_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
+    url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q8_0.bin",
+    name: "ggml-medium-q8_0.bin",
 }];
 
 pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
@@ -106,7 +106,7 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         key: "parakeet_tdt_int8",
         label: "Parakeet TDT 0.6B",
         description: "Fast multilingual transcription with NVIDIA's quantized Parakeet model.",
-        size_mb: 980.0,
+        size_mb: 700.0,
         files: &PARAKEET_TDT_INT8_FILES,
         engine: LocalModelEngine::Parakeet { quantized: true },
         variant: "Int8 Quantized",
@@ -117,7 +117,7 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         key: "parakeet_tdt_fp32",
         label: "Parakeet TDT 0.6B",
         description: "Highest accuracy Parakeet model with full-precision weights.",
-        size_mb: 1350.0,
+        size_mb: 2300.0,
         files: &PARAKEET_TDT_FP32_FILES,
         engine: LocalModelEngine::Parakeet { quantized: false },
         variant: "FP32 Precision",
@@ -128,7 +128,7 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         key: "whisper_small_q5",
         label: "Whisper Small",
         description: "CPU-friendly, supports custom words.",
-        size_mb: 480.0,
+        size_mb: 200.0,
         files: &WHISPER_SMALL_Q5_FILES,
         engine: LocalModelEngine::Whisper,
         variant: "Q5_1",
@@ -138,16 +138,16 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         tags: &["English", "Custom Words", "CPU Friendly"],
     },
     ModelDefinition {
-        key: "whisper_medium_q4",
+        key: "whisper_medium_q8_1",
         label: "Whisper Medium",
         description:
-            "Best quality local Whisper model with multilingual support, supports custom words.",
-        size_mb: 1500.0,
-        files: &WHISPER_MEDIUM_Q4_FILES,
+            "Good quality local Whisper model with multilingual support, supports custom words.",
+        size_mb: 820.0,
+        files: &WHISPER_MEDIUM_Q8_FILES,
         engine: LocalModelEngine::Whisper,
-        variant: "Q4_1",
+        variant: "Q8_1",
         storage: ModelStorage::File {
-            artifact: "ggml-medium-q4_1.bin",
+            artifact: "ggml-medium-q8_0.bin",
         },
         tags: &["Multilingual", "Custom Words", "Balanced"],
     },

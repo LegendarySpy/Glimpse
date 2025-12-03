@@ -20,13 +20,13 @@ const SidebarItem = ({
 }) => (
     <motion.button
         onClick={onClick}
-        className={`group flex w-full items-center gap-3 rounded-lg h-9 transition-colors pl-[13px] ${active
+        className={`group flex items-center rounded-lg h-9 transition-colors ${collapsed ? "w-[46px] justify-center ml-[7px]" : "w-full gap-3 pl-[13px]"} ${active
             ? "bg-[#1a1a1e] text-[#e8e8eb]"
             : "text-[#6b6b76] hover:bg-[#151517] hover:text-[#a0a0ab]"
             }`}
         whileTap={{ scale: 0.97 }}
     >
-        <div className={`shrink-0 ${active ? "text-[#e8e8eb]" : "group-hover:text-[#a0a0ab]"}`}>
+        <div className={`shrink-0 ${collapsed ? "flex items-center justify-center" : ""} ${active ? "text-[#e8e8eb]" : "group-hover:text-[#a0a0ab]"}`}>
             {icon}
         </div>
         <AnimatePresence mode="wait" initial={false}>
@@ -50,7 +50,7 @@ const Home = () => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
     const [activeView, setActiveView] = useState<"home" | "dictionary" | "brain">("home");
 
-    const sidebarWidth = isSidebarCollapsed ? 60 : 200;
+    const sidebarWidth = isSidebarCollapsed ? 68 : 200;
 
     // Get greeting based on time of day
     const getGreeting = () => {
@@ -129,7 +129,7 @@ const Home = () => {
                     />
                     <SidebarItem
                         icon={<Brain size={18} />}
-                        label="Brain"
+                        label="Personalization"
                         active={activeView === "brain"}
                         collapsed={isSidebarCollapsed}
                         onClick={() => setActiveView("brain")}
@@ -223,7 +223,7 @@ const Home = () => {
                                 className="flex flex-col items-center justify-center text-[#4a4a54]"
                             >
                                 <Brain size={48} strokeWidth={1} className="mb-4 opacity-50" />
-                                <p>Brain</p>
+                                <p>Personalization</p>
                             </motion.div>
                         )}
                     </AnimatePresence>

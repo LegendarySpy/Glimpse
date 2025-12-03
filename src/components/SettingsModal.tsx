@@ -1071,7 +1071,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                             </div>
                                                             <div>
                                                                 <h3 className="text-[13px] font-medium text-[#e8e8eb]">AI Cleanup</h3>
-                                                                <p className="text-[11px] text-[#4a4a54]">Use LLM to clean up transcriptions</p>
+                                                                <p className="text-[11px] text-[#4a4a54]">Use an LLM to clean up transcriptions</p>
                                                             </div>
                                                         </div>
                                                         <motion.button

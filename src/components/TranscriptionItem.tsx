@@ -226,7 +226,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                             </p>
                         </div>
                     ) : (
-                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#c8c8d2]">
+                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#c8c8d2] select-text cursor-text">
                             {truncatedText}
                         </p>
                     )}
@@ -269,9 +269,26 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                     </div>
                 </div>
 
-                {/* Actions - Three dot menu (or trash when shift held) */}
+                {/* Actions - Copy and menu buttons */}
                 {!isRetrying && !isRetryingLlm && !isUndoingLlm && (
-                    <div className="relative shrink-0" ref={menuRef}>
+                    <div className="relative shrink-0 flex items-center gap-1" ref={menuRef}>
+                        {!isError && (
+                            <motion.button
+                                onClick={handleCopy}
+                                whileTap={{ scale: 0.95 }}
+                                className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 hover:bg-[#1a1a1e] ${
+                                    copied ? "bg-[#1a1a1e]" : ""
+                                }`}
+                                title={copied ? "Copied" : "Copy transcription"}
+                            >
+                                {copied ? (
+                                    <Check size={14} className="text-[#4ade80]" />
+                                ) : (
+                                    <Copy size={14} className="text-[#c8c8d2]" />
+                                )}
+                            </motion.button>
+                        )}
+
                         <motion.button
                             onClick={() => {
                                 if (shiftHeld) {
@@ -306,20 +323,6 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                         right: menuRef.current ? window.innerWidth - menuRef.current.getBoundingClientRect().right : 0,
                                     }}
                                 >
-                                    {!isError && (
-                                        <button
-                                            onClick={handleCopy}
-                                            className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-[#c8c8d2] hover:bg-[#1a1a1e] transition-colors"
-                                        >
-                                            {copied ? (
-                                                <Check size={12} className="text-[#4ade80]" />
-                                            ) : (
-                                                <Copy size={12} className="text-[#6b6b76]" />
-                                            )}
-                                            <span>{copied ? "Copied!" : "Copy to clipboard"}</span>
-                                        </button>
-                                    )}
-
                                     {isError && (
                                         <button
                                             onClick={handleRetry}
