@@ -50,7 +50,7 @@ const COLORS = {
 interface RecordingStartPayload { started_at: string; }
 interface RecordingErrorPayload { message: string; }
 interface TranscriptionStartPayload { path: string; }
-interface TranscriptionCompletePayload { transcript: string; confidence?: number | null; auto_paste: boolean; }
+interface TranscriptionCompletePayload { transcript: string; auto_paste: boolean; }
 interface TranscriptionErrorPayload { message: string; stage: string; }
 
 // --- Main Pill Component ---

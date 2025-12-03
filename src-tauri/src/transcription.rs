@@ -45,7 +45,7 @@ fn env_flag(key: &str, default: bool) -> bool {
 #[derive(Debug, Deserialize)]
 pub struct TranscriptionSuccess {
     pub transcript: String,
-    pub confidence: Option<f32>,
+    pub speech_model: Option<String>,
 }
 
 pub fn normalize_transcript(input: &str) -> String {
@@ -72,7 +72,8 @@ pub fn normalize_transcript(input: &str) -> String {
 #[derive(Debug, Deserialize)]
 struct ApiResponse {
     transcript: String,
-    confidence: Option<f32>,
+    #[serde(default)]
+    model: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -123,7 +124,7 @@ pub async fn request_transcription(
             .with_context(|| format!("Unexpected transcription response: {text}"))?;
         return Ok(TranscriptionSuccess {
             transcript: normalize_transcript(&parsed.transcript),
-            confidence: parsed.confidence,
+            speech_model: parsed.model,
         });
     }
 

@@ -377,7 +377,10 @@ fn update_settings(
             let (name1, shortcut1) = enabled_shortcuts[i];
             let (name2, shortcut2) = enabled_shortcuts[j];
             if shortcut1.to_lowercase() == shortcut2.to_lowercase() {
-                return Err(format!("{} and {} shortcuts cannot be the same", name1, name2));
+                return Err(format!(
+                    "{} and {} shortcuts cannot be the same",
+                    name1, name2
+                ));
             }
         }
     }
@@ -571,7 +574,7 @@ async fn retry_transcription(
         match result {
             Ok(result) => {
                 let raw_transcript = result.transcript.clone();
-                let confidence = result.confidence;
+                let reported_model = result.speech_model.clone();
 
                 // Apply LLM cleanup if enabled (same as normal transcription flow)
                 let (final_transcript, llm_cleaned) =
@@ -616,14 +619,23 @@ async fn retry_transcription(
                     }
                 }
 
+                let metadata = build_transcription_metadata(
+                    &saved_for_task,
+                    &settings,
+                    use_local,
+                    reported_model.as_deref(),
+                    &final_transcript,
+                    llm_cleaned,
+                );
+
                 emit_transcription_complete_with_cleanup(
                     &app_handle,
                     raw_transcript,
                     final_transcript,
-                    confidence,
                     pasted,
                     saved_for_task.path.display().to_string(),
                     llm_cleaned,
+                    metadata,
                 );
 
                 hide_overlay(&app_handle);
@@ -663,6 +675,7 @@ async fn retry_llm_cleanup(
     if !llm_cleanup::is_cleanup_available(&settings) {
         return Err("LLM cleanup is not configured".to_string());
     }
+    let llm_model = llm_cleanup::resolved_model_name(&settings);
 
     // Use raw text if available, otherwise use current text
     let text_to_clean = record.raw_text.unwrap_or(record.text);
@@ -674,7 +687,9 @@ async fn retry_llm_cleanup(
     async_runtime::spawn(async move {
         match llm_cleanup::cleanup_transcription(&http, &text_to_clean, &settings).await {
             Ok(cleaned) => {
-                if let Err(err) = storage.update_with_llm_cleanup(&record_id, cleaned) {
+                if let Err(err) =
+                    storage.update_with_llm_cleanup(&record_id, cleaned, llm_model.clone())
+                {
                     eprintln!("Failed to save LLM cleanup: {err}");
                 }
                 // Emit event to refresh UI
@@ -682,7 +697,6 @@ async fn retry_llm_cleanup(
                     EVENT_TRANSCRIPTION_COMPLETE,
                     TranscriptionCompletePayload {
                         transcript: String::new(),
-                        confidence: None,
                         auto_paste: false,
                     },
                 );
@@ -710,7 +724,7 @@ async fn undo_llm_cleanup(
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
     let storage = state.storage();
-    
+
     match storage.revert_to_raw(&id) {
         Ok(Some(_)) => {
             // Emit event to refresh UI
@@ -718,7 +732,6 @@ async fn undo_llm_cleanup(
                 EVENT_TRANSCRIPTION_COMPLETE,
                 TranscriptionCompletePayload {
                     transcript: String::new(),
-                    confidence: None,
                     auto_paste: false,
                 },
             );
@@ -864,17 +877,17 @@ const SMART_MODE_TAP_THRESHOLD_MS: i64 = 200;
 
 fn handle_smart_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
-    
+
     // If already recording in toggle mode, stop it
     if state.is_toggle_recording_active() {
         return handle_toggle_shortcut_press(app);
     }
-    
+
     // If already recording in hold mode, ignore (will stop on release)
     if state.get_active_recording_mode().as_deref() == Some("hold") {
         return Ok(());
     }
-    
+
     // Start recording immediately (for hold mode) and store press time
     state.set_smart_press_time(Some(chrono::Local::now()));
     handle_hold_shortcut_press(app)
@@ -882,15 +895,15 @@ fn handle_smart_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()>
 
 fn handle_smart_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
-    
+
     // Get press time to determine if this was a tap or hold
     let press_time = state.get_smart_press_time();
     state.set_smart_press_time(None);
-    
+
     if let Some(start_time) = press_time {
         let now = chrono::Local::now();
         let held_duration_ms = (now - start_time).num_milliseconds();
-        
+
         // Quick tap (< 200ms) = convert to toggle mode
         if held_duration_ms < SMART_MODE_TAP_THRESHOLD_MS {
             // Stop the hold recording and start toggle mode
@@ -909,7 +922,7 @@ fn handle_smart_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<(
             }
             return Ok(());
         }
-        
+
         // Long hold (>= 200ms) = normal hold mode, stop on release
         handle_hold_shortcut_release(app)
     } else {
@@ -1281,7 +1294,7 @@ fn queue_transcription(
         match result {
             Ok(result) => {
                 let raw_transcript = result.transcript.clone();
-                let confidence = result.confidence;
+                let reported_model = result.speech_model.clone();
 
                 // Apply LLM cleanup if enabled
                 let (final_transcript, llm_cleaned) =
@@ -1324,14 +1337,23 @@ fn queue_transcription(
                     }
                 }
 
+                let metadata = build_transcription_metadata(
+                    &saved_for_task,
+                    &settings,
+                    use_local,
+                    reported_model.as_deref(),
+                    &final_transcript,
+                    llm_cleaned,
+                );
+
                 emit_transcription_complete_with_cleanup(
                     &app_handle,
                     raw_transcript,
                     final_transcript,
-                    confidence,
                     pasted,
                     saved_for_task.path.display().to_string(),
                     llm_cleaned,
+                    metadata,
                 );
 
                 // Hide overlay immediately on success
@@ -1362,48 +1384,20 @@ fn emit_transcription_start(app: &AppHandle<AppRuntime>, saved: &RecordingSaved)
 }
 
 #[allow(dead_code)]
-fn emit_transcription_complete(
-    app: &AppHandle<AppRuntime>,
-    transcript: String,
-    confidence: Option<f32>,
-    auto_paste: bool,
-    audio_path: String,
-) {
-    emit_event(
-        app,
-        EVENT_TRANSCRIPTION_COMPLETE,
-        TranscriptionCompletePayload {
-            transcript: transcript.clone(),
-            confidence,
-            auto_paste,
-        },
-    );
-
-    // Save successful transcription to storage with the provided audio path
-    let _ = app.state::<AppState>().storage().save_transcription(
-        transcript,
-        audio_path,
-        storage::TranscriptionStatus::Success,
-        None,
-        confidence,
-    );
-}
-
 fn emit_transcription_complete_with_cleanup(
     app: &AppHandle<AppRuntime>,
     raw_transcript: String,
     final_transcript: String,
-    confidence: Option<f32>,
     auto_paste: bool,
     audio_path: String,
     llm_cleaned: bool,
+    metadata: storage::TranscriptionMetadata,
 ) {
     emit_event(
         app,
         EVENT_TRANSCRIPTION_COMPLETE,
         TranscriptionCompletePayload {
             transcript: final_transcript.clone(),
-            confidence,
             auto_paste,
         },
     );
@@ -1417,7 +1411,7 @@ fn emit_transcription_complete_with_cleanup(
                 raw_transcript,
                 final_transcript,
                 audio_path,
-                confidence,
+                metadata,
             );
     } else {
         let _ = app.state::<AppState>().storage().save_transcription(
@@ -1425,7 +1419,7 @@ fn emit_transcription_complete_with_cleanup(
             audio_path,
             storage::TranscriptionStatus::Success,
             None,
-            confidence,
+            metadata,
         );
     }
 }
@@ -1453,6 +1447,10 @@ fn emit_transcription_error(
 
     // Create user-friendly toast message
     let toast_message = format_transcription_error(&message, is_local);
+    let metadata = storage::TranscriptionMetadata {
+        speech_model: resolve_speech_model_label(&settings, is_local, None),
+        ..Default::default()
+    };
 
     // Save failed transcription to storage with the clean error message
     let record_result = app.state::<AppState>().storage().save_transcription(
@@ -1460,7 +1458,7 @@ fn emit_transcription_error(
         audio_path.clone(),
         storage::TranscriptionStatus::Error,
         Some(toast_message.clone()),
-        None,
+        metadata,
     );
 
     let retry_id = if !is_local {
@@ -1538,6 +1536,53 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
     } else {
         "Transcription failed".to_string()
     }
+}
+
+fn build_transcription_metadata(
+    saved: &RecordingSaved,
+    settings: &UserSettings,
+    use_local: bool,
+    reported_model: Option<&str>,
+    final_text: &str,
+    llm_cleaned: bool,
+) -> storage::TranscriptionMetadata {
+    storage::TranscriptionMetadata {
+        speech_model: resolve_speech_model_label(settings, use_local, reported_model),
+        llm_model: if llm_cleaned {
+            llm_cleanup::resolved_model_name(settings)
+        } else {
+            None
+        },
+        word_count: count_words(final_text),
+        audio_duration_seconds: compute_audio_duration_seconds(saved),
+    }
+}
+
+fn resolve_speech_model_label(
+    settings: &UserSettings,
+    use_local: bool,
+    reported_model: Option<&str>,
+) -> String {
+    if use_local {
+        model_manager::definition(&settings.local_model)
+            .map(|def| def.label.to_string())
+            .unwrap_or_else(|| settings.local_model.clone())
+    } else if let Some(model) = reported_model {
+        model.to_string()
+    } else {
+        "Cloud API".to_string()
+    }
+}
+
+fn compute_audio_duration_seconds(saved: &RecordingSaved) -> f32 {
+    let duration_ms = (saved.ended_at - saved.started_at).num_milliseconds();
+    (duration_ms.max(0) as f32) / 1000.0
+}
+
+fn count_words(text: &str) -> u32 {
+    text.split_whitespace()
+        .filter(|word| !word.is_empty())
+        .count() as u32
 }
 
 /// Simplifies recording error messages
@@ -1728,7 +1773,6 @@ struct TranscriptionStartPayload {
 #[derive(Serialize, Clone)]
 struct TranscriptionCompletePayload {
     transcript: String,
-    confidence: Option<f32>,
     auto_paste: bool,
 }
 

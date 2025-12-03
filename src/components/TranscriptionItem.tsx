@@ -126,6 +126,18 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
     const isError = record.status === "error";
     const errorMessage = record.error_message || "Transcription failed";
     const displayText = isError ? null : record.text;
+    const speechModelLabel = record.speech_model?.trim() ? record.speech_model : "Unknown model";
+    const llmModelLabel = record.llm_model?.trim() || null;
+    const wordCountLabel = `${record.word_count || 0} ${record.word_count === 1 ? "word" : "words"}`;
+    const formatDuration = (seconds: number) => {
+        if (!Number.isFinite(seconds) || seconds <= 0) return "0s audio";
+        if (seconds < 60) {
+            return `${seconds < 10 ? seconds.toFixed(1) : seconds.toFixed(0)}s audio`;
+        }
+        const minutes = Math.floor(seconds / 60);
+        const remaining = Math.round(seconds % 60);
+        return remaining === 0 ? `${minutes}m audio` : `${minutes}m ${remaining}s audio`;
+    };
 
     // Only truncate if text is very long (>300 chars)
     const shouldTruncate = displayText && displayText.length > 300;
@@ -219,11 +231,21 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                         </p>
                     )}
 
-                    <div className="flex items-center gap-3 mt-1">
-                        {record.confidence && !isError && (
-                            <span className="text-[9px] text-[#4a4a54]">
-                                {Math.round(record.confidence * 100)}% confidence
-                            </span>
+                    <div className="flex flex-wrap items-center gap-3 mt-1 text-[9px] text-[#4a4a54]">
+                        {!isError && (
+                            <>
+                                <span>{wordCountLabel}</span>
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                <span>{formatDuration(record.audio_duration_seconds ?? 0)}</span>
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                <span>Speech: {speechModelLabel}</span>
+                                {llmModelLabel && (
+                                    <>
+                                        <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                        <span>LLM: {llmModelLabel}</span>
+                                    </>
+                                )}
+                            </>
                         )}
 
                         {shouldTruncate && (

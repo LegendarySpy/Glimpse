@@ -11,7 +11,7 @@ use transcribe_rs::{
 };
 
 use crate::{
-    model_manager::{LocalModelEngine, ReadyModel},
+    model_manager::{self, LocalModelEngine, ReadyModel},
     transcription::{normalize_transcript, TranscriptionSuccess},
 };
 
@@ -49,6 +49,9 @@ impl LocalTranscriber {
     ) -> Result<TranscriptionSuccess> {
         self.ensure_engine(model)?;
         let prepared = prepare_audio(samples, sample_rate);
+        let model_label = model_manager::definition(&model.key)
+            .map(|def| def.label.to_string())
+            .unwrap_or_else(|| model.key.clone());
 
         let mut guard = self.inner.lock();
         let loaded = guard
@@ -72,7 +75,7 @@ impl LocalTranscriber {
 
         Ok(TranscriptionSuccess {
             transcript: normalize_transcript(&transcript),
-            confidence: None,
+            speech_model: Some(model_label),
         })
     }
 

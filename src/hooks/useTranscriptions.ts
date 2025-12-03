@@ -6,12 +6,15 @@ export interface TranscriptionRecord {
     id: string;
     timestamp: string;
     text: string;
-    raw_text?: string;
+    raw_text?: string | null;
     audio_path: string;
     status: "success" | "error";
     error_message?: string;
-    confidence?: number;
-    llm_cleaned?: boolean;
+    llm_cleaned: boolean;
+    speech_model: string;
+    llm_model?: string | null;
+    word_count: number;
+    audio_duration_seconds: number;
 }
 
 export function useTranscriptions() {

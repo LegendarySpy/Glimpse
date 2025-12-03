@@ -43,6 +43,7 @@ tokio = { version = "1", features = ["time"] }
 uuid = { version = "1.18.1", features = ["v4"] }
 minimp3 = "0.5"
 tauri-plugin-macos-permissions = "2.3.0"
+rusqlite = { version = "0.31", features = ["bundled"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"

@@ -95,7 +95,7 @@ fn get_endpoint(settings: &UserSettings) -> Result<String> {
     ))
 }
 
-fn get_model(settings: &UserSettings) -> String {
+fn resolve_model(settings: &UserSettings) -> String {
     if !settings.llm_model.is_empty() {
         return settings.llm_model.clone();
     }
@@ -124,7 +124,7 @@ pub async fn cleanup_transcription(
     };
 
     let body = ChatRequest {
-        model: get_model(settings),
+        model: resolve_model(settings),
         messages: vec![
             Message {
                 role: "system".into(),
@@ -165,4 +165,12 @@ pub async fn cleanup_transcription(
 
 pub fn is_cleanup_available(settings: &UserSettings) -> bool {
     settings.llm_cleanup_enabled && !matches!(settings.llm_provider, LlmProvider::None)
+}
+
+pub fn resolved_model_name(settings: &UserSettings) -> Option<String> {
+    if !is_cleanup_available(settings) {
+        None
+    } else {
+        Some(resolve_model(settings))
+    }
 }
