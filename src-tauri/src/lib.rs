@@ -30,6 +30,7 @@ use tauri::menu::{MenuBuilder, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::Emitter;
 use tauri::{ActivationPolicy, AppHandle, Manager, WebviewWindow, Wry};
+use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 const MAIN_WINDOW_LABEL: &str = "main";
@@ -126,6 +127,7 @@ pub fn run() {
             get_settings,
             update_settings,
             get_app_info,
+            open_data_dir,
             get_transcriptions,
             delete_transcription,
             retry_transcription,
@@ -476,6 +478,21 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
         data_dir_size_bytes,
         data_dir_path,
     })
+}
+
+#[tauri::command]
+fn open_data_dir(path: Option<String>, app: AppHandle<AppRuntime>) -> Result<(), String> {
+    let path = path.ok_or_else(|| "Path is empty".to_string())?;
+    let path = PathBuf::from(path);
+
+    if !path.exists() {
+        return Err("Path does not exist".to_string());
+    }
+
+    // Use reveal_item_in_dir to leverage default opener permissions and open the directory
+    app.opener()
+        .reveal_item_in_dir(&path)
+        .map_err(|err| format!("Failed to open path: {err}"))
 }
 
 fn calculate_dir_size(path: &std::path::Path) -> Result<u64> {

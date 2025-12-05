@@ -143,6 +143,15 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
 
+    const handleOpenDataDir = useCallback(async () => {
+        if (!appInfo?.data_dir_path) return;
+        try {
+            await invoke("open_data_dir", { path: appInfo.data_dir_path });
+        } catch (err) {
+            console.error("Failed to open data directory:", err);
+        }
+    }, [appInfo?.data_dir_path]);
+
     useEffect(() => {
         if (transcriptionMode === "cloud" && activeTab === "models") {
             setActiveTab("general");
@@ -1329,12 +1338,17 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
                                                 <div className="mt-4 pt-3 border-t border-[#1e1e22]">
                                                     <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1.5">Data Location</p>
-                                                    <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleOpenDataDir}
+                                                        disabled={!appInfo?.data_dir_path}
+                                                        className="flex w-full items-center gap-2 px-1.5 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#2a2a30] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                    >
                                                         <FolderOpen size={12} className="text-[#4a4a54] shrink-0" />
-                                                        <p className="text-[11px] text-[#6b6b76] font-mono truncate">
+                                                        <span className="text-[11px] text-[#6b6b76] font-mono truncate border-b border-dotted border-[#6b6b76] pb-[1px] leading-[1.2]">
                                                             {appInfo?.data_dir_path ?? "—"}
-                                                        </p>
-                                                    </div>
+                                                        </span>
+                                                    </button>
                                                 </div>
                                             </div>
 
