@@ -17,7 +17,7 @@ interface GridInfo {
 
 // --- Constants ---
 
-const PILL_WIDTH = 107;
+const PILL_WIDTH = 97;
 const PILL_HEIGHT = 27;
 const DOT_SPACING = 3;
 const DOT_RADIUS = {
