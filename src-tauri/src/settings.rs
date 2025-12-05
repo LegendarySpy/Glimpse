@@ -7,7 +7,23 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
 const SETTINGS_DB_FILE_NAME: &str = "settings.db";
-const SETTINGS_DB_KEY: &str = "user_settings";
+const KEY_ONBOARDING_COMPLETED: &str = "onboarding_completed";
+const KEY_SMART_SHORTCUT: &str = "smart_shortcut";
+const KEY_SMART_ENABLED: &str = "smart_enabled";
+const KEY_HOLD_SHORTCUT: &str = "hold_shortcut";
+const KEY_HOLD_ENABLED: &str = "hold_enabled";
+const KEY_TOGGLE_SHORTCUT: &str = "toggle_shortcut";
+const KEY_TOGGLE_ENABLED: &str = "toggle_enabled";
+const KEY_TRANSCRIPTION_MODE: &str = "transcription_mode";
+const KEY_LOCAL_MODEL: &str = "local_model";
+const KEY_MICROPHONE_DEVICE: &str = "microphone_device";
+const KEY_LANGUAGE: &str = "language";
+const KEY_LLM_CLEANUP_ENABLED: &str = "llm_cleanup_enabled";
+const KEY_LLM_PROVIDER: &str = "llm_provider";
+const KEY_LLM_ENDPOINT: &str = "llm_endpoint";
+const KEY_LLM_API_KEY: &str = "llm_api_key";
+const KEY_LLM_MODEL: &str = "llm_model";
+const KEY_USER_CONTEXT: &str = "user_context";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSettings {
@@ -168,33 +184,100 @@ impl SettingsStore {
     /// Load settings from DB, falling back to defaults if empty.
     pub fn load(&self) -> Result<UserSettings> {
         let conn = self.conn.lock();
-        let raw: Option<String> = conn
-            .query_row(
-                "SELECT value FROM settings WHERE key = ?1",
-                params![SETTINGS_DB_KEY],
-                |row| row.get(0),
-            )
-            .optional()
-            .context("Failed to read settings from DB")?;
-        drop(conn);
+        let mut settings = UserSettings::default();
 
-        if let Some(raw) = raw {
-            serde_json::from_str(&raw).context("Malformed settings JSON in DB")
-        } else {
-            Ok(UserSettings::default())
-        }
+        settings.onboarding_completed =
+            self.read_value(&conn, KEY_ONBOARDING_COMPLETED, settings.onboarding_completed)?;
+        settings.smart_shortcut =
+            self.read_value(&conn, KEY_SMART_SHORTCUT, settings.smart_shortcut.clone())?;
+        settings.smart_enabled =
+            self.read_value(&conn, KEY_SMART_ENABLED, settings.smart_enabled)?;
+        settings.hold_shortcut =
+            self.read_value(&conn, KEY_HOLD_SHORTCUT, settings.hold_shortcut.clone())?;
+        settings.hold_enabled = self.read_value(&conn, KEY_HOLD_ENABLED, settings.hold_enabled)?;
+        settings.toggle_shortcut =
+            self.read_value(&conn, KEY_TOGGLE_SHORTCUT, settings.toggle_shortcut.clone())?;
+        settings.toggle_enabled =
+            self.read_value(&conn, KEY_TOGGLE_ENABLED, settings.toggle_enabled)?;
+        settings.transcription_mode = self
+            .read_value(&conn, KEY_TRANSCRIPTION_MODE, settings.transcription_mode.clone())?;
+        settings.local_model =
+            self.read_value(&conn, KEY_LOCAL_MODEL, settings.local_model.clone())?;
+        settings.microphone_device = self.read_value(
+            &conn,
+            KEY_MICROPHONE_DEVICE,
+            settings.microphone_device.clone(),
+        )?;
+        settings.language = self.read_value(&conn, KEY_LANGUAGE, settings.language.clone())?;
+        settings.llm_cleanup_enabled = self
+            .read_value(&conn, KEY_LLM_CLEANUP_ENABLED, settings.llm_cleanup_enabled)?;
+        settings.llm_provider =
+            self.read_value(&conn, KEY_LLM_PROVIDER, settings.llm_provider.clone())?;
+        settings.llm_endpoint =
+            self.read_value(&conn, KEY_LLM_ENDPOINT, settings.llm_endpoint.clone())?;
+        settings.llm_api_key =
+            self.read_value(&conn, KEY_LLM_API_KEY, settings.llm_api_key.clone())?;
+        settings.llm_model = self.read_value(&conn, KEY_LLM_MODEL, settings.llm_model.clone())?;
+        settings.user_context =
+            self.read_value(&conn, KEY_USER_CONTEXT, settings.user_context.clone())?;
+
+        Ok(settings)
     }
 
     /// Persist settings into DB immediately.
     pub fn save(&self, settings: &UserSettings) -> Result<()> {
-        let data = serde_json::to_string(settings)?;
         let conn = self.conn.lock();
+        self.write_value(&conn, KEY_ONBOARDING_COMPLETED, &settings.onboarding_completed)?;
+        self.write_value(&conn, KEY_SMART_SHORTCUT, &settings.smart_shortcut)?;
+        self.write_value(&conn, KEY_SMART_ENABLED, &settings.smart_enabled)?;
+        self.write_value(&conn, KEY_HOLD_SHORTCUT, &settings.hold_shortcut)?;
+        self.write_value(&conn, KEY_HOLD_ENABLED, &settings.hold_enabled)?;
+        self.write_value(&conn, KEY_TOGGLE_SHORTCUT, &settings.toggle_shortcut)?;
+        self.write_value(&conn, KEY_TOGGLE_ENABLED, &settings.toggle_enabled)?;
+        self.write_value(&conn, KEY_TRANSCRIPTION_MODE, &settings.transcription_mode)?;
+        self.write_value(&conn, KEY_LOCAL_MODEL, &settings.local_model)?;
+        self.write_value(&conn, KEY_MICROPHONE_DEVICE, &settings.microphone_device)?;
+        self.write_value(&conn, KEY_LANGUAGE, &settings.language)?;
+        self.write_value(&conn, KEY_LLM_CLEANUP_ENABLED, &settings.llm_cleanup_enabled)?;
+        self.write_value(&conn, KEY_LLM_PROVIDER, &settings.llm_provider)?;
+        self.write_value(&conn, KEY_LLM_ENDPOINT, &settings.llm_endpoint)?;
+        self.write_value(&conn, KEY_LLM_API_KEY, &settings.llm_api_key)?;
+        self.write_value(&conn, KEY_LLM_MODEL, &settings.llm_model)?;
+        self.write_value(&conn, KEY_USER_CONTEXT, &settings.user_context)?;
+        Ok(())
+    }
+
+    fn read_value<T>(&self, conn: &Connection, key: &str, default: T) -> Result<T>
+    where
+        T: for<'de> Deserialize<'de>,
+    {
+        let raw: Option<String> = conn
+            .query_row(
+                "SELECT value FROM settings WHERE key = ?1",
+                params![key],
+                |row| row.get(0),
+            )
+            .optional()
+            .context("Failed to read setting from DB")?;
+
+        if let Some(raw) = raw {
+            serde_json::from_str(&raw).context("Malformed setting JSON in DB")
+        } else {
+            Ok(default)
+        }
+    }
+
+    fn write_value<T>(&self, conn: &Connection, key: &str, value: &T) -> Result<()>
+    where
+        T: Serialize,
+    {
+        let data = serde_json::to_string(value)?;
         conn.execute(
             "INSERT INTO settings (key, value) VALUES (?1, ?2)
              ON CONFLICT(key) DO UPDATE SET value = excluded.value",
-            params![SETTINGS_DB_KEY, data],
+            params![key, data],
         )
-        .context("Failed to upsert settings into DB")?;
+        .with_context(|| format!("Failed to upsert setting '{key}' into DB"))?;
         Ok(())
     }
 }
