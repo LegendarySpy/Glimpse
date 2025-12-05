@@ -1,10 +1,13 @@
 use std::{fs, path::PathBuf};
 
 use anyhow::{Context, Result};
+use parking_lot::Mutex;
+use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
-const SETTINGS_FILE_NAME: &str = "settings.json";
+const SETTINGS_DB_FILE_NAME: &str = "settings.db";
+const SETTINGS_DB_KEY: &str = "user_settings";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSettings {
@@ -128,44 +131,81 @@ fn default_language() -> String {
     "en".to_string()
 }
 
-impl UserSettings {
-    pub fn load(app: &AppHandle) -> Result<Self> {
-        let path = settings_path(app)?;
-        if !path.exists() {
-            return Ok(Self::default());
+pub struct SettingsStore {
+    conn: Mutex<Connection>,
+}
+
+impl SettingsStore {
+    pub fn new(app: &AppHandle) -> Result<Self> {
+        let path = db_path(app)?;
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)
+                .with_context(|| format!("Failed to create settings dir {}", parent.display()))?;
         }
 
-        let contents = fs::read_to_string(&path)
-            .with_context(|| format!("Failed to read settings file at {}", path.display()))?;
-        let parsed: Self =
-            serde_json::from_str(&contents).with_context(|| "Malformed settings JSON")?;
-        Ok(parsed)
+        let conn = Connection::open(&path)
+            .with_context(|| format!("Failed to open settings DB at {}", path.display()))?;
+
+        let store = Self {
+            conn: Mutex::new(conn),
+        };
+
+        store.init_schema()?;
+
+        Ok(store)
     }
 
-    pub fn save(&self, app: &AppHandle) -> Result<()> {
-        let path = settings_path(app)?;
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent).with_context(|| {
-                format!(
-                    "Failed to create settings directory at {}",
-                    parent.display()
-                )
-            })?;
+    fn init_schema(&self) -> Result<()> {
+        let conn = self.conn.lock();
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
+            [],
+        )
+        .context("Failed to create settings table")?;
+        Ok(())
+    }
+
+    /// Load settings from DB, falling back to defaults if empty.
+    pub fn load(&self) -> Result<UserSettings> {
+        let conn = self.conn.lock();
+        let raw: Option<String> = conn
+            .query_row(
+                "SELECT value FROM settings WHERE key = ?1",
+                params![SETTINGS_DB_KEY],
+                |row| row.get(0),
+            )
+            .optional()
+            .context("Failed to read settings from DB")?;
+        drop(conn);
+
+        if let Some(raw) = raw {
+            serde_json::from_str(&raw).context("Malformed settings JSON in DB")
+        } else {
+            Ok(UserSettings::default())
         }
-        let data = serde_json::to_string_pretty(self)?;
-        fs::write(&path, data)
-            .with_context(|| format!("Failed to write settings file at {}", path.display()))?;
+    }
+
+    /// Persist settings into DB immediately.
+    pub fn save(&self, settings: &UserSettings) -> Result<()> {
+        let data = serde_json::to_string(settings)?;
+        let conn = self.conn.lock();
+        conn.execute(
+            "INSERT INTO settings (key, value) VALUES (?1, ?2)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            params![SETTINGS_DB_KEY, data],
+        )
+        .context("Failed to upsert settings into DB")?;
         Ok(())
     }
 }
 
-fn settings_path(app: &AppHandle) -> Result<PathBuf> {
+fn db_path(app: &AppHandle) -> Result<PathBuf> {
     let resolver = app.path();
     let mut dir = resolver
         .app_config_dir()
         .or_else(|_| resolver.app_data_dir())
         .context("Unable to resolve config directory")?;
     dir.push("Glimpse");
-    dir.push(SETTINGS_FILE_NAME);
+    dir.push(SETTINGS_DB_FILE_NAME);
     Ok(dir)
 }

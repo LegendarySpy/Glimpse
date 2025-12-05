@@ -22,7 +22,9 @@ use recorder::{
 };
 use reqwest::Client;
 use serde::Serialize;
-use settings::{default_local_model, LlmProvider, TranscriptionMode, UserSettings};
+use settings::{
+    default_local_model, LlmProvider, SettingsStore, TranscriptionMode, UserSettings,
+};
 use tauri::async_runtime;
 use tauri::menu::{MenuBuilder, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
@@ -55,22 +57,26 @@ pub fn run() {
             app.set_activation_policy(ActivationPolicy::Accessory);
 
             let handle = app.handle();
-            let mut settings = UserSettings::load(&handle).unwrap_or_default();
+            let settings_store = Arc::new(SettingsStore::new(&handle)?);
+            let mut settings = settings_store.load().unwrap_or_default();
             if model_manager::definition(&settings.local_model).is_none() {
                 settings.local_model = default_local_model();
-                if let Err(err) = settings.save(&handle) {
+                if let Err(err) = settings_store.save(&settings) {
                     eprintln!("Failed to persist default local model: {err}");
                 }
             }
             let needs_onboarding = !settings.onboarding_completed;
-            app.manage(AppState::new(settings, &handle));
+            app.manage(AppState::new(
+                Arc::clone(&settings_store),
+                settings,
+                &handle,
+            ));
 
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
                 position_overlay(&window);
                 let _ = window.hide();
 
                 // When main window loses focus (cmd+tab), hide toast too
-                let app_handle = handle.clone();
                 window.on_window_event(move |event| {
                     if let tauri::WindowEvent::Focused(false) = event {
                         // Keep toast visible even if the pill loses focus so warnings still show
@@ -153,6 +159,7 @@ struct AppState {
     http: Client,
     local_transcriber: Arc<local_transcription::LocalTranscriber>,
     storage: Arc<storage::StorageManager>,
+    settings_store: Arc<SettingsStore>,
     settings: parking_lot::Mutex<UserSettings>,
     tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
     hold_shortcut_down: AtomicBool,
@@ -165,7 +172,11 @@ struct AppState {
 }
 
 impl AppState {
-    fn new(settings: UserSettings, app_handle: &AppHandle<AppRuntime>) -> Self {
+    fn new(
+        settings_store: Arc<SettingsStore>,
+        settings: UserSettings,
+        app_handle: &AppHandle<AppRuntime>,
+    ) -> Self {
         let http = Client::builder()
             .timeout(Duration::from_secs(120))
             .build()
@@ -185,6 +196,7 @@ impl AppState {
             http,
             local_transcriber: Arc::new(local_transcription::LocalTranscriber::new()),
             storage: Arc::new(storage),
+            settings_store,
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
             hold_shortcut_down: AtomicBool::new(false),
@@ -196,11 +208,22 @@ impl AppState {
     }
 
     fn current_settings(&self) -> UserSettings {
-        self.settings.lock().clone()
+        match self.settings_store.load() {
+            Ok(latest) => {
+                *self.settings.lock() = latest.clone();
+                latest
+            }
+            Err(err) => {
+                eprintln!("Failed to load settings from DB, using cache: {err}");
+                self.settings.lock().clone()
+            }
+        }
     }
 
-    fn set_settings(&self, next: UserSettings) {
-        *self.settings.lock() = next;
+    fn persist_settings(&self, next: UserSettings) -> GlimpseResult<UserSettings> {
+        self.settings_store.save(&next)?;
+        *self.settings.lock() = next.clone();
+        Ok(next)
     }
 
     fn recorder(&self) -> &RecorderManager {
@@ -299,8 +322,10 @@ fn complete_onboarding(
 ) -> Result<(), String> {
     let mut settings = state.current_settings();
     settings.onboarding_completed = true;
-    settings.save(&app).map_err(|err| err.to_string())?;
-    state.set_settings(settings);
+    let _ = app; // app handle kept for parity; not needed after DB migration
+    state
+        .persist_settings(settings)
+        .map_err(|err| err.to_string())?;
     Ok(())
 }
 
@@ -311,8 +336,10 @@ fn reset_onboarding(
 ) -> Result<(), String> {
     let mut settings = state.current_settings();
     settings.onboarding_completed = false;
-    settings.save(&app).map_err(|err| err.to_string())?;
-    state.set_settings(settings);
+    let _ = app; // app handle kept for parity; not needed after DB migration
+    state
+        .persist_settings(settings)
+        .map_err(|err| err.to_string())?;
     Ok(())
 }
 
@@ -414,8 +441,9 @@ fn update_settings(
     next.llm_model = llmModel;
     next.user_context = userContext;
 
-    next.save(&app).map_err(|err| err.to_string())?;
-    state.set_settings(next.clone());
+    let next = state
+        .persist_settings(next)
+        .map_err(|err| err.to_string())?;
 
     register_shortcuts(&app).map_err(|err| err.to_string())?;
 
