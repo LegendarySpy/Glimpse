@@ -673,9 +673,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             transition={{ duration: 0.3 }}
                             className="flex flex-col items-center text-center max-w-sm"
                         >
-                            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-[#1a1a1e] border border-[#2a2a30]">
-                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={4} gap={3} color="#fbbf24" />
-                            </div>
 
                             <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
                                 Cloud Sign-In
@@ -686,10 +683,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
                             <div className="w-full rounded-xl border border-[#1e1e22] bg-[#111113] p-6 text-left">
                                 <p className="text-[11px] font-mono text-[#d0d0da] mb-3">
-                                    Coming soon: connect your account to sync history, shortcuts, and preferences.
+                                    Coming soon: Sync history across devices, use bigger & better models, support this project!
                                 </p>
                                 <div className="rounded-lg border border-[#2a2a30] bg-[#16161a] px-3 py-2 text-[10px] text-[#8b8b96] leading-relaxed">
-                                    Cloud mode will still work locally for now. Once sign-in ships, you’ll keep everything in sync automatically.
+                                    Cloud mode is 100% optional. Local mode will always be free and available.
                                 </div>
                             </div>
 
