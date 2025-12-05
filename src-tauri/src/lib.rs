@@ -10,7 +10,7 @@ mod settings;
 mod storage;
 mod transcription;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -73,10 +73,7 @@ pub fn run() {
                 let app_handle = handle.clone();
                 window.on_window_event(move |event| {
                     if let tauri::WindowEvent::Focused(false) = event {
-                        // Hide toast when pill loses focus
-                        if let Some(toast) = app_handle.get_webview_window(TOAST_WINDOW_LABEL) {
-                            let _ = toast.hide();
-                        }
+                        // Keep toast visible even if the pill loses focus so warnings still show
                     }
                 });
             }
@@ -576,6 +573,11 @@ async fn retry_transcription(
                 let raw_transcript = result.transcript.clone();
                 let reported_model = result.speech_model.clone();
 
+                if count_words(&raw_transcript) == 0 {
+                    handle_empty_transcription(&app_handle, &saved_for_task.path);
+                    return;
+                }
+
                 // Apply LLM cleanup if enabled (same as normal transcription flow)
                 let (final_transcript, llm_cleaned) =
                     if llm_cleanup::is_cleanup_available(&settings) {
@@ -593,6 +595,11 @@ async fn retry_transcription(
                     } else {
                         (raw_transcript.clone(), false)
                     };
+
+                if count_words(&final_transcript) == 0 {
+                    handle_empty_transcription(&app_handle, &saved_for_task.path);
+                    return;
+                }
 
                 let mut pasted = false;
                 if config.auto_paste && !final_transcript.trim().is_empty() {
@@ -1296,6 +1303,11 @@ fn queue_transcription(
                 let raw_transcript = result.transcript.clone();
                 let reported_model = result.speech_model.clone();
 
+                if count_words(&raw_transcript) == 0 {
+                    handle_empty_transcription(&app_handle, &saved_for_task.path);
+                    return;
+                }
+
                 // Apply LLM cleanup if enabled
                 let (final_transcript, llm_cleaned) =
                     if llm_cleanup::is_cleanup_available(&settings) {
@@ -1311,6 +1323,11 @@ fn queue_transcription(
                     } else {
                         (raw_transcript.clone(), false)
                     };
+
+                if count_words(&final_transcript) == 0 {
+                    handle_empty_transcription(&app_handle, &saved_for_task.path);
+                    return;
+                }
 
                 let mut pasted = false;
                 if config.auto_paste && !final_transcript.trim().is_empty() {
@@ -1422,6 +1439,41 @@ fn emit_transcription_complete_with_cleanup(
             metadata,
         );
     }
+}
+
+fn handle_empty_transcription(app: &AppHandle<AppRuntime>, audio_path: &Path) {
+    emit_event(
+        app,
+        EVENT_TRANSCRIPTION_COMPLETE,
+        TranscriptionCompletePayload {
+            transcript: String::new(),
+            auto_paste: false,
+        },
+    );
+
+    emit_toast(
+        app,
+        ToastPayload {
+            toast_type: "warning".to_string(),
+            title: None,
+            message: "No words detected. Recording deleted.".to_string(),
+            auto_dismiss: Some(true),
+            duration: Some(3000),
+            retry_id: None,
+            mode: None,
+        },
+    );
+
+    if audio_path.exists() {
+        if let Err(err) = std::fs::remove_file(audio_path) {
+            eprintln!(
+                "Failed to remove empty transcription audio {}: {err}",
+                audio_path.display()
+            );
+        }
+    }
+
+    hide_overlay(app);
 }
 
 fn emit_transcription_error(
