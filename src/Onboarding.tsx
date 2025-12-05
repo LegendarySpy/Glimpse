@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import {
     checkAccessibilityPermission,
     requestAccessibilityPermission,
@@ -11,15 +12,38 @@ import {
     Mic,
     Accessibility,
     Sparkles,
+    Download,
+    Trash2,
+    ChevronLeft,
+    Server,
+    Key,
+    Cpu,
     ChevronRight,
     Check,
     ExternalLink,
-    User,
     Loader2,
     Wand2,
 } from "lucide-react";
+import DotMatrix from "./components/DotMatrix";
 
-type OnboardingStep = "welcome" | "microphone" | "accessibility" | "ready";
+type TranscriptionMode = "cloud" | "local";
+
+type OnboardingStep = "welcome" | "cloud-signin" | "local-model" | "cleanup" | "microphone" | "accessibility" | "ready";
+
+type LocalDownloadStatus = {
+    status: "idle" | "downloading" | "complete" | "error";
+    percent: number;
+    file?: string;
+    message?: string;
+};
+
+type ModelStatus = {
+    key: string;
+    installed: boolean;
+    bytes_on_disk: number;
+    missing_files: string[];
+    directory: string;
+};
 
 interface OnboardingProps {
     onComplete: () => void;
@@ -180,6 +204,18 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [accessibilityPermission, setAccessibilityPermission] = useState(false);
     const [isCheckingMic, setIsCheckingMic] = useState(true);
     const [isCheckingAccessibility, setIsCheckingAccessibility] = useState(true);
+    const [selectedMode, setSelectedMode] = useState<TranscriptionMode>("cloud");
+    const [localModelChoice, setLocalModelChoice] = useState<"parakeet_tdt_int8" | "whisper_small_q5">("parakeet_tdt_int8");
+    const [localDownload, setLocalDownload] = useState<Record<string, LocalDownloadStatus>>({
+        parakeet_tdt_int8: { status: "idle", percent: 0 },
+        whisper_small_q5: { status: "idle", percent: 0 },
+    });
+    const [modelStatus, setModelStatus] = useState<Record<string, ModelStatus>>({});
+    const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
+    const [llmProvider, setLlmProvider] = useState<"lmstudio" | "ollama" | "openai" | "custom" | "none">("none");
+    const [llmEndpoint, setLlmEndpoint] = useState("");
+    const [llmApiKey, setLlmApiKey] = useState("");
+    const [llmModel, setLlmModel] = useState("");
     
     // Smart mode shortcut state
     const [smartShortcut, setSmartShortcut] = useState("Control+Space");
@@ -187,7 +223,9 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const pressedModifiers = useRef<Set<string>>(new Set());
     const primaryKey = useRef<string | null>(null);
 
-    const steps: OnboardingStep[] = ["welcome", "microphone", "accessibility", "ready"];
+    const steps: OnboardingStep[] = selectedMode === "cloud"
+        ? ["welcome", "cloud-signin", "microphone", "accessibility", "ready"]
+        : ["welcome", "local-model", "cleanup", "microphone", "accessibility", "ready"];
     const currentStepIndex = steps.indexOf(step);
 
     const checkMicPermission = useCallback(async () => {
@@ -279,15 +317,15 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                 holdEnabled: false,
                 toggleShortcut: "Control+Alt+Space",
                 toggleEnabled: false,
-                transcriptionMode: "cloud",
-                localModel: "parakeet_tdt_int8",
+                transcriptionMode: selectedMode,
+                localModel: localModelChoice,
                 microphoneDevice: null,
                 language: "en",
-                llmCleanupEnabled: false,
-                llmProvider: "none",
-                llmEndpoint: "",
-                llmApiKey: "",
-                llmModel: "",
+                llmCleanupEnabled,
+                llmProvider,
+                llmEndpoint,
+                llmApiKey,
+                llmModel,
                 userContext: "",
             });
             await invoke("complete_onboarding");
@@ -301,6 +339,13 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         const nextIndex = currentStepIndex + 1;
         if (nextIndex < steps.length) {
             setStep(steps[nextIndex]);
+        }
+    };
+
+    const goToPrevStep = () => {
+        const prevIndex = currentStepIndex - 1;
+        if (prevIndex >= 0) {
+            setStep(steps[prevIndex]);
         }
     };
 
@@ -363,8 +408,141 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         };
     }, [captureActive]);
 
+    const refreshModelStatus = useCallback((modelKey: "parakeet_tdt_int8" | "whisper_small_q5") => {
+        invoke<ModelStatus>("check_model_status", { model: modelKey })
+            .then((status) => {
+                setModelStatus((prev) => ({ ...prev, [modelKey]: status }));
+            })
+            .catch((err) => console.error("Failed to check model status", err));
+    }, []);
+
+    useEffect(() => {
+        ["parakeet_tdt_int8", "whisper_small_q5"].forEach((model) => refreshModelStatus(model as "parakeet_tdt_int8" | "whisper_small_q5"));
+    }, [refreshModelStatus]);
+
+    // Listen for model download events to mirror Settings behavior
+    useEffect(() => {
+        let active = true;
+        const disposers: UnlistenFn[] = [];
+
+        const setup = async () => {
+            try {
+                const results = await Promise.allSettled([
+                    listen<{ model: string; percent: number; downloaded: number; total: number; file: string }>(
+                        "download:progress",
+                        (event) => {
+                            const payload = event.payload;
+                            setLocalDownload((prev) => ({
+                                ...prev,
+                                [payload.model]: {
+                                    status: "downloading",
+                                    percent: Math.min(100, payload.percent),
+                                    file: payload.file,
+                                },
+                            }));
+                        }
+                    ),
+                    listen<{ model: string }>("download:complete", (event) => {
+                        const model = event.payload.model;
+                        setLocalDownload((prev) => ({
+                            ...prev,
+                            [model]: {
+                                status: "complete",
+                                percent: 100,
+                                file: prev[model]?.file,
+                                message: prev[model]?.message,
+                            },
+                        }));
+                        refreshModelStatus(model as "parakeet_tdt_int8" | "whisper_small_q5");
+                    }),
+                    listen<{ model: string; error: string }>("download:error", (event) => {
+                        const { model, error } = event.payload;
+                        setLocalDownload((prev) => ({
+                            ...prev,
+                            [model]: { status: "error", percent: prev[model]?.percent ?? 0, message: error },
+                        }));
+                    }),
+                ]);
+
+                results.forEach((res) => {
+                    if (res.status === "fulfilled") {
+                        if (!active) {
+                            res.value();
+                        } else {
+                            disposers.push(res.value);
+                        }
+                    } else {
+                        console.error("Failed to set up download listener", res.reason);
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to set up download listeners", err);
+            }
+        };
+
+        setup();
+
+        return () => {
+            active = false;
+            disposers.forEach((fn) => fn());
+        };
+    }, [refreshModelStatus]);
+
+    const handleLocalDownload = async (modelKey: "parakeet_tdt_int8" | "whisper_small_q5") => {
+        setLocalDownload((prev) => ({
+            ...prev,
+            [modelKey]: { status: "downloading", percent: 0, file: "starting..." },
+        }));
+        try {
+            await invoke("download_model", { model: modelKey });
+        } catch (err) {
+            console.error(err);
+            setLocalDownload((prev) => ({
+                ...prev,
+                [modelKey]: { status: "error", percent: 0, message: "Download failed" },
+            }));
+        }
+    };
+
+    const handleLocalDelete = async (modelKey: "parakeet_tdt_int8" | "whisper_small_q5") => {
+        try {
+            await invoke("delete_model", { model: modelKey });
+            setLocalDownload((prev) => ({
+                ...prev,
+                [modelKey]: { status: "idle", percent: 0 },
+            }));
+            refreshModelStatus(modelKey);
+        } catch (err) {
+            console.error(err);
+            setLocalDownload((prev) => ({
+                ...prev,
+                [modelKey]: { status: "error", percent: prev[modelKey]?.percent ?? 0, message: "Delete failed" },
+            }));
+        }
+    };
+
+    const displayState = useMemo(() => {
+        const buildState = (key: "parakeet_tdt_int8" | "whisper_small_q5") => {
+            const installed = modelStatus[key]?.installed;
+            const base = localDownload[key];
+            if (installed) {
+                return {
+                    status: "complete" as const,
+                    percent: 100,
+                    file: base?.file,
+                    message: base?.message,
+                };
+            }
+            return base ?? { status: "idle", percent: 0 };
+        };
+        return {
+            parakeet: buildState("parakeet_tdt_int8"),
+            whisper: buildState("whisper_small_q5"),
+        };
+    }, [localDownload, modelStatus]);
+
     return (
-        <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0a0a0c] text-white select-none">
+        <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0a0a0c] text-white select-none relative">
             {/* Title bar */}
             <div data-tauri-drag-region className="h-7 w-full shrink-0" />
 
@@ -384,7 +562,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -16 }}
                             transition={{ duration: 0.3 }}
-                            className="flex flex-col items-center text-center max-w-sm"
+                            className="flex flex-col items-center text-center w-full max-w-5xl"
                         >
                             <div className="mb-6">
                                 <GlimpseLogo size="lg" />
@@ -395,21 +573,437 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             </h1>
 
                             <p className="text-sm text-[#6b6b76] mb-8">
-                                Voice to text, instantly.
+                                Build at the speed of speech.
                             </p>
 
-                            <button
-                                className="flex items-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-2.5 text-sm font-medium text-[#0a0a0c] hover:bg-white transition-colors"
-                            >
-                                <User size={15} />
-                                Sign In / Create Account
-                            </button>
+                            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedMode("cloud")}
+                                    className={`group relative w-full rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden transition-all ${
+                                        selectedMode === "cloud" ? "ring-1 ring-amber-400/50" : ""
+                                    }`}
+                                    aria-pressed={selectedMode === "cloud"}
+                                >
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute inset-0 opacity-18">
+                                            <DotMatrix rows={6} cols={18} activeDots={[1,4,7,10,12,15,18,20,23,26,29,32,35,38,41,44,47,50,53,56,59,62,65,68]} dotSize={2} gap={4} color="#2e2e37" />
+                                        </div>
+                                    </div>
+                                    <div className="relative flex items-center gap-2">
+                                        <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                        <span className="text-[10px] font-semibold text-amber-400">Glimpse Cloud</span>
+                                    </div>
+                                    <div className="relative flex flex-col gap-1.5 text-[11px] text-[#f0f0f5] font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                            <span>Cross-device sync</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                            <span>Bigger & better models</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                            <span>Faster cleanup & delivery</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative flex items-center gap-3 rounded-xl border border-[#1a1a22] bg-[#0d0d12]/90 px-3 py-2 text-[10px] text-[#d0d0da] leading-relaxed">
+                                        <DotMatrix rows={3} cols={5} activeDots={[0, 2, 4, 6, 8, 10, 12, 14]} dotSize={2} gap={2} color="#2a2a34" />
+                                        <p className="flex-1">Local stays free and on-device. Cloud is optional ($5.99/mo) if you want these perks.</p>
+                                    </div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedMode("local")}
+                                    className={`group relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)] overflow-hidden transition-colors ${
+                                        selectedMode === "local"
+                                            ? "border-[#3a3a45] bg-[#0c0c10]"
+                                            : "border-[#15151c] bg-[#0b0b0f]"
+                                    }`}
+                                    aria-pressed={selectedMode === "local"}
+                                >
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute inset-0 opacity-14">
+                                            <DotMatrix rows={6} cols={18} activeDots={[0,3,5,8,11,14,17,20,23,26,29,32,35,38,41,44,47,50,53,56,59,62,65,68]} dotSize={2} gap={4} color="#1f1f28" />
+                                        </div>
+                                    </div>
+                                    <div className="relative flex items-center gap-2">
+                                        <DotMatrix rows={2} cols={2} activeDots={[1]} dotSize={3} gap={2} color="#9ca3af" />
+                                        <span className="text-[10px] font-semibold text-[#d1d5db]">Glimpse Local</span>
+                                    </div>
+                                    <div className="relative flex flex-col gap-1.5 text-[11px] text-[#dcdce3] font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Everything stays on-device for privacy</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Runs with local models—no uploads</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Offline-friendly when you're traveling</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative flex items-center gap-3 rounded-xl border border-[#16161f] bg-[#0c0c12]/90 px-3 py-2 text-[10px] text-[#a1a1ad] leading-relaxed">
+                                        <DotMatrix rows={3} cols={5} activeDots={[1, 4, 6, 9, 12, 15, 18, 21]} dotSize={2} gap={2} color="#1d1d26" />
+                                        <p className="flex-1">Best for privacy-first or offline sessions. Cloud remains optional if you want sync and faster responses.</p>
+                                    </div>
+                                </button>
+                            </div>
 
                             <button
                                 onClick={goToNextStep}
-                                className="mt-4 text-xs text-[#5a5a64] hover:text-[#8b8b96] transition-colors"
+                                className="flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-2.5 text-sm font-mono font-semibold text-[#0a0a0c] hover:bg-white transition-colors min-w-[150px] tracking-tight"
                             >
-                                I'll do this later
+                                {selectedMode === "cloud" ? "> Cloud" : "> Local"}
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {/* Cloud Sign-In (WIP) */}
+                    {step === "cloud-signin" && (
+                        <motion.div
+                            key="cloud-signin"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -16 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center text-center max-w-sm"
+                        >
+                            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-[#1a1a1e] border border-[#2a2a30]">
+                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={4} gap={3} color="#fbbf24" />
+                            </div>
+
+                            <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
+                                Cloud Sign-In
+                            </h2>
+                            <p className="text-sm text-[#6b6b76] mb-6">
+                                Account sync is work-in-progress. We’ll add sign-in soon.
+                            </p>
+
+                            <div className="w-full rounded-xl border border-[#1e1e22] bg-[#111113] p-6 text-left">
+                                <p className="text-[11px] font-mono text-[#d0d0da] mb-3">
+                                    Coming soon: connect your account to sync history, shortcuts, and preferences.
+                                </p>
+                                <div className="rounded-lg border border-[#2a2a30] bg-[#16161a] px-3 py-2 text-[10px] text-[#8b8b96] leading-relaxed">
+                                    Cloud mode will still work locally for now. Once sign-in ships, you’ll keep everything in sync automatically.
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={goToNextStep}
+                                className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-2.5 text-sm font-mono font-semibold text-[#0a0a0c] hover:bg-white transition-colors min-w-[150px] tracking-tight"
+                            >
+                                Continue
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {/* Local model selection */}
+                    {step === "local-model" && (
+                        <motion.div
+                            key="local-model"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -16 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center text-center w-full max-w-2xl"
+                        >
+
+                            <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
+                                Choose your local model
+                            </h2>
+                            <p className="text-sm text-[#6b6b76] mb-6">
+                                Pick a model to download and run locally. You can add more in Settings later.
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => setLocalModelChoice("parakeet_tdt_int8")}
+                                    className={`relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-colors ${
+                                        localModelChoice === "parakeet_tdt_int8"
+                                            ? "border-[#3a3a45] bg-[#0f0f14]"
+                                            : "border-[#1b1b22] bg-[#0c0c12]"
+                                    }`}
+                                >
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute inset-0 opacity-12">
+                                            <DotMatrix rows={6} cols={18} activeDots={[0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,60,63,66]} dotSize={2} gap={4} color="#1f1f28" />
+                                        </div>
+                                    </div>
+                                    <div className="relative flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <DotMatrix rows={2} cols={2} activeDots={[0]} dotSize={3} gap={2} color="#fbbf24" />
+                                            <span className="text-[11px] font-semibold text-[#e5e7eb]">Parakeet (INT8)</span>
+                                        </div>
+                                        <span className="text-[10px] font-mono text-[#8b8b96]">Fast, small</span>
+                                    </div>
+                                    <div className="relative space-y-1.5 text-[11px] text-[#d0d0da] font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Good accuracy, fast</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Multilingual</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative rounded-lg border border-[#20202a] bg-[#121218] px-3 py-2 text-[10px] text-[#9ca3af] leading-relaxed space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-semibold text-[#d0d0da]">Download</span>
+                                            <button
+                                                aria-label={displayState.parakeet.status === "complete" ? "Delete model" : "Download model"}
+                                                onClick={() => (displayState.parakeet.status === "complete" ? handleLocalDelete("parakeet_tdt_int8") : handleLocalDownload("parakeet_tdt_int8"))}
+                                                disabled={displayState.parakeet.status === "downloading"}
+                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
+                                                    displayState.parakeet.status === "downloading"
+                                                        ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
+                                                        : displayState.parakeet.status === "complete"
+                                                            ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                                            : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
+                                                }`}
+                                            >
+                                                {displayState.parakeet.status === "downloading" ? (
+                                                    <Loader2 size={10} className="animate-spin" />
+                                                ) : displayState.parakeet.status === "complete" ? (
+                                                    <Trash2 size={10} />
+                                                ) : (
+                                                    <Download size={10} />
+                                                )}
+                                            </button>
+                                        </div>
+                                        <ModelProgress percent={displayState.parakeet.percent} status={displayState.parakeet.status} />
+                                        <div className="h-[14px]">
+                                            {displayState.parakeet.status === "downloading" && (
+                                                <p className="text-[10px] text-[#6b6b76] tabular-nums">
+                                                    {displayState.parakeet.percent.toFixed(0)}% · {displayState.parakeet.file ?? ""}
+                                                </p>
+                                            )}
+                                            {displayState.parakeet.status === "error" && (
+                                                <p className="text-[10px] text-red-400">
+                                                    {displayState.parakeet.message ?? "Download failed"}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setLocalModelChoice("whisper_small_q5")}
+                                    className={`relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.16)] overflow-hidden transition-colors ${
+                                        localModelChoice === "whisper_small_q5"
+                                            ? "border-[#32323c] bg-[#0e0e13]"
+                                            : "border-[#181820] bg-[#0b0b0f]"
+                                    }`}
+                                >
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute inset-0 opacity-10">
+                                            <DotMatrix rows={6} cols={18} activeDots={[1,5,9,13,17,21,25,29,33,37,41,45,49,53,57,61,65]} dotSize={2} gap={4} color="#1c1c25" />
+                                        </div>
+                                    </div>
+                                    <div className="relative flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <DotMatrix rows={2} cols={2} activeDots={[1]} dotSize={3} gap={2} color="#a5b4fc" />
+                                            <span className="text-[11px] font-semibold text-[#e5e7eb]">Whisper Small (Q5)</span>
+                                        </div>
+                                        <span className="text-[10px] font-mono text-[#8b8b96]">Broad support</span>
+                                    </div>
+                                    <div className="relative space-y-1.5 text-[11px] text-[#d0d0da] font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>High quality, medium speed</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Supports custom words</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative rounded-lg border border-[#20202a] bg-[#0f0f15] px-3 py-2 text-[10px] text-[#9ca3af] leading-relaxed space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-semibold text-[#d0d0da]">Download</span>
+                                            <button
+                                                aria-label={displayState.whisper.status === "complete" ? "Delete model" : "Download model"}
+                                                onClick={() => (displayState.whisper.status === "complete" ? handleLocalDelete("whisper_small_q5") : handleLocalDownload("whisper_small_q5"))}
+                                                disabled={displayState.whisper.status === "downloading"}
+                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
+                                                    displayState.whisper.status === "downloading"
+                                                        ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
+                                                        : displayState.whisper.status === "complete"
+                                                            ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                                            : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
+                                                }`}
+                                            >
+                                                {displayState.whisper.status === "downloading" ? (
+                                                    <Loader2 size={10} className="animate-spin" />
+                                                ) : displayState.whisper.status === "complete" ? (
+                                                    <Trash2 size={10} />
+                                                ) : (
+                                                    <Download size={10} />
+                                                )}
+                                            </button>
+                                        </div>
+                                        <ModelProgress percent={displayState.whisper.percent} status={displayState.whisper.status} />
+                                        <div className="h-[14px]">
+                                            {displayState.whisper.status === "downloading" && (
+                                                <p className="text-[10px] text-[#6b6b76] tabular-nums">
+                                                    {displayState.whisper.percent.toFixed(0)}% · {displayState.whisper.file ?? ""}
+                                                </p>
+                                            )}
+                                            {displayState.whisper.status === "error" && (
+                                                <p className="text-[10px] text-red-400">
+                                                    {displayState.whisper.message ?? "Download failed"}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <p className="mt-4 text-[11px] text-[#5a5a64]">
+                                More models available in Settings after setup.
+                            </p>
+
+                            <button
+                                onClick={goToNextStep}
+                                className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-2.5 text-sm font-mono font-semibold text-[#0a0a0c] hover:bg-white transition-colors min-w-[150px] tracking-tight"
+                            >
+                                Continue
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {/* AI Cleanup */}
+                    {step === "cleanup" && selectedMode === "local" && (
+                        <motion.div
+                            key="cleanup"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -16 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center text-center w-full max-w-xl"
+                        >
+
+                            <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
+                                AI Cleanup (optional)
+                            </h2>
+                            <p className="text-sm text-[#6b6b76] mb-6">
+                                Let an LLM tidy transcriptions before delivery. You can adjust later in Settings.
+                            </p>
+
+                            <div className="w-full rounded-2xl border border-[#1f1f28] bg-[#0f0f13] p-4 space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.25)] text-left">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#16161b] border border-[#25252f]">
+                                            <Wand2 size={14} className="text-[#e8e8eb]" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[13px] font-medium text-[#e8e8eb]">AI Cleanup</p>
+                                            <p className="text-[11px] text-[#6b6b76]">Uses an LLM to polish text</p>
+                                        </div>
+                                    </div>
+                                    <motion.button
+                                        onClick={() => setLlmCleanupEnabled(!llmCleanupEnabled)}
+                                        className={`relative w-11 h-6 rounded-full transition-colors ${llmCleanupEnabled ? "bg-amber-400" : "bg-[#2a2a30]"}`}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <motion.div
+                                            className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm"
+                                            animate={{ left: llmCleanupEnabled ? "calc(100% - 22px)" : "2px" }}
+                                            transition={{ type: "spring", stiffness: 500, damping: 32 }}
+                                        />
+                                    </motion.button>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Provider</label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                            {[
+                                                { label: "LM Studio", key: "lmstudio" as const },
+                                                { label: "Ollama", key: "ollama" as const },
+                                                { label: "OpenAI", key: "openai" as const },
+                                                { label: "Custom", key: "custom" as const },
+                                            ].map((opt) => (
+                                                <motion.button
+                                                    key={opt.key}
+                                                    onClick={() => setLlmProvider(opt.key)}
+                                                    className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${
+                                                        llmProvider === opt.key
+                                                            ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
+                                                            : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
+                                                    }`}
+                                                    whileTap={{ scale: 0.97 }}
+                                                >
+                                                    {opt.label}
+                                                </motion.button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                            <Server size={10} />
+                                            Endpoint {llmProvider !== "custom" && <span className="text-[#4a4a54]">(optional override)</span>}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={llmEndpoint}
+                                            onChange={(e) => setLlmEndpoint(e.target.value)}
+                                            placeholder={
+                                                llmProvider === "lmstudio" ? "http://localhost:1234" :
+                                                    llmProvider === "ollama" ? "http://localhost:11434" :
+                                                        llmProvider === "openai" ? "https://api.openai.com" :
+                                                            "https://your-llm-endpoint.com"
+                                            }
+                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                            <Key size={10} />
+                                            API Key {llmProvider !== "openai" && <span className="text-[#4a4a54]">(if required)</span>}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={llmApiKey}
+                                            onChange={(e) => setLlmApiKey(e.target.value)}
+                                            placeholder={llmProvider === "openai" ? "sk-..." : "Optional"}
+                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                            <Cpu size={10} />
+                                            Model <span className="text-[#4a4a54]">(leave empty for default)</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={llmModel}
+                                            onChange={(e) => setLlmModel(e.target.value)}
+                                            placeholder={
+                                                llmProvider === "lmstudio" ? "Uses loaded model" :
+                                                    llmProvider === "ollama" ? "llama3.2" :
+                                                        llmProvider === "openai" ? "gpt-4o-mini" :
+                                                            "model-name"
+                                            }
+                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={goToNextStep}
+                                className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-2.5 text-sm font-mono font-semibold text-[#0a0a0c] hover:bg-white transition-colors min-w-[150px] tracking-tight"
+                            >
+                                Continue
                             </button>
                         </motion.div>
                     )}
@@ -615,7 +1209,46 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                     <span className="text-[10px] font-medium">Glimpse</span>
                 </div>
             </div>
+
+            {currentStepIndex > 0 && (
+                <button
+                    onClick={goToPrevStep}
+                    className="absolute left-6 bottom-6 flex items-center gap-1 text-xs text-[#5a5a64] hover:text-[#8b8b96] transition-colors"
+                >
+                    <ChevronLeft size={14} />
+                    Back
+                </button>
+            )}
         </div>
+    );
+};
+
+const ModelProgress = ({ percent, status }: { percent: number; status: string }) => {
+    const cols = 50;
+    const rows = 3;
+    const totalDots = cols * rows;
+    const activeCount = Math.round((percent / 100) * totalDots);
+
+    const activeDots = useMemo(() => {
+        const dots: number[] = [];
+        for (let i = 0; i < activeCount && i < totalDots; i++) {
+            dots.push(i);
+        }
+        return dots;
+    }, [activeCount, totalDots]);
+
+    const color = status === "error" ? "#f87171" : status === "complete" ? "#4ade80" : "#fbbf24";
+
+    return (
+        <DotMatrix
+            rows={rows}
+            cols={cols}
+            activeDots={activeDots}
+            dotSize={3}
+            gap={2}
+            color={color}
+            className="opacity-70"
+        />
     );
 };
 
