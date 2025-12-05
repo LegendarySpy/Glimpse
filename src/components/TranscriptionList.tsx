@@ -106,7 +106,7 @@ const TranscriptionList: React.FC = () => {
 
             {/* List Container */}
             <div className="bg-[#0a0a0c] rounded-xl border border-[#1a1a1e] overflow-hidden">
-                <div className="max-h-[460px] overflow-y-auto custom-scrollbar">
+                <div className="max-h-[460px] overflow-y-auto custom-scrollbar scrollbar-balanced">
                     <AnimatePresence mode="popLayout">
                         {filteredTranscriptions.length > 0 ? (
                             filteredTranscriptions.map((record) => (
@@ -160,6 +160,9 @@ const TranscriptionList: React.FC = () => {
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: #252528;
+                }
+                .scrollbar-balanced {
+                    scrollbar-gutter: stable both-edges;
                 }
             `}</style>
         </motion.div>
