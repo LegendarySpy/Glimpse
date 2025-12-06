@@ -10,6 +10,7 @@ mod settings;
 mod storage;
 mod transcription;
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -29,7 +30,10 @@ use tauri::async_runtime;
 use tauri::menu::{MenuBuilder, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::Emitter;
-use tauri::{ActivationPolicy, AppHandle, Manager, WebviewWindow, Wry};
+use tauri::{
+    ActivationPolicy, AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent,
+    Wry,
+};
 use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
@@ -126,6 +130,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_settings,
             update_settings,
+            get_dictionary,
+            set_dictionary,
             get_app_info,
             open_data_dir,
             get_transcriptions,
@@ -164,6 +170,7 @@ struct AppState {
     settings_store: Arc<SettingsStore>,
     settings: parking_lot::Mutex<UserSettings>,
     tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
+    settings_close_handler_registered: AtomicBool,
     hold_shortcut_down: AtomicBool,
     toggle_recording_active: AtomicBool,
     /// Tracks which mode started the current recording: "hold", "toggle", or "smart"
@@ -201,6 +208,7 @@ impl AppState {
             settings_store,
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
+            settings_close_handler_registered: AtomicBool::new(false),
             hold_shortcut_down: AtomicBool::new(false),
             toggle_recording_active: AtomicBool::new(false),
             active_recording_mode: parking_lot::Mutex::new(None),
@@ -452,6 +460,87 @@ fn update_settings(
     Ok(next)
 }
 
+fn sanitize_dictionary_entries(entries: &[String]) -> Vec<String> {
+    let mut seen = HashSet::new();
+    let mut cleaned = Vec::new();
+
+    for raw in entries {
+        let trimmed = raw.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        let normalized = trimmed.to_lowercase();
+        if seen.insert(normalized) {
+            // Cap using char boundaries to avoid UTF-8 slicing panics
+            let capped: String = trimmed.chars().take(160).collect();
+            let capped = capped.trim_end().to_string();
+            cleaned.push(capped);
+        }
+        if cleaned.len() >= 64 {
+            break;
+        }
+    }
+
+    cleaned
+}
+
+fn build_dictionary_prompt(entries: &[String]) -> Option<String> {
+    let cleaned = sanitize_dictionary_entries(entries);
+    if cleaned.is_empty() {
+        return None;
+    }
+
+    let mut prompt =
+        String::from("Use the following preferred terms verbatim when transcribing:\n");
+    for term in cleaned {
+        prompt.push_str("- ");
+        prompt.push_str(&term);
+        prompt.push('\n');
+    }
+
+    Some(prompt)
+}
+
+fn dictionary_prompt_for_model(
+    model: &model_manager::ReadyModel,
+    settings: &settings::UserSettings,
+) -> Option<String> {
+    if !matches!(model.engine, model_manager::LocalModelEngine::Whisper) {
+        return None;
+    }
+
+    build_dictionary_prompt(&settings.dictionary)
+}
+
+#[tauri::command]
+fn get_dictionary(state: tauri::State<AppState>) -> Result<Vec<String>, String> {
+    let mut settings = state.current_settings();
+    let cleaned = sanitize_dictionary_entries(&settings.dictionary);
+    if cleaned != settings.dictionary {
+        settings.dictionary = cleaned.clone();
+        state
+            .persist_settings(settings)
+            .map_err(|err| err.to_string())?;
+    }
+    Ok(cleaned)
+}
+
+#[tauri::command]
+fn set_dictionary(
+    entries: Vec<String>,
+    app: AppHandle<AppRuntime>,
+    state: tauri::State<AppState>,
+) -> Result<Vec<String>, String> {
+    let cleaned = sanitize_dictionary_entries(&entries);
+    let mut settings = state.current_settings();
+    settings.dictionary = cleaned.clone();
+    let _ = app;
+    state
+        .persist_settings(settings)
+        .map_err(|err| err.to_string())?;
+    Ok(cleaned)
+}
+
 #[derive(Serialize)]
 struct AppInfo {
     version: String,
@@ -594,9 +683,15 @@ async fn retry_transcription(
                     let model_key = settings.local_model.clone();
                     match model_manager::ensure_model_ready(&app_handle, &model_key) {
                         Ok(ready_model) => {
+                            let dictionary_prompt = dictionary_prompt_for_model(&ready_model, &settings);
                             let transcriber = app_handle.state::<AppState>().local_transcriber();
                             match async_runtime::spawn_blocking(move || {
-                                transcriber.transcribe(&ready_model, &samples, sample_rate)
+                                transcriber.transcribe(
+                                    &ready_model,
+                                    &samples,
+                                    sample_rate,
+                                    dictionary_prompt.as_deref(),
+                                )
                             })
                             .await
                             {
@@ -1322,6 +1417,7 @@ fn queue_transcription(
             let model_key = settings.local_model.clone();
             match model_manager::ensure_model_ready(&app_handle, &model_key) {
                 Ok(ready_model) => {
+                    let dictionary_prompt = dictionary_prompt_for_model(&ready_model, &settings);
                     let transcriber = app_handle.state::<AppState>().local_transcriber();
                     let local_recording = recording_for_task.clone();
                     match async_runtime::spawn_blocking(move || {
@@ -1329,6 +1425,7 @@ fn queue_transcription(
                             &ready_model,
                             &local_recording.samples,
                             local_recording.sample_rate,
+                            dictionary_prompt.as_deref(),
                         )
                     })
                     .await
@@ -1801,26 +1898,53 @@ fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>
 }
 
 fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
-    if let Some(window) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
-        // Show app in dock when settings window is open
-        let _ = app.set_activation_policy(ActivationPolicy::Regular);
+    let state = app.state::<AppState>();
+    let mut reset_close_flag = false;
 
-        window.show()?;
-        window.set_focus()?;
+    let window = if let Some(existing) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
+        existing
+    } else {
+        // Recreate settings window if it was closed
+        reset_close_flag = true;
+        WebviewWindowBuilder::new(app, SETTINGS_WINDOW_LABEL, WebviewUrl::default())
+            .title("Glimpse Settings")
+            .inner_size(900.0, 650.0)
+            .min_inner_size(625.0, 400.0)
+            .resizable(true)
+            .visible(false)
+            .hidden_title(true)
+            .build()?
+    };
 
-        // Listen for window close to hide from dock again
+    if reset_close_flag {
+        state
+            .settings_close_handler_registered
+            .store(false, Ordering::SeqCst);
+    }
+
+    // Show app in dock when settings window is open
+    let _ = app.set_activation_policy(ActivationPolicy::Regular);
+
+    window.show()?;
+    window.set_focus()?;
+
+    // Prevent destroying the window on Cmd+W; hide instead (register once)
+    let already_registered = state
+        .settings_close_handler_registered
+        .swap(true, Ordering::SeqCst);
+    if !already_registered {
         let app_handle = app.clone();
+        let window_clone = window.clone();
         window.on_window_event(move |event| {
-            if let tauri::WindowEvent::CloseRequested { .. } = event {
-                // Hide from dock when settings is closed
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window_clone.hide();
                 let _ = app_handle.set_activation_policy(ActivationPolicy::Accessory);
             }
         });
-
-        Ok(())
-    } else {
-        Err(anyhow!("Settings window is not available")).map_err(Into::into)
     }
+
+    Ok(())
 }
 
 fn position_overlay(window: &WebviewWindow<AppRuntime>) {

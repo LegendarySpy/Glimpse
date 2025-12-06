@@ -5,7 +5,7 @@ use parking_lot::Mutex;
 use transcribe_rs::{
     engines::{
         parakeet::{ParakeetEngine, ParakeetModelParams},
-        whisper::WhisperEngine,
+        whisper::{WhisperEngine, WhisperInferenceParams},
     },
     TranscriptionEngine,
 };
@@ -46,6 +46,7 @@ impl LocalTranscriber {
         model: &ReadyModel,
         samples: &[i16],
         sample_rate: u32,
+        initial_prompt: Option<&str>,
     ) -> Result<TranscriptionSuccess> {
         self.ensure_engine(model)?;
         let prepared = prepare_audio(samples, sample_rate);
@@ -66,8 +67,13 @@ impl LocalTranscriber {
                 result.text
             }
             EngineInstance::Whisper { engine } => {
+                let params = initial_prompt.map(|prompt| WhisperInferenceParams {
+                    initial_prompt: Some(prompt.to_string()),
+                    ..Default::default()
+                });
+
                 let result = engine
-                    .transcribe_samples(prepared.data.clone(), None)
+                    .transcribe_samples(prepared.data.clone(), params)
                     .map_err(|err| anyhow!("Whisper transcription failed: {err}"))?;
                 result.text
             }

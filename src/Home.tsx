@@ -4,6 +4,7 @@ import { Settings, ChevronLeft, Home as HomeIcon, Book, Brain } from "lucide-rea
 import SettingsModal from "./components/SettingsModal";
 import DotMatrix from "./components/DotMatrix";
 import TranscriptionList from "./components/TranscriptionList";
+import DictionaryView from "./components/DictionaryView";
 
 const SidebarItem = ({
     icon,
@@ -20,7 +21,7 @@ const SidebarItem = ({
 }) => (
     <motion.button
         onClick={onClick}
-        className={`group flex w-full items-center gap-3 pl-[13px] pr-3 rounded-lg h-9 transition-colors ${active
+        className={`group flex w-full items-center rounded-lg h-9 transition-colors ${collapsed ? "justify-center gap-0 px-0" : "gap-3 pl-[13px] pr-3"} ${active
             ? "bg-[#1a1a1e] text-[#e8e8eb]"
             : "text-[#6b6b76] hover:bg-[#151517] hover:text-[#a0a0ab]"
             }`}
@@ -166,63 +167,51 @@ const Home = () => {
             <main className="flex flex-1 flex-col bg-[#0e0e10] overflow-hidden">
                 <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
-                <div className="flex-1 flex flex-col items-center justify-center px-12 pb-16">
+                <div className="flex-1 flex flex-col px-12 pb-16">
                     <AnimatePresence mode="wait">
                         {activeView === "home" && (
                             <motion.div
                                 key="home"
-                                className="w-full max-w-2xl"
-                                initial={{ opacity: 0, y: 16 }}
+                                className="w-full max-w-2xl mx-auto pt-8"
+                                initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -16 }}
-                                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                                exit={{ opacity: 0, y: 12 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
                             >
-                                {/* Greeting - large and personal */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1, duration: 0.4 }}
-                                    className="mb-8"
-                                >
+                                <div className="mb-8">
                                     <h1 className="text-3xl font-medium text-[#e8e8eb] tracking-tight">
                                         {getGreeting()}
                                     </h1>
                                     <p className="mt-2 text-[15px] text-[#5a5a64]">
                                         Ready when you are
                                     </p>
-                                </motion.div>
+                                </div>
 
-                                {/* Transcription List */}
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.2, duration: 0.5 }}
-                                >
-                                    <TranscriptionList />
-                                </motion.div>
+                                <TranscriptionList />
                             </motion.div>
                         )}
 
                         {activeView === "dictionary" && (
                             <motion.div
                                 key="dictionary"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="flex flex-col items-center justify-center text-[#4a4a54]"
+                                className="w-full max-w-3xl mx-auto pt-8"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 8 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
                             >
-                                <Book size={48} strokeWidth={1} className="mb-4 opacity-50" />
-                                <p>Dictionary</p>
+                                <DictionaryView />
                             </motion.div>
                         )}
 
                         {activeView === "brain" && (
                             <motion.div
                                 key="brain"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="flex flex-col items-center justify-center text-[#4a4a54]"
+                                className="flex flex-col items-center justify-start pt-12 text-[#4a4a54]"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 8 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
                             >
                                 <Brain size={48} strokeWidth={1} className="mb-4 opacity-50" />
                                 <p>Personalization</p>

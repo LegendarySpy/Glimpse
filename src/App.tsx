@@ -23,6 +23,7 @@ type StoredSettings = {
   llm_api_key: string;
   llm_model: string;
   user_context: string;
+  dictionary: string[];
 };
 
 function App() {
