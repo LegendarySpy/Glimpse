@@ -18,7 +18,9 @@ src-tauri/target/
 
 # Editor directories and files
 .vscode/*
+.cursor/*
 !.vscode/extensions.json
+!.cursor/extensions.json
 .idea
 .DS_Store
 *.suo
