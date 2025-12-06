@@ -97,9 +97,9 @@ const WHISPER_SMALL_Q5_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
     name: "ggml-small-q5_1.bin",
 }];
 
-const WHISPER_MEDIUM_Q8_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
-    url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q8_0.bin",
-    name: "ggml-medium-q8_0.bin",
+const WHISPER_LARGE_V3_TURBO_Q8_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
+    url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q8_0.bin",
+    name: "ggml-large-v3-turbo-q8_0.bin",
 }];
 
 pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
@@ -139,18 +139,18 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
         tags: &["English", "Custom Words", "CPU Friendly"],
     },
     ModelDefinition {
-        key: "whisper_medium_q8_1",
-        label: "Whisper Medium",
+        key: "whisper_large_v3_turbo_q8",
+        label: "Whisper Large V3 Turbo",
         description:
-            "Good quality local Whisper model with multilingual support, supports custom words.",
-        size_mb: 820.0,
-        files: &WHISPER_MEDIUM_Q8_FILES,
+            "Great quality local Whisper model with multilingual support, supports custom words.",
+        size_mb: 880.0,
+        files: &WHISPER_LARGE_V3_TURBO_Q8_FILES,
         engine: LocalModelEngine::Whisper,
         variant: "Q8_1",
         storage: ModelStorage::File {
-            artifact: "ggml-medium-q8_0.bin",
+            artifact: "ggml-large-v3-turbo-q8_0.bin",
         },
-        tags: &["Multilingual", "Custom Words", "Balanced"],
+        tags: &["Multilingual", "Custom Words"],
     },
 ];
 

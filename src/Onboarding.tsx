@@ -65,7 +65,7 @@ interface OnboardingProps {
 }
 
 const PARAKEET_KEY = "parakeet_tdt_int8";
-const WHISPER_KEY = "whisper_medium_q8_1";
+const WHISPER_KEY = "whisper_large_v3_turbo_q8";
 
 // Clean animated logo - 4 dots in 2x2 grid with smooth transitions
 const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
