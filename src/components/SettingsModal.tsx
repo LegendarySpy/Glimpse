@@ -159,6 +159,33 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         }
     }, [transcriptionMode, activeTab]);
 
+    useEffect(() => {
+        const unlistenPromise = listen<StoredSettings>("settings:changed", (event) => {
+            const settings = event.payload;
+            if (!settings) return;
+            setSmartShortcut(settings.smart_shortcut);
+            setSmartEnabled(settings.smart_enabled);
+            setHoldShortcut(settings.hold_shortcut);
+            setHoldEnabled(settings.hold_enabled);
+            setToggleShortcut(settings.toggle_shortcut);
+            setToggleEnabled(settings.toggle_enabled);
+            setTranscriptionMode(settings.transcription_mode);
+            setLocalModel(settings.local_model);
+            setMicrophoneDevice(settings.microphone_device);
+            setLanguage(settings.language);
+            setLlmCleanupEnabled(settings.llm_cleanup_enabled ?? false);
+            setLlmProvider(settings.llm_provider ?? "none");
+            setLlmEndpoint(settings.llm_endpoint ?? "");
+            setLlmApiKey(settings.llm_api_key ?? "");
+            setLlmModel(settings.llm_model ?? "");
+        });
+
+        return () => {
+            // Ensure we always clean up even if the listener promise resolves after unmount
+            unlistenPromise.then((unlisten) => unlisten()).catch(() => {});
+        };
+    }, []);
+
     const refreshModelStatus = useCallback((modelKey: string) => {
         invoke<ModelStatus>("check_model_status", { model: modelKey })
             .then((status) => {

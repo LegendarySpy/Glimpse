@@ -2,6 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Context, Result};
+use crate::AppRuntime;
 use serde::Serialize;
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -104,23 +105,23 @@ const WHISPER_MEDIUM_Q8_FILES: [ModelFileDescriptor; 1] = [ModelFileDescriptor {
 pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
     ModelDefinition {
         key: "parakeet_tdt_int8",
-        label: "Parakeet TDT 0.6B",
+        label: "Parakeet 0.6B (Int8)",
         description: "Fast multilingual transcription with NVIDIA's quantized Parakeet model.",
         size_mb: 700.0,
         files: &PARAKEET_TDT_INT8_FILES,
         engine: LocalModelEngine::Parakeet { quantized: true },
-        variant: "Int8 Quantized",
+        variant: "Int8",
         storage: ModelStorage::Directory,
         tags: &["Multilingual", "Fast"],
     },
     ModelDefinition {
         key: "parakeet_tdt_fp32",
-        label: "Parakeet TDT 0.6B",
+        label: "Parakeet 0.6B (FP32)",
         description: "Highest accuracy Parakeet model with full-precision weights.",
         size_mb: 2300.0,
         files: &PARAKEET_TDT_FP32_FILES,
         engine: LocalModelEngine::Parakeet { quantized: false },
-        variant: "FP32 Precision",
+        variant: "FP32",
         storage: ModelStorage::Directory,
         tags: &["Multilingual", "High Accuracy"],
     },
@@ -291,8 +292,8 @@ pub fn check_model_status<R: Runtime>(
 }
 
 #[tauri::command]
-pub async fn download_model<R: Runtime>(
-    app: AppHandle<R>,
+pub async fn download_model(
+    app: AppHandle<AppRuntime>,
     state: tauri::State<'_, crate::AppState>,
     model: String,
 ) -> Result<ModelStatus, String> {
@@ -305,17 +306,35 @@ pub async fn download_model<R: Runtime>(
         .await
         .map_err(|err| err.to_string())?;
 
-    Ok(ModelStatus::from_definition(&dir, def))
+    let status = ModelStatus::from_definition(&dir, def);
+
+    // Refresh tray menu so newly downloaded models become selectable
+    let settings = state.current_settings();
+    if let Err(err) = crate::refresh_tray_menu(&app, &settings) {
+        eprintln!("Failed to refresh tray menu after download: {err}");
+    }
+
+    Ok(status)
 }
 
 #[tauri::command]
-pub fn delete_model<R: Runtime>(app: AppHandle<R>, model: String) -> Result<ModelStatus, String> {
+pub fn delete_model(app: AppHandle<AppRuntime>, model: String) -> Result<ModelStatus, String> {
     let def = definition(&model).ok_or_else(|| "Unknown model".to_string())?;
     let dir = get_model_dir(&app, &model).map_err(|err| err.to_string())?;
     if dir.exists() {
         fs::remove_dir_all(&dir).map_err(|err| err.to_string())?;
     }
-    Ok(ModelStatus::from_definition(&dir, def))
+    let status = ModelStatus::from_definition(&dir, def);
+
+    // Refresh tray menu so deleted models are disabled immediately
+    if let Some(state) = app.try_state::<crate::AppState>() {
+        let settings = state.current_settings();
+        if let Err(err) = crate::refresh_tray_menu(&app, &settings) {
+            eprintln!("Failed to refresh tray menu after delete: {err}");
+        }
+    }
+
+    Ok(status)
 }
 
 pub fn ensure_model_ready<R: Runtime>(app: &AppHandle<R>, model: &str) -> Result<ReadyModel> {

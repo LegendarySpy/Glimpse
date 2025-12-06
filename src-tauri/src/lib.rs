@@ -27,7 +27,7 @@ use settings::{
     default_local_model, LlmProvider, SettingsStore, TranscriptionMode, UserSettings,
 };
 use tauri::async_runtime;
-use tauri::menu::{MenuBuilder, MenuItem};
+use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::Emitter;
 use tauri::{
@@ -50,6 +50,15 @@ const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
 const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
 const EVENT_TOAST_SHOW: &str = "toast:show";
 const EVENT_TOAST_HIDE: &str = "toast:hide";
+const EVENT_SETTINGS_CHANGED: &str = "settings:changed";
+const FEEDBACK_URL: &str = "https://github.com/LegendarySpy/Glimpse/issues";
+const MENU_ID_MODE_LOCAL: &str = "menu_mode_local";
+const MENU_ID_MODE_CLOUD: &str = "menu_mode_cloud";
+const MENU_ID_MODEL_PREFIX: &str = "menu_model_";
+const MENU_ID_MIC_PREFIX: &str = "menu_mic_";
+const MENU_ID_MIC_DEFAULT: &str = "menu_mic_default";
+const MENU_ID_FEEDBACK: &str = "menu_send_feedback";
+const MENU_ID_CHECK_UPDATES: &str = "menu_check_updates";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -434,6 +443,7 @@ fn update_settings(
     }
 
     let mut next = state.current_settings();
+    let prev = next.clone();
     next.smart_shortcut = smartShortcut;
     next.smart_enabled = smartEnabled;
     next.hold_shortcut = holdShortcut;
@@ -456,6 +466,19 @@ fn update_settings(
         .map_err(|err| err.to_string())?;
 
     register_shortcuts(&app).map_err(|err| err.to_string())?;
+
+    if prev.transcription_mode != next.transcription_mode
+        || prev.local_model != next.local_model
+        || prev.microphone_device != next.microphone_device
+    {
+        if let Err(err) = refresh_tray_menu(&app, &next) {
+            eprintln!("Failed to refresh tray menu: {err}");
+        }
+    }
+
+    if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &next) {
+        eprintln!("Failed to emit settings change: {err}");
+    }
 
     Ok(next)
 }
@@ -1855,15 +1878,236 @@ fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
     Ok(desktop)
 }
 
-fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>> {
+fn build_tray_menu(
+    app: &AppHandle<AppRuntime>,
+    settings: &UserSettings,
+) -> tauri::Result<Menu<AppRuntime>> {
+    let mut menu = MenuBuilder::new(app);
+
+    // Cloud / Local mode submenu
+    let mode_cloud = CheckMenuItemBuilder::with_id(MENU_ID_MODE_CLOUD, "Cloud")
+        .checked(matches!(settings.transcription_mode, TranscriptionMode::Cloud))
+        .build(app)?;
+    let mode_local = CheckMenuItemBuilder::with_id(MENU_ID_MODE_LOCAL, "Local")
+        .checked(matches!(settings.transcription_mode, TranscriptionMode::Local))
+        .build(app)?;
+    let mode_submenu = SubmenuBuilder::new(app, "Mode")
+        .item(&mode_cloud)
+        .item(&mode_local)
+        .build()?;
+    menu = menu.item(&mode_submenu);
+
+    // Microphone selector submenu
+    let mut mic_submenu = SubmenuBuilder::new(app, "Microphone");
+    let default_mic = CheckMenuItemBuilder::with_id(MENU_ID_MIC_DEFAULT, "System Default")
+        .checked(settings.microphone_device.is_none())
+        .build(app)?;
+    mic_submenu = mic_submenu.item(&default_mic);
+
+    match audio::list_input_devices() {
+        Ok(devices) => {
+            if devices.is_empty() {
+                let unavailable = MenuItem::with_id(
+                    app,
+                    "menu_mic_none",
+                    "No input devices found",
+                    false,
+                    None::<&str>,
+                )?;
+                mic_submenu = mic_submenu.item(&unavailable);
+            } else {
+                for device in devices {
+                    let label = if device.is_default {
+                        format!("{} (Default)", device.name)
+                    } else {
+                        device.name.clone()
+                    };
+                    let checked = settings.microphone_device.as_deref() == Some(device.id.as_str());
+                    // Prefix device IDs to avoid collisions with MENU_ID_MIC_DEFAULT (e.g., device id "default")
+                    let item = CheckMenuItemBuilder::with_id(
+                        format!("{MENU_ID_MIC_PREFIX}dev:{}", device.id),
+                        label,
+                    )
+                    .checked(checked)
+                    .build(app)?;
+                    mic_submenu = mic_submenu.item(&item);
+                }
+            }
+        }
+        Err(err) => {
+            let unavailable = MenuItem::with_id(
+                app,
+                "menu_mic_error",
+                format!("Microphone unavailable ({err})"),
+                false,
+                None::<&str>,
+            )?;
+            mic_submenu = mic_submenu.item(&unavailable);
+        }
+    }
+    menu = menu.item(&mic_submenu.build()?);
+
+    // Models submenu only when in local mode (radio-style via check items)
+    if matches!(settings.transcription_mode, TranscriptionMode::Local) {
+        let mut model_submenu = SubmenuBuilder::new(app, "Model");
+        for model in model_manager::list_models() {
+            let installed = model_manager::check_model_status(app.clone(), model.key.clone())
+                .map(|s| s.installed)
+                .unwrap_or(false);
+            let label = if installed {
+                model.label.clone()
+            } else {
+                format!("{} (Not downloaded)", model.label)
+            };
+            let item = CheckMenuItemBuilder::with_id(
+                format!("{MENU_ID_MODEL_PREFIX}{}", model.key),
+                label,
+            )
+            .enabled(installed)
+            .checked(installed && settings.local_model == model.key)
+            .build(app)?;
+            model_submenu = model_submenu.item(&item);
+        }
+        menu = menu.item(&model_submenu.build()?);
+    }
+
+    // Utility actions
+    menu = menu.separator();
+    let check_updates = MenuItem::with_id(
+        app,
+        MENU_ID_CHECK_UPDATES,
+        "Check for Updates",
+        false,
+        None::<&str>,
+    )?;
+    let send_feedback =
+        MenuItem::with_id(app, MENU_ID_FEEDBACK, "Send Feedback", true, None::<&str>)?;
+    menu = menu.item(&check_updates).item(&send_feedback);
+    menu = menu.separator();
+
+    // Existing actions
     let open_settings =
         MenuItem::with_id(app, "open_settings", "Open Glimpse", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit_glimpse", "Quit Glimpse", true, None::<&str>)?;
+    menu = menu.item(&open_settings).item(&quit);
 
-    let menu = MenuBuilder::new(app)
-        .item(&open_settings)
-        .item(&quit)
-        .build()?;
+    menu.build()
+}
+
+pub(crate) fn refresh_tray_menu(
+    app: &AppHandle<AppRuntime>,
+    settings: &UserSettings,
+) -> tauri::Result<()> {
+    let state = app.state::<AppState>();
+    if let Some(tray) = state.tray.lock().clone() {
+        let menu = build_tray_menu(app, settings)?;
+        tray.set_menu(Some(menu))?;
+    }
+    Ok(())
+}
+
+fn set_transcription_mode_from_menu(app: &AppHandle<AppRuntime>, mode: TranscriptionMode) {
+    let state = app.state::<AppState>();
+    let mut settings = state.current_settings();
+    if settings.transcription_mode == mode {
+        return;
+    }
+    settings.transcription_mode = mode;
+    match state.persist_settings(settings.clone()) {
+        Ok(saved) => {
+            if let Err(err) = refresh_tray_menu(app, &saved) {
+                eprintln!("Failed to refresh tray menu: {err}");
+            }
+            if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
+                eprintln!("Failed to emit settings change: {err}");
+            }
+        }
+        Err(err) => eprintln!("Failed to update transcription mode: {err}"),
+    }
+}
+
+fn set_local_model_from_menu(app: &AppHandle<AppRuntime>, model_key: &str) {
+    if model_manager::definition(model_key).is_none() {
+        eprintln!("Ignoring unknown model selection: {model_key}");
+        return;
+    }
+
+    match model_manager::check_model_status(app.clone(), model_key.to_string()) {
+        Ok(status) if status.installed => {}
+        Ok(_) => {
+            eprintln!("Model not installed: {model_key}");
+            return;
+        }
+        Err(err) => {
+            eprintln!("Failed to check model status for {model_key}: {err}");
+            return;
+        }
+    }
+
+    let state = app.state::<AppState>();
+    let mut settings = state.current_settings();
+    if settings.local_model == model_key {
+        return;
+    }
+    settings.local_model = model_key.to_string();
+    match state.persist_settings(settings.clone()) {
+        Ok(saved) => {
+            if let Err(err) = refresh_tray_menu(app, &saved) {
+                eprintln!("Failed to refresh tray menu: {err}");
+            }
+            if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
+                eprintln!("Failed to emit settings change: {err}");
+            }
+        }
+        Err(err) => eprintln!("Failed to update model selection: {err}"),
+    }
+}
+
+fn set_microphone_from_menu(app: &AppHandle<AppRuntime>, device_id: Option<&str>) {
+    let state = app.state::<AppState>();
+    let mut settings = state.current_settings();
+    if settings.microphone_device.as_deref() == device_id {
+        return;
+    }
+    settings.microphone_device = device_id.map(|id| id.to_string());
+    match state.persist_settings(settings.clone()) {
+        Ok(saved) => {
+            if let Err(err) = refresh_tray_menu(app, &saved) {
+                eprintln!("Failed to refresh tray menu: {err}");
+            }
+            if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
+                eprintln!("Failed to emit settings change: {err}");
+            }
+        }
+        Err(err) => eprintln!("Failed to update microphone selection: {err}"),
+    }
+}
+
+fn handle_tray_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
+    match id {
+        MENU_ID_MODE_LOCAL => set_transcription_mode_from_menu(app, TranscriptionMode::Local),
+        MENU_ID_MODE_CLOUD => set_transcription_mode_from_menu(app, TranscriptionMode::Cloud),
+        MENU_ID_MIC_DEFAULT => set_microphone_from_menu(app, None),
+        MENU_ID_FEEDBACK => {
+            if let Err(err) = app.opener().open_url(FEEDBACK_URL, None::<&str>) {
+                eprintln!("Failed to open feedback link: {err}");
+            }
+        }
+        MENU_ID_CHECK_UPDATES => {}
+        _ => {
+            if let Some(model_key) = id.strip_prefix(MENU_ID_MODEL_PREFIX) {
+                set_local_model_from_menu(app, model_key);
+            } else if let Some(device_id_raw) = id.strip_prefix(MENU_ID_MIC_PREFIX) {
+                let device_id = device_id_raw.strip_prefix("dev:").unwrap_or(device_id_raw);
+                set_microphone_from_menu(app, Some(device_id));
+            }
+        }
+    }
+}
+
+fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>> {
+    let settings = app.state::<AppState>().current_settings();
+    let menu = build_tray_menu(app, &settings)?;
 
     let icon_bytes = include_bytes!("../icons/32x32.png");
     let icon = tauri::image::Image::from_bytes(icon_bytes)?.to_owned();
@@ -1892,7 +2136,7 @@ fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>
             "quit_glimpse" => {
                 app.exit(0);
             }
-            _ => {}
+            other => handle_tray_menu_event(app, other),
         })
         .build(app)
 }
