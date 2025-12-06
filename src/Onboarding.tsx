@@ -23,8 +23,23 @@ import {
     ExternalLink,
     Loader2,
     Wand2,
+    AlertTriangle,
 } from "lucide-react";
 import DotMatrix from "./components/DotMatrix";
+
+type ModelInfo = {
+    key: string;
+    label: string;
+    description: string;
+    size_mb: number;
+    engine: string;
+    variant: string;
+    tags: string[];
+};
+
+type StoredSettings = {
+    local_model?: string;
+};
 
 type TranscriptionMode = "cloud" | "local";
 
@@ -48,6 +63,9 @@ type ModelStatus = {
 interface OnboardingProps {
     onComplete: () => void;
 }
+
+const PARAKEET_KEY = "parakeet_tdt_int8";
+const WHISPER_KEY = "whisper_medium_q8_1";
 
 // Clean animated logo - 4 dots in 2x2 grid with smooth transitions
 const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
@@ -205,10 +223,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [isCheckingMic, setIsCheckingMic] = useState(true);
     const [isCheckingAccessibility, setIsCheckingAccessibility] = useState(true);
     const [selectedMode, setSelectedMode] = useState<TranscriptionMode>("cloud");
-    const [localModelChoice, setLocalModelChoice] = useState<"parakeet_tdt_int8" | "whisper_small_q5">("parakeet_tdt_int8");
+    const [localModelChoice, setLocalModelChoice] = useState<typeof PARAKEET_KEY | typeof WHISPER_KEY>(PARAKEET_KEY);
     const [localDownload, setLocalDownload] = useState<Record<string, LocalDownloadStatus>>({
-        parakeet_tdt_int8: { status: "idle", percent: 0 },
-        whisper_small_q5: { status: "idle", percent: 0 },
+        [PARAKEET_KEY]: { status: "idle", percent: 0 },
+        [WHISPER_KEY]: { status: "idle", percent: 0 },
     });
     const [modelStatus, setModelStatus] = useState<Record<string, ModelStatus>>({});
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
@@ -216,6 +234,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [llmEndpoint, setLlmEndpoint] = useState("");
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
+    const [showLocalConfirm, setShowLocalConfirm] = useState(false);
     
     // Smart mode shortcut state
     const [smartShortcut, setSmartShortcut] = useState("Control+Space");
@@ -227,6 +246,11 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         ? ["welcome", "cloud-signin", "microphone", "accessibility", "ready"]
         : ["welcome", "local-model", "cleanup", "microphone", "accessibility", "ready"];
     const currentStepIndex = steps.indexOf(step);
+
+    // Auto-close confirm modal if the step changes (e.g., Back navigation)
+    useEffect(() => {
+        if (showLocalConfirm) setShowLocalConfirm(false);
+    }, [step]);
 
     const checkMicPermission = useCallback(async () => {
         try {
@@ -408,7 +432,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         };
     }, [captureActive]);
 
-    const refreshModelStatus = useCallback((modelKey: "parakeet_tdt_int8" | "whisper_small_q5") => {
+    const refreshModelStatus = useCallback((modelKey: string) => {
         invoke<ModelStatus>("check_model_status", { model: modelKey })
             .then((status) => {
                 setModelStatus((prev) => ({ ...prev, [modelKey]: status }));
@@ -417,7 +441,31 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     }, []);
 
     useEffect(() => {
-        ["parakeet_tdt_int8", "whisper_small_q5"].forEach((model) => refreshModelStatus(model as "parakeet_tdt_int8" | "whisper_small_q5"));
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const [models, settings] = await Promise.all([
+                    invoke<ModelInfo[]>("list_models"),
+                    invoke<StoredSettings>("get_settings"),
+                ]);
+                if (!isMounted) return;
+                models.forEach((model) => refreshModelStatus(model.key));
+                if (
+                    settings?.local_model &&
+                    (settings.local_model === PARAKEET_KEY || settings.local_model === WHISPER_KEY)
+                ) {
+                    setLocalModelChoice(settings.local_model as typeof PARAKEET_KEY | typeof WHISPER_KEY);
+                }
+            } catch (err) {
+                console.error("Failed to preload model info", err);
+                if (!isMounted) return;
+                [PARAKEET_KEY, WHISPER_KEY].forEach((model) => refreshModelStatus(model));
+            }
+        };
+        load();
+        return () => {
+            isMounted = false;
+        };
     }, [refreshModelStatus]);
 
     // Listen for model download events to mirror Settings behavior
@@ -488,7 +536,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         };
     }, [refreshModelStatus]);
 
-    const handleLocalDownload = async (modelKey: "parakeet_tdt_int8" | "whisper_small_q5") => {
+    const handleLocalDownload = async (modelKey: typeof PARAKEET_KEY | typeof WHISPER_KEY) => {
         setLocalDownload((prev) => ({
             ...prev,
             [modelKey]: { status: "downloading", percent: 0, file: "starting..." },
@@ -504,7 +552,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         }
     };
 
-    const handleLocalDelete = async (modelKey: "parakeet_tdt_int8" | "whisper_small_q5") => {
+    const handleLocalDelete = async (modelKey: typeof PARAKEET_KEY | typeof WHISPER_KEY) => {
         try {
             await invoke("delete_model", { model: modelKey });
             setLocalDownload((prev) => ({
@@ -522,7 +570,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     };
 
     const displayState = useMemo(() => {
-        const buildState = (key: "parakeet_tdt_int8" | "whisper_small_q5") => {
+        const buildState = (key: typeof PARAKEET_KEY | typeof WHISPER_KEY) => {
             const installed = modelStatus[key]?.installed;
             const base = localDownload[key];
             if (installed) {
@@ -536,10 +584,33 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
             return base ?? { status: "idle", percent: 0 };
         };
         return {
-            parakeet: buildState("parakeet_tdt_int8"),
-            whisper: buildState("whisper_small_q5"),
+            parakeet: buildState(PARAKEET_KEY),
+            whisper: buildState(WHISPER_KEY),
         };
     }, [localDownload, modelStatus]);
+
+    const parakeetInstalled = modelStatus[PARAKEET_KEY]?.installed || displayState.parakeet.status === "complete";
+    const whisperInstalled = modelStatus[WHISPER_KEY]?.installed || displayState.whisper.status === "complete";
+    const isParakeetActive = localModelChoice === PARAKEET_KEY && parakeetInstalled;
+    const isWhisperActive = localModelChoice === WHISPER_KEY && whisperInstalled;
+
+    const selectedModelReady = useMemo(() => {
+        const selectedKey = localModelChoice;
+        const isParakeet = selectedKey === PARAKEET_KEY;
+        const ready =
+            (isParakeet
+                ? modelStatus[PARAKEET_KEY]?.installed || displayState.parakeet.status === "complete"
+                : modelStatus[WHISPER_KEY]?.installed || displayState.whisper.status === "complete");
+        return !!ready;
+    }, [localModelChoice, displayState.parakeet.status, displayState.whisper.status, modelStatus]);
+
+    const handleLocalModelContinue = () => {
+        if (!selectedModelReady) {
+            setShowLocalConfirm(true);
+            return;
+        }
+        goToNextStep();
+    };
 
     return (
         <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0a0a0c] text-white select-none relative">
@@ -610,7 +681,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                     </div>
                                     <div className="relative flex items-center gap-3 rounded-xl border border-[#1a1a22] bg-[#0d0d12]/90 px-3 py-2 text-[10px] text-[#d0d0da] leading-relaxed">
                                         <DotMatrix rows={3} cols={5} activeDots={[0, 2, 4, 6, 8, 10, 12, 14]} dotSize={2} gap={2} color="#2a2a34" />
-                                        <p className="flex-1">Local stays free and on-device. Cloud is optional ($5.99/mo) if you want these perks.</p>
+                                        <p className="flex-1">Cloud is optional ($5.99/mo) if you want these perks. Cloud provides better models and faster cleanup & delivery.</p>
                                     </div>
                                 </button>
 
@@ -713,18 +784,28 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
                                 Choose your local model
                             </h2>
-                            <p className="text-sm text-[#6b6b76] mb-6">
-                                Pick a model to download and run locally. You can add more in Settings later.
-                            </p>
+                            <div className="mb-6 flex flex-col gap-1 text-sm text-[#6b6b76]">
+                                <p>Pick a model, then download it. You can add more in Settings later.</p>
+                                <p className="text-xs text-[#4a4a54]">Both models work offline; choose one and get it ready.</p>
+                            </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                                <button
-                                    type="button"
-                                    onClick={() => setLocalModelChoice("parakeet_tdt_int8")}
-                                    className={`relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-colors ${
-                                        localModelChoice === "parakeet_tdt_int8"
-                                            ? "border-[#3a3a45] bg-[#0f0f14]"
-                                            : "border-[#1b1b22] bg-[#0c0c12]"
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setLocalModelChoice(PARAKEET_KEY)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            setLocalModelChoice(PARAKEET_KEY);
+                                        }
+                                    }}
+                                    className={`relative w-full rounded-2xl border border-[#1b1b22] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-colors cursor-pointer ${
+                                        isParakeetActive
+                                            ? "bg-amber-400/5 ring-1 ring-amber-400/60"
+                                            : localModelChoice === PARAKEET_KEY
+                                                ? "bg-[#0f0f14] ring-1 ring-amber-400/30"
+                                                : "bg-[#0c0c12] hover:border-[#2a2a32]"
                                     }`}
                                 >
                                     <div className="absolute inset-0 pointer-events-none">
@@ -732,12 +813,30 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             <DotMatrix rows={6} cols={18} activeDots={[0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,60,63,66]} dotSize={2} gap={4} color="#1f1f28" />
                                         </div>
                                     </div>
-                                    <div className="relative flex items-center justify-between">
+                                    <div className="relative flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-2">
                                             <DotMatrix rows={2} cols={2} activeDots={[0]} dotSize={3} gap={2} color="#fbbf24" />
                                             <span className="text-[11px] font-semibold text-[#e5e7eb]">Parakeet (INT8)</span>
                                         </div>
-                                        <span className="text-[10px] font-mono text-[#8b8b96]">Fast, small</span>
+                                        <span
+                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
+                                                isParakeetActive
+                                                    ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
+                                                    : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
+                                            }`}
+                                        >
+                                            Active
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[10px] text-[#8b8b96]">
+                                        <span className="font-mono">Fast, small</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
+                                            parakeetInstalled
+                                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                                : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
+                                        }`}>
+                                            {parakeetInstalled ? "Ready" : "Download needed"}
+                                        </span>
                                     </div>
                                     <div className="relative space-y-1.5 text-[11px] text-[#d0d0da] font-medium">
                                         <div className="flex items-center gap-2">
@@ -754,7 +853,14 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             <span className="text-[10px] font-semibold text-[#d0d0da]">Download</span>
                                             <button
                                                 aria-label={displayState.parakeet.status === "complete" ? "Delete model" : "Download model"}
-                                                onClick={() => (displayState.parakeet.status === "complete" ? handleLocalDelete("parakeet_tdt_int8") : handleLocalDownload("parakeet_tdt_int8"))}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (displayState.parakeet.status === "complete") {
+                                                        handleLocalDelete(PARAKEET_KEY);
+                                                    } else {
+                                                        handleLocalDownload(PARAKEET_KEY);
+                                                    }
+                                                }}
                                                 disabled={displayState.parakeet.status === "downloading"}
                                                 className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
                                                     displayState.parakeet.status === "downloading"
@@ -769,7 +875,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                                 ) : displayState.parakeet.status === "complete" ? (
                                                     <Trash2 size={10} />
                                                 ) : (
-                                                    <Download size={10} />
+                                                    <Download size={10} className="text-amber-400" />
                                                 )}
                                             </button>
                                         </div>
@@ -787,15 +893,24 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             )}
                                         </div>
                                     </div>
-                                </button>
+                                </div>
 
-                                <button
-                                    type="button"
-                                    onClick={() => setLocalModelChoice("whisper_small_q5")}
-                                    className={`relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.16)] overflow-hidden transition-colors ${
-                                        localModelChoice === "whisper_small_q5"
-                                            ? "border-[#32323c] bg-[#0e0e13]"
-                                            : "border-[#181820] bg-[#0b0b0f]"
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setLocalModelChoice(WHISPER_KEY)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            setLocalModelChoice(WHISPER_KEY);
+                                        }
+                                    }}
+                                    className={`relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.16)] overflow-hidden transition-colors cursor-pointer ${
+                                        isWhisperActive
+                                            ? "border-[#181820] bg-amber-400/5 ring-1 ring-amber-400/60"
+                                            : localModelChoice === WHISPER_KEY
+                                                ? "border-[#181820] bg-[#0e0e13] ring-1 ring-amber-400/30"
+                                                : "border-[#181820] bg-[#0b0b0f] hover:border-[#262631]"
                                     }`}
                                 >
                                     <div className="absolute inset-0 pointer-events-none">
@@ -803,17 +918,35 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             <DotMatrix rows={6} cols={18} activeDots={[1,5,9,13,17,21,25,29,33,37,41,45,49,53,57,61,65]} dotSize={2} gap={4} color="#1c1c25" />
                                         </div>
                                     </div>
-                                    <div className="relative flex items-center justify-between">
+                                    <div className="relative flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-2">
                                             <DotMatrix rows={2} cols={2} activeDots={[1]} dotSize={3} gap={2} color="#a5b4fc" />
-                                            <span className="text-[11px] font-semibold text-[#e5e7eb]">Whisper Small (Q5)</span>
+                                            <span className="text-[11px] font-semibold text-[#e5e7eb]">Whisper Medium (Q8)</span>
                                         </div>
-                                        <span className="text-[10px] font-mono text-[#8b8b96]">Broad support</span>
+                                        <span
+                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
+                                                isWhisperActive
+                                                    ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
+                                                    : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
+                                            }`}
+                                        >
+                                            Active
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[10px] text-[#8b8b96]">
+                                        <span className="font-mono">Multilingual, balanced</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
+                                            whisperInstalled
+                                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                                : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
+                                        }`}>
+                                            {whisperInstalled ? "Ready" : "Download needed"}
+                                        </span>
                                     </div>
                                     <div className="relative space-y-1.5 text-[11px] text-[#d0d0da] font-medium">
                                         <div className="flex items-center gap-2">
                                             <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
-                                            <span>High quality, medium speed</span>
+                                                <span>Good quality, balanced speed</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
@@ -825,7 +958,14 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             <span className="text-[10px] font-semibold text-[#d0d0da]">Download</span>
                                             <button
                                                 aria-label={displayState.whisper.status === "complete" ? "Delete model" : "Download model"}
-                                                onClick={() => (displayState.whisper.status === "complete" ? handleLocalDelete("whisper_small_q5") : handleLocalDownload("whisper_small_q5"))}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (displayState.whisper.status === "complete") {
+                                                        handleLocalDelete(WHISPER_KEY);
+                                                    } else {
+                                                        handleLocalDownload(WHISPER_KEY);
+                                                    }
+                                                }}
                                                 disabled={displayState.whisper.status === "downloading"}
                                                 className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
                                                     displayState.whisper.status === "downloading"
@@ -840,7 +980,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                                 ) : displayState.whisper.status === "complete" ? (
                                                     <Trash2 size={10} />
                                                 ) : (
-                                                    <Download size={10} />
+                                                    <Download size={10} className="text-amber-400" />
                                                 )}
                                             </button>
                                         </div>
@@ -858,7 +998,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             )}
                                         </div>
                                     </div>
-                                </button>
+                                </div>
                             </div>
 
                             <p className="mt-4 text-[11px] text-[#5a5a64]">
@@ -866,7 +1006,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             </p>
 
                             <button
-                                onClick={goToNextStep}
+                                onClick={handleLocalModelContinue}
                                 className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-2.5 text-sm font-mono font-semibold text-[#0a0a0c] hover:bg-white transition-colors min-w-[150px] tracking-tight"
                             >
                                 Continue
@@ -1206,6 +1346,53 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                     <span className="text-[10px] font-medium">Glimpse</span>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {showLocalConfirm && (
+                    <motion.div
+                        key="local-confirm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-6"
+                        onClick={() => setShowLocalConfirm(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.96, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.96, opacity: 0 }}
+                            transition={{ duration: 0.18 }}
+                            className="w-full max-w-sm rounded-2xl border border-[#1f1f28] bg-[#0d0d12] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center gap-3 mb-3">
+                                <AlertTriangle size={20} className="text-amber-400 shrink-0" />
+                                <div>
+                                    <p className="text-[14px] font-semibold text-[#e8e8eb]">Continue without a model?</p>
+                                    <p className="text-[11px] text-[#7a7a84]">You haven't downloaded a local model yet. Transcription will not run offline until you add one in Settings.</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowLocalConfirm(false)}
+                                    className="rounded-lg border border-[#2a2a30] px-4 py-2 text-[12px] font-medium text-[#d0d0da] hover:border-[#3a3a42] transition-colors"
+                                >
+                                    Stay here
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowLocalConfirm(false);
+                                        goToNextStep();
+                                    }}
+                                    className="rounded-lg bg-amber-400 px-4 py-2 text-[12px] font-semibold text-black hover:bg-amber-300 transition-colors"
+                                >
+                                    Continue anyway
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {currentStepIndex > 0 && (
                 <button
