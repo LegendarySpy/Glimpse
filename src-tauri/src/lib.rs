@@ -23,19 +23,17 @@ use recorder::{
 };
 use reqwest::Client;
 use serde::Serialize;
-use settings::{
-    default_local_model, LlmProvider, SettingsStore, TranscriptionMode, UserSettings,
-};
+use settings::{default_local_model, LlmProvider, SettingsStore, TranscriptionMode, UserSettings};
 use tauri::async_runtime;
 use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::Emitter;
 use tauri::{
-    ActivationPolicy, AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent,
-    Wry,
+    ActivationPolicy, AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
+    WindowEvent, Wry,
 };
-use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use tauri_plugin_opener::OpenerExt;
 
 const MAIN_WINDOW_LABEL: &str = "main";
 const SETTINGS_WINDOW_LABEL: &str = "settings";
@@ -145,6 +143,7 @@ pub fn run() {
             open_data_dir,
             get_transcriptions,
             delete_transcription,
+            delete_all_transcriptions,
             retry_transcription,
             retry_llm_cleanup,
             undo_llm_cleanup,
@@ -658,6 +657,21 @@ fn delete_transcription(id: String, state: tauri::State<AppState>) -> Result<boo
 }
 
 #[tauri::command]
+fn delete_all_transcriptions(state: tauri::State<AppState>) -> Result<u32, String> {
+    let audio_paths = state
+        .storage()
+        .delete_all()
+        .map_err(|err| format!("Failed to delete all transcriptions: {err}"))?;
+
+    let deleted_count = audio_paths.len() as u32;
+    for audio_path in audio_paths {
+        let _ = std::fs::remove_file(audio_path);
+    }
+
+    Ok(deleted_count)
+}
+
+#[tauri::command]
 async fn retry_transcription(
     id: String,
     app: AppHandle<AppRuntime>,
@@ -706,7 +720,8 @@ async fn retry_transcription(
                     let model_key = settings.local_model.clone();
                     match model_manager::ensure_model_ready(&app_handle, &model_key) {
                         Ok(ready_model) => {
-                            let dictionary_prompt = dictionary_prompt_for_model(&ready_model, &settings);
+                            let dictionary_prompt =
+                                dictionary_prompt_for_model(&ready_model, &settings);
                             let transcriber = app_handle.state::<AppState>().local_transcriber();
                             match async_runtime::spawn_blocking(move || {
                                 transcriber.transcribe(
@@ -1334,7 +1349,7 @@ fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecor
     let base_dir = match recordings_root(&app) {
         Ok(path) => path,
         Err(err) => {
-            emit_error(&app, format!("Failed to resolve Desktop folder: {err}"));
+            emit_error(&app, format!("Failed to resolve recordings directory: {err}"));
             return;
         }
     };
@@ -1870,12 +1885,12 @@ fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
 }
 
 fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
-    let mut desktop = app
+    let mut data_dir = app
         .path()
-        .desktop_dir()
-        .context("Desktop directory not found")?;
-    desktop.push("Glimpse");
-    Ok(desktop)
+        .app_data_dir()
+        .context("App data directory not found")?;
+    data_dir.push("recordings");
+    Ok(data_dir)
 }
 
 fn build_tray_menu(
@@ -1886,10 +1901,16 @@ fn build_tray_menu(
 
     // Cloud / Local mode submenu
     let mode_cloud = CheckMenuItemBuilder::with_id(MENU_ID_MODE_CLOUD, "Cloud")
-        .checked(matches!(settings.transcription_mode, TranscriptionMode::Cloud))
+        .checked(matches!(
+            settings.transcription_mode,
+            TranscriptionMode::Cloud
+        ))
         .build(app)?;
     let mode_local = CheckMenuItemBuilder::with_id(MENU_ID_MODE_LOCAL, "Local")
-        .checked(matches!(settings.transcription_mode, TranscriptionMode::Local))
+        .checked(matches!(
+            settings.transcription_mode,
+            TranscriptionMode::Local
+        ))
         .build(app)?;
     let mode_submenu = SubmenuBuilder::new(app, "Mode")
         .item(&mode_cloud)

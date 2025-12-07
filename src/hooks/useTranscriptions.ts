@@ -100,6 +100,16 @@ export function useTranscriptions() {
         };
     }, [loadTranscriptions]);
 
+    const clearAllTranscriptions = useCallback(async () => {
+        try {
+            await invoke("delete_all_transcriptions");
+            setTranscriptions([]);
+        } catch (err) {
+            console.error("Failed to clear all transcriptions:", err);
+            throw err;
+        }
+    }, []);
+
     return {
         transcriptions,
         isLoading,
@@ -108,6 +118,7 @@ export function useTranscriptions() {
         retryTranscription,
         retryLlmCleanup,
         undoLlmCleanup,
+        clearAllTranscriptions,
         refresh: loadTranscriptions,
     };
 }

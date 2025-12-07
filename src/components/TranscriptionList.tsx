@@ -6,13 +6,27 @@ import TranscriptionItem from "./TranscriptionItem";
 import DotMatrix from "./DotMatrix";
 
 const TranscriptionList: React.FC = () => {
-    const { transcriptions, isLoading, deleteTranscription, retryTranscription, retryLlmCleanup, undoLlmCleanup } = useTranscriptions();
+    const { transcriptions, isLoading, deleteTranscription, retryTranscription, retryLlmCleanup, undoLlmCleanup, clearAllTranscriptions } = useTranscriptions();
     const [searchQuery, setSearchQuery] = useState("");
+    const [isClearing, setIsClearing] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const confirmClearAll = async () => {
+        setIsClearing(true);
+        try {
+            await clearAllTranscriptions();
+            setShowConfirm(false);
+        } catch (err) {
+            console.error("Failed to clear all transcriptions:", err);
+        } finally {
+            setIsClearing(false);
+        }
+    };
 
     const filteredTranscriptions = useMemo(() => {
         if (!searchQuery.trim()) return transcriptions;
         const query = searchQuery.toLowerCase();
-        return transcriptions.filter(record => 
+        return transcriptions.filter(record =>
             record.text.toLowerCase().includes(query) ||
             record.raw_text?.toLowerCase().includes(query)
         );
@@ -136,7 +150,7 @@ const TranscriptionList: React.FC = () => {
                 </div>
             </div>
 
-            {/* Footer with count */}
+            {/* Footer with count and Clear All */}
             <div className="flex items-center justify-between px-4 pt-2">
                 <span className="text-[9px] text-[#3a3a42] uppercase tracking-wider">
                     {searchQuery ? (
@@ -145,6 +159,33 @@ const TranscriptionList: React.FC = () => {
                         `${transcriptions.length} ${transcriptions.length === 1 ? 'transcription' : 'transcriptions'}`
                     )}
                 </span>
+                {transcriptions.length > 0 && (
+                    showConfirm ? (
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={confirmClearAll}
+                                disabled={isClearing}
+                                className="text-[9px] text-red-300 uppercase tracking-wider hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isClearing ? 'Clearing...' : 'Confirm'}
+                            </button>
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                disabled={isClearing}
+                                className="text-[9px] text-[#5a5a64] uppercase tracking-wider hover:text-[#8a8a94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setShowConfirm(true)}
+                            className="text-[9px] text-[#5a5a64] uppercase tracking-wider hover:text-red-400 transition-colors"
+                        >
+                            Clear All
+                        </button>
+                    )
+                )}
             </div>
 
             <style>{`

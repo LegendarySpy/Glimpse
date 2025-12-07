@@ -234,6 +234,22 @@ impl StorageManager {
         Ok(removed_audio_path)
     }
 
+    /// Delete all transcription records and return their audio paths
+    pub fn delete_all(&self) -> Result<Vec<String>> {
+        let audio_paths = {
+            let conn = self.connection.lock();
+            let mut stmt = conn.prepare("SELECT audio_path FROM transcriptions")?;
+            let paths = stmt
+                .query_map([], |row| row.get(0))?
+                .collect::<rusqlite::Result<Vec<String>>>()?;
+            conn.execute("DELETE FROM transcriptions", [])?;
+            paths
+        };
+
+        self.write_json_snapshot()?;
+        Ok(audio_paths)
+    }
+
     pub fn get_by_id(&self, id: &str) -> Option<TranscriptionRecord> {
         let conn = self.connection.lock();
         match Self::get_record(&conn, id) {

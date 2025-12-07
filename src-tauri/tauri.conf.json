@@ -32,7 +32,7 @@
         "label": "settings",
         "title": "Glimpse Settings",
         "width": 900,
-        "height": 650,
+        "height": 750,
         "minWidth": 625,
         "minHeight": 400,
         "resizable": true,
