@@ -628,24 +628,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
   // --- Render ---
 
-  const getStatusLabel = () => {
-    switch (status) {
-      case "idle": return "Ready";
-      case "listening": 
-        return recordingMode === "hold" ? "Hold to record…" : 
-               recordingMode === "toggle" ? "Tap to stop…" : "Listening…";
-      case "processing": return "Processing…";
-      case "error": return "Error";
-    }
-  };
-
-  const statusColors: Record<PillStatus, string> = {
-    idle: "text-gray-500",
-    listening: "text-rose-400",
-    processing: "text-gray-400",
-    error: "text-red-400",
-  };
-
   return (
     <div
       className={`relative w-full h-full flex flex-col justify-end select-none ${className}`}
@@ -667,13 +649,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
             ref={canvasRef}
             className="absolute inset-0 w-full h-full block"
           />
-        </div>
-
-        {/* Status Text */}
-        <div className="mt-2 text-center">
-          <p className={`text-[9px] uppercase tracking-[0.25em] ${statusColors[status]}`}>
-            {getStatusLabel()}
-          </p>
         </div>
       </div>
     </div>
