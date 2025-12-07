@@ -104,6 +104,20 @@ const WHISPER_LARGE_V3_TURBO_Q8_FILES: [ModelFileDescriptor; 1] = [ModelFileDesc
 
 pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
     ModelDefinition {
+        key: "whisper_large_v3_turbo_q8",
+        label: "Whisper Large V3 Turbo",
+        description:
+            "Great quality local Whisper model with multilingual support, supports custom words.",
+        size_mb: 880.0,
+        files: &WHISPER_LARGE_V3_TURBO_Q8_FILES,
+        engine: LocalModelEngine::Whisper,
+        variant: "Q8_1",
+        storage: ModelStorage::File {
+            artifact: "ggml-large-v3-turbo-q8_0.bin",
+        },
+        tags: &["Recommended", "Custom Words", "Multilingual"],
+    },
+    ModelDefinition {
         key: "parakeet_tdt_int8",
         label: "Parakeet 0.6B (Int8)",
         description: "Fast multilingual transcription with NVIDIA's quantized Parakeet model.",
@@ -137,20 +151,6 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
             artifact: "ggml-small-q5_1.bin",
         },
         tags: &["English", "Custom Words", "CPU Friendly"],
-    },
-    ModelDefinition {
-        key: "whisper_large_v3_turbo_q8",
-        label: "Whisper Large V3 Turbo",
-        description:
-            "Great quality local Whisper model with multilingual support, supports custom words.",
-        size_mb: 880.0,
-        files: &WHISPER_LARGE_V3_TURBO_Q8_FILES,
-        engine: LocalModelEngine::Whisper,
-        variant: "Q8_1",
-        storage: ModelStorage::File {
-            artifact: "ggml-large-v3-turbo-q8_0.bin",
-        },
-        tags: &["Multilingual", "Custom Words"],
     },
 ];
 

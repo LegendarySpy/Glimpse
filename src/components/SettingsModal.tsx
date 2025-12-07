@@ -1268,11 +1268,21 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                             )}
                                                                         </div>
                                                                         <div className="flex flex-wrap gap-1.5 mt-1 mb-1.5">
-                                                                            {model.tags.map(tag => (
-                                                                                <span key={tag} className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#1a1a1e] text-[#6b6b76] border border-[#2a2a30]">
-                                                                                    {tag}
-                                                                                </span>
-                                                                            ))}
+                                                                            {model.tags.map(tag => {
+                                                                                const isRecommended = tag.toLowerCase() === "recommended";
+                                                                                return (
+                                                                                    <span
+                                                                                        key={tag}
+                                                                                        className={
+                                                                                            isRecommended
+                                                                                                ? "px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border bg-[#A5B4FD26] text-[#A5B4FD] border-[#A5B4FD66]"
+                                                                                                : "px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#1a1a1e] text-[#6b6b76] border border-[#2a2a30]"
+                                                                                        }
+                                                                                    >
+                                                                                        {tag}
+                                                                                    </span>
+                                                                                );
+                                                                            })}
                                                                         </div>
                                                                         <p className="text-[11px] text-[#6b6b76] line-clamp-1">{model.description}</p>
                                                                         <div className="mt-2 flex items-center gap-2">

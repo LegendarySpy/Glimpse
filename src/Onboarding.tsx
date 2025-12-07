@@ -922,6 +922,9 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                         <div className="flex items-center gap-2">
                                             <DotMatrix rows={2} cols={2} activeDots={[1]} dotSize={3} gap={2} color="#a5b4fc" />
                                             <span className="text-[11px] font-semibold text-[#e5e7eb]">Whisper Large V3 Turbo (Q8)</span>
+                                            <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border bg-[#A5B4FD26] text-[#A5B4FD] border-[#A5B4FD66]">
+                                                Recommended
+                                            </span>
                                         </div>
                                         <span
                                             className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
