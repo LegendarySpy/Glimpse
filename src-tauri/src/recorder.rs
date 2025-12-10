@@ -202,10 +202,11 @@ impl RecorderCore {
             }
 
             apply_filters(&mut mono, active.sample_rate);
-            apply_compression(&mut mono);
-            apply_frame_normalization(&mut mono, active.sample_rate);
             let trimmed = trim_silence(&mono, active.sample_rate);
-            let processed = if trimmed.is_empty() { mono } else { trimmed };
+            let mut processed = if trimmed.is_empty() { mono } else { trimmed };
+
+            apply_compression(&mut processed);
+            apply_frame_normalization(&mut processed, active.sample_rate);
 
             let samples: Vec<i16> = processed
                 .into_iter()

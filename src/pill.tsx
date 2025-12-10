@@ -64,6 +64,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const heightsRef = useRef<number[]>([]);
   const animationRef = useRef<number | null>(null);
   const loaderTimeRef = useRef<number>(0);
+  const audioReferenceLevelRef = useRef<number>(100);
 
   const [status, setStatus] = useState<PillStatus>("idle");
   const [isErrorFlashing, setIsErrorFlashing] = useState(false);
@@ -252,13 +253,38 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     const centerCol = Math.floor(cols / 2);
 
     if (audioData.length > 0) {
+      // Adaptive Gain Control (AGC) calculation
+      let framePeak = 0;
+      // Sample a subset for performance
+      for (let i = 0; i < audioData.length; i += 4) {
+        if (audioData[i] > framePeak) framePeak = audioData[i];
+      }
+
+      const SIGNAL_FLOOR = 15; // Noise floor
+      const TARGET_PEAK = 200; // Target value we want peaks to map to (out of 255)
+
+      if (framePeak > SIGNAL_FLOOR) {
+        if (framePeak > audioReferenceLevelRef.current) {
+          // Attack: Quick adaptation to loud sounds
+          audioReferenceLevelRef.current += (framePeak - audioReferenceLevelRef.current) * 0.1;
+        } else {
+          // Decay: Slow recovery for quiet sections
+          audioReferenceLevelRef.current += (framePeak - audioReferenceLevelRef.current) * 0.005;
+        }
+      }
+
+      // Clamp reference to prevent extreme boosting of silence
+      const effectiveRef = Math.max(audioReferenceLevelRef.current, 50);
+      const normalizationFactor = TARGET_PEAK / effectiveRef;
+
       for (let i = 0; i <= centerCol; i++) {
         const distFromCenter = i / centerCol;
         const freqIndex = Math.floor(audioData.length * 0.4 * (distFromCenter * distFromCenter));
         let sample = audioData[freqIndex] || 0;
         if (audioData[freqIndex + 1]) sample = (sample + audioData[freqIndex + 1]) / 2;
 
-        let val = (sample / 255) * sensitivity;
+        // Apply AGC factor
+        let val = (sample * normalizationFactor / 255) * sensitivity;
         if (distFromCenter < 0.2) val *= 1.25;
         val = Math.min(val, 1.0);
 

@@ -5,7 +5,6 @@ import PillOverlay from "./pill";
 import ToastOverlay from "./ToastOverlay";
 import Home from "./Home";
 import Onboarding from "./Onboarding";
-import FAQ from "./components/FAQ";
 import "./App.css";
 
 type StoredSettings = {
@@ -45,7 +44,6 @@ function App() {
     return () => document.removeEventListener("contextmenu", handleContextMenu);
   }, []);
 
-  // Check onboarding status for settings window
   useEffect(() => {
     if (windowLabel === "settings") {
       const checkOnboarding = async () => {
@@ -54,7 +52,6 @@ function App() {
           setShowOnboarding(!settings.onboarding_completed);
         } catch (err) {
           console.error("Failed to load settings:", err);
-          // On error, assume onboarding is complete to not block users
           setShowOnboarding(false);
         } finally {
           setIsLoading(false);
@@ -82,22 +79,11 @@ function App() {
     };
   }, [windowLabel]);
 
-  // Handle onboarding completion
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
   };
 
-  // FAQ window
-  if (windowLabel === "faq") {
-    return (
-      <div className="h-screen w-screen overflow-hidden bg-[#0a0a0c]">
-        <FAQ />
-      </div>
-    );
-  }
-
   if (windowLabel === "settings") {
-    // Show loading state briefly while checking onboarding
     if (isLoading) {
       return (
         <div className="settings-view h-screen w-screen overflow-hidden bg-[#0a0a0c]" />
