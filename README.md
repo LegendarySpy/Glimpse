@@ -32,7 +32,8 @@ bun tauri build
 > Note when running production builds sometimes you may need to remove and re-enable accessibility features to make them work again.
 ## Roadmap
 
-- [ ] Custom dictionary for words and phrases
+- [x] Custom dictionary for words and phrases
+- [ ] Personalization features (per app writing styles: emailing, messaging etc)
 - [ ] Contextual awareness (detect destination app and adjust tone)
 - [ ] Edit mode (rewrite selected text with full context)
 - [ ] Ask mode (query what's on your screen)
