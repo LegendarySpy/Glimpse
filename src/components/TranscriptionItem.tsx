@@ -151,7 +151,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
-            className="group relative"
+            className="group relative snap-start"
         >
             <div className={`flex items-start gap-3 py-3 px-4 rounded-lg transition-colors ${isError ? "bg-red-500/[0.03]" : "hover:bg-[#131316]"}`}>
                 {/* Status Indicator */}
@@ -276,9 +276,8 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                             <motion.button
                                 onClick={handleCopy}
                                 whileTap={{ scale: 0.95 }}
-                                className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 hover:bg-[#1a1a1e] ${
-                                    copied ? "bg-[#1a1a1e]" : ""
-                                }`}
+                                className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 hover:bg-[#1a1a1e] ${copied ? "bg-[#1a1a1e]" : ""
+                                    }`}
                                 title={copied ? "Copied" : "Copy transcription"}
                             >
                                 {copied ? (
@@ -298,9 +297,8 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                 }
                             }}
                             whileTap={{ scale: 0.95 }}
-                            className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 ${
-                                shiftHeld ? "hover:bg-red-500/10" : "hover:bg-[#1a1a1e]"
-                            }`}
+                            className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 ${shiftHeld ? "hover:bg-red-500/10" : "hover:bg-[#1a1a1e]"
+                                }`}
                             title={shiftHeld ? "Delete" : "More options"}
                         >
                             {shiftHeld ? (

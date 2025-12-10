@@ -12,15 +12,55 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --color-cloud: #FBBF24;
+  --color-cloud-light: #FCD34D;
+  --color-cloud-dark: #D97706;
+  --color-cloud-hover: #F59E0B;
+  --color-cloud-5: rgba(251, 191, 36, 0.05);
+  --color-cloud-10: rgba(251, 191, 36, 0.10);
+  --color-cloud-20: rgba(251, 191, 36, 0.20);
+  --color-cloud-30: rgba(251, 191, 36, 0.30);
+  --color-cloud-50: rgba(251, 191, 36, 0.50);
+  --color-cloud-80: rgba(251, 191, 36, 0.80);
+
+  --color-local: #A5B3FE;
+  --color-local-light: #C4CBFF;
+  --color-local-dark: #818CF8;
+  --color-local-hover: #8B99FF;
+  --color-local-5: rgba(165, 179, 254, 0.05);
+  --color-local-10: rgba(165, 179, 254, 0.10);
+  --color-local-20: rgba(165, 179, 254, 0.20);
+  --color-local-30: rgba(165, 179, 254, 0.30);
+  --color-local-50: rgba(165, 179, 254, 0.50);
+  --color-local-80: rgba(165, 179, 254, 0.80);
+
+  --color-bg-primary: #030303;
+  --color-bg-secondary: #0a0a0c;
+  --color-bg-tertiary: #0d0d10;
+  --color-bg-elevated: #1a1a22;
+  --color-bg-hover: #2a2a34;
+
+  --color-border-primary: #1f1f28;
+  --color-border-secondary: #2a2a32;
+  --color-border-hover: #3a3a45;
+
+  --color-text-primary: #f0f0f5;
+  --color-text-secondary: #a0a0ab;
+  --color-text-muted: #6b6b76;
+  --color-text-disabled: #4a4a54;
+
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --color-warning: #F59E0B;
+  --color-info: #3B82F6;
 }
 
-/* Tauri window drag region - enables window dragging */
 *[data-tauri-drag-region] {
   -webkit-app-region: drag;
   app-region: drag;
 }
 
-/* Ensure interactive elements within drag region are still clickable */
 *[data-tauri-drag-region] button,
 *[data-tauri-drag-region] a,
 *[data-tauri-drag-region] input,
@@ -66,7 +106,6 @@ body {
   min-height: 100vh;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -85,7 +124,6 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Settings modal smooth scroll */
 .settings-scroll {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
@@ -109,7 +147,6 @@ body {
   background: #3a3a40;
 }
 
-/* Smooth animations */
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 0.4;
@@ -123,7 +160,6 @@ body {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Error shake animation */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
@@ -134,7 +170,6 @@ body {
   animation: shake 0.4s ease-in-out;
 }
 
-/* Toast animations - appears from below (since toast window is above pill) */
 @keyframes toast-in {
   from {
     opacity: 0;
@@ -165,12 +200,10 @@ body {
   animation: toast-out 0.15s ease-in forwards;
 }
 
-/* Toast expand/collapse transition */
 .toast-content-expand {
   transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
 }
 
-/* Toast type-specific glow effects */
 .toast-glow-error {
   box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.1);
 }
@@ -191,7 +224,6 @@ body {
   box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(139, 92, 246, 0.1);
 }
 
-/* Line clamp utility for toast content */
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;

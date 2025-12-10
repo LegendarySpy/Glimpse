@@ -3,8 +3,6 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useSharedAnalyser } from "./hooks/useSharedAnalyser";
 
-// --- Types ---
-
 type PillStatus = "idle" | "listening" | "processing" | "error";
 
 interface GridInfo {
@@ -15,8 +13,6 @@ interface GridInfo {
   offsetY: number;
 }
 
-// --- Constants ---
-
 const PILL_WIDTH = 97;
 const PILL_HEIGHT = 27;
 const DOT_SPACING = 3;
@@ -26,8 +22,6 @@ const DOT_RADIUS = {
   wave: 1.0,
   loader: 1.0,
 };
-
-// --- Icon Bitmaps ---
 
 const ICONS = {
   warning: [
@@ -45,15 +39,11 @@ const COLORS = {
   red: "239, 68, 68",
 };
 
-// --- Event Payloads ---
-
 interface RecordingStartPayload { started_at: string; }
 interface RecordingErrorPayload { message: string; }
 interface TranscriptionStartPayload { path: string; }
 interface TranscriptionCompletePayload { transcript: string; auto_paste: boolean; }
 interface TranscriptionErrorPayload { message: string; stage: string; }
-
-// --- Main Pill Component ---
 
 export interface PillOverlayProps {
   className?: string;
@@ -68,7 +58,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   sensitivity = 3,
   decay = 0.85,
 }) => {
-  // Refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<GridInfo>({ spacing: DOT_SPACING, cols: 0, rows: 0, offsetX: 0, offsetY: 0 });
@@ -76,12 +65,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const animationRef = useRef<number | null>(null);
   const loaderTimeRef = useRef<number>(0);
 
-  // State
   const [status, setStatus] = useState<PillStatus>("idle");
-  const [recordingMode, setRecordingMode] = useState<"hold" | "toggle" | null>(null);
   const [isErrorFlashing, setIsErrorFlashing] = useState(false);
 
-  // Audio
   const { analyser, isListening, start, stop } = useSharedAnalyser();
   const analyserRef = useRef<AnalyserNode | null>(null);
 
@@ -89,7 +75,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     analyserRef.current = analyser;
   }, [analyser]);
 
-  // --- Hide overlay window ---
   const hideOverlay = useCallback(async () => {
     try {
       const window = getCurrentWindow();
@@ -99,14 +84,12 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, []);
 
-  // --- Dismiss handler (hides window and resets state) ---
   const dismissOverlay = useCallback(() => {
     setStatus("idle");
     setIsErrorFlashing(false);
     hideOverlay();
   }, [hideOverlay]);
 
-  // --- Keyboard handler (Esc to dismiss on error) ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && status === "error") {
@@ -118,8 +101,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [status, dismissOverlay]);
-
-  // --- Drawing Utilities ---
 
   const getMaskOpacity = useCallback((x: number, y: number, width: number, height: number): number => {
     const radius = height / 2;
@@ -154,8 +135,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     return false;
   }, []);
 
-  // --- Draw Functions ---
-
   const drawProcessingFrame = useCallback((time: number) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -170,11 +149,10 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     ctx.shadowColor = "transparent";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Smooth breathing wave that travels across
     const speed = 0.0015;
     const waveLength = cols * 0.4;
     const breathe = 0.5 + 0.5 * Math.sin(time * 0.001);
-    
+
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
         const cx = offsetX + c * spacing + spacing / 2;
@@ -183,23 +161,20 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         if (maskAlpha <= 0.05) continue;
 
         const distFromCenterY = Math.abs(cy - height / 2);
-        
-        // Create a traveling wave across columns
+
         const wavePhase = (c / waveLength) - (time * speed);
         const wave = Math.sin(wavePhase * Math.PI * 2) * 0.5 + 0.5;
-        
-        // Wave height with breathing effect
+
         const maxRadius = height * 0.4 * (0.6 + 0.4 * breathe);
         const activeRadius = wave * maxRadius;
-        
+
         const isActive = distFromCenterY < activeRadius;
 
         ctx.beginPath();
         if (isActive) {
-          // Smooth gradient from center to edge
           const edgeFactor = 1 - (distFromCenterY / (activeRadius + 0.5));
           const brightness = Math.pow(edgeFactor, 1.5) * (0.7 + 0.3 * wave);
-          
+
           ctx.fillStyle = `rgba(${COLORS.white}, ${brightness * maskAlpha})`;
           if (brightness > 0.7) {
             ctx.shadowBlur = 3;
@@ -211,8 +186,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
           ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
         }
         ctx.fill();
-        
-        // Reset shadow
+
         if (isActive) {
           ctx.shadowBlur = 0;
           ctx.shadowColor = "transparent";
@@ -237,7 +211,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     ctx.shadowColor = "transparent";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Fast flash effect
     const flash = Math.sin(time * 0.02 * Math.PI * 2);
     const intensity = 0.5 + 0.5 * Math.max(0, flash);
 
@@ -341,8 +314,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, [decay, getMaskOpacity, sensitivity]);
 
-  // --- Animation Controller ---
-
   const stopAllAnimations = useCallback(() => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
@@ -392,7 +363,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       animationRef.current = requestAnimationFrame(fadeOutWave);
     } else {
       heightsRef.current.fill(0);
-      // Just clear to base dots - no icon
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (!canvas || !ctx) return;
@@ -419,20 +389,15 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, [drawAudioFrame, getMaskOpacity]);
 
-  // --- Set Error State (visual only, toast handled separately) ---
   const setErrorState = useCallback(() => {
     setStatus("error");
     setIsErrorFlashing(true);
-    // Stop flashing after animation, keep error state
     setTimeout(() => setIsErrorFlashing(false), 1200);
   }, []);
 
-  // --- Event Listeners ---
-
   useEffect(() => {
     const unlisteners: Promise<UnlistenFn>[] = [
-      listen<{ mode: string }>("recording:mode_change", (event) => {
-        setRecordingMode(event.payload.mode as "hold" | "toggle");
+      listen<{ mode: string }>("recording:mode_change", () => {
       }),
       listen<RecordingStartPayload>("recording:start", async () => {
         setStatus("listening");
@@ -445,7 +410,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       }),
       listen("recording:stop", () => {
         setStatus("processing");
-        setRecordingMode(null);
+
         stop();
       }),
       listen<RecordingErrorPayload>("recording:error", () => {
@@ -456,7 +421,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         setStatus("processing");
       }),
       listen<TranscriptionCompletePayload>("transcription:complete", () => {
-        // Success - hide the overlay
         setStatus("idle");
         hideOverlay();
       }),
@@ -473,8 +437,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       stop();
     };
   }, [start, stop, setErrorState, hideOverlay]);
-
-  // --- Canvas Setup ---
 
   const setupCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -518,7 +480,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     };
   }, [setupCanvas, stopAllAnimations]);
 
-  // --- Draw base dots (idle state) ---
   const drawBaseDots = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -587,8 +548,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
   }, [getMaskOpacity, isIconPixel]);
 
-  // --- Visual State Management ---
-
   useEffect(() => {
     stopAllAnimations();
 
@@ -611,7 +570,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         if (isErrorFlashing) {
           runAnimation("error");
         } else {
-          // Static error state with warning icon
           drawStaticIcon(ICONS.warning, COLORS.red, COLORS.red);
         }
         break;
@@ -625,8 +583,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       fadeOutWave();
     }
   }, [isListening, analyser, status, runAnimation, fadeOutWave]);
-
-  // --- Render ---
 
   return (
     <div

@@ -5,6 +5,7 @@ import PillOverlay from "./pill";
 import ToastOverlay from "./ToastOverlay";
 import Home from "./Home";
 import Onboarding from "./Onboarding";
+import FAQ from "./components/FAQ";
 import "./App.css";
 
 type StoredSettings = {
@@ -85,6 +86,15 @@ function App() {
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
   };
+
+  // FAQ window
+  if (windowLabel === "faq") {
+    return (
+      <div className="h-screen w-screen overflow-hidden bg-[#0a0a0c]">
+        <FAQ />
+      </div>
+    );
+  }
 
   if (windowLabel === "settings") {
     // Show loading state briefly while checking onboarding

@@ -145,6 +145,21 @@ impl StorageManager {
         Ok(record)
     }
 
+    pub fn import_transcription(&self, record: TranscriptionRecord) -> Result<bool> {
+        {
+            let conn = self.connection.lock();
+
+            if Self::get_record(&conn, &record.id)?.is_some() {
+                return Ok(false);
+            }
+
+            Self::insert_record(&conn, &record)?;
+        }
+
+        self.write_json_snapshot()?;
+        Ok(true)
+    }
+
     pub fn save_transcription_with_cleanup(
         &self,
         raw_text: String,

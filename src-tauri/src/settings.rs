@@ -28,11 +28,9 @@ const KEY_DICTIONARY: &str = "dictionary";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSettings {
-    // Onboarding state
     #[serde(default)]
     pub onboarding_completed: bool,
 
-    // Smart mode settings (default enabled)
     #[serde(default = "default_smart_shortcut")]
     pub smart_shortcut: String,
     #[serde(default = "default_true")]
@@ -53,7 +51,6 @@ pub struct UserSettings {
     pub microphone_device: Option<String>,
     #[serde(default = "default_language")]
     pub language: String,
-    // LLM cleanup settings
     #[serde(default)]
     pub llm_cleanup_enabled: bool,
     #[serde(default = "default_llm_provider")]
@@ -190,8 +187,11 @@ impl SettingsStore {
         let conn = self.conn.lock();
         let mut settings = UserSettings::default();
 
-        settings.onboarding_completed =
-            self.read_value(&conn, KEY_ONBOARDING_COMPLETED, settings.onboarding_completed)?;
+        settings.onboarding_completed = self.read_value(
+            &conn,
+            KEY_ONBOARDING_COMPLETED,
+            settings.onboarding_completed,
+        )?;
         settings.smart_shortcut =
             self.read_value(&conn, KEY_SMART_SHORTCUT, settings.smart_shortcut.clone())?;
         settings.smart_enabled =
@@ -203,8 +203,11 @@ impl SettingsStore {
             self.read_value(&conn, KEY_TOGGLE_SHORTCUT, settings.toggle_shortcut.clone())?;
         settings.toggle_enabled =
             self.read_value(&conn, KEY_TOGGLE_ENABLED, settings.toggle_enabled)?;
-        settings.transcription_mode = self
-            .read_value(&conn, KEY_TRANSCRIPTION_MODE, settings.transcription_mode.clone())?;
+        settings.transcription_mode = self.read_value(
+            &conn,
+            KEY_TRANSCRIPTION_MODE,
+            settings.transcription_mode.clone(),
+        )?;
         settings.local_model =
             self.read_value(&conn, KEY_LOCAL_MODEL, settings.local_model.clone())?;
         settings.microphone_device = self.read_value(
@@ -213,18 +216,37 @@ impl SettingsStore {
             settings.microphone_device.clone(),
         )?;
         settings.language = self.read_value(&conn, KEY_LANGUAGE, settings.language.clone())?;
-        settings.llm_cleanup_enabled = self
-            .read_value(&conn, KEY_LLM_CLEANUP_ENABLED, settings.llm_cleanup_enabled)?;
+        settings.llm_cleanup_enabled =
+            self.read_value(&conn, KEY_LLM_CLEANUP_ENABLED, settings.llm_cleanup_enabled)?;
         settings.llm_provider =
             self.read_value(&conn, KEY_LLM_PROVIDER, settings.llm_provider.clone())?;
         settings.llm_endpoint =
             self.read_value(&conn, KEY_LLM_ENDPOINT, settings.llm_endpoint.clone())?;
-        settings.llm_api_key =
-            self.read_value(&conn, KEY_LLM_API_KEY, settings.llm_api_key.clone())?;
+
+        let encrypted_key: String = self.read_value(&conn, KEY_LLM_API_KEY, String::new())?;
+        if !encrypted_key.is_empty() {
+            if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
+                match crate::crypto::decrypt(&encrypted_key, &hardware_uuid) {
+                    Ok(decrypted) => settings.llm_api_key = decrypted,
+                    Err(e) => {
+                        if !crate::crypto::looks_encrypted(&encrypted_key) {
+                            settings.llm_api_key = encrypted_key;
+                        } else {
+                            eprintln!("Error: Failed to decrypt API key: {}. Key will need to be re-entered.", e);
+                        }
+                    }
+                }
+            } else {
+                eprintln!("Warning: Could not get hardware UUID, API key won't be encrypted");
+                settings.llm_api_key = encrypted_key;
+            }
+        }
+
         settings.llm_model = self.read_value(&conn, KEY_LLM_MODEL, settings.llm_model.clone())?;
         settings.user_context =
             self.read_value(&conn, KEY_USER_CONTEXT, settings.user_context.clone())?;
-        settings.dictionary = self.read_value(&conn, KEY_DICTIONARY, settings.dictionary.clone())?;
+        settings.dictionary =
+            self.read_value(&conn, KEY_DICTIONARY, settings.dictionary.clone())?;
 
         Ok(settings)
     }
@@ -232,7 +254,11 @@ impl SettingsStore {
     /// Persist settings into DB immediately.
     pub fn save(&self, settings: &UserSettings) -> Result<()> {
         let conn = self.conn.lock();
-        self.write_value(&conn, KEY_ONBOARDING_COMPLETED, &settings.onboarding_completed)?;
+        self.write_value(
+            &conn,
+            KEY_ONBOARDING_COMPLETED,
+            &settings.onboarding_completed,
+        )?;
         self.write_value(&conn, KEY_SMART_SHORTCUT, &settings.smart_shortcut)?;
         self.write_value(&conn, KEY_SMART_ENABLED, &settings.smart_enabled)?;
         self.write_value(&conn, KEY_HOLD_SHORTCUT, &settings.hold_shortcut)?;
@@ -243,10 +269,25 @@ impl SettingsStore {
         self.write_value(&conn, KEY_LOCAL_MODEL, &settings.local_model)?;
         self.write_value(&conn, KEY_MICROPHONE_DEVICE, &settings.microphone_device)?;
         self.write_value(&conn, KEY_LANGUAGE, &settings.language)?;
-        self.write_value(&conn, KEY_LLM_CLEANUP_ENABLED, &settings.llm_cleanup_enabled)?;
+        self.write_value(
+            &conn,
+            KEY_LLM_CLEANUP_ENABLED,
+            &settings.llm_cleanup_enabled,
+        )?;
         self.write_value(&conn, KEY_LLM_PROVIDER, &settings.llm_provider)?;
         self.write_value(&conn, KEY_LLM_ENDPOINT, &settings.llm_endpoint)?;
-        self.write_value(&conn, KEY_LLM_API_KEY, &settings.llm_api_key)?;
+
+        let stored_key = if settings.llm_api_key.is_empty() {
+            String::new()
+        } else if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
+            crate::crypto::encrypt(&settings.llm_api_key, &hardware_uuid)
+                .map_err(|e| anyhow::anyhow!("Failed to encrypt API key: {}", e))?
+        } else {
+            eprintln!("Warning: Could not get hardware UUID, storing API key unencrypted");
+            settings.llm_api_key.clone()
+        };
+        self.write_value(&conn, KEY_LLM_API_KEY, &stored_key)?;
+
         self.write_value(&conn, KEY_LLM_MODEL, &settings.llm_model)?;
         self.write_value(&conn, KEY_USER_CONTEXT, &settings.user_context)?;
         self.write_value(&conn, KEY_DICTIONARY, &settings.dictionary)?;

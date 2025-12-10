@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import {
     X,
     Keyboard,
@@ -22,8 +23,18 @@ import {
     Key,
     RotateCcw,
     FolderOpen,
+    Github,
+
+    Mail,
+    HelpCircle,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
+import AccountView from "./AccountView";
+import FAQModal from "./FAQModal";
+import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../lib/auth";
+
+import { OAuthProvider } from "appwrite";
+
 
 type TranscriptionMode = "cloud" | "local";
 type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "custom";
@@ -112,16 +123,27 @@ const languages = [
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialTab?: "general" | "account" | "models" | "about";
+    currentUser: AppwriteUser | null;
+    onUpdateUser: () => Promise<void>;
+    transcriptionMode: TranscriptionMode;
 }
 
-const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
+const SettingsModal = ({
+    isOpen,
+    onClose,
+    initialTab = "general",
+    currentUser,
+    onUpdateUser,
+    transcriptionMode: initialTranscriptionMode,
+}: SettingsModalProps) => {
     const [smartShortcut, setSmartShortcut] = useState("Control+Space");
     const [smartEnabled, setSmartEnabled] = useState(true);
     const [holdShortcut, setHoldShortcut] = useState("Control+Shift+Space");
     const [holdEnabled, setHoldEnabled] = useState(false);
     const [toggleShortcut, setToggleShortcut] = useState("Control+Alt+Space");
     const [toggleEnabled, setToggleEnabled] = useState(false);
-    const [transcriptionMode, setTranscriptionMode] = useState<TranscriptionMode>("cloud");
+    const [transcriptionMode, setTranscriptionMode] = useState<TranscriptionMode>(initialTranscriptionMode);
     const [localModel, setLocalModel] = useState("parakeet_tdt_int8");
     const [microphoneDevice, setMicrophoneDevice] = useState<string | null>(null);
     const [language, setLanguage] = useState("en");
@@ -137,12 +159,33 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account">("general");
     const [shortcutsExpanded, setShortcutsExpanded] = useState(false);
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
-    // LLM cleanup settings
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
     const [llmProvider, setLlmProvider] = useState<LlmProvider>("none");
     const [llmEndpoint, setLlmEndpoint] = useState("");
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
+
+    const [authLoading, setAuthLoading] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
+    const [showEmailForm, setShowEmailForm] = useState(false);
+    const [showFAQModal, setShowFAQModal] = useState(false);
+    const [authEmail, setAuthEmail] = useState("");
+    const [authPassword, setAuthPassword] = useState("");
+
+    const [cloudSyncEnabled, setCloudSyncEnabled] = useState(() => {
+        const stored = localStorage.getItem("glimpse_cloud_sync_enabled");
+        return stored !== null ? stored === "true" : true;
+    });
+
+    useEffect(() => {
+        if (isOpen && initialTab) {
+            setActiveTab(initialTab);
+        }
+    }, [isOpen, initialTab]);
+
+    useEffect(() => {
+        localStorage.setItem("glimpse_cloud_sync_enabled", String(cloudSyncEnabled));
+    }, [cloudSyncEnabled]);
 
     const handleOpenDataDir = useCallback(async () => {
         if (!appInfo?.data_dir_path) return;
@@ -181,7 +224,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         });
 
         return () => {
-            // Ensure we always clean up even if the listener promise resolves after unmount
             unlistenPromise.then((unlisten) => unlisten()).catch(() => {});
         };
     }, []);
@@ -263,6 +305,40 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 });
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (isOpen) {
+            setAuthLoading(true);
+            getCurrentUser()
+                .then(() => {
+                    setAuthError(null);
+                })
+                .catch(() => {})
+                .finally(() => {
+                    setAuthLoading(false);
+                });
+        }
+    }, [isOpen]);
+
+    const handleSignOut = async () => {
+        setAuthLoading(true);
+        try {
+            await logout();
+            await onUpdateUser();
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : "Sign out failed");
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+
+    const handleCancelAuth = () => {
+        setAuthLoading(false);
+        setAuthError(null);
+        setShowEmailForm(false);
+    };
+
+
 
 
 
@@ -423,7 +499,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                     llmEndpoint,
                     llmApiKey,
                     llmModel,
-                    userContext: "", // Set from app context elsewhere
+                    userContext: "",
                 });
                 setError(null);
             } catch (err) {
@@ -480,7 +556,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             await invoke("delete_model", { model: modelKey });
             setDownloadState((prev) => ({ ...prev, [modelKey]: { status: "idle", percent: 0, downloaded: 0, total: 0 } }));
 
-            // If deleting the active model, switch to another installed model
             if (localModel === modelKey) {
                 const otherInstalledModel = modelCatalog.find(
                     (m) => m.key !== modelKey && modelStatus[m.key]?.installed
@@ -488,7 +563,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 if (otherInstalledModel) {
                     setLocalModel(otherInstalledModel.key);
                 }
-                // If no other model is installed, keep the selection - the warning will show
             }
 
             refreshModelStatus(modelKey);
@@ -512,7 +586,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         const k = 1024;
         const sizes = ["B", "KB", "MB", "GB", "TB"];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        // Show 1 decimal place for GB and above, 0 for others
         const decimals = i >= 3 ? 1 : 0;
         return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
     };
@@ -571,14 +644,11 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                         >
                             <X size={14} />
                         </motion.button>
-
-                        {/* Sidebar */}
                         <aside className="flex w-44 flex-col border-r border-[#1e1e22] bg-[#111113]">
                             <div className="px-4 pt-5 pb-4">
                                 <h2 className="text-[13px] font-semibold text-[#e8e8eb]">Settings</h2>
                             </div>
                             <nav className="flex-1 px-2 space-y-4">
-                                {/* Account Section */}
                                 <div className="space-y-1">
                                     <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#4a4a54]">Account</p>
                                     <ModalNavItem
@@ -589,7 +659,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                     />
                                 </div>
 
-                                {/* General Section */}
                                 <div className="space-y-1">
                                     <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#4a4a54]">General</p>
                                     <ModalNavItem
@@ -606,7 +675,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                     />
                                 </div>
 
-                                {/* Local Section - only when local mode */}
                                 <AnimatePresence>
                                     {transcriptionMode === "local" && (
                                         <motion.div
@@ -629,7 +697,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                             </nav>
                         </aside>
 
-                        {/* Main Content */}
                         <main className="flex flex-1 flex-col bg-[#161618] overflow-hidden">
                             <div className="flex-1 overflow-y-auto p-6 settings-scroll">
                                 <AnimatePresence mode="wait">
@@ -644,19 +711,213 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                         >
                                             <header>
                                                 <h1 className="text-lg font-medium text-[#e8e8eb]">Account</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Manage your account settings and preferences.</p>
+                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Manage your profile, sessions, and subscription.</p>
                                             </header>
 
-                                            <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-8 text-center">
-                                                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#1a1a1e] border border-[#2a2a30]">
-                                                    <User size={24} className="text-[#6b6b76]" />
+                                            {authError && (
+                                                <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+                                                    <AlertCircle size={16} />
+                                                    <span>{authError}</span>
                                                 </div>
-                                                <h3 className="text-[13px] font-medium text-[#e8e8eb]">Not Signed In</h3>
-                                                <p className="mt-1 text-[11px] text-[#6b6b76]">Sign in to sync your settings and history.</p>
-                                                <button className="mt-4 rounded-lg bg-[#e8e8eb] px-4 py-2 text-[12px] font-medium text-black hover:bg-white transition-colors">
-                                                    Sign In
-                                                </button>
-                                            </div>
+                                            )}
+
+                                            {authLoading ? (
+                                                <div className="flex flex-col items-center justify-center py-16">
+                                                    <Loader2 size={24} className="animate-spin text-amber-400 mb-3" />
+                                                    <p className="text-[12px] text-[#6b6b76] mb-3">Loading...</p>
+                                                    <button
+                                                        onClick={handleCancelAuth}
+                                                        className="text-[11px] text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            ) : currentUser ? (
+                                                <AccountView
+                                                    currentUser={currentUser}
+                                                    cloudSyncEnabled={cloudSyncEnabled}
+                                                    onCloudSyncToggle={() => setCloudSyncEnabled(!cloudSyncEnabled)}
+                                                    onUserUpdate={async () => {
+                                                        await onUpdateUser();
+                                                        setShowEmailForm(false);
+                                                    }}
+                                                    onSignOut={handleSignOut}
+                                                />
+
+                                            ) : (
+                                                <div className="grid grid-cols-5 gap-4">
+                                                    <div className="col-span-3 relative rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px]">
+                                                        <div className="absolute inset-0 pointer-events-none opacity-18">
+                                                            <DotMatrix rows={8} cols={24} activeDots={[1, 4, 7, 10, 12, 15, 18, 20, 23]} dotSize={2} gap={4} color="#2e2e37" />
+                                                        </div>
+                                                        <div className="relative flex flex-col h-full">
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                                                <span className="text-[10px] font-semibold text-amber-400">Glimpse Cloud</span>
+                                                                <span className="ml-auto rounded-lg bg-[#1a1a22] px-2 py-0.5 text-[9px] font-medium text-[#6b6b76]">$5.99/mo</span>
+                                                            </div>
+
+                                                            <div className="flex flex-col gap-1.5 text-[11px] text-[#f0f0f5] font-medium mb-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <span>Cross-device sync</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <span>Bigger & better models</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <span>Faster processing</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="mt-auto flex items-center gap-3 rounded-xl border border-[#1a1a22] bg-[#0d0d12]/90 px-3 py-2 text-[10px] text-[#a0a0ab] leading-relaxed">
+                                                                <DotMatrix rows={3} cols={5} activeDots={[0, 2, 4, 6, 8, 10, 12, 14]} dotSize={2} gap={2} color="#2a2a34" />
+                                                                <p className="flex-1">Cloud is optional. Get faster processing, better models and cross-device sync.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="col-span-2 relative rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px] flex flex-col">
+                                                        <div className="absolute inset-0 pointer-events-none opacity-18">
+                                                            <DotMatrix rows={8} cols={12} activeDots={[0, 3, 6, 9, 12, 15, 18, 21]} dotSize={2} gap={4} color="#2e2e37" />
+                                                        </div>
+
+                                                        <div className="relative flex flex-col flex-1">
+                                                            <AnimatePresence mode="wait">
+                                                                {showEmailForm ? (
+                                                                    <motion.div
+                                                                        key="email-form"
+                                                                        initial={{ opacity: 0 }}
+                                                                        animate={{ opacity: 1 }}
+                                                                        exit={{ opacity: 0, scale: 0.95 }}
+                                                                        transition={{ duration: 0.15 }}
+                                                                        className="relative flex flex-col h-full"
+                                                                    >
+                                                                        <div className="flex items-center justify-between mb-3">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                                                                <span className="text-[10px] font-semibold text-[#9ca3af]">Continue with Email</span>
+                                                                            </div>
+                                                                            <button
+                                                                                onClick={() => setShowEmailForm(false)}
+                                                                                className="text-[9px] text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                                            >
+                                                                                Back
+                                                                            </button>
+                                                                        </div>
+
+                                                                        <form
+                                                                            onSubmit={async (e) => {
+                                                                                e.preventDefault();
+                                                                                setAuthError(null);
+                                                                                setAuthLoading(true);
+                                                                                try {
+                                                                                    try {
+                                                                                        await login(authEmail, authPassword);
+                                                                                    } catch (loginErr) {
+                                                                                        const errorMsg = loginErr instanceof Error ? loginErr.message : "";
+                                                                                        if (errorMsg.includes("Invalid credentials") || errorMsg.includes("user") || errorMsg.includes("not found")) {
+                                                                                            await createAccount(authEmail, authPassword);
+                                                                                        } else {
+                                                                                            throw loginErr;
+                                                                                        }
+                                                                                    }
+                                                                                    await onUpdateUser();
+                                                                                    setShowEmailForm(false);
+                                                                                } catch (err) {
+                                                                                    setAuthError(err instanceof Error ? err.message : "Authentication failed");
+                                                                                } finally {
+                                                                                    setAuthLoading(false);
+                                                                                }
+                                                                            }}
+                                                                            className="flex-1 flex flex-col gap-2"
+                                                                        >
+                                                                            <input
+                                                                                type="email"
+                                                                                placeholder="Email"
+                                                                                value={authEmail}
+                                                                                onChange={(e) => setAuthEmail(e.target.value)}
+                                                                                required
+                                                                                className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
+                                                                            />
+                                                                            <input
+                                                                                type="password"
+                                                                                placeholder="Password"
+                                                                                value={authPassword}
+                                                                                onChange={(e) => setAuthPassword(e.target.value)}
+                                                                                required
+                                                                                minLength={8}
+                                                                                className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
+                                                                            />
+                                                                            <button
+                                                                                type="submit"
+                                                                                className="mt-auto w-full rounded-xl bg-amber-400 py-2.5 text-[11px] font-semibold text-black hover:bg-amber-300 transition-colors"
+                                                                            >
+                                                                                Continue
+                                                                            </button>
+                                                                        </form>
+                                                                    </motion.div>
+                                                                ) : (
+                                                                    <motion.div
+                                                                        key="oauth-options"
+                                                                        initial={{ opacity: 0 }}
+                                                                        animate={{ opacity: 1 }}
+                                                                        exit={{ opacity: 0, scale: 0.95 }}
+                                                                        transition={{ duration: 0.15 }}
+                                                                        className="relative flex flex-col h-full"
+                                                                    >
+                                                                        <div className="flex items-center gap-2 mb-3">
+                                                                            <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                                                            <span className="text-[10px] font-semibold text-[#9ca3af]">Sign In</span>
+                                                                        </div>
+
+                                                                        <p className="text-[10px] text-[#6b6b76] mb-4 leading-relaxed">
+                                                                            Sign in to sync your transcriptions across devices.
+                                                                        </p>
+
+                                                                        <div className="flex flex-col gap-2 mt-auto">
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    const url = getOAuth2Url(OAuthProvider.Google, window.location.href);
+                                                                                    openUrl(url);
+                                                                                }}
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                            >
+                                                                                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                                                                                    <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                                                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                                                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                                                                    <path fill="#4285F4" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                                                                </svg>
+                                                                                Google
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    const url = getOAuth2Url(OAuthProvider.Github, window.location.href);
+                                                                                    openUrl(url);
+                                                                                }}
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                            >
+                                                                                <Github size={14} fill="currentColor" />
+                                                                                GitHub
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => setShowEmailForm(true)}
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                            >
+                                                                                <Mail size={14} />
+                                                                                Email
+                                                                            </button>
+                                                                        </div>
+                                                                    </motion.div>
+                                                                )}
+                                                            </AnimatePresence>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </motion.div>
                                     )}
 
@@ -675,7 +936,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                             </header>
 
                                             <div className="space-y-3">
-                                                {/* Shortcuts Section - Collapsible */}
                                                 <div className="rounded-xl border border-[#1e1e22] bg-[#111113] overflow-hidden">
                                                     <motion.button
                                                         onClick={() => setShortcutsExpanded(!shortcutsExpanded)}
@@ -728,7 +988,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                 className="overflow-hidden"
                                                             >
                                                                 <div className="px-4 pb-4 space-y-3 border-t border-[#1e1e22] pt-4">
-                                                                    {/* Smart Mode Shortcut */}
                                                                     <div className={`rounded-xl border p-4 transition-colors ${smartEnabled
                                                                         ? "border-amber-400/30 bg-amber-400/5"
                                                                         : "border-[#1e1e22]/50 bg-[#111113]/50"
@@ -798,7 +1057,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                         </motion.div>
                                                                     </div>
 
-                                                                    {/* Hold Shortcut */}
                                                                     <div className={`rounded-xl border p-4 transition-colors ${holdEnabled
                                                                         ? "border-[#1e1e22] bg-[#111113]"
                                                                         : "border-[#1e1e22]/50 bg-[#111113]/50"
@@ -868,7 +1126,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                         </motion.div>
                                                                     </div>
 
-                                                                    {/* Toggle Shortcut */}
                                                                     <div className={`rounded-xl border p-4 transition-colors ${toggleEnabled
                                                                         ? "border-[#1e1e22] bg-[#111113]"
                                                                         : "border-[#1e1e22]/50 bg-[#111113]/50"
@@ -943,7 +1200,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                     </AnimatePresence>
                                                 </div>
 
-                                                {/* Audio Section */}
                                                 <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4 space-y-4">
                                                     <div className="flex items-center gap-3 mb-2">
                                                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
@@ -998,10 +1254,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                {/* Transcription Mode Section */}
-
-                                                {/* Transcription Mode */}
                                                 <motion.div
                                                     layout
                                                     transition={{ type: "spring", stiffness: 400, damping: 35 }}
@@ -1027,6 +1279,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                             description="Fast & lightweight"
                                                             active={transcriptionMode === "cloud"}
                                                             onClick={() => setTranscriptionMode("cloud")}
+                                                            variant="cloud"
                                                         />
                                                         <ModeButton
                                                             icon={<HardDrive size={16} />}
@@ -1034,10 +1287,10 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                             description="Private & offline"
                                                             active={transcriptionMode === "local"}
                                                             onClick={() => setTranscriptionMode("local")}
+                                                            variant="local"
                                                         />
                                                     </div>
 
-                                                    {/* Warning when local mode enabled but model not installed */}
                                                     <AnimatePresence>
                                                         {transcriptionMode === "local" && !modelStatus[localModel]?.installed && (
                                                             <motion.div
@@ -1065,7 +1318,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                 </motion.div>
                                             </div>
 
-                                            {/* Error Display */}
                                             <AnimatePresence>
                                                 {error && (
                                                     <motion.div
@@ -1097,8 +1349,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                 <h1 className="text-lg font-medium text-[#e8e8eb]">Local Models</h1>
                                                 <p className="mt-1 text-[12px] text-[#6b6b76]">Manage transcription engines and AI cleanup.</p>
                                             </header>
-
-                                            {/* LLM Cleanup Section */}
                                             <div className="rounded-xl border border-[#1e1e22] bg-[#111113] overflow-hidden">
                                                 <div className="p-4">
                                                     <div className="flex items-center justify-between mb-3">
@@ -1134,7 +1384,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                 className="overflow-hidden"
                                                             >
                                                                 <div className="pt-3 border-t border-[#1e1e22] space-y-3">
-                                                                    {/* Provider Selection */}
                                                                     <div className="space-y-1.5">
                                                                         <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Provider</label>
                                                                         <div className="grid grid-cols-4 gap-2">
@@ -1161,7 +1410,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                         </div>
                                                                     </div>
 
-                                                                    {/* Endpoint (for Custom, or to override default) */}
                                                                     <div className="space-y-1.5">
                                                                         <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
                                                                             <Server size={10} />
@@ -1181,7 +1429,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                         />
                                                                     </div>
 
-                                                                    {/* API Key (required for OpenAI, optional for others) */}
                                                                     <div className="space-y-1.5">
                                                                         <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
                                                                             <Key size={10} />
@@ -1196,7 +1443,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                         />
                                                                     </div>
 
-                                                                    {/* Model Name */}
                                                                     <div className="space-y-1.5">
                                                                         <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
                                                                             <Cpu size={10} />
@@ -1228,8 +1474,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                     </AnimatePresence>
                                                 </div>
                                             </div>
-
-                                            {/* Transcription Models Section */}
                                             <div>
                                                 <div className="flex items-center gap-2 mb-3">
                                                     <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#1a1a1e] border border-[#2a2a30]">
@@ -1242,7 +1486,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                         const modelStat = modelStatus[model.key];
                                                         const progress = downloadState[model.key];
                                                         const installed = modelStat?.installed;
-                                                        // Only show as active if it's both selected AND installed
                                                         const isActive = localModel === model.key && installed;
                                                         const isDownloading = progress?.status === "downloading";
                                                         const showError = progress?.status === "error";
@@ -1321,8 +1564,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                                         </motion.button>
                                                                     </div>
                                                                 </div>
-
-                                                                {/* Progress bar - 3 rows tall, only when downloading or not installed */}
                                                                 {(isDownloading || !installed) && (
                                                                     <div className="mt-3">
                                                                         <ModelProgress percent={percent} status={progress?.status ?? "idle"} />
@@ -1361,16 +1602,15 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                 <p className="mt-1 text-[12px] text-[#6b6b76]">App info and setup options.</p>
                                             </header>
 
-                                            {/* App Info Grid */}
                                             <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1">Version</p>
-                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo?.version ?? "—"}</p>
+                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo?.version ?? "-"}</p>
                                                     </div>
                                                     <div>
                                                         <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1">Storage Used</p>
-                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "—"}</p>
+                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "-"}</p>
                                                     </div>
                                                 </div>
 
@@ -1384,13 +1624,11 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                     >
                                                         <FolderOpen size={12} className="text-[#4a4a54] shrink-0" />
                                                         <span className="text-[11px] text-[#6b6b76] font-mono truncate border-b border-dotted border-[#6b6b76] pb-[1px] leading-[1.2]">
-                                                            {appInfo?.data_dir_path ?? "—"}
+                                                            {appInfo?.data_dir_path ?? "-"}
                                                         </span>
                                                     </button>
                                                 </div>
                                             </div>
-
-                                            {/* Actions */}
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] px-1">Setup</p>
                                                 <button
@@ -1412,6 +1650,19 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                                         <p className="text-[10px] text-[#4a4a54]">Re-run the initial setup wizard</p>
                                                     </div>
                                                 </button>
+
+                                                <button
+                                                    onClick={() => setShowFAQModal(true)}
+                                                    className="w-full flex items-center gap-3 rounded-lg border border-[#1e1e22] bg-[#111113] p-3 text-left hover:bg-[#161618] hover:border-[#2a2a30] transition-colors"
+                                                >
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
+                                                        <HelpCircle size={14} className="text-[#6b6b76]" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[12px] font-medium text-[#e8e8eb]">FAQ & Help</p>
+                                                        <p className="text-[10px] text-[#4a4a54]">Common questions about Glimpse</p>
+                                                    </div>
+                                                </button>
                                             </div>
                                         </motion.div>
                                     )}
@@ -1420,9 +1671,10 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                         </main>
                     </motion.div>
                 </motion.div>
-            )
-            }
-        </AnimatePresence >
+            )}
+
+            <FAQModal isOpen={showFAQModal} onClose={() => setShowFAQModal(false)} />
+        </AnimatePresence>
     );
 
     function normalizeModifier(event: KeyboardEvent): string | null {
@@ -1462,22 +1714,28 @@ const ModalNavItem = ({ icon, label, active, onClick }: {
     </motion.button>
 );
 
-const ModeButton = ({ icon, label, description, active, onClick }: {
-    icon: React.ReactNode; label: string; description: string; active: boolean; onClick: () => void;
-}) => (
-    <motion.button
-        onClick={onClick}
-        className={`rounded-xl border p-3 text-left transition-all ${active
-            ? "border-amber-400/40 bg-amber-400/10"
-            : "border-[#2a2a30] bg-[#1a1a1e] hover:border-[#3a3a42]"
-            }`}
-        whileTap={{ scale: 0.98 }}
-    >
-        <div className={`mb-1.5 ${active ? "text-amber-400" : "text-[#6b6b76]"}`}>{icon}</div>
-        <div className={`text-[12px] font-medium ${active ? "text-[#e8e8eb]" : "text-[#a0a0ab]"}`}>{label}</div>
-        <div className={`text-[10px] ${active ? "text-amber-400/60" : "text-[#4a4a54]"}`}>{description}</div>
-    </motion.button>
-);
+const ModeButton = ({ icon, label, description, active, onClick, variant = "cloud" }: {
+    icon: React.ReactNode; label: string; description: string; active: boolean; onClick: () => void; variant?: "cloud" | "local";
+}) => {
+    const colors = variant === "cloud"
+        ? { border: "border-amber-400/40", bg: "bg-amber-400/10", icon: "text-amber-400", desc: "text-amber-400/60" }
+        : { border: "border-[#A5B3FE]/40", bg: "bg-[#A5B3FE]/10", icon: "text-[#A5B3FE]", desc: "text-[#A5B3FE]/60" };
+
+    return (
+        <motion.button
+            onClick={onClick}
+            className={`rounded-xl border p-3 text-left transition-all ${active
+                ? `${colors.border} ${colors.bg}`
+                : "border-[#2a2a30] bg-[#1a1a1e] hover:border-[#3a3a42]"
+                }`}
+            whileTap={{ scale: 0.98 }}
+        >
+            <div className={`mb-1.5 ${active ? colors.icon : "text-[#6b6b76]"}`}>{icon}</div>
+            <div className={`text-[12px] font-medium ${active ? "text-[#e8e8eb]" : "text-[#a0a0ab]"}`}>{label}</div>
+            <div className={`text-[10px] ${active ? colors.desc : "text-[#4a4a54]"}`}>{description}</div>
+        </motion.button>
+    );
+};
 
 const LlmProviderButton = ({ label, active, onClick }: {
     label: string; active: boolean; onClick: () => void;
@@ -1496,11 +1754,10 @@ const LlmProviderButton = ({ label, active, onClick }: {
 
 const ModelProgress = ({ percent, status }: { percent: number; status: string }) => {
     const cols = 50;
-    const rows = 3; // 3 dots tall as requested
+    const rows = 3;
     const totalDots = cols * rows;
     const activeCount = Math.round((percent / 100) * totalDots);
 
-    // Fill row by row for a nicer effect
     const activeDots = useMemo(() => {
         const dots: number[] = [];
         for (let i = 0; i < activeCount && i < totalDots; i++) {

@@ -24,8 +24,20 @@ import {
     Loader2,
     Wand2,
     AlertTriangle,
+    Mail,
+    Lock,
+    Eye,
+    EyeOff,
+    AlertCircle,
+    CloudCog,
+    HelpCircle,
+    User,
 } from "lucide-react";
 import DotMatrix from "./components/DotMatrix";
+import FAQModal from "./components/FAQModal";
+import { OAuthProvider } from "appwrite";
+import { createAccount, login, createOAuth2Session, updateName, updatePreferences } from "./lib/auth";
+
 
 type ModelInfo = {
     key: string;
@@ -43,7 +55,7 @@ type StoredSettings = {
 
 type TranscriptionMode = "cloud" | "local";
 
-type OnboardingStep = "welcome" | "cloud-signin" | "local-model" | "cleanup" | "microphone" | "accessibility" | "ready";
+type OnboardingStep = "welcome" | "cloud-signin" | "cloud-profile" | "cloud-sync" | "local-model" | "cleanup" | "local-signin" | "microphone" | "accessibility" | "ready";
 
 type LocalDownloadStatus = {
     status: "idle" | "downloading" | "complete" | "error";
@@ -67,7 +79,6 @@ interface OnboardingProps {
 const PARAKEET_KEY = "parakeet_tdt_int8";
 const WHISPER_KEY = "whisper_large_v3_turbo_q8";
 
-// Clean animated logo - 4 dots in 2x2 grid with smooth transitions
 const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
     const [pattern, setPattern] = useState(0);
     const intervalRef = useRef<number | null>(null);
@@ -78,13 +89,13 @@ const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
         lg: { dot: 14, gap: 10 },
     }[size];
 
-    // Pattern: 0=diagonal TL/BR, 1=diagonal TR/BL, 2=all, 3=none (breathe)
     const patterns = [
-        [true, false, false, true],   // diagonal \
-        [false, true, true, false],   // diagonal /
-        [true, true, true, true],     // all on
-        [true, false, false, true],   // diagonal \
+        [true, false, false, true],
+        [false, true, true, false],
+        [true, true, true, true],
     ];
+
+    const dotColors = ["#FBBF24", "#A5B3FE", "#A5B3FE", "#FBBF24"];
 
     useEffect(() => {
         intervalRef.current = window.setInterval(() => {
@@ -111,12 +122,13 @@ const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
                 return (
                     <motion.div
                         key={i}
-                        className="absolute rounded-full bg-amber-400"
+                        className="absolute rounded-full"
                         style={{
                             width: sizes.dot,
                             height: sizes.dot,
                             left: col * (sizes.dot + sizes.gap),
                             top: row * (sizes.dot + sizes.gap),
+                            backgroundColor: dotColors[i],
                         }}
                         animate={{
                             opacity: isActive ? 1 : 0.15,
@@ -133,7 +145,6 @@ const GlimpseLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
     );
 };
 
-// Progress indicator
 const StepIndicator = ({ currentStep, total }: { currentStep: number; total: number }) => (
     <div className="flex items-center gap-1.5">
         {Array.from({ length: total }).map((_, i) => (
@@ -150,7 +161,6 @@ const StepIndicator = ({ currentStep, total }: { currentStep: number; total: num
     </div>
 );
 
-// Permission status indicator
 const StatusBadge = ({ granted, checking }: { granted: boolean; checking?: boolean }) => {
     if (checking) {
         return (
@@ -218,12 +228,14 @@ const formatShortcutForDisplay = (shortcut: string): string => {
 
 const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [step, setStep] = useState<OnboardingStep>("welcome");
+    // Track where we skipped from for proper back navigation
+    const skippedFrom = useRef<OnboardingStep | null>(null);
     const [micPermission, setMicPermission] = useState(false);
     const [accessibilityPermission, setAccessibilityPermission] = useState(false);
     const [isCheckingMic, setIsCheckingMic] = useState(true);
     const [isCheckingAccessibility, setIsCheckingAccessibility] = useState(true);
     const [selectedMode, setSelectedMode] = useState<TranscriptionMode>("cloud");
-    const [localModelChoice, setLocalModelChoice] = useState<typeof PARAKEET_KEY | typeof WHISPER_KEY>(PARAKEET_KEY);
+    const [localModelChoice, setLocalModelChoice] = useState<typeof PARAKEET_KEY | typeof WHISPER_KEY>(WHISPER_KEY);
     const [localDownload, setLocalDownload] = useState<Record<string, LocalDownloadStatus>>({
         [PARAKEET_KEY]: { status: "idle", percent: 0 },
         [WHISPER_KEY]: { status: "idle", percent: 0 },
@@ -235,19 +247,28 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
     const [showLocalConfirm, setShowLocalConfirm] = useState(false);
-    
-    // Smart mode shortcut state
+
+    const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+    const [authEmail, setAuthEmail] = useState("");
+    const [authPassword, setAuthPassword] = useState("");
+    const [authName, setAuthName] = useState("");
+    const [authShowPassword, setAuthShowPassword] = useState(false);
+    const [authLoading, setAuthLoading] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
+
+    const [cloudSyncEnabled, setCloudSyncEnabled] = useState(true);
+    const [showFAQModal, setShowFAQModal] = useState(false);
+
     const [smartShortcut, setSmartShortcut] = useState("Control+Space");
     const [captureActive, setCaptureActive] = useState(false);
     const pressedModifiers = useRef<Set<string>>(new Set());
     const primaryKey = useRef<string | null>(null);
 
     const steps: OnboardingStep[] = selectedMode === "cloud"
-        ? ["welcome", "cloud-signin", "microphone", "accessibility", "ready"]
-        : ["welcome", "local-model", "cleanup", "microphone", "accessibility", "ready"];
+        ? ["welcome", "cloud-signin", "cloud-profile", "cloud-sync", "microphone", "accessibility", "ready"]
+        : ["welcome", "local-model", "cleanup", "local-signin", "microphone", "accessibility", "ready"];
     const currentStepIndex = steps.indexOf(step);
 
-    // Auto-close confirm modal if the step changes (e.g., Back navigation)
     useEffect(() => {
         if (showLocalConfirm) setShowLocalConfirm(false);
     }, [step]);
@@ -255,7 +276,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const checkMicPermission = useCallback(async () => {
         try {
             const granted = await checkMicrophonePermission();
-            console.log("Microphone permission:", granted);
             setMicPermission(granted);
         } catch (err) {
             console.error("Failed to check microphone permission:", err);
@@ -267,7 +287,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const checkAccessPermission = useCallback(async () => {
         try {
             const granted = await checkAccessibilityPermission();
-            console.log("Accessibility permission:", granted);
             setAccessibilityPermission(granted);
         } catch (err) {
             console.error("Failed to check accessibility permission:", err);
@@ -276,13 +295,11 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         }
     }, []);
 
-    // Initial checks
     useEffect(() => {
         checkMicPermission();
         checkAccessPermission();
     }, [checkMicPermission, checkAccessPermission]);
 
-    // Poll when on relevant steps
     useEffect(() => {
         if (step === "microphone") {
             const interval = setInterval(checkMicPermission, 1500);
@@ -299,13 +316,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const handleRequestMicrophoneAccess = async () => {
         try {
-            // Use the macOS permissions plugin to request microphone access
-            // This properly triggers the system permission dialog
             await requestMicrophonePermission();
             await checkMicPermission();
         } catch (err) {
             console.error("Failed to request microphone:", err);
-            // Fallback: try opening system settings
             try {
                 await invoke("open_microphone_settings");
             } catch (e) {
@@ -316,13 +330,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const handleRequestAccessibilityAccess = async () => {
         try {
-            // Use the macOS permissions plugin to request accessibility access
-            // This shows a system dialog prompting user to enable in System Settings
             await requestAccessibilityPermission();
             await checkAccessPermission();
         } catch (err) {
             console.error("Failed to request accessibility:", err);
-            // Fallback: try opening system settings
             try {
                 await invoke("open_accessibility_settings");
             } catch (e) {
@@ -333,7 +344,8 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const handleComplete = async () => {
         try {
-            // Save the smart shortcut setting before completing onboarding
+            localStorage.setItem("glimpse_cloud_sync_enabled", String(cloudSyncEnabled));
+
             await invoke("update_settings", {
                 smartShortcut,
                 smartEnabled: true,
@@ -367,6 +379,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     };
 
     const goToPrevStep = () => {
+        // If we skipped steps to get here, go back to where we skipped from
+        if (skippedFrom.current) {
+            setStep(skippedFrom.current);
+            skippedFrom.current = null;
+            return;
+        }
         const prevIndex = currentStepIndex - 1;
         if (prevIndex >= 0) {
             setStep(steps[prevIndex]);
@@ -389,7 +407,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         return [...orderedMods, formattedKey].join("+");
     };
 
-    // Handle keyboard capture for shortcut editing
     useEffect(() => {
         if (!captureActive) return;
 
@@ -468,7 +485,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         };
     }, [refreshModelStatus]);
 
-    // Listen for model download events to mirror Settings behavior
     useEffect(() => {
         let active = true;
         const disposers: UnlistenFn[] = [];
@@ -614,18 +630,14 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     return (
         <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#0a0a0c] text-white select-none relative">
-            {/* Title bar */}
             <div data-tauri-drag-region className="h-7 w-full shrink-0" />
 
-            {/* Progress */}
             <div className="flex justify-center pt-6 pb-6">
                 <StepIndicator currentStep={currentStepIndex} total={steps.length} />
             </div>
 
-            {/* Content */}
             <div className="flex-1 flex items-center justify-center px-10 pb-10">
                 <AnimatePresence mode="wait">
-                    {/* Welcome */}
                     {step === "welcome" && (
                         <motion.div
                             key="welcome"
@@ -651,14 +663,13 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                 <button
                                     type="button"
                                     onClick={() => setSelectedMode("cloud")}
-                                    className={`group relative w-full rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden transition-all ${
-                                        selectedMode === "cloud" ? "ring-1 ring-amber-400/50" : ""
-                                    }`}
+                                    className={`group relative w-full rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden transition-all ${selectedMode === "cloud" ? "ring-1 ring-amber-400/50" : ""
+                                        }`}
                                     aria-pressed={selectedMode === "cloud"}
                                 >
                                     <div className="absolute inset-0 pointer-events-none">
                                         <div className="absolute inset-0 opacity-18">
-                                            <DotMatrix rows={6} cols={18} activeDots={[1,4,7,10,12,15,18,20,23,26,29,32,35,38,41,44,47,50,53,56,59,62,65,68]} dotSize={2} gap={4} color="#2e2e37" />
+                                            <DotMatrix rows={6} cols={18} activeDots={[1, 4, 7, 10, 12, 15, 18, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68]} dotSize={2} gap={4} color="#2e2e37" />
                                         </div>
                                     </div>
                                     <div className="relative flex items-center gap-2">
@@ -688,38 +699,37 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                 <button
                                     type="button"
                                     onClick={() => setSelectedMode("local")}
-                                    className={`group relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)] overflow-hidden transition-colors ${
-                                        selectedMode === "local"
-                                            ? "border-[#3a3a45] bg-[#0c0c10]"
-                                            : "border-[#15151c] bg-[#0b0b0f]"
-                                    }`}
+                                    className={`group relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)] overflow-hidden transition-colors ${selectedMode === "local"
+                                        ? "border-[#A5B3FE]/50 bg-[#0c0c10] ring-1 ring-[#A5B3FE]/30"
+                                        : "border-[#15151c] bg-[#0b0b0f]"
+                                        }`}
                                     aria-pressed={selectedMode === "local"}
                                 >
                                     <div className="absolute inset-0 pointer-events-none">
                                         <div className="absolute inset-0 opacity-14">
-                                            <DotMatrix rows={6} cols={18} activeDots={[0,3,5,8,11,14,17,20,23,26,29,32,35,38,41,44,47,50,53,56,59,62,65,68]} dotSize={2} gap={4} color="#1f1f28" />
+                                            <DotMatrix rows={6} cols={18} activeDots={[0, 3, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68]} dotSize={2} gap={4} color="#1f1f28" />
                                         </div>
                                     </div>
                                     <div className="relative flex items-center gap-2">
-                                        <DotMatrix rows={2} cols={2} activeDots={[1]} dotSize={3} gap={2} color="#9ca3af" />
-                                        <span className="text-[10px] font-semibold text-[#d1d5db]">Glimpse Local</span>
+                                        <DotMatrix rows={2} cols={2} activeDots={[1, 2]} dotSize={3} gap={2} color="#A5B3FE" />
+                                        <span className="text-[10px] font-semibold text-[#A5B3FE]">Glimpse Local</span>
                                     </div>
                                     <div className="relative flex flex-col gap-1.5 text-[11px] text-[#dcdce3] font-medium">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
-                                            <span>Everything stays on-device for privacy</span>
+                                            <div className="h-1 w-3 rounded-full bg-[#A5B3FE]/80" />
+                                            <span>Everything stays on-device for privacy </span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
-                                            <span>Runs with local models—no uploads</span>
+                                            <div className="h-1 w-3 rounded-full bg-[#A5B3FE]/80" />
+                                            <span>Local models</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
-                                            <span>Offline-friendly when you're traveling</span>
+                                            <div className="h-1 w-3 rounded-full bg-[#A5B3FE]/80" />
+                                            <span>free optional Cloud transcription sync</span>
                                         </div>
                                     </div>
                                     <div className="relative flex items-center gap-3 rounded-xl border border-[#16161f] bg-[#0c0c12]/90 px-3 py-2 text-[10px] text-[#a1a1ad] leading-relaxed">
-                                        <DotMatrix rows={3} cols={5} activeDots={[1, 4, 6, 9, 12, 15, 18, 21]} dotSize={2} gap={2} color="#1d1d26" />
+                                        <DotMatrix rows={3} cols={5} activeDots={[1, 4, 6, 9, 12, 15, 18, 21]} dotSize={2} gap={2} color="#A5B3FE" />
                                         <p className="flex-1">Best for privacy-first or offline sessions. Cloud remains optional if you want sync and faster responses.</p>
                                     </div>
                                 </button>
@@ -734,7 +744,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                         </motion.div>
                     )}
 
-                    {/* Cloud Sign-In (WIP) */}
                     {step === "cloud-signin" && (
                         <motion.div
                             key="cloud-signin"
@@ -742,35 +751,292 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -16 }}
                             transition={{ duration: 0.3 }}
-                            className="flex flex-col items-center text-center max-w-sm"
+                            className="flex flex-col items-center text-center w-full max-w-sm"
                         >
-
                             <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
-                                Cloud Sign-In
+                                {authMode === "signin" ? "Sign in to Glimpse Cloud" : "Create your account"}
                             </h2>
                             <p className="text-sm text-[#6b6b76] mb-6">
-                                Account sync is work-in-progress. We’ll add sign-in soon.
+                                {authMode === "signin"
+                                    ? "Sync transcriptions across devices"
+                                    : "Get started with Glimpse Cloud"}
                             </p>
 
-                            <div className="w-full rounded-xl border border-[#1e1e22] bg-[#111113] p-6 text-left">
-                                <p className="text-[11px] font-mono text-[#d0d0da] mb-3">
-                                    Coming soon: Sync history across devices, use bigger & better models, support this project!
-                                </p>
-                                <div className="rounded-lg border border-[#2a2a30] bg-[#16161a] px-3 py-2 text-[10px] text-[#8b8b96] leading-relaxed">
-                                    Cloud mode is 100% optional. Local mode will always be free and available.
+                            {authError && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="w-full mb-4 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400"
+                                >
+                                    <AlertCircle size={16} />
+                                    <span>{authError}</span>
+                                </motion.div>
+                            )}
+
+                            <form
+                                className="w-full space-y-3"
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    setAuthError(null);
+                                    setAuthLoading(true);
+                                    try {
+                                        if (authMode === "signup") {
+                                            await createAccount(authEmail, authPassword, authName || undefined);
+                                        } else {
+                                            await login(authEmail, authPassword);
+                                        }
+                                        goToNextStep();
+                                    } catch (err) {
+                                        setAuthError(err instanceof Error ? err.message : "Authentication failed");
+                                    } finally {
+                                        setAuthLoading(false);
+                                    }
+                                }}
+                            >
+                                {authMode === "signup" && (
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Name (optional)"
+                                            value={authName}
+                                            onChange={(e) => setAuthName(e.target.value)}
+                                            className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                        />
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                                            <Mail size={16} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="relative">
+                                    <input
+                                        type="email"
+                                        placeholder="Email"
+                                        value={authEmail}
+                                        onChange={(e) => setAuthEmail(e.target.value)}
+                                        required
+                                        className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                    />
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                                        <Mail size={16} />
+                                    </div>
                                 </div>
+
+                                <div className="relative">
+                                    <input
+                                        type={authShowPassword ? "text" : "password"}
+                                        placeholder="Password"
+                                        value={authPassword}
+                                        onChange={(e) => setAuthPassword(e.target.value)}
+                                        required
+                                        minLength={8}
+                                        className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 pr-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                    />
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                                        <Lock size={16} />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAuthShowPassword(!authShowPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                    >
+                                        {authShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={authLoading}
+                                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-3 text-sm font-semibold text-[#0a0a0c] hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {authLoading ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            {authMode === "signin" ? "Signing in..." : "Creating account..."}
+                                        </>
+                                    ) : authMode === "signin" ? (
+                                        "Sign In"
+                                    ) : (
+                                        "Create Account"
+                                    )}
+                                </button>
+                            </form>
+
+                            <div className="my-5 flex w-full items-center gap-3">
+                                <div className="flex-1 h-px bg-[#1e1e28]" />
+                                <span className="text-xs text-[#4a4a54]">or continue with</span>
+                                <div className="flex-1 h-px bg-[#1e1e28]" />
                             </div>
 
-                            <button
-                                onClick={goToNextStep}
-                                className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-2.5 text-sm font-mono font-semibold text-[#0a0a0c] hover:bg-white transition-colors min-w-[150px] tracking-tight"
+                            <div className="grid grid-cols-2 gap-3 w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => createOAuth2Session(OAuthProvider.Google)}
+                                    className="flex items-center justify-center gap-2 rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-2.5 text-sm text-[#c0c0c8] hover:bg-[#161619] hover:border-[#2a2a34] transition-colors"
+                                >
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                        <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                        <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                        <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                    </svg>
+                                    Google
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => createOAuth2Session(OAuthProvider.Github)}
+                                    className="flex items-center justify-center gap-2 rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-2.5 text-sm text-[#c0c0c8] hover:bg-[#161619] hover:border-[#2a2a34] transition-colors"
+                                >
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385c.6.105.825-.255.825-.57c0-.285-.015-1.23-.015-2.235c-3.015.555-3.795-.735-4.035-1.41c-.135-.345-.72-1.41-1.23-1.695c-.42-.225-1.02-.78-.015-.795c.945-.015 1.62.87 1.845 1.23c1.08 1.815 2.805 1.305 3.495.99c.105-.78.42-1.305.765-1.605c-2.67-.3-5.46-1.335-5.46-5.925c0-1.305.465-2.385 1.23-3.225c-.12-.3-.54-1.53.12-3.18c0 0 1.005-.315 3.3 1.23c.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23c.66 1.65.24 2.88.12 3.18c.765.84 1.23 1.905 1.23 3.225c0 4.605-2.805 5.625-5.475 5.925c.435.375.81 1.095.81 2.22c0 1.605-.015 2.895-.015 3.3c0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+                                    </svg>
+                                    GitHub
+                                </button>
+                            </div>
+
+                            <p className="mt-5 text-sm text-[#6b6b76]">
+                                {authMode === "signin" ? (
+                                    <>
+                                        Don't have an account?{" "}
+                                        <button
+                                            type="button"
+                                            onClick={() => { setAuthMode("signup"); setAuthError(null); }}
+                                            className="text-amber-400 hover:text-amber-300 transition-colors"
+                                        >
+                                            Sign up
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        Already have an account?{" "}
+                                        <button
+                                            type="button"
+                                            onClick={() => { setAuthMode("signin"); setAuthError(null); }}
+                                            className="text-amber-400 hover:text-amber-300 transition-colors"
+                                        >
+                                            Sign in
+                                        </button>
+                                    </>
+                                )}
+                            </p>
+                        </motion.div>
+                    )}
+
+                    {step === "cloud-profile" && (
+                        <motion.div
+                            key="cloud-profile"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -16 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center text-center w-full max-w-sm"
+                        >
+                            <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
+                                Welcome to Glimpse!
+                            </h2>
+                            <p className="text-sm text-[#6b6b76] mb-6">
+                                Let's personalize your experience
+                            </p>
+
+                            <form
+                                className="w-full space-y-4"
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    setAuthLoading(true);
+                                    try {
+                                        if (authName.trim()) {
+                                            await updateName(authName.trim());
+                                        }
+                                        goToNextStep();
+                                    } catch (err) {
+                                        console.error("Failed to update name:", err);
+                                        goToNextStep();
+                                    } finally {
+                                        setAuthLoading(false);
+                                    }
+                                }}
                             >
-                                Continue
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="What should we call you?"
+                                        value={authName}
+                                        onChange={(e) => setAuthName(e.target.value)}
+                                        autoFocus
+                                        className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 text-sm text-white text-center placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={authLoading}
+                                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-3 text-sm font-semibold text-[#0a0a0c] hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {authLoading ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        "Continue"
+                                    )}
+                                </button>
+                            </form>
+
+                            <button
+                                type="button"
+                                onClick={goToNextStep}
+                                className="mt-4 text-xs text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                            >
+                                Skip for now
                             </button>
                         </motion.div>
                     )}
 
-                    {/* Local model selection */}
+                    {step === "cloud-sync" && (
+                        <motion.div
+                            key="cloud-sync"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -16 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center text-center w-full max-w-sm"
+                        >
+                            <div className="mb-4 rounded-2xl bg-amber-400/10 p-4">
+                                <CloudCog size={32} className="text-amber-400" />
+                            </div>
+                            <h2 className="text-xl font-semibold text-[#e8e8eb] mb-2">
+                                Sync your history?
+                            </h2>
+                            <p className="text-sm text-[#6b6b76] mb-8 leading-relaxed max-w-[280px]">
+                                We can securely sync your transcription text (not audio) to the cloud so you can access it anywhere.
+                            </p>
+
+                            <div className="w-full space-y-4">
+                                <div
+                                    className="flex items-center justify-between rounded-xl border border-[#1e1e28] bg-[#111115] p-4 cursor-pointer hover:border-[#2a2a34] transition-colors"
+                                    onClick={() => setCloudSyncEnabled(!cloudSyncEnabled)}
+                                >
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span className="text-sm font-medium text-[#e8e8eb]">History Sync</span>
+                                        <span className="text-[11px] text-[#6b6b76]">Encrypted text-only backup</span>
+                                    </div>
+                                    <div className={`relative w-11 h-6 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-[#2a2a34]"}`}>
+                                        <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform ${cloudSyncEnabled ? "translate-x-5" : "translate-x-0.5"}`} />
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={goToNextStep}
+                                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-3 text-sm font-semibold text-[#0a0a0c] hover:bg-white transition-colors"
+                                >
+                                    Continue
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+
                     {step === "local-model" && (
                         <motion.div
                             key="local-model"
@@ -800,17 +1066,16 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             setLocalModelChoice(PARAKEET_KEY);
                                         }
                                     }}
-                                    className={`relative w-full rounded-2xl border border-[#1b1b22] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-colors cursor-pointer ${
-                                        isParakeetActive
-                                            ? "bg-amber-400/5 ring-1 ring-amber-400/60"
-                                            : localModelChoice === PARAKEET_KEY
-                                                ? "bg-[#0f0f14] ring-1 ring-amber-400/30"
-                                                : "bg-[#0c0c12] hover:border-[#2a2a32]"
-                                    }`}
+                                    className={`relative w-full rounded-2xl border border-[#1b1b22] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-colors cursor-pointer ${isParakeetActive
+                                        ? "bg-amber-400/5 ring-1 ring-amber-400/60"
+                                        : localModelChoice === PARAKEET_KEY
+                                            ? "bg-[#0f0f14] ring-1 ring-amber-400/30"
+                                            : "bg-[#0c0c12] hover:border-[#2a2a32]"
+                                        }`}
                                 >
                                     <div className="absolute inset-0 pointer-events-none">
                                         <div className="absolute inset-0 opacity-12">
-                                            <DotMatrix rows={6} cols={18} activeDots={[0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,60,63,66]} dotSize={2} gap={4} color="#1f1f28" />
+                                            <DotMatrix rows={6} cols={18} activeDots={[0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66]} dotSize={2} gap={4} color="#1f1f28" />
                                         </div>
                                     </div>
                                     <div className="relative flex items-center justify-between gap-3">
@@ -819,22 +1084,19 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             <span className="text-[11px] font-semibold text-[#e5e7eb]">Parakeet (INT8)</span>
                                         </div>
                                         <span
-                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
-                                                isParakeetActive
-                                                    ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
-                                                    : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
-                                            }`}
+                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${isParakeetActive
+                                                ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
+                                                : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
+                                                }`}
                                         >
                                             Active
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-[#8b8b96]">
-                                        <span className="font-mono">Fast, small</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
-                                            parakeetInstalled
-                                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                                : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
-                                        }`}>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${parakeetInstalled
+                                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                            : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
+                                            }`}>
                                             {parakeetInstalled ? "Ready" : "Download needed"}
                                         </span>
                                     </div>
@@ -862,13 +1124,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                                     }
                                                 }}
                                                 disabled={displayState.parakeet.status === "downloading"}
-                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
-                                                    displayState.parakeet.status === "downloading"
-                                                        ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
-                                                        : displayState.parakeet.status === "complete"
-                                                            ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
-                                                            : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
-                                                }`}
+                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${displayState.parakeet.status === "downloading"
+                                                    ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
+                                                    : displayState.parakeet.status === "complete"
+                                                        ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                                        : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
+                                                    }`}
                                             >
                                                 {displayState.parakeet.status === "downloading" ? (
                                                     <Loader2 size={10} className="animate-spin" />
@@ -905,51 +1166,47 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             setLocalModelChoice(WHISPER_KEY);
                                         }
                                     }}
-                                    className={`relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.16)] overflow-hidden transition-colors cursor-pointer ${
-                                        isWhisperActive
-                                            ? "border-[#181820] bg-amber-400/5 ring-1 ring-amber-400/60"
-                                            : localModelChoice === WHISPER_KEY
-                                                ? "border-[#181820] bg-[#0e0e13] ring-1 ring-amber-400/30"
-                                                : "border-[#181820] bg-[#0b0b0f] hover:border-[#262631]"
-                                    }`}
+                                    className={`relative w-full rounded-2xl border p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.16)] overflow-hidden transition-colors cursor-pointer ${isWhisperActive
+                                        ? "border-[#181820] bg-amber-400/5 ring-1 ring-amber-400/60"
+                                        : localModelChoice === WHISPER_KEY
+                                            ? "border-[#181820] bg-[#0e0e13] ring-1 ring-amber-400/30"
+                                            : "border-[#181820] bg-[#0b0b0f] hover:border-[#262631]"
+                                        }`}
                                 >
                                     <div className="absolute inset-0 pointer-events-none">
                                         <div className="absolute inset-0 opacity-10">
-                                            <DotMatrix rows={6} cols={18} activeDots={[1,5,9,13,17,21,25,29,33,37,41,45,49,53,57,61,65]} dotSize={2} gap={4} color="#1c1c25" />
+                                            <DotMatrix rows={6} cols={18} activeDots={[1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65]} dotSize={2} gap={4} color="#1c1c25" />
                                         </div>
                                     </div>
                                     <div className="relative flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-2">
-                                            <DotMatrix rows={2} cols={2} activeDots={[1]} dotSize={3} gap={2} color="#a5b4fc" />
+                                            <DotMatrix rows={2} cols={2} activeDots={[1, 2]} dotSize={3} gap={2} color="#A5B3FE" />
                                             <span className="text-[11px] font-semibold text-[#e5e7eb]">Whisper Large V3 Turbo (Q8)</span>
-                                            <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border bg-[#A5B4FD26] text-[#A5B4FD] border-[#A5B4FD66]">
-                                                Recommended
-                                            </span>
                                         </div>
                                         <span
-                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
-                                                isWhisperActive
-                                                    ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
-                                                    : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
-                                            }`}
+                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${isWhisperActive
+                                                ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
+                                                : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
+                                                }`}
                                         >
                                             Active
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-[#8b8b96]">
-                                        <span className="font-mono">Multilingual, balanced</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${
-                                            whisperInstalled
-                                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                                : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
-                                        }`}>
+                                    <div className="flex items-center gap-2">
+                                        <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border bg-[#A5B4FD26] text-[#A5B4FD] border-[#A5B4FD66]">
+                                            Recommended
+                                        </span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${whisperInstalled
+                                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                            : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
+                                            }`}>
                                             {whisperInstalled ? "Ready" : "Download needed"}
                                         </span>
                                     </div>
                                     <div className="relative space-y-1.5 text-[11px] text-[#d0d0da] font-medium">
                                         <div className="flex items-center gap-2">
                                             <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
-                                                <span>Good quality, balanced speed</span>
+                                            <span>Good quality, balanced speed</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
@@ -970,13 +1227,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                                     }
                                                 }}
                                                 disabled={displayState.whisper.status === "downloading"}
-                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${
-                                                    displayState.whisper.status === "downloading"
-                                                        ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
-                                                        : displayState.whisper.status === "complete"
-                                                            ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
-                                                            : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
-                                                }`}
+                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${displayState.whisper.status === "downloading"
+                                                    ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
+                                                    : displayState.whisper.status === "complete"
+                                                        ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                                        : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
+                                                    }`}
                                             >
                                                 {displayState.whisper.status === "downloading" ? (
                                                     <Loader2 size={10} className="animate-spin" />
@@ -1017,7 +1273,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                         </motion.div>
                     )}
 
-                    {/* AI Cleanup */}
                     {step === "cleanup" && selectedMode === "local" && (
                         <motion.div
                             key="cleanup"
@@ -1072,11 +1327,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                                 <motion.button
                                                     key={opt.key}
                                                     onClick={() => setLlmProvider(opt.key)}
-                                                    className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${
-                                                        llmProvider === opt.key
-                                                            ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-                                                            : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
-                                                    }`}
+                                                    className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${llmProvider === opt.key
+                                                        ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
+                                                        : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
+                                                        }`}
                                                     whileTap={{ scale: 0.97 }}
                                                 >
                                                     {opt.label}
@@ -1148,8 +1402,192 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                         </motion.div>
                     )}
 
-                    {/* Microphone */}
+                    {step === "local-signin" && (
+                        <motion.div
+                            key="local-signin"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -16 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center text-center w-full max-w-sm"
+                        >
+                            <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
+                                Free Transcription Sync
+                            </h2>
+                            <p className="text-sm text-[#6b6b76] mb-6">
+                                Sign in to sync your transcriptions across devices, it's free!
+                            </p>
+
+                            {authError && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="w-full mb-4 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400"
+                                >
+                                    <AlertCircle size={16} />
+                                    <span>{authError}</span>
+                                </motion.div>
+                            )}
+
+                            <form
+                                className="w-full space-y-3"
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    setAuthError(null);
+                                    setAuthLoading(true);
+                                    try {
+                                        // Try login first, fallback to signup if account doesn't exist
+                                        try {
+                                            await login(authEmail, authPassword);
+                                        } catch (loginErr) {
+                                            // Check if error indicates user doesn't exist - if so, create account
+                                            const errorMsg = loginErr instanceof Error ? loginErr.message : "";
+                                            if (errorMsg.includes("Invalid credentials") || errorMsg.includes("user") || errorMsg.includes("not found")) {
+                                                // Create account with name if provided
+                                                await createAccount(authEmail, authPassword, authName.trim() || undefined);
+                                                // Save name to preferences for cross-device sync
+                                                if (authName.trim()) {
+                                                    await updatePreferences({ displayName: authName.trim() });
+                                                }
+                                            } else {
+                                                throw loginErr;
+                                            }
+                                        }
+                                        // Both new and existing accounts go directly to microphone
+                                        // (profile step removed since name is collected here)
+                                        skippedFrom.current = "local-signin";
+                                        setStep("microphone");
+                                    } catch (err) {
+                                        setAuthError(err instanceof Error ? err.message : "Authentication failed");
+                                    } finally {
+                                        setAuthLoading(false);
+                                    }
+                                }}
+                            >
+                                {/* Name field - optional */}
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Name (optional)"
+                                        value={authName}
+                                        onChange={(e) => setAuthName(e.target.value)}
+                                        className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                    />
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                                        <User size={16} />
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <input
+                                        type="email"
+                                        placeholder="Email"
+                                        value={authEmail}
+                                        onChange={(e) => setAuthEmail(e.target.value)}
+                                        required
+                                        className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                    />
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                                        <Mail size={16} />
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <input
+                                        type={authShowPassword ? "text" : "password"}
+                                        placeholder="Password"
+                                        value={authPassword}
+                                        onChange={(e) => setAuthPassword(e.target.value)}
+                                        required
+                                        minLength={8}
+                                        className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 pr-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                    />
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                                        <Lock size={16} />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAuthShowPassword(!authShowPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                    >
+                                        {authShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={authLoading}
+                                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#A5B3FE] px-5 py-3 text-sm font-semibold text-[#0a0a0c] hover:bg-[#B8C4FF] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {authLoading ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Signing in...
+                                        </>
+                                    ) : (
+                                        "Continue"
+                                    )}
+                                </button>
+                            </form>
+
+                            <div className="my-5 flex w-full items-center gap-3">
+                                <div className="flex-1 h-px bg-[#1e1e28]" />
+                                <span className="text-xs text-[#4a4a54]">or continue with</span>
+                                <div className="flex-1 h-px bg-[#1e1e28]" />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => createOAuth2Session(OAuthProvider.Google)}
+                                    className="flex items-center justify-center gap-2 rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-2.5 text-sm text-[#c0c0c8] hover:bg-[#161619] hover:border-[#2a2a34] transition-colors"
+                                >
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                        <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                        <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                        <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                    </svg>
+                                    Google
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => createOAuth2Session(OAuthProvider.Github)}
+                                    className="flex items-center justify-center gap-2 rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-2.5 text-sm text-[#c0c0c8] hover:bg-[#161619] hover:border-[#2a2a34] transition-colors"
+                                >
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385c.6.105.825-.255.825-.57c0-.285-.015-1.23-.015-2.235c-3.015.555-3.795-.735-4.035-1.41c-.135-.345-.72-1.41-1.23-1.695c-.42-.225-1.02-.78-.015-.795c.945-.015 1.62.87 1.845 1.23c1.08 1.815 2.805 1.305 3.495.99c.105-.78.42-1.305.765-1.605c-2.67-.3-5.46-1.335-5.46-5.925c0-1.305.465-2.385 1.23-3.225c-.12-.3-.54-1.53.12-3.18c0 0 1.005-.315 3.3 1.23c.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23c.66 1.65.24 2.88.12 3.18c.765.84 1.23 1.905 1.23 3.225c0 4.605-2.805 5.625-5.475 5.925c.435.375.81 1.095.81 2.22c0 1.605-.015 2.895-.015 3.3c0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+                                    </svg>
+                                    GitHub
+                                </button>
+                            </div>
+
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    skippedFrom.current = "local-signin";
+                                    setStep("microphone");
+                                }}
+                                className="mt-4 text-xs text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                            >
+                                Skip for now
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setShowFAQModal(true)}
+                                className="mt-3 flex items-center gap-1.5 text-xs text-[#4a4a54] hover:text-[#A5B3FE] transition-colors"
+                            >
+                                <HelpCircle size={12} />
+                                How is this free?
+                            </button>
+                        </motion.div>
+                    )}
+
                     {step === "microphone" && (
+
                         <motion.div
                             key="microphone"
                             initial={{ opacity: 0, y: 16 }}
@@ -1158,8 +1596,8 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             transition={{ duration: 0.3 }}
                             className="flex flex-col items-center text-center max-w-sm"
                         >
-                            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-amber-400/10 border border-amber-400/20">
-                                <Mic size={24} className="text-amber-400" />
+                            <div className="mb-5">
+                                <Mic size={32} className="text-amber-400" />
                             </div>
 
                             <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
@@ -1202,7 +1640,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                         </motion.div>
                     )}
 
-                    {/* Accessibility */}
                     {step === "accessibility" && (
                         <motion.div
                             key="accessibility"
@@ -1212,8 +1649,8 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             transition={{ duration: 0.3 }}
                             className="flex flex-col items-center text-center max-w-sm"
                         >
-                            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-violet-400/10 border border-violet-400/20">
-                                <Accessibility size={24} className="text-violet-400" />
+                            <div className="mb-5">
+                                <Accessibility size={32} className="text-violet-400" />
                             </div>
 
                             <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
@@ -1263,7 +1700,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                         </motion.div>
                     )}
 
-                    {/* Ready */}
                     {step === "ready" && (
                         <motion.div
                             key="ready"
@@ -1273,9 +1709,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                             transition={{ duration: 0.3 }}
                             className="flex flex-col items-center text-center max-w-md"
                         >
-                            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-400/10 border border-emerald-400/20">
-                                <Sparkles size={24} className="text-emerald-400" />
-                            </div>
 
                             <h2 className="text-xl font-semibold text-[#e8e8eb] mb-1">
                                 You're ready!
@@ -1293,11 +1726,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                         setCaptureActive(true);
                                     }
                                 }}
-                                className={`w-full max-w-xs rounded-xl border p-4 text-left transition-all ${
-                                    captureActive 
-                                        ? "border-amber-400 bg-amber-400/10" 
-                                        : "border-amber-400/30 bg-amber-400/5 hover:border-amber-400/50 hover:bg-amber-400/10"
-                                }`}
+                                className={`w-full max-w-xs rounded-xl border p-4 text-left transition-all ${captureActive
+                                    ? "border-amber-400 bg-amber-400/10"
+                                    : "border-amber-400/30 bg-amber-400/5 hover:border-amber-400/50 hover:bg-amber-400/10"
+                                    }`}
                                 animate={captureActive ? {
                                     borderColor: ["rgba(251, 191, 36, 0.5)", "rgba(251, 191, 36, 1)", "rgba(251, 191, 36, 0.5)"]
                                 } : {}}
@@ -1342,7 +1774,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                 </AnimatePresence>
             </div>
 
-            {/* Footer */}
             <div className="flex justify-center pb-5">
                 <div className="flex items-center gap-2 text-[#3a3a42]">
                     <GlimpseLogo size="sm" />
@@ -1396,6 +1827,8 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <FAQModal isOpen={showFAQModal} onClose={() => setShowFAQModal(false)} />
 
             {currentStepIndex > 0 && (
                 <button

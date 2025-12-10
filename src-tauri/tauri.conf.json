@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "glimpse",
-  "version": "0.1.0",
-  "identifier": "dev.glimpse.app",
+  "version": "0.2.0",
+  "identifier": "dev.glimpse.glimpse",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -59,7 +59,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; connect-src *; base-uri 'self'; form-action 'self'"
     },
     "macOSPrivateApi": true
   },

@@ -39,7 +39,7 @@ bun tauri build
 
 ## Thank you
 
-* [Tauri](https://v2.tauri.app/) — the framework Glimpse is built on
-* [Transcribe-rs](https://github.com/cjpais/transcribe-rs) — the underlying STT engine that powers Glimpse locally
+* [Tauri](https://v2.tauri.app/) - the framework Glimpse is built on
+* [Transcribe-rs](https://github.com/cjpais/transcribe-rs) - the underlying STT engine that powers Glimpse locally
 
 

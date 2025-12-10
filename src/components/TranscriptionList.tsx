@@ -78,7 +78,6 @@ const TranscriptionList: React.FC = () => {
             animate={{ opacity: 1 }}
             className="w-full max-w-2xl"
         >
-            {/* Header with Search */}
             <div className="flex items-center justify-between px-4 pb-3 mb-2">
                 <div className="flex items-center gap-2">
                     <DotMatrix
@@ -95,7 +94,6 @@ const TranscriptionList: React.FC = () => {
                     </h2>
                 </div>
 
-                {/* Search Input */}
                 <div className="relative">
                     <div className="flex items-center gap-2 bg-[#0a0a0c] border border-[#1a1a1e] rounded-lg px-2.5 py-1.5 focus-within:border-[#2a2a30] transition-colors">
                         <Search size={12} className="text-[#4a4a54] shrink-0" />
@@ -118,9 +116,14 @@ const TranscriptionList: React.FC = () => {
                 </div>
             </div>
 
-            {/* List Container */}
-            <div className="bg-[#0a0a0c] rounded-xl border border-[#1a1a1e] overflow-hidden">
-                <div className="max-h-[460px] overflow-y-auto custom-scrollbar scrollbar-balanced">
+            <div className="bg-[#0a0a0c] rounded-xl border border-[#1a1a1e] overflow-hidden relative">
+                <div className="absolute top-0 left-0 right-2 h-[6px] bg-gradient-to-b from-[#0a0a0c] to-transparent z-10 pointer-events-none" />
+
+                <div className="absolute bottom-0 left-0 right-2 h-[6px] bg-gradient-to-t from-[#0a0a0c] to-transparent z-10 pointer-events-none" />
+
+                <div
+                    className="max-h-[460px] overflow-y-auto custom-scrollbar scrollbar-balanced snap-y snap-proximity pt-[6px] scroll-pt-[6px]"
+                >
                     <AnimatePresence mode="popLayout">
                         {filteredTranscriptions.length > 0 ? (
                             filteredTranscriptions.map((record) => (
@@ -150,7 +153,6 @@ const TranscriptionList: React.FC = () => {
                 </div>
             </div>
 
-            {/* Footer with count and Clear All */}
             <div className="flex items-center justify-between px-4 pt-2">
                 <span className="text-[9px] text-[#3a3a42] uppercase tracking-wider">
                     {searchQuery ? (
@@ -190,7 +192,7 @@ const TranscriptionList: React.FC = () => {
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
+                    width: 4px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-track {
                     background: transparent;

@@ -32,6 +32,13 @@ const DictionaryView = () => {
     const [settings, setSettings] = useState<StoredSettings | null>(null);
     const [models, setModels] = useState<ModelInfo[]>([]);
 
+    // Derive filtered entries based on search query
+    const searchQuery = newEntry.trim().toLowerCase();
+    const filteredEntries = searchQuery
+        ? entries.filter((entry) => entry.toLowerCase().includes(searchQuery))
+        : entries;
+    const isSearching = searchQuery.length > 0;
+
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -155,12 +162,17 @@ const DictionaryView = () => {
                                 handleAdd();
                             }
                         }}
-                        placeholder="Add a word or phrase, press Enter to add"
+                        placeholder="Search or add a word..."
                         className="flex-1 bg-transparent text-[14px] text-[#e8e8eb] placeholder-[#4a4a54] outline-none"
                     />
+                    {isSearching && entries.length > 0 && (
+                        <span className="text-[12px] text-[#8a8a94] whitespace-nowrap">
+                            {filteredEntries.length} of {entries.length}
+                        </span>
+                    )}
                     <button
                         onClick={handleAdd}
-                        disabled={!newEntry.trim() || saving}
+                        disabled={!newEntry.trim() || saving || entries.includes(newEntry.trim())}
                         className="flex items-center gap-1 rounded-lg bg-[#1a1a1e] px-3 py-1.5 text-[13px] text-[#e8e8eb] hover:bg-[#222228] disabled:opacity-40 transition-colors"
                     >
                         {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
@@ -182,82 +194,97 @@ const DictionaryView = () => {
                                 className="opacity-60"
                             />
                         </div>
-                    ) : entries.length === 0 ? (
+                    ) : filteredEntries.length === 0 ? (
                         <div className="flex flex-col items-start gap-2 px-4 py-6 text-[#6b6b76]">
-                            <p className="text-[14px] font-medium">No entries yet</p>
-                            <p className="text-[12px] text-[#5a5a64]">
-                                Add words, phrases or names that arent in the default dictionary.
-                            </p>
+                            {isSearching ? (
+                                <>
+                                    <p className="text-[14px] font-medium">No matches found</p>
+                                    <p className="text-[12px] text-[#5a5a64]">
+                                        Press Enter to add "{newEntry.trim()}" as a new entry.
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-[14px] font-medium">No entries yet</p>
+                                    <p className="text-[12px] text-[#5a5a64]">
+                                        Add words, phrases or names that arent in the default dictionary.
+                                    </p>
+                                </>
+                            )}
                         </div>
                     ) : (
                         <AnimatePresence mode="popLayout">
-                            {entries.map((entry, idx) => (
-                                <motion.div
-                                    key={entry + idx}
-                                    layout="position"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.18, ease: "easeOut" }}
-                                    className="group flex items-center gap-3 border-b border-[#121216] px-4 py-3 last:border-none"
-                                >
-                                    {editingIndex === idx ? (
-                                        <input
-                                            value={editingValue}
-                                            onChange={(e) => setEditingValue(e.target.value)}
-                                            autoFocus
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                    e.preventDefault();
+                            {filteredEntries.map((entry) => {
+                                // Find the original index in entries array for edit/delete operations
+                                const originalIndex = entries.indexOf(entry);
+                                return (
+                                    <motion.div
+                                        key={entry + originalIndex}
+                                        layout="position"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.18, ease: "easeOut" }}
+                                        className="group flex items-center gap-3 border-b border-[#121216] px-4 py-3 last:border-none"
+                                    >
+                                        {editingIndex === originalIndex ? (
+                                            <input
+                                                value={editingValue}
+                                                onChange={(e) => setEditingValue(e.target.value)}
+                                                autoFocus
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                        e.preventDefault();
+                                                        handleEditCommit();
+                                                    }
+                                                    if (e.key === "Escape") {
+                                                        setEditingIndex(null);
+                                                        setEditingValue("");
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    // Commit on blur to keep UX simple
                                                     handleEditCommit();
-                                                }
-                                                if (e.key === "Escape") {
-                                                    setEditingIndex(null);
-                                                    setEditingValue("");
-                                                }
-                                            }}
-                                            onBlur={() => {
-                                                // Commit on blur to keep UX simple
-                                                handleEditCommit();
-                                            }}
-                                            className="flex-1 rounded-md border border-[#1f1f24] bg-[#0f0f12] px-2.5 py-1.5 text-[14px] text-[#e8e8eb] outline-none focus:border-[#2a2a30]"
-                                        />
-                                    ) : (
-                                        <button
-                                            onClick={() => startEditing(idx)}
-                                            className="flex-1 text-left"
-                                        >
-                                            <p className="text-[14px] text-[#e8e8eb]">{entry}</p>
-                                            <p className="text-[11px] text-[#5a5a64] opacity-0 transition-opacity group-hover:opacity-100">
-                                                Click to edit
-                                            </p>
-                                        </button>
-                                    )}
-
-                                    <div className="flex items-center gap-2">
-                                        {editingIndex === idx ? (
-                                            <div className="text-[11px] text-[#6b6b76]">
-                                                Press Enter to save
-                                            </div>
+                                                }}
+                                                className="flex-1 rounded-md border border-[#1f1f24] bg-[#0f0f12] px-2.5 py-1.5 text-[14px] text-[#e8e8eb] outline-none focus:border-[#2a2a30]"
+                                            />
                                         ) : (
                                             <button
-                                                onClick={() => startEditing(idx)}
-                                                className="rounded-md bg-[#141419] p-1.5 text-[#cfcfd6] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
-                                                title="Edit"
+                                                onClick={() => startEditing(originalIndex)}
+                                                className="flex-1 text-left"
                                             >
-                                                <Edit3 size={14} />
+                                                <p className="text-[14px] text-[#e8e8eb]">{entry}</p>
+                                                <p className="text-[11px] text-[#5a5a64] opacity-0 transition-opacity group-hover:opacity-100">
+                                                    Click to edit
+                                                </p>
                                             </button>
                                         )}
-                                        <button
-                                            onClick={() => handleDelete(idx)}
-                                            className="rounded-md bg-[#141419] p-1.5 text-[#c96b6b] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
-                                            title="Delete"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            ))}
+
+                                        <div className="flex items-center gap-2">
+                                            {editingIndex === originalIndex ? (
+                                                <div className="text-[11px] text-[#6b6b76]">
+                                                    Press Enter to save
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => startEditing(originalIndex)}
+                                                    className="rounded-md bg-[#141419] p-1.5 text-[#cfcfd6] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
+                                                    title="Edit"
+                                                >
+                                                    <Edit3 size={14} />
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleDelete(originalIndex)}
+                                                className="rounded-md bg-[#141419] p-1.5 text-[#c96b6b] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
                         </AnimatePresence>
                     )}
                 </div>

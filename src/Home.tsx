@@ -1,10 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, ChevronLeft, Home as HomeIcon, Book, Brain } from "lucide-react";
+import { Settings, ChevronLeft, Home as HomeIcon, Book, Brain, User, Info, HelpCircle, Github, Mail, X } from "lucide-react";
+import { invoke } from "@tauri-apps/api/core";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import SettingsModal from "./components/SettingsModal";
+import FAQModal from "./components/FAQModal";
 import DotMatrix from "./components/DotMatrix";
 import TranscriptionList from "./components/TranscriptionList";
 import DictionaryView from "./components/DictionaryView";
+import { getCurrentUser, type User as AppwriteUser } from "./lib/auth";
+
+type TranscriptionMode = "cloud" | "local";
+
+type StoredSettings = {
+    transcription_mode: TranscriptionMode;
+};
 
 const SidebarItem = ({
     icon,
@@ -19,41 +29,92 @@ const SidebarItem = ({
     collapsed: boolean;
     onClick?: () => void;
 }) => (
-    <motion.button
+    <button
         onClick={onClick}
-        className={`group flex w-full items-center rounded-lg h-9 transition-colors ${collapsed ? "justify-center gap-0 px-0" : "gap-3 pl-[13px] pr-3"} ${active
-            ? "bg-[#1a1a1e] text-[#e8e8eb]"
-            : "text-[#6b6b76] hover:bg-[#151517] hover:text-[#a0a0ab]"
+        className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 ${collapsed ? "gap-0" : "gap-3"
+            } ${active
+                ? "bg-[#1a1a1e] text-[#e8e8eb]"
+                : "text-[#6b6b76] hover:bg-[#151517] hover:text-[#a0a0ab]"
             }`}
-        whileTap={{ scale: 0.97 }}
     >
         <div className={`flex items-center justify-center w-[18px] shrink-0 ${active ? "text-[#e8e8eb]" : "group-hover:text-[#a0a0ab]"}`}>
             {icon}
         </div>
-        <AnimatePresence mode="wait" initial={false}>
-            {!collapsed && (
-                <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-[13px] font-medium whitespace-nowrap overflow-hidden"
-                >
-                    {label}
-                </motion.span>
-            )}
-        </AnimatePresence>
-    </motion.button>
+        <span
+            style={{ width: collapsed ? 0 : 'auto', opacity: collapsed ? 0 : 1 }}
+            className="text-[13px] font-medium whitespace-nowrap overflow-hidden transition-[width,opacity] duration-200 ease-out"
+        >
+            {label}
+        </span>
+    </button>
 );
 
 const Home = () => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [settingsTab, setSettingsTab] = useState<"general" | "account" | "models" | "about">("general");
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
     const [activeView, setActiveView] = useState<"home" | "dictionary" | "brain">("home");
+    const [transcriptionMode, setTranscriptionMode] = useState<TranscriptionMode>("cloud");
+    const [currentUser, setCurrentUser] = useState<AppwriteUser | null>(null);
+    const [showSupportPopup, setShowSupportPopup] = useState(false);
+    const [showFAQ, setShowFAQ] = useState(false);
+    const popupRef = useRef<HTMLDivElement>(null);
 
     const sidebarWidth = isSidebarCollapsed ? 68 : 200;
 
-    // Get greeting based on time of day
+    const loadUser = useCallback(async () => {
+        try {
+            const user = await getCurrentUser();
+            setCurrentUser(user);
+        } catch (err) {
+            console.error("Failed to load user:", err);
+            setCurrentUser(null);
+        }
+    }, []);
+
+    useEffect(() => {
+        let unlisten: UnlistenFn | null = null;
+
+        const loadSettings = async () => {
+            try {
+                const settings = await invoke<StoredSettings>("get_settings");
+                setTranscriptionMode(settings.transcription_mode);
+            } catch (err) {
+                console.error("Failed to load settings:", err);
+            }
+        };
+
+        loadSettings();
+        loadUser();
+
+        listen<StoredSettings>("settings:changed", (event) => {
+            setTranscriptionMode(event.payload.transcription_mode);
+        }).then((fn) => {
+            unlisten = fn;
+        });
+
+        return () => {
+            unlisten?.();
+        };
+    }, [loadUser]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+                setShowSupportPopup(false);
+            }
+        };
+
+        if (showSupportPopup) {
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => document.removeEventListener("mousedown", handleClickOutside);
+        }
+    }, [showSupportPopup]);
+
+    const isCloudMode = transcriptionMode === "cloud";
+    const logoColor = isCloudMode ? "var(--color-cloud)" : "var(--color-local)";
+    const logoActiveDots = isCloudMode ? [0, 3] : [1, 2];
+
     const getGreeting = () => {
         const hour = new Date().getHours();
         if (hour < 12) return "Good morning";
@@ -63,56 +124,44 @@ const Home = () => {
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#0e0e10] font-sans text-white select-none">
-            {/* Top titlebar - invisible drag region */}
-            <div 
-                data-tauri-drag-region 
+            <div
+                data-tauri-drag-region
                 className="fixed top-0 left-0 right-0 h-8 z-50"
             />
 
-            {/* Tactile Sidebar */}
             <motion.aside
                 initial={false}
                 animate={{ width: sidebarWidth }}
                 transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                    mass: 0.8
+                    type: "tween",
+                    duration: 0.2,
+                    ease: [0.25, 0.1, 0.25, 1]
                 }}
-                className="relative flex flex-col border-r border-[#1a1a1e] bg-[#0a0a0c]"
+                className="relative flex flex-col border-r border-[#1a1a1e] bg-[#0a0a0c] shrink-0"
             >
                 <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
-                {/* Logo */}
                 <div className="pl-6 pb-6 pt-1">
-                    <motion.div className="flex items-center gap-3 h-6" layout>
+                    <div className="flex items-center gap-3 h-6">
                         <div className="shrink-0">
                             <DotMatrix
                                 rows={2}
                                 cols={2}
-                                activeDots={[0, 3]}
+                                activeDots={logoActiveDots}
                                 dotSize={4}
                                 gap={3}
-                                color="#fbbf24"
+                                color={logoColor}
                             />
                         </div>
-                        <AnimatePresence mode="wait" initial={false}>
-                            {!isSidebarCollapsed && (
-                                <motion.span
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="text-[14px] font-bold tracking-wide text-[#e8e8eb]"
-                                >
-                                    Glimpse
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </motion.div>
+                        <span
+                            style={{ width: isSidebarCollapsed ? 0 : 'auto', opacity: isSidebarCollapsed ? 0 : 1 }}
+                            className="text-[14px] font-bold tracking-wide text-[#e8e8eb] whitespace-nowrap overflow-hidden transition-[width,opacity] duration-200 ease-out"
+                        >
+                            Glimpse
+                        </span>
+                    </div>
                 </div>
 
-                {/* Navigation */}
                 <nav className="flex-1 px-2 space-y-1">
                     <SidebarItem
                         icon={<HomeIcon size={18} />}
@@ -137,22 +186,102 @@ const Home = () => {
                     />
                 </nav>
 
-                {/* Bottom controls */}
                 <div className="p-2 space-y-1 border-t border-[#1a1a1e]/50">
-                    <motion.button
+                    <button
                         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                        className="flex w-full items-center rounded-lg h-9 text-[#4a4a54] hover:text-[#6b6b76] transition-colors pl-[13px]"
-                        whileTap={{ scale: 0.97 }}
+                        className="flex w-full items-center rounded-lg h-9 pl-[17px] text-[#4a4a54] hover:text-[#6b6b76]"
                     >
                         <div className="flex items-center justify-center w-[18px]">
                             <motion.div
                                 animate={{ rotate: isSidebarCollapsed ? 180 : 0 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                transition={{ type: "tween", duration: 0.2 }}
                             >
                                 <ChevronLeft size={16} />
                             </motion.div>
                         </div>
-                    </motion.button>
+                    </button>
+
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowSupportPopup(!showSupportPopup)}
+                            className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 text-[#6b6b76] hover:bg-[#151517] hover:text-[#a0a0ab] ${isSidebarCollapsed ? "gap-0" : "gap-3"
+                                }`}
+                        >
+                            <div className="flex items-center justify-center w-[18px] shrink-0 group-hover:text-[#a0a0ab]">
+                                <Info size={18} />
+                            </div>
+                            <span
+                                style={{ width: isSidebarCollapsed ? 0 : 'auto', opacity: isSidebarCollapsed ? 0 : 1 }}
+                                className="text-[13px] font-medium whitespace-nowrap overflow-hidden transition-[width,opacity] duration-200 ease-out"
+                            >
+                                Support
+                            </span>
+                        </button>
+
+                        <AnimatePresence>
+                            {showSupportPopup && (
+                                <motion.div
+                                    ref={popupRef}
+                                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                    transition={{ duration: 0.15, ease: "easeOut" }}
+                                    className="absolute bottom-full left-2 mb-2 w-56 bg-[#111113] border border-[#2a2a30] rounded-xl shadow-xl overflow-hidden z-50"
+                                >
+                                    <div className="p-3 border-b border-[#1e1e22]">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[12px] font-medium text-[#e8e8eb]">Get Support</span>
+                                            <button
+                                                onClick={() => setShowSupportPopup(false)}
+                                                className="p-1 rounded-md hover:bg-[#1a1a1e] text-[#6b6b76] hover:text-[#a0a0ab] transition-colors"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="p-2 space-y-1">
+                                        <button
+                                            onClick={() => {
+                                                setShowSupportPopup(false);
+                                                setShowFAQ(true);
+                                            }}
+                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group w-full text-left"
+                                        >
+                                            <HelpCircle size={16} className="text-amber-400" />
+                                            <div>
+                                                <div className="text-[12px] font-medium text-[#e8e8eb]">FAQ</div>
+                                                <div className="text-[10px] text-[#6b6b76]">Common questions</div>
+                                            </div>
+                                        </button>
+                                        <a
+                                            href="https://github.com/glimpse/issues"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => setShowSupportPopup(false)}
+                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group"
+                                        >
+                                            <Github size={16} className="text-[#a0a0ab]" />
+                                            <div>
+                                                <div className="text-[12px] font-medium text-[#e8e8eb]">GitHub Issues</div>
+                                                <div className="text-[10px] text-[#6b6b76]">Report bugs & features</div>
+                                            </div>
+                                        </a>
+                                        <a
+                                            href="mailto:wip"
+                                            onClick={() => setShowSupportPopup(false)}
+                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group"
+                                        >
+                                            <Mail size={16} className="text-[#5865F2]" />
+                                            <div>
+                                                <div className="text-[12px] font-medium text-[#e8e8eb]">Email</div>
+                                                <div className="text-[10px] text-[#6b6b76]">wip</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
                     <SidebarItem
                         icon={<Settings size={18} />}
@@ -163,9 +292,33 @@ const Home = () => {
                 </div>
             </motion.aside>
 
-            {/* Main Content - Clean, flowing layout */}
-            <main className="flex flex-1 flex-col bg-[#0e0e10] overflow-hidden">
+            <main className="flex flex-1 flex-col bg-[#0e0e10] overflow-hidden relative">
                 <div data-tauri-drag-region className="h-8 w-full shrink-0" />
+
+                {currentUser && (
+                    <button
+                        onClick={() => {
+                            setSettingsTab("account");
+                            setIsSettingsOpen(true);
+                        }}
+                        className="fixed top-10 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1e1e22] bg-[#111113] hover:bg-[#161618] hover:border-[#2a2a30] transition-colors z-10"
+                    >
+                        <div className="w-6 h-6 rounded-full bg-[#1a1a1e] border border-[#2a2a30] flex items-center justify-center overflow-hidden">
+                            {(currentUser.prefs as Record<string, string>)?.avatar ? (
+                                <img
+                                    src={(currentUser.prefs as Record<string, string>).avatar}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <User size={14} className="text-[#6b6b76]" />
+                            )}
+                        </div>
+                        <span className="text-[12px] text-[#a0a0ab] max-w-[100px] truncate">
+                            {currentUser.name || currentUser.email?.split("@")[0] || "Account"}
+                        </span>
+                    </button>
+                )}
 
                 <div className="flex-1 flex flex-col px-12 pb-16">
                     <AnimatePresence mode="wait">
@@ -214,14 +367,32 @@ const Home = () => {
                                 transition={{ duration: 0.25, ease: "easeOut" }}
                             >
                                 <Brain size={48} strokeWidth={1} className="mb-4 opacity-50" />
-                                <p>Personalization</p>
+                                <p className="mb-2">Personalization</p>
+                                <span className="px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[10px] font-medium">
+                                    Work in Progress
+                                </span>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
             </main>
 
-            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+            <SettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => {
+                    setIsSettingsOpen(false);
+                    setSettingsTab("general");
+                }}
+                initialTab={settingsTab}
+                currentUser={currentUser}
+                onUpdateUser={loadUser}
+                transcriptionMode={transcriptionMode}
+            />
+
+            <FAQModal
+                isOpen={showFAQ}
+                onClose={() => setShowFAQ(false)}
+            />
         </div>
     );
 };

@@ -1,5 +1,6 @@
 mod assistive;
 mod audio;
+mod crypto;
 mod downloader;
 mod llm_cleanup;
 mod local_transcription;
@@ -65,6 +66,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_macos_permissions::init())
+        .plugin(tauri_plugin_deep_link::init())
         .setup(|app| {
             app.set_activation_policy(ActivationPolicy::Accessory);
 
@@ -77,7 +79,6 @@ pub fn run() {
                     eprintln!("Failed to persist default local model: {err}");
                 }
             }
-            let needs_onboarding = !settings.onboarding_completed;
             app.manage(AppState::new(
                 Arc::clone(&settings_store),
                 settings,
@@ -87,31 +88,20 @@ pub fn run() {
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
                 position_overlay(&window);
                 let _ = window.hide();
-
-                // When main window loses focus (cmd+tab), hide toast too
-                window.on_window_event(move |event| {
-                    if let tauri::WindowEvent::Focused(false) = event {
-                        // Keep toast visible even if the pill loses focus so warnings still show
-                    }
-                });
             }
 
-            // Toast window starts hidden - will be positioned when shown
             if let Some(toast_window) = handle.get_webview_window(TOAST_WINDOW_LABEL) {
                 let _ = toast_window.hide();
 
-                // When toast loses focus, hide both windows
                 let app_handle = handle.clone();
                 toast_window.on_window_event(move |event| {
                     if let tauri::WindowEvent::Focused(false) = event {
-                        // Hide both windows when toast loses focus
                         if let Some(main) = app_handle.get_webview_window(MAIN_WINDOW_LABEL) {
                             let _ = main.hide();
                         }
                         if let Some(toast) = app_handle.get_webview_window(TOAST_WINDOW_LABEL) {
                             let _ = toast.hide();
                         }
-                        // Also stop any active recording
                         stop_active_recording(&app_handle);
                     }
                 });
@@ -125,11 +115,8 @@ pub fn run() {
                 eprintln!("Failed to register shortcuts: {err}");
             }
 
-            // Auto-open settings window if onboarding hasn't been completed
-            if needs_onboarding {
-                if let Err(err) = toggle_settings_window(&handle) {
-                    eprintln!("Failed to auto-open settings for onboarding: {err}");
-                }
+            if let Err(err) = toggle_settings_window(&handle) {
+                eprintln!("Failed to open settings window on launch: {err}");
             }
 
             Ok(())
@@ -153,14 +140,14 @@ pub fn run() {
             model_manager::delete_model,
             audio::list_input_devices,
             toast_dismissed,
-            // Onboarding & permissions
             check_microphone_permission,
             request_microphone_permission,
             check_accessibility_permission,
             open_accessibility_settings,
             open_microphone_settings,
             complete_onboarding,
-            reset_onboarding
+            reset_onboarding,
+            import_transcription_from_cloud
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -306,8 +293,6 @@ fn get_settings(state: tauri::State<AppState>) -> Result<UserSettings, String> {
     Ok(state.current_settings())
 }
 
-// --- Onboarding & Permission Commands ---
-
 #[tauri::command]
 fn check_microphone_permission() -> permissions::PermissionStatus {
     permissions::check_microphone_permission()
@@ -335,12 +320,11 @@ fn open_microphone_settings() -> Result<(), String> {
 
 #[tauri::command]
 fn complete_onboarding(
-    app: AppHandle<AppRuntime>,
+    _app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
     let mut settings = state.current_settings();
     settings.onboarding_completed = true;
-    let _ = app; // app handle kept for parity; not needed after DB migration
     state
         .persist_settings(settings)
         .map_err(|err| err.to_string())?;
@@ -349,19 +333,16 @@ fn complete_onboarding(
 
 #[tauri::command]
 fn reset_onboarding(
-    app: AppHandle<AppRuntime>,
+    _app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
     let mut settings = state.current_settings();
     settings.onboarding_completed = false;
-    let _ = app; // app handle kept for parity; not needed after DB migration
     state
         .persist_settings(settings)
         .map_err(|err| err.to_string())?;
     Ok(())
 }
-
-// --- End Onboarding Commands ---
 
 #[tauri::command]
 #[allow(non_snake_case)]
@@ -401,7 +382,6 @@ fn update_settings(
         return Err("At least one recording mode must be enabled".into());
     }
 
-    // Collect all enabled shortcuts for conflict checking
     let mut enabled_shortcuts: Vec<(&str, &str)> = vec![];
     if smartEnabled {
         enabled_shortcuts.push(("Smart", smartShortcut.trim()));
@@ -413,7 +393,6 @@ fn update_settings(
         enabled_shortcuts.push(("Toggle", toggleShortcut.trim()));
     }
 
-    // Check for duplicate shortcuts
     for i in 0..enabled_shortcuts.len() {
         for j in (i + 1)..enabled_shortcuts.len() {
             let (name1, shortcut1) = enabled_shortcuts[i];
@@ -431,7 +410,6 @@ fn update_settings(
         return Err("Unknown model selection".into());
     }
 
-    // Validate LLM settings if enabled
     if llmCleanupEnabled && !matches!(llmProvider, LlmProvider::None) {
         if matches!(llmProvider, LlmProvider::Custom) && llmEndpoint.trim().is_empty() {
             return Err("Custom LLM endpoint cannot be empty".into());
@@ -581,7 +559,6 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
 
     let data_dir_path = data_dir.display().to_string();
 
-    // Calculate directory size
     let data_dir_size_bytes = calculate_dir_size(&data_dir).unwrap_or(0);
 
     Ok(AppInfo {
@@ -600,7 +577,6 @@ fn open_data_dir(path: Option<String>, app: AppHandle<AppRuntime>) -> Result<(),
         return Err("Path does not exist".to_string());
     }
 
-    // Use reveal_item_in_dir to leverage default opener permissions and open the directory
     app.opener()
         .reveal_item_in_dir(&path)
         .map_err(|err| format!("Failed to open path: {err}"))
@@ -641,10 +617,20 @@ fn get_transcriptions(
 }
 
 #[tauri::command]
+fn import_transcription_from_cloud(
+    record: storage::TranscriptionRecord,
+    state: tauri::State<AppState>,
+) -> Result<bool, String> {
+    state
+        .storage()
+        .import_transcription(record)
+        .map_err(|err| format!("Failed to import transcription: {err}"))
+}
+
+#[tauri::command]
 fn delete_transcription(id: String, state: tauri::State<AppState>) -> Result<bool, String> {
     match state.storage().delete(&id) {
         Ok(Some(audio_path)) => {
-            // Also delete the audio file
             let path = PathBuf::from(audio_path);
             if path.exists() {
                 let _ = std::fs::remove_file(path);
@@ -691,17 +677,14 @@ async fn retry_transcription(
         return Err("Audio file not found".to_string());
     }
 
-    // Create a RecordingSaved struct from the record
     let saved = RecordingSaved {
         path: audio_path,
         started_at: record.timestamp,
         ended_at: record.timestamp,
     };
 
-    // Delete the old failed record
     let _ = state.storage().delete(&id);
 
-    // Queue transcription with current settings
     emit_transcription_start(&app, &saved);
 
     let http = state.http();
@@ -714,7 +697,6 @@ async fn retry_transcription(
         let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
 
         let result = if use_local {
-            // For local transcription, we need to load the audio file
             match load_audio_for_transcription(&saved_for_task.path) {
                 Ok((samples, sample_rate)) => {
                     let model_key = settings.local_model.clone();
@@ -756,7 +738,6 @@ async fn retry_transcription(
                     return;
                 }
 
-                // Apply LLM cleanup if enabled (same as normal transcription flow)
                 let (final_transcript, llm_cleaned) =
                     if llm_cleanup::is_cleanup_available(&settings) {
                         match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings)
@@ -833,7 +814,6 @@ async fn retry_transcription(
                     stage,
                     saved_for_task.path.display().to_string(),
                 );
-                // Don't auto-hide - overlay stays visible until toast is dismissed
             }
         }
     });
@@ -862,7 +842,6 @@ async fn retry_llm_cleanup(
     }
     let llm_model = llm_cleanup::resolved_model_name(&settings);
 
-    // Use raw text if available, otherwise use current text
     let text_to_clean = record.raw_text.unwrap_or(record.text);
 
     let http = state.http();
@@ -877,7 +856,6 @@ async fn retry_llm_cleanup(
                 {
                     eprintln!("Failed to save LLM cleanup: {err}");
                 }
-                // Emit event to refresh UI
                 let _ = app.emit(
                     EVENT_TRANSCRIPTION_COMPLETE,
                     TranscriptionCompletePayload {
@@ -912,7 +890,6 @@ async fn undo_llm_cleanup(
 
     match storage.revert_to_raw(&id) {
         Ok(Some(_)) => {
-            // Emit event to refresh UI
             let _ = app.emit(
                 EVENT_TRANSCRIPTION_COMPLETE,
                 TranscriptionCompletePayload {
@@ -935,8 +912,6 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
         eprintln!("Failed to clear shortcuts: {err}");
     }
 
-    // Register smart mode shortcut if enabled
-    // Smart mode: quick tap/release = hold behavior, long press = toggle behavior
     if settings.smart_enabled {
         let smart_shortcut = settings.smart_shortcut.clone();
         manager.on_shortcut(smart_shortcut.as_str(), move |app, _shortcut, event| {
@@ -952,7 +927,6 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
         })?;
     }
 
-    // Check if shortcuts overlap (one is a subset of the other)
     let hold_keys: std::collections::HashSet<&str> = settings
         .hold_shortcut
         .split('+')
@@ -968,16 +942,12 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let _toggle_is_subset_of_hold =
         settings.hold_enabled && settings.toggle_enabled && toggle_keys.is_subset(&hold_keys);
 
-    // Register hold-to-record shortcut if enabled
     if settings.hold_enabled {
         let hold_shortcut = settings.hold_shortcut.clone();
         let check_toggle_overlap = hold_is_subset_of_toggle;
         let toggle_shortcut_clone = settings.toggle_shortcut.clone();
         manager.on_shortcut(hold_shortcut.as_str(), move |app, shortcut, event| {
-            // If hold shortcut is a subset of toggle, check if toggle keys are also pressed
-            // In that case, ignore this event and let the toggle handler deal with it
             if check_toggle_overlap {
-                // The shortcut system should handle this, but we add extra safety
                 let pressed_shortcut = shortcut.to_string();
                 if pressed_shortcut.to_lowercase() == toggle_shortcut_clone.to_lowercase() {
                     return;
@@ -996,7 +966,6 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
         })?;
     }
 
-    // Register toggle-to-record shortcut if enabled
     if settings.toggle_enabled {
         let toggle_shortcut = settings.toggle_shortcut.clone();
         manager.on_shortcut(toggle_shortcut.as_str(), move |app, _shortcut, event| {
@@ -1005,7 +974,6 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
                     eprintln!("Toggle shortcut press error: {err}");
                 }
             }
-            // Toggle mode doesn't use release event
         })?;
     }
 
@@ -1015,12 +983,10 @@ fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
 fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
 
-    // If any recording is already active, ignore
     if state.is_toggle_recording_active() || state.get_active_recording_mode().is_some() {
         return Ok(());
     }
 
-    // Prevent duplicate press events
     if state.mark_hold_shortcut_down() {
         return Ok(());
     }
@@ -1063,17 +1029,14 @@ const SMART_MODE_TAP_THRESHOLD_MS: i64 = 200;
 fn handle_smart_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
 
-    // If already recording in toggle mode, stop it
     if state.is_toggle_recording_active() {
         return handle_toggle_shortcut_press(app);
     }
 
-    // If already recording in hold mode, ignore (will stop on release)
     if state.get_active_recording_mode().as_deref() == Some("hold") {
         return Ok(());
     }
 
-    // Start recording immediately (for hold mode) and store press time
     state.set_smart_press_time(Some(chrono::Local::now()));
     handle_hold_shortcut_press(app)
 }
@@ -1081,7 +1044,6 @@ fn handle_smart_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()>
 fn handle_smart_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
 
-    // Get press time to determine if this was a tap or hold
     let press_time = state.get_smart_press_time();
     state.set_smart_press_time(None);
 
@@ -1089,11 +1051,8 @@ fn handle_smart_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<(
         let now = chrono::Local::now();
         let held_duration_ms = (now - start_time).num_milliseconds();
 
-        // Quick tap (< 200ms) = convert to toggle mode
         if held_duration_ms < SMART_MODE_TAP_THRESHOLD_MS {
-            // Stop the hold recording and start toggle mode
             if state.get_active_recording_mode().as_deref() == Some("hold") {
-                // Clear hold state but keep recording active
                 state.clear_hold_shortcut_state();
                 state.set_toggle_recording_active(true);
                 state.set_active_recording_mode(Some("toggle"));
@@ -1108,7 +1067,6 @@ fn handle_smart_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<(
             return Ok(());
         }
 
-        // Long hold (>= 200ms) = normal hold mode, stop on release
         handle_hold_shortcut_release(app)
     } else {
         Ok(())
@@ -1121,7 +1079,6 @@ fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
         return Ok(());
     }
 
-    // Only stop if we're in hold mode
     if state.get_active_recording_mode().as_deref() != Some("hold") {
         return Ok(());
     }
@@ -1130,7 +1087,6 @@ fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
         Ok(Some(recording)) => {
             let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
 
-            // If recording is too short, discard it and hide overlay immediately
             if duration_ms < MIN_RECORDING_DURATION_MS {
                 state.set_active_recording_mode(None);
                 hide_overlay(app);
@@ -1138,7 +1094,6 @@ fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
             }
 
             state.set_active_recording_mode(None);
-            // Don't hide overlay yet - it should remain visible during saving/transcription
             emit_event(
                 app,
                 EVENT_RECORDING_STOP,
@@ -1161,20 +1116,17 @@ fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
 fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
     let state = app.state::<AppState>();
 
-    // If hold recording is active, ignore toggle shortcut
     if state.get_active_recording_mode().as_deref() == Some("hold") {
         return Ok(());
     }
 
     if state.is_toggle_recording_active() {
-        // Stop toggle recording
         state.set_toggle_recording_active(false);
 
         match state.recorder().stop() {
             Ok(Some(recording)) => {
                 let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
 
-                // If recording is too short, discard it and hide overlay immediately
                 if duration_ms < MIN_RECORDING_DURATION_MS {
                     state.set_active_recording_mode(None);
                     hide_overlay(app);
@@ -1182,7 +1134,6 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
                 }
 
                 state.set_active_recording_mode(None);
-                // Don't hide overlay yet - it should remain visible during saving/transcription
                 emit_event(
                     app,
                     EVENT_RECORDING_STOP,
@@ -1202,7 +1153,6 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
             }
         }
     } else {
-        // Start toggle recording
         let settings = state.current_settings();
         match state.recorder().start(settings.microphone_device) {
             Ok(started) => {
@@ -1234,7 +1184,6 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
 }
 
 fn show_overlay(app: &AppHandle<AppRuntime>) {
-    // Hide toast if visible (user pressed keybind to start new recording)
     if let Some(toast) = app.get_webview_window(TOAST_WINDOW_LABEL) {
         let _ = toast.hide();
     }
@@ -1263,11 +1212,8 @@ fn stop_active_recording(app: &AppHandle<AppRuntime>) {
 
 #[tauri::command]
 fn toast_dismissed(app: AppHandle<AppRuntime>) {
-    // Stop any active recording (releases mic)
     stop_active_recording(&app);
-    // Hide the pill overlay
     hide_overlay(&app);
-    // Hide the toast window
     if let Some(toast_window) = app.get_webview_window(TOAST_WINDOW_LABEL) {
         let _ = toast_window.hide();
     }
@@ -1326,17 +1272,15 @@ fn hide_toast(app: &AppHandle<AppRuntime>) {
 }
 
 fn position_toast_window(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime>) {
-    // Toast window is same width as pill (185px), so same X position
     if let Some(main_window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
         if let Ok(main_pos) = main_window.outer_position() {
-            let x = main_pos.x; // Same X - both windows are 185px wide
-            let y = main_pos.y - 168; // 100px toast height + 8px gap
+            let x = main_pos.x;
+            let y = main_pos.y - 168;
             let _ = toast_window.set_position(tauri::PhysicalPosition::new(x, y));
             return;
         }
     }
 
-    // Fallback: center on screen at ~88% height
     if let Ok(Some(monitor)) = toast_window.current_monitor() {
         let screen = monitor.size();
         let x = (screen.width as i32 - 185) / 2;
@@ -1349,7 +1293,10 @@ fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecor
     let base_dir = match recordings_root(&app) {
         Ok(path) => path,
         Err(err) => {
-            emit_error(&app, format!("Failed to resolve recordings directory: {err}"));
+            emit_error(
+                &app,
+                format!("Failed to resolve recordings directory: {err}"),
+            );
             return;
         }
     };
@@ -1383,7 +1330,6 @@ fn emit_complete(
         },
     );
 
-    // Validate recording before transcription to avoid wasting API calls on empty/silent recordings
     if let Err(rejection) = validate_recording(&recording) {
         let reason = match rejection {
             RecordingRejectionReason::TooShort {
@@ -1402,12 +1348,10 @@ fn emit_complete(
         };
         eprintln!("Recording rejected: {reason}");
 
-        // Clean up the audio file since we won't transcribe it
         if let Err(err) = std::fs::remove_file(&saved.path) {
             eprintln!("Failed to remove rejected recording file: {err}");
         }
 
-        // Hide the overlay and show a brief toast (optional - can be silent rejection)
         hide_overlay(app);
         return;
     }
@@ -1424,7 +1368,6 @@ fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
         },
     );
     stop_active_recording(app);
-    // Show simplified error toast
     let toast_message = simplify_recording_error(&message);
     show_toast(app, "error", None, &toast_message);
 }
@@ -1488,7 +1431,6 @@ fn queue_transcription(
                     return;
                 }
 
-                // Apply LLM cleanup if enabled
                 let (final_transcript, llm_cleaned) =
                     if llm_cleanup::is_cleanup_available(&settings) {
                         match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings)
@@ -1553,7 +1495,6 @@ fn queue_transcription(
                     metadata,
                 );
 
-                // Hide overlay immediately on success
                 hide_overlay(&app_handle);
             }
             Err(err) => {
@@ -1564,7 +1505,6 @@ fn queue_transcription(
                     stage,
                     saved_for_task.path.display().to_string(),
                 );
-                // Don't auto-hide - overlay stays visible until toast is dismissed
             }
         }
     });
@@ -1599,7 +1539,6 @@ fn emit_transcription_complete_with_cleanup(
         },
     );
 
-    // Save transcription to storage with cleanup info
     if llm_cleaned {
         let _ = app
             .state::<AppState>()
@@ -1673,18 +1612,15 @@ fn emit_transcription_error(
 
     stop_active_recording(app);
 
-    // Get mode for context-aware message
     let settings = app.state::<AppState>().current_settings();
     let is_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
 
-    // Create user-friendly toast message
     let toast_message = format_transcription_error(&message, is_local);
     let metadata = storage::TranscriptionMetadata {
         speech_model: resolve_speech_model_label(&settings, is_local, None),
         ..Default::default()
     };
 
-    // Save failed transcription to storage with the clean error message
     let record_result = app.state::<AppState>().storage().save_transcription(
         String::new(),
         audio_path.clone(),
@@ -1731,7 +1667,6 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
     let msg_lower = message.to_lowercase();
 
     if is_local {
-        // Local mode errors - tell user what to fix
         if msg_lower.contains("not fully installed") || msg_lower.contains("missing:") {
             return "No transcription model installed".to_string();
         }
@@ -1739,7 +1674,6 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
             return "No transcription model selected".to_string();
         }
     } else {
-        // Cloud mode errors
         if msg_lower.contains("network") || msg_lower.contains("connection") {
             return "Network error. Recording saved. Tap Retry to send again.".to_string();
         }
@@ -1751,7 +1685,6 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
         }
     }
 
-    // Generic errors
     if msg_lower.contains("microphone") || msg_lower.contains("audio input") {
         return "Microphone error".to_string();
     }
@@ -1762,7 +1695,6 @@ fn format_transcription_error(message: &str, is_local: bool) -> String {
         return "Pasted to clipboard instead".to_string();
     }
 
-    // Default
     if is_local {
         "Transcription failed".to_string()
     } else {
@@ -1839,17 +1771,15 @@ fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
     use minimp3::{Decoder, Frame};
     use std::io::Read;
 
-    // Read the MP3 file
     let mut file = std::fs::File::open(path)
         .with_context(|| format!("Failed to open audio file at {}", path.display()))?;
     let mut mp3_data = Vec::new();
     file.read_to_end(&mut mp3_data)
         .context("Failed to read MP3 file")?;
 
-    // Decode MP3 to raw samples
     let mut decoder = Decoder::new(&mp3_data[..]);
     let mut samples = Vec::new();
-    let mut sample_rate = 16000; // Default, will be updated from first frame
+    let mut sample_rate = 16000;
 
     loop {
         match decoder.next_frame() {
@@ -1861,11 +1791,9 @@ fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
             }) => {
                 sample_rate = sr as u32;
 
-                // Convert to mono if needed and collect samples
                 if channels == 1 {
                     samples.extend_from_slice(&data);
                 } else {
-                    // Downmix stereo/multi-channel to mono
                     for chunk in data.chunks(channels) {
                         let mono_sample: i32 = chunk.iter().map(|&s| s as i32).sum();
                         samples.push((mono_sample / channels as i32) as i16);
@@ -1899,7 +1827,6 @@ fn build_tray_menu(
 ) -> tauri::Result<Menu<AppRuntime>> {
     let mut menu = MenuBuilder::new(app);
 
-    // Cloud / Local mode submenu
     let mode_cloud = CheckMenuItemBuilder::with_id(MENU_ID_MODE_CLOUD, "Cloud")
         .checked(matches!(
             settings.transcription_mode,
@@ -1918,7 +1845,6 @@ fn build_tray_menu(
         .build()?;
     menu = menu.item(&mode_submenu);
 
-    // Microphone selector submenu
     let mut mic_submenu = SubmenuBuilder::new(app, "Microphone");
     let default_mic = CheckMenuItemBuilder::with_id(MENU_ID_MIC_DEFAULT, "System Default")
         .checked(settings.microphone_device.is_none())
@@ -1968,7 +1894,6 @@ fn build_tray_menu(
     }
     menu = menu.item(&mic_submenu.build()?);
 
-    // Models submenu only when in local mode (radio-style via check items)
     if matches!(settings.transcription_mode, TranscriptionMode::Local) {
         let mut model_submenu = SubmenuBuilder::new(app, "Model");
         for model in model_manager::list_models() {
@@ -1992,7 +1917,6 @@ fn build_tray_menu(
         menu = menu.item(&model_submenu.build()?);
     }
 
-    // Utility actions
     menu = menu.separator();
     let check_updates = MenuItem::with_id(
         app,
@@ -2006,7 +1930,6 @@ fn build_tray_menu(
     menu = menu.item(&check_updates).item(&send_feedback);
     menu = menu.separator();
 
-    // Existing actions
     let open_settings =
         MenuItem::with_id(app, "open_settings", "Open Glimpse", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit_glimpse", "Quit Glimpse", true, None::<&str>)?;
@@ -2169,7 +2092,6 @@ fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
     let window = if let Some(existing) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
         existing
     } else {
-        // Recreate settings window if it was closed
         reset_close_flag = true;
         WebviewWindowBuilder::new(app, SETTINGS_WINDOW_LABEL, WebviewUrl::default())
             .title("Glimpse Settings")
@@ -2187,13 +2109,11 @@ fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
             .store(false, Ordering::SeqCst);
     }
 
-    // Show app in dock when settings window is open
     let _ = app.set_activation_policy(ActivationPolicy::Regular);
 
     window.show()?;
     window.set_focus()?;
 
-    // Prevent destroying the window on Cmd+W; hide instead (register once)
     let already_registered = state
         .settings_close_handler_registered
         .swap(true, Ordering::SeqCst);
