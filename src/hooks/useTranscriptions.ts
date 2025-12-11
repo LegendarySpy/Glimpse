@@ -22,11 +22,39 @@ export interface TranscriptionRecord {
     llm_model?: string | null;
     word_count: number;
     audio_duration_seconds: number;
-    cloud_id?: string;
+    synced: boolean;
 }
 
 interface UseTranscriptionsOptions {
     cloudSyncEnabled?: boolean;
+}
+
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 1000;
+
+async function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function withRetry<T>(
+    fn: () => Promise<T>,
+    maxAttempts: number = MAX_RETRY_ATTEMPTS,
+    delayMs: number = RETRY_DELAY_MS
+): Promise<T> {
+    let lastError: Error | unknown;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            return await fn();
+        } catch (err) {
+            lastError = err;
+            if (attempt < maxAttempts) {
+                const backoff = delayMs * Math.pow(2, attempt - 1);
+                console.warn(`Attempt ${attempt} failed, retrying in ${backoff}ms...`, err);
+                await sleep(backoff);
+            }
+        }
+    }
+    throw lastError;
 }
 
 export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
@@ -86,7 +114,14 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
         try {
             setIsSyncing(true);
-            const cloudDoc = await syncLocalTranscription(userId, record);
+            const cloudDoc = await withRetry(() => syncLocalTranscription(userId, record));
+
+            await invoke("mark_transcription_synced", { id: record.id });
+
+            setTranscriptions(prev => prev.map(t =>
+                t.id === record.id ? { ...t, synced: true } : t
+            ));
+
             return cloudDoc;
         } catch (err) {
             console.error("Failed to sync to cloud:", err);
@@ -103,8 +138,24 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         try {
             const currentRecords = await invoke<TranscriptionRecord[]>("get_transcriptions");
 
-            for (const record of currentRecords) {
-                await syncLocalTranscription(userId, record);
+            const unsyncedRecords = currentRecords.filter(r => !r.synced);
+
+            if (unsyncedRecords.length === 0) {
+                return;
+            }
+
+            console.log(`Syncing ${unsyncedRecords.length} records to cloud...`);
+
+            for (const record of unsyncedRecords) {
+                try {
+                    await withRetry(() => syncLocalTranscription(userId, record));
+                    await invoke("mark_transcription_synced", { id: record.id });
+                    setTranscriptions(prev => prev.map(t =>
+                        t.id === record.id ? { ...t, synced: true } : t
+                    ));
+                } catch (err) {
+                    console.error(`Failed to sync record ${record.id} after retries:`, err);
+                }
             }
         } catch (err) {
             console.error("Failed to sync all to cloud:", err);
@@ -118,14 +169,27 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
         try {
             setIsSyncing(true);
-            const cloudDocs = await listTranscriptions(userId, 100);
             const localRecords = await invoke<TranscriptionRecord[]>("get_transcriptions");
+
+            // Fetch all cloud documents with pagination
+            const PAGE_SIZE = 100;
+            let offset = 0;
+            let allCloudDocs: Awaited<ReturnType<typeof listTranscriptions>> = [];
+
+            while (true) {
+                const batch = await listTranscriptions(userId, PAGE_SIZE, offset);
+                allCloudDocs = allCloudDocs.concat(batch);
+
+                if (batch.length < PAGE_SIZE) {
+                    break; // No more pages
+                }
+                offset += PAGE_SIZE;
+            }
 
             let importedCount = 0;
 
-            for (const doc of cloudDocs) {
+            for (const doc of allCloudDocs) {
                 if (doc.is_deleted) continue;
-
                 if (!doc.text || !doc.status) continue;
 
                 const targetId = doc.local_id || doc.$id;
@@ -152,6 +216,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
                     llm_model: doc.llm_model,
                     word_count: doc.word_count,
                     audio_duration_seconds: doc.audio_duration_seconds,
+                    synced: true,
                 };
 
                 const wasImported = await invoke<boolean>("import_transcription_from_cloud", { record: localRecord });
@@ -242,10 +307,14 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
     useEffect(() => {
         if (resolvedCloudSyncEnabled && userId) {
-            syncFromCloud();
-            syncAllToCloud();
+            // Run syncs sequentially to avoid race conditions
+            (async () => {
+                await syncFromCloud();
+                await syncAllToCloud();
+            })();
         }
-    }, [resolvedCloudSyncEnabled, userId, syncFromCloud, syncAllToCloud]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [resolvedCloudSyncEnabled, userId]);
 
     useEffect(() => {
         const unlisten1 = listen<{ id: string }>("transcription:complete", async (event) => {
@@ -255,9 +324,14 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
                 const records = await invoke<TranscriptionRecord[]>("get_transcriptions");
                 const newRecord = records.find(r => r.id === event.payload?.id) || records[0];
 
-                if (newRecord) {
-                    syncLocalTranscription(userId, newRecord).catch(err => {
-                        console.error("Background sync failed:", err);
+                if (newRecord && !newRecord.synced) {
+                    withRetry(() => syncLocalTranscription(userId, newRecord)).then(async () => {
+                        await invoke("mark_transcription_synced", { id: newRecord.id });
+                        setTranscriptions(prev => prev.map(t =>
+                            t.id === newRecord.id ? { ...t, synced: true } : t
+                        ));
+                    }).catch(err => {
+                        console.error("Background sync failed after retries:", err);
                     });
                 }
             }

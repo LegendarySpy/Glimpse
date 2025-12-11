@@ -147,7 +147,8 @@ pub fn run() {
             open_microphone_settings,
             complete_onboarding,
             reset_onboarding,
-            import_transcription_from_cloud
+            import_transcription_from_cloud,
+            mark_transcription_synced
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -190,7 +191,7 @@ impl AppState {
             .path()
             .app_data_dir()
             .expect("Failed to resolve app data directory")
-            .join("transcriptions.json");
+            .join("transcriptions.db");
 
         let storage = storage::StorageManager::new(storage_path)
             .expect("Failed to initialize transcription storage");
@@ -625,6 +626,14 @@ fn import_transcription_from_cloud(
         .storage()
         .import_transcription(record)
         .map_err(|err| format!("Failed to import transcription: {err}"))
+}
+
+#[tauri::command]
+fn mark_transcription_synced(id: String, state: tauri::State<AppState>) -> Result<(), String> {
+    state
+        .storage()
+        .mark_as_synced(&id)
+        .map_err(|err| format!("Failed to mark transcription as synced: {err}"))
 }
 
 #[tauri::command]

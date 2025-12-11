@@ -33,6 +33,8 @@ pub struct TranscriptionRecord {
     pub word_count: u32,
     #[serde(default)]
     pub audio_duration_seconds: f32,
+    #[serde(default)]
+    pub synced: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
@@ -60,7 +62,6 @@ impl TranscriptionStatus {
 }
 
 pub struct StorageManager {
-    json_path: PathBuf,
     connection: Arc<Mutex<Connection>>,
 }
 
@@ -84,14 +85,13 @@ impl Default for TranscriptionMetadata {
 }
 
 impl StorageManager {
-    pub fn new(json_path: PathBuf) -> Result<Self> {
-        if let Some(parent) = json_path.parent() {
+    pub fn new(db_path: PathBuf) -> Result<Self> {
+        if let Some(parent) = db_path.parent() {
             fs::create_dir_all(parent).with_context(|| {
                 format!("Failed to create storage directory at {}", parent.display())
             })?;
         }
 
-        let db_path = json_path.with_extension("db");
         let connection = Connection::open(&db_path).with_context(|| {
             format!(
                 "Failed to open transcription database at {}",
@@ -102,15 +102,9 @@ impl StorageManager {
         Self::configure_connection(&connection)?;
         Self::apply_migrations(&connection)?;
 
-        let manager = Self {
-            json_path,
+        Ok(Self {
             connection: Arc::new(Mutex::new(connection)),
-        };
-
-        manager.import_legacy_json_if_needed()?;
-        manager.ensure_json_snapshot()?;
-
-        Ok(manager)
+        })
     }
 
     pub fn save_transcription(
@@ -134,29 +128,22 @@ impl StorageManager {
             llm_model: metadata.llm_model,
             word_count: metadata.word_count,
             audio_duration_seconds: metadata.audio_duration_seconds,
+            synced: false,
         };
 
-        {
-            let conn = self.connection.lock();
-            Self::insert_record(&conn, &record)?;
-        }
-
-        self.write_json_snapshot()?;
+        let conn = self.connection.lock();
+        Self::insert_record(&conn, &record)?;
         Ok(record)
     }
 
     pub fn import_transcription(&self, record: TranscriptionRecord) -> Result<bool> {
-        {
-            let conn = self.connection.lock();
+        let conn = self.connection.lock();
 
-            if Self::get_record(&conn, &record.id)?.is_some() {
-                return Ok(false);
-            }
-
-            Self::insert_record(&conn, &record)?;
+        if Self::get_record(&conn, &record.id)?.is_some() {
+            return Ok(false);
         }
 
-        self.write_json_snapshot()?;
+        Self::insert_record(&conn, &record)?;
         Ok(true)
     }
 
@@ -180,14 +167,11 @@ impl StorageManager {
             llm_model: metadata.llm_model,
             word_count: metadata.word_count,
             audio_duration_seconds: metadata.audio_duration_seconds,
+            synced: false,
         };
 
-        {
-            let conn = self.connection.lock();
-            Self::insert_record(&conn, &record)?;
-        }
-
-        self.write_json_snapshot()?;
+        let conn = self.connection.lock();
+        Self::insert_record(&conn, &record)?;
         Ok(record)
     }
 
@@ -197,29 +181,22 @@ impl StorageManager {
         cleaned_text: String,
         llm_model: Option<String>,
     ) -> Result<Option<TranscriptionRecord>> {
-        let updated = {
-            let conn = self.connection.lock();
-            Self::apply_llm_cleanup(&conn, id, &cleaned_text, llm_model.as_deref())?
-        };
-
-        if updated.is_some() {
-            self.write_json_snapshot()?;
-        }
-
-        Ok(updated)
+        let conn = self.connection.lock();
+        Self::apply_llm_cleanup(&conn, id, &cleaned_text, llm_model.as_deref())
     }
 
     pub fn revert_to_raw(&self, id: &str) -> Result<Option<TranscriptionRecord>> {
-        let updated = {
-            let conn = self.connection.lock();
-            Self::revert_to_raw_internal(&conn, id)?
-        };
+        let conn = self.connection.lock();
+        Self::revert_to_raw_internal(&conn, id)
+    }
 
-        if updated.is_some() {
-            self.write_json_snapshot()?;
-        }
-
-        Ok(updated)
+    pub fn mark_as_synced(&self, id: &str) -> Result<()> {
+        let conn = self.connection.lock();
+        conn.execute(
+            "UPDATE transcriptions SET synced = 1 WHERE id = ?1",
+            params![id],
+        )?;
+        Ok(())
     }
 
     pub fn get_all(&self) -> Vec<TranscriptionRecord> {
@@ -233,36 +210,23 @@ impl StorageManager {
     }
 
     pub fn delete(&self, id: &str) -> Result<Option<String>> {
-        let removed_audio_path = {
-            let conn = self.connection.lock();
-            let record = Self::get_record(&conn, id)?;
-            if record.is_some() {
-                conn.execute("DELETE FROM transcriptions WHERE id = ?1", params![id])?;
-            }
-            record.map(|r| r.audio_path)
-        };
-
-        if removed_audio_path.is_some() {
-            self.write_json_snapshot()?;
+        let conn = self.connection.lock();
+        let record = Self::get_record(&conn, id)?;
+        if record.is_some() {
+            conn.execute("DELETE FROM transcriptions WHERE id = ?1", params![id])?;
         }
-
-        Ok(removed_audio_path)
+        Ok(record.map(|r| r.audio_path))
     }
 
     /// Delete all transcription records and return their audio paths
     pub fn delete_all(&self) -> Result<Vec<String>> {
-        let audio_paths = {
-            let conn = self.connection.lock();
-            let mut stmt = conn.prepare("SELECT audio_path FROM transcriptions")?;
-            let paths = stmt
-                .query_map([], |row| row.get(0))?
-                .collect::<rusqlite::Result<Vec<String>>>()?;
-            conn.execute("DELETE FROM transcriptions", [])?;
-            paths
-        };
-
-        self.write_json_snapshot()?;
-        Ok(audio_paths)
+        let conn = self.connection.lock();
+        let mut stmt = conn.prepare("SELECT audio_path FROM transcriptions")?;
+        let paths = stmt
+            .query_map([], |row| row.get(0))?
+            .collect::<rusqlite::Result<Vec<String>>>()?;
+        conn.execute("DELETE FROM transcriptions", [])?;
+        Ok(paths)
     }
 
     pub fn get_by_id(&self, id: &str) -> Option<TranscriptionRecord> {
@@ -291,8 +255,9 @@ impl StorageManager {
                 speech_model,
                 llm_model,
                 word_count,
-                audio_duration_seconds
-             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+                audio_duration_seconds,
+                synced
+             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
             params![
                 record.id,
                 timestamp,
@@ -306,6 +271,7 @@ impl StorageManager {
                 record.llm_model,
                 record.word_count as i64,
                 record.audio_duration_seconds as f64,
+                if record.synced { 1 } else { 0 },
             ],
         )?;
         Ok(())
@@ -325,10 +291,11 @@ impl StorageManager {
             record.llm_cleaned = true;
             record.llm_model = llm_model.map(|value| value.to_string());
             record.word_count = count_words(&record.text);
+            record.synced = false;
 
             conn.execute(
                 "UPDATE transcriptions
-                 SET text = ?1, raw_text = ?2, llm_cleaned = 1, llm_model = ?3, word_count = ?4
+                 SET text = ?1, raw_text = ?2, llm_cleaned = 1, llm_model = ?3, word_count = ?4, synced = 0
                  WHERE id = ?5",
                 params![
                     record.text,
@@ -352,9 +319,10 @@ impl StorageManager {
                 record.llm_cleaned = false;
                 record.word_count = count_words(&record.text);
                 record.llm_model = None;
+                record.synced = false;
                 conn.execute(
                     "UPDATE transcriptions
-                     SET text = ?1, raw_text = NULL, llm_cleaned = 0, llm_model = NULL, word_count = ?2
+                     SET text = ?1, raw_text = NULL, llm_cleaned = 0, llm_model = NULL, word_count = ?2, synced = 0
                      WHERE id = ?3",
                     params![record.text, record.word_count as i64, id],
                 )?;
@@ -367,7 +335,7 @@ impl StorageManager {
     fn get_record(conn: &Connection, id: &str) -> Result<Option<TranscriptionRecord>> {
         conn.query_row(
             "SELECT id, timestamp, text, raw_text, audio_path, status, error_message, llm_cleaned,
-                    speech_model, llm_model, word_count, audio_duration_seconds
+                    speech_model, llm_model, word_count, audio_duration_seconds, synced
              FROM transcriptions WHERE id = ?1",
             params![id],
             |row| Self::record_from_row(row),
@@ -380,7 +348,7 @@ impl StorageManager {
         let conn = self.connection.lock();
         let mut stmt = conn.prepare(
             "SELECT id, timestamp, text, raw_text, audio_path, status, error_message, llm_cleaned,
-                    speech_model, llm_model, word_count, audio_duration_seconds
+                    speech_model, llm_model, word_count, audio_duration_seconds, synced
              FROM transcriptions ORDER BY timestamp DESC",
         )?;
 
@@ -429,6 +397,7 @@ impl StorageManager {
             llm_model: row.get("llm_model")?,
             word_count: row.get::<_, i64>("word_count")? as u32,
             audio_duration_seconds: row.get::<_, f64>("audio_duration_seconds")? as f32,
+            synced: row.get::<_, i64>("synced").unwrap_or(0) == 1,
         })
     }
 
@@ -453,7 +422,8 @@ impl StorageManager {
                 speech_model TEXT NOT NULL DEFAULT '',
                 llm_model TEXT NULL,
                 word_count INTEGER NOT NULL DEFAULT 0,
-                audio_duration_seconds REAL NOT NULL DEFAULT 0
+                audio_duration_seconds REAL NOT NULL DEFAULT 0,
+                synced INTEGER NOT NULL DEFAULT 0
             );
             CREATE INDEX IF NOT EXISTS idx_transcriptions_timestamp ON transcriptions(timestamp);
             CREATE INDEX IF NOT EXISTS idx_transcriptions_status ON transcriptions(status);",
@@ -483,6 +453,12 @@ impl StorageManager {
             "audio_duration_seconds",
             "ALTER TABLE transcriptions ADD COLUMN audio_duration_seconds REAL NOT NULL DEFAULT 0",
         )?;
+        Self::ensure_column(
+            conn,
+            "transcriptions",
+            "synced",
+            "ALTER TABLE transcriptions ADD COLUMN synced INTEGER NOT NULL DEFAULT 0",
+        )?;
         Ok(())
     }
 
@@ -504,62 +480,6 @@ impl StorageManager {
             }
         }
         Ok(false)
-    }
-
-    fn import_legacy_json_if_needed(&self) -> Result<()> {
-        if !self.json_path.exists() {
-            return Ok(());
-        }
-
-        let records: Vec<TranscriptionRecord> = match fs::read_to_string(&self.json_path) {
-            Ok(contents) if !contents.trim().is_empty() => {
-                serde_json::from_str(&contents).unwrap_or_else(|_| Vec::new())
-            }
-            _ => Vec::new(),
-        };
-
-        if records.is_empty() {
-            return Ok(());
-        }
-
-        let needs_import = {
-            let conn = self.connection.lock();
-            let count: i64 =
-                conn.query_row("SELECT COUNT(*) FROM transcriptions", [], |row| row.get(0))?;
-            count == 0
-        };
-
-        if !needs_import {
-            return Ok(());
-        }
-
-        let mut conn = self.connection.lock();
-        let tx = conn.transaction()?;
-        for record in records {
-            Self::insert_record(&tx, &record)?;
-        }
-        tx.commit()?;
-        Ok(())
-    }
-
-    fn ensure_json_snapshot(&self) -> Result<()> {
-        if self.json_path.exists() {
-            return Ok(());
-        }
-        self.write_json_snapshot()
-    }
-
-    fn write_json_snapshot(&self) -> Result<()> {
-        let records = self.load_all_from_db()?;
-        let json =
-            serde_json::to_string_pretty(&records).context("Failed to serialize transcriptions")?;
-        fs::write(&self.json_path, json).with_context(|| {
-            format!(
-                "Failed to write transcription snapshot to {}",
-                self.json_path.display()
-            )
-        })?;
-        Ok(())
     }
 }
 
