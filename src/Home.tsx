@@ -254,7 +254,7 @@ const Home = () => {
                                             </div>
                                         </button>
                                         <a
-                                            href="https://github.com/glimpse/issues"
+                                            href="https://github.com/LegendarySpy/Glimpse"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             onClick={() => setShowSupportPopup(false)}
