@@ -224,7 +224,7 @@ const SettingsModal = ({
         });
 
         return () => {
-            unlistenPromise.then((unlisten) => unlisten()).catch(() => {});
+            unlistenPromise.then((unlisten) => unlisten()).catch(() => { });
         };
     }, []);
 
@@ -313,7 +313,7 @@ const SettingsModal = ({
                 .then(() => {
                     setAuthError(null);
                 })
-                .catch(() => {})
+                .catch(() => { })
                 .finally(() => {
                     setAuthLoading(false);
                 });
@@ -676,7 +676,7 @@ const SettingsModal = ({
                                 </div>
 
                                 <AnimatePresence>
-                                    {transcriptionMode === "local" && (
+                                    {!loading && transcriptionMode === "local" && (
                                         <motion.div
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: "auto" }}
@@ -1280,6 +1280,7 @@ const SettingsModal = ({
                                                             active={transcriptionMode === "cloud"}
                                                             onClick={() => setTranscriptionMode("cloud")}
                                                             variant="cloud"
+                                                            loading={loading}
                                                         />
                                                         <ModeButton
                                                             icon={<HardDrive size={16} />}
@@ -1288,11 +1289,12 @@ const SettingsModal = ({
                                                             active={transcriptionMode === "local"}
                                                             onClick={() => setTranscriptionMode("local")}
                                                             variant="local"
+                                                            loading={loading}
                                                         />
                                                     </div>
 
                                                     <AnimatePresence>
-                                                        {transcriptionMode === "local" && !modelStatus[localModel]?.installed && (
+                                                        {!loading && transcriptionMode === "local" && !modelStatus[localModel]?.installed && (
                                                             <motion.div
                                                                 initial={{ opacity: 0, height: 0, marginTop: 0 }}
                                                                 animate={{ opacity: 1, height: "auto", marginTop: 12 }}
@@ -1714,25 +1716,27 @@ const ModalNavItem = ({ icon, label, active, onClick }: {
     </motion.button>
 );
 
-const ModeButton = ({ icon, label, description, active, onClick, variant = "cloud" }: {
-    icon: React.ReactNode; label: string; description: string; active: boolean; onClick: () => void; variant?: "cloud" | "local";
+const ModeButton = ({ icon, label, description, active, onClick, variant = "cloud", loading = false }: {
+    icon: React.ReactNode; label: string; description: string; active: boolean; onClick: () => void; variant?: "cloud" | "local"; loading?: boolean;
 }) => {
     const colors = variant === "cloud"
         ? { border: "border-amber-400/40", bg: "bg-amber-400/10", icon: "text-amber-400", desc: "text-amber-400/60" }
         : { border: "border-[#A5B3FE]/40", bg: "bg-[#A5B3FE]/10", icon: "text-[#A5B3FE]", desc: "text-[#A5B3FE]/60" };
 
+    const isActive = !loading && active;
+
     return (
         <motion.button
             onClick={onClick}
-            className={`rounded-xl border p-3 text-left transition-all ${active
+            className={`rounded-xl border p-3 text-left transition-all ${isActive
                 ? `${colors.border} ${colors.bg}`
                 : "border-[#2a2a30] bg-[#1a1a1e] hover:border-[#3a3a42]"
                 }`}
             whileTap={{ scale: 0.98 }}
         >
-            <div className={`mb-1.5 ${active ? colors.icon : "text-[#6b6b76]"}`}>{icon}</div>
-            <div className={`text-[12px] font-medium ${active ? "text-[#e8e8eb]" : "text-[#a0a0ab]"}`}>{label}</div>
-            <div className={`text-[10px] ${active ? colors.desc : "text-[#4a4a54]"}`}>{description}</div>
+            <div className={`mb-1.5 ${isActive ? colors.icon : "text-[#6b6b76]"}`}>{icon}</div>
+            <div className={`text-[12px] font-medium ${isActive ? "text-[#e8e8eb]" : "text-[#a0a0ab]"}`}>{label}</div>
+            <div className={`text-[10px] ${isActive ? colors.desc : "text-[#4a4a54]"}`}>{description}</div>
         </motion.button>
     );
 };
