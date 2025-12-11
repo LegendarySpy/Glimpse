@@ -32,20 +32,21 @@ const ToastOverlay: React.FC = () => {
   const [toast, setToast] = useState<ToastState | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastRef = useRef<ToastState | null>(null);
 
-  // Close everything - backend hides both windows
+  useEffect(() => {
+    toastRef.current = toast;
+  }, [toast]);
+
   const closeAll = async () => {
     try {
-      // This command stops recording and hides the pill overlay
       await invoke("toast_dismissed");
-      // Then hide the toast window itself
       await getCurrentWindow().hide();
     } catch (e) {
       console.error("closeAll failed:", e);
     }
   };
 
-  // Dismiss with animation
   const dismiss = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -54,20 +55,23 @@ const ToastOverlay: React.FC = () => {
     setToast((t) => (t ? { ...t, isLeaving: true } : null));
     setTimeout(() => {
       setToast(null);
-      closeAll();
+      getCurrentWindow().hide();
     }, 120);
   };
 
-  // Handle X button click - close immediately, don't wait for animation
-  const handleClose = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const dismissWithCleanup = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
     setToast(null);
     closeAll();
+  };
+
+  const handleClose = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dismissWithCleanup();
   };
 
   // Handle retry
@@ -85,12 +89,11 @@ const ToastOverlay: React.FC = () => {
     }
   };
 
-  // Keyboard: Esc to dismiss
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && toast) {
         e.preventDefault();
-        dismiss();
+        dismissWithCleanup();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -120,7 +123,7 @@ const ToastOverlay: React.FC = () => {
 
     const unsub2 = listen("toast:hide", () => dismiss());
     const unsub3 = listen("recording:start", () => {
-      if (toast) dismiss();
+      if (toastRef.current) dismiss();
     });
 
     return () => {
@@ -136,14 +139,8 @@ const ToastOverlay: React.FC = () => {
   const colors = COLORS[toast.type];
   const showRetry = toast.retryId && toast.mode === "cloud";
 
-  // Handle background click - close immediately
   const handleBackgroundClick = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    setToast(null);
-    closeAll();
+    dismissWithCleanup();
   };
 
   return (
