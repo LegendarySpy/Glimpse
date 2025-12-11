@@ -1,5 +1,5 @@
 [package]
-name = "glimpse"
+name = "Glimpse"
 version = "0.2.0"
 description = "Open-source voice-to-text productivity app built with Tauri"
 authors = ["LegendarySpy"]

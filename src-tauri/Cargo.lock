@@ -3,6 +3,44 @@
 version = 4
 
 [[package]]
+name = "Glimpse"
+version = "0.2.0"
+dependencies = [
+ "aes-gcm",
+ "anyhow",
+ "arboard",
+ "base64 0.22.1",
+ "chrono",
+ "core-graphics 0.23.2",
+ "cpal",
+ "crossbeam-channel",
+ "dirs 5.0.1",
+ "dotenvy",
+ "mime_guess",
+ "minimp3",
+ "mp3lame-encoder",
+ "parking_lot",
+ "pbkdf2",
+ "rand 0.8.5",
+ "reqwest",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-deep-link",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-macos-permissions",
+ "tauri-plugin-opener",
+ "thiserror 1.0.69",
+ "tokio",
+ "transcribe-rs",
+ "uuid",
+ "webrtc-vad",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1922,44 +1960,6 @@ checksum = "063ce2eb6a8d0ea93d2bf8ba1957e78dbab6be1c2220dd3daca57d5a9d869898"
 dependencies = [
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "glimpse"
-version = "0.2.0"
-dependencies = [
- "aes-gcm",
- "anyhow",
- "arboard",
- "base64 0.22.1",
- "chrono",
- "core-graphics 0.23.2",
- "cpal",
- "crossbeam-channel",
- "dirs 5.0.1",
- "dotenvy",
- "mime_guess",
- "minimp3",
- "mp3lame-encoder",
- "parking_lot",
- "pbkdf2",
- "rand 0.8.5",
- "reqwest",
- "rusqlite",
- "serde",
- "serde_json",
- "sha2",
- "tauri",
- "tauri-build",
- "tauri-plugin-deep-link",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-macos-permissions",
- "tauri-plugin-opener",
- "thiserror 1.0.69",
- "tokio",
- "transcribe-rs",
- "uuid",
- "webrtc-vad",
 ]
 
 [[package]]

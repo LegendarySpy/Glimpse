@@ -2062,11 +2062,12 @@ fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>
     let settings = app.state::<AppState>().current_settings();
     let menu = build_tray_menu(app, &settings)?;
 
-    let icon_bytes = include_bytes!("../icons/32x32.png");
+    let icon_bytes = include_bytes!("../icons/tray.png");
     let icon = tauri::image::Image::from_bytes(icon_bytes)?.to_owned();
 
     TrayIconBuilder::new()
         .icon(icon)
+        .icon_as_template(true)
         .menu(&menu)
         .on_tray_icon_event(|tray, event| match event {
             TrayIconEvent::Click {
