@@ -33,6 +33,8 @@ bun tauri build
 ## Roadmap
 
 - [x] Custom dictionary for words and phrases
+- [ ] Temporary mode 0 doesn't save transcriptions at all (either keybind or global mode)
+- [ ] Built in updater
 - [ ] Personalization features (per app writing styles: emailing, messaging etc)
 - [ ] Contextual awareness (detect destination app and adjust tone)
 - [ ] Edit mode (rewrite selected text with full context)
