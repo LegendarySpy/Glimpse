@@ -1,0 +1,63 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+      - bot
+    authors:
+      - dependabot
+      - github-actions
+
+  categories:
+    - title: New Features
+      labels:
+        - enhancement
+        - feature
+        - feat
+
+    - title: Bug Fixes
+      labels:
+        - bug
+        - fix
+        - bugfix
+
+    - title: Performance
+      labels:
+        - performance
+        - perf
+
+    - title: UI/UX Changes
+      labels:
+        - ui
+        - ux
+        - design
+        - styling
+
+    - title: Security
+      labels:
+        - security
+
+    - title: Documentation
+      labels:
+        - documentation
+        - docs
+
+    - title: Maintenance
+      labels:
+        - chore
+        - maintenance
+        - refactor
+        - cleanup
+
+    - title: Dependencies
+      labels:
+        - dependencies
+        - deps
+
+    - title: Testing
+      labels:
+        - test
+        - testing
+
+    - title: Other Changes
+      labels:
+        - "*"

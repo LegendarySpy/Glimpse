@@ -31,6 +31,7 @@ import {
 import DotMatrix from "./DotMatrix";
 import AccountView from "./AccountView";
 import FAQModal from "./FAQModal";
+import { UpdateChecker } from "./UpdateChecker";
 import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../lib/auth";
 
 import { OAuthProvider } from "appwrite";
@@ -697,8 +698,8 @@ const SettingsModal = ({
                             </nav>
                         </aside>
 
-                        <main className="flex flex-1 flex-col bg-[#161618] overflow-hidden">
-                            <div className="flex-1 overflow-y-auto p-6 settings-scroll">
+                        <main className="flex flex-1 flex-col min-h-0 bg-[#161618]">
+                            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 settings-scroll">
                                 <AnimatePresence mode="wait">
                                     {activeTab === "account" && (
                                         <motion.div
@@ -1629,6 +1630,11 @@ const SettingsModal = ({
                                                             {appInfo?.data_dir_path ?? "-"}
                                                         </span>
                                                     </button>
+                                                </div>
+
+                                                <div className="mt-4 pt-3 border-t border-[#1e1e22]">
+                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-2">Updates</p>
+                                                    <UpdateChecker />
                                                 </div>
                                             </div>
                                             <div className="space-y-2">
