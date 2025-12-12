@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "glimpse",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "identifier": "dev.glimpse.glimpse",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -66,6 +66,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -76,6 +77,14 @@
     "macOS": {
       "entitlements": "./Entitlements.plist",
       "hardenedRuntime": true
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIwRjZFNTY4MTZGNjc3RkQKUldUOWQvWVdhT1gySUtvN0IwSUQxTW8rWitVeHRlMC9FcjZ0TWp6RlVld0ltUnA5QVc2S0N0TVUK",
+      "endpoints": [
+        "https://github.com/LegendarySpy/Glimpse/releases/latest/download/latest.json"
+      ]
     }
   }
 }

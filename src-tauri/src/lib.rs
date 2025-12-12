@@ -67,6 +67,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_macos_permissions::init())
         .plugin(tauri_plugin_deep_link::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             app.set_activation_policy(ActivationPolicy::Accessory);
 
@@ -1931,7 +1933,7 @@ fn build_tray_menu(
         app,
         MENU_ID_CHECK_UPDATES,
         "Check for Updates",
-        false,
+        true,
         None::<&str>,
     )?;
     let send_feedback =
@@ -2046,7 +2048,12 @@ fn handle_tray_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
                 eprintln!("Failed to open feedback link: {err}");
             }
         }
-        MENU_ID_CHECK_UPDATES => {}
+        MENU_ID_CHECK_UPDATES => {
+            if let Err(err) = toggle_settings_window(app) {
+                eprintln!("Failed to open settings for update check: {err}");
+            }
+            let _ = app.emit("navigate:about", ());
+        }
         _ => {
             if let Some(model_key) = id.strip_prefix(MENU_ID_MODEL_PREFIX) {
                 set_local_model_from_menu(app, model_key);

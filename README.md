@@ -63,7 +63,8 @@ bun tauri build
 
 - [x] Custom dictionary for words and phrases
 - [ ] Temporary mode: transcribe without saving
-- [ ] Built-in updater
+- [x] Built-in updater
+- [ ] App localization
 - [ ] Personalization & per app context: per-app writing styles (email, messaging, etc.)
 - [ ] Edit mode: rewrite selected text with full context
 - [ ] Ask mode: query what's on your screen

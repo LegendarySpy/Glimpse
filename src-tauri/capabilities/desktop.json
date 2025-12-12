@@ -6,9 +6,12 @@
     "linux"
   ],
   "windows": [
-    "main"
+    "main",
+    "settings"
   ],
   "permissions": [
-    "global-shortcut:default"
+    "global-shortcut:default",
+    "updater:default",
+    "process:allow-restart"
   ]
 }

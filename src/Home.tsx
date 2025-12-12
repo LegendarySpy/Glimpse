@@ -73,7 +73,8 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-        let unlisten: UnlistenFn | null = null;
+        let unlistenSettings: UnlistenFn | null = null;
+        let unlistenNavigate: UnlistenFn | null = null;
 
         const loadSettings = async () => {
             try {
@@ -90,11 +91,23 @@ const Home = () => {
         listen<StoredSettings>("settings:changed", (event) => {
             setTranscriptionMode(event.payload.transcription_mode);
         }).then((fn) => {
-            unlisten = fn;
+            unlistenSettings = fn;
+        });
+
+        listen("navigate:about", async () => {
+            setSettingsTab("about");
+            setIsSettingsOpen(true);
+            setTimeout(async () => {
+                const { emit } = await import("@tauri-apps/api/event");
+                emit("updater:check");
+            }, 100);
+        }).then((fn) => {
+            unlistenNavigate = fn;
         });
 
         return () => {
-            unlisten?.();
+            unlistenSettings?.();
+            unlistenNavigate?.();
         };
     }, [loadUser]);
 
