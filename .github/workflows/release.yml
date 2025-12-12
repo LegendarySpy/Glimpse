@@ -14,12 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS ARM
+          # Universal macOS build
           - platform: 'macos-latest'
-            args: '--target aarch64-apple-darwin'
-          # macOS Intel
-          - platform: 'macos-latest'
-            args: '--target x86_64-apple-darwin'
+            args: '--target universal-apple-darwin'
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -37,6 +34,9 @@ jobs:
 
       - name: install frontend dependencies
         run: bun install
+
+      - name: build frontend
+        run: bun run build
 
       - name: import Apple Developer Certificate
         # Prevents keychain from locking automatically for 3600 seconds.
