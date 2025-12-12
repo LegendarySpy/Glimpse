@@ -119,7 +119,7 @@ const DictionaryView = () => {
     const showWarning = Boolean(isLocal && currentModel && !isWhisper);
 
     return (
-        <div className="w-full max-w-2xl text-left">
+        <div className="w-full text-left">
             <div className="flex items-start gap-3 mb-6">
                 <DotMatrix
                     rows={2}
