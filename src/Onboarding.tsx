@@ -1059,106 +1059,6 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                 <div
                                     role="button"
                                     tabIndex={0}
-                                    onClick={() => setLocalModelChoice(PARAKEET_KEY)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter" || e.key === " ") {
-                                            e.preventDefault();
-                                            setLocalModelChoice(PARAKEET_KEY);
-                                        }
-                                    }}
-                                    className={`relative w-full rounded-2xl border border-[#1b1b22] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-colors cursor-pointer ${isParakeetActive
-                                        ? "bg-amber-400/5 ring-1 ring-amber-400/60"
-                                        : localModelChoice === PARAKEET_KEY
-                                            ? "bg-[#0f0f14] ring-1 ring-amber-400/30"
-                                            : "bg-[#0c0c12] hover:border-[#2a2a32]"
-                                        }`}
-                                >
-                                    <div className="absolute inset-0 pointer-events-none">
-                                        <div className="absolute inset-0 opacity-12">
-                                            <DotMatrix rows={6} cols={18} activeDots={[0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66]} dotSize={2} gap={4} color="#1f1f28" />
-                                        </div>
-                                    </div>
-                                    <div className="relative flex items-center justify-between gap-3">
-                                        <div className="flex items-center gap-2">
-                                            <DotMatrix rows={2} cols={2} activeDots={[0]} dotSize={3} gap={2} color="#fbbf24" />
-                                            <span className="text-[11px] font-semibold text-[#e5e7eb]">Parakeet (INT8)</span>
-                                        </div>
-                                        <span
-                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${isParakeetActive
-                                                ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
-                                                : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
-                                                }`}
-                                        >
-                                            Active
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${parakeetInstalled
-                                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                            : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
-                                            }`}>
-                                            {parakeetInstalled ? "Ready" : "Download needed"}
-                                        </span>
-                                    </div>
-                                    <div className="relative space-y-1.5 text-[11px] text-[#d0d0da] font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
-                                            <span>Good accuracy, fast</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
-                                            <span>Multilingual</span>
-                                        </div>
-                                    </div>
-                                    <div className="relative rounded-lg border border-[#20202a] bg-[#121218] px-3 py-2 text-[10px] text-[#9ca3af] leading-relaxed space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-semibold text-[#d0d0da]">Download</span>
-                                            <button
-                                                aria-label={displayState.parakeet.status === "complete" ? "Delete model" : "Download model"}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (displayState.parakeet.status === "complete") {
-                                                        handleLocalDelete(PARAKEET_KEY);
-                                                    } else {
-                                                        handleLocalDownload(PARAKEET_KEY);
-                                                    }
-                                                }}
-                                                disabled={displayState.parakeet.status === "downloading"}
-                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${displayState.parakeet.status === "downloading"
-                                                    ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
-                                                    : displayState.parakeet.status === "complete"
-                                                        ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
-                                                        : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
-                                                    }`}
-                                            >
-                                                {displayState.parakeet.status === "downloading" ? (
-                                                    <Loader2 size={10} className="animate-spin" />
-                                                ) : displayState.parakeet.status === "complete" ? (
-                                                    <Trash2 size={10} />
-                                                ) : (
-                                                    <Download size={10} className="text-amber-400" />
-                                                )}
-                                            </button>
-                                        </div>
-                                        <ModelProgress percent={displayState.parakeet.percent} status={displayState.parakeet.status} />
-                                        <div className="h-[14px]">
-                                            {displayState.parakeet.status === "downloading" && (
-                                                <p className="text-[10px] text-[#6b6b76] tabular-nums">
-                                                    {displayState.parakeet.percent.toFixed(0)}% · {displayState.parakeet.file ?? ""}
-                                                </p>
-                                            )}
-                                            {displayState.parakeet.status === "error" && (
-                                                <p className="text-[10px] text-red-400">
-                                                    {displayState.parakeet.message ?? "Download failed"}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    role="button"
-                                    tabIndex={0}
                                     onClick={() => setLocalModelChoice(WHISPER_KEY)}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter" || e.key === " ") {
@@ -1253,6 +1153,106 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             {displayState.whisper.status === "error" && (
                                                 <p className="text-[10px] text-red-400">
                                                     {displayState.whisper.message ?? "Download failed"}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setLocalModelChoice(PARAKEET_KEY)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            setLocalModelChoice(PARAKEET_KEY);
+                                        }
+                                    }}
+                                    className={`relative w-full rounded-2xl border border-[#1b1b22] p-4 text-left space-y-3 shadow-[0_10px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-colors cursor-pointer ${isParakeetActive
+                                        ? "bg-amber-400/5 ring-1 ring-amber-400/60"
+                                        : localModelChoice === PARAKEET_KEY
+                                            ? "bg-[#0f0f14] ring-1 ring-amber-400/30"
+                                            : "bg-[#0c0c12] hover:border-[#2a2a32]"
+                                        }`}
+                                >
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute inset-0 opacity-12">
+                                            <DotMatrix rows={6} cols={18} activeDots={[0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66]} dotSize={2} gap={4} color="#1f1f28" />
+                                        </div>
+                                    </div>
+                                    <div className="relative flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <DotMatrix rows={2} cols={2} activeDots={[0]} dotSize={3} gap={2} color="#fbbf24" />
+                                            <span className="text-[11px] font-semibold text-[#e5e7eb]">Parakeet (INT8)</span>
+                                        </div>
+                                        <span
+                                            className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${isParakeetActive
+                                                ? "bg-amber-400/20 text-amber-400 border-amber-400/40"
+                                                : "opacity-0 border-transparent text-transparent pointer-events-none select-none"
+                                                }`}
+                                        >
+                                            Active
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${parakeetInstalled
+                                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                            : "bg-[#16161d] text-[#9ca3af] border-[#2a2a30]"
+                                            }`}>
+                                            {parakeetInstalled ? "Ready" : "Download needed"}
+                                        </span>
+                                    </div>
+                                    <div className="relative space-y-1.5 text-[11px] text-[#d0d0da] font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Good accuracy, fast</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-3 rounded-full bg-[#6b7280]" />
+                                            <span>Multilingual</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative rounded-lg border border-[#20202a] bg-[#121218] px-3 py-2 text-[10px] text-[#9ca3af] leading-relaxed space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-semibold text-[#d0d0da]">Download</span>
+                                            <button
+                                                aria-label={displayState.parakeet.status === "complete" ? "Delete model" : "Download model"}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (displayState.parakeet.status === "complete") {
+                                                        handleLocalDelete(PARAKEET_KEY);
+                                                    } else {
+                                                        handleLocalDownload(PARAKEET_KEY);
+                                                    }
+                                                }}
+                                                disabled={displayState.parakeet.status === "downloading"}
+                                                className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${displayState.parakeet.status === "downloading"
+                                                    ? "border-[#2a2a30] text-[#6b6b76] cursor-wait"
+                                                    : displayState.parakeet.status === "complete"
+                                                        ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                                        : "border-[#2a2a30] text-[#e8e8eb] hover:border-[#3a3a42]"
+                                                    }`}
+                                            >
+                                                {displayState.parakeet.status === "downloading" ? (
+                                                    <Loader2 size={10} className="animate-spin" />
+                                                ) : displayState.parakeet.status === "complete" ? (
+                                                    <Trash2 size={10} />
+                                                ) : (
+                                                    <Download size={10} className="text-amber-400" />
+                                                )}
+                                            </button>
+                                        </div>
+                                        <ModelProgress percent={displayState.parakeet.percent} status={displayState.parakeet.status} />
+                                        <div className="h-[14px]">
+                                            {displayState.parakeet.status === "downloading" && (
+                                                <p className="text-[10px] text-[#6b6b76] tabular-nums">
+                                                    {displayState.parakeet.percent.toFixed(0)}% · {displayState.parakeet.file ?? ""}
+                                                </p>
+                                            )}
+                                            {displayState.parakeet.status === "error" && (
+                                                <p className="text-[10px] text-red-400">
+                                                    {displayState.parakeet.message ?? "Download failed"}
                                                 </p>
                                             )}
                                         </div>
