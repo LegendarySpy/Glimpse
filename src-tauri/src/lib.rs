@@ -6,10 +6,14 @@ mod llm_cleanup;
 mod local_transcription;
 mod model_manager;
 mod permissions;
+mod platform;
 mod recorder;
 mod settings;
+mod shortcuts;
 mod storage;
+mod toast;
 mod transcription;
+mod tray;
 
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
@@ -26,50 +30,46 @@ use reqwest::Client;
 use serde::Serialize;
 use settings::{default_local_model, LlmProvider, SettingsStore, TranscriptionMode, UserSettings};
 use tauri::async_runtime;
-use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
-use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
+use tauri::tray::TrayIcon;
 use tauri::Emitter;
-use tauri::{
-    ActivationPolicy, AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
-    WindowEvent, Wry,
-};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use tauri::{AppHandle, Manager, WebviewWindow, Wry};
+
+#[cfg(target_os = "macos")]
+use tauri::ActivationPolicy;
 use tauri_plugin_opener::OpenerExt;
 
-const MAIN_WINDOW_LABEL: &str = "main";
-const SETTINGS_WINDOW_LABEL: &str = "settings";
-const TOAST_WINDOW_LABEL: &str = "toast";
-const EVENT_RECORDING_START: &str = "recording:start";
-const EVENT_RECORDING_STOP: &str = "recording:stop";
-const EVENT_RECORDING_COMPLETE: &str = "recording:complete";
-const EVENT_RECORDING_ERROR: &str = "recording:error";
-const EVENT_RECORDING_MODE_CHANGE: &str = "recording:mode_change";
-const EVENT_TRANSCRIPTION_START: &str = "transcription:start";
-const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
-const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
-const EVENT_TOAST_SHOW: &str = "toast:show";
-const EVENT_TOAST_HIDE: &str = "toast:hide";
-const EVENT_SETTINGS_CHANGED: &str = "settings:changed";
-const FEEDBACK_URL: &str = "https://github.com/LegendarySpy/Glimpse/issues";
-const MENU_ID_MODE_LOCAL: &str = "menu_mode_local";
-const MENU_ID_MODE_CLOUD: &str = "menu_mode_cloud";
-const MENU_ID_MODEL_PREFIX: &str = "menu_model_";
-const MENU_ID_MIC_PREFIX: &str = "menu_mic_";
-const MENU_ID_MIC_DEFAULT: &str = "menu_mic_default";
-const MENU_ID_FEEDBACK: &str = "menu_send_feedback";
-const MENU_ID_CHECK_UPDATES: &str = "menu_check_updates";
+pub(crate) const MAIN_WINDOW_LABEL: &str = "main";
+pub(crate) const SETTINGS_WINDOW_LABEL: &str = "settings";
+pub(crate) const EVENT_RECORDING_START: &str = "recording:start";
+pub(crate) const EVENT_RECORDING_STOP: &str = "recording:stop";
+pub(crate) const EVENT_RECORDING_COMPLETE: &str = "recording:complete";
+pub(crate) const EVENT_RECORDING_ERROR: &str = "recording:error";
+pub(crate) const EVENT_RECORDING_MODE_CHANGE: &str = "recording:mode_change";
+pub(crate) const EVENT_TRANSCRIPTION_START: &str = "transcription:start";
+pub(crate) const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
+pub(crate) const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
+pub(crate) const EVENT_SETTINGS_CHANGED: &str = "settings:changed";
+pub(crate) const FEEDBACK_URL: &str = "https://github.com/LegendarySpy/Glimpse/issues";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     dotenvy::dotenv().ok();
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_macos_permissions::init())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_process::init());
+
+    #[cfg(target_os = "macos")]
+    let builder = builder.plugin(tauri_plugin_macos_permissions::init());
+
+    #[cfg(target_os = "macos")]
+    let builder = builder.plugin(tauri_nspanel::init());
+
+    builder
         .setup(|app| {
+            #[cfg(target_os = "macos")]
             app.set_activation_policy(ActivationPolicy::Accessory);
 
             let handle = app.handle();
@@ -90,34 +90,29 @@ pub fn run() {
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
                 position_overlay(&window);
                 let _ = window.hide();
+
+                // On macOS, convert the overlay window to a non-activating NSPanel so showing it
+                // doesn't steal focus from the user's active text field.
+                platform::overlay::init(&handle, &window);
             }
 
-            if let Some(toast_window) = handle.get_webview_window(TOAST_WINDOW_LABEL) {
+            if let Some(toast_window) = handle.get_webview_window(toast::WINDOW_LABEL) {
                 let _ = toast_window.hide();
 
-                let app_handle = handle.clone();
-                toast_window.on_window_event(move |event| {
-                    if let tauri::WindowEvent::Focused(false) = event {
-                        if let Some(main) = app_handle.get_webview_window(MAIN_WINDOW_LABEL) {
-                            let _ = main.hide();
-                        }
-                        if let Some(toast) = app_handle.get_webview_window(TOAST_WINDOW_LABEL) {
-                            let _ = toast.hide();
-                        }
-                        stop_active_recording(&app_handle);
-                    }
-                });
+                // Toast dismissal is handled via timer/click/Escape in the toast UI.
+                // Platform-specific toast window/panel initialization lives in `platform::toast`.
+                platform::toast::init(&handle, &toast_window);
             }
 
-            if let Ok(tray) = build_tray(&handle) {
+            if let Ok(tray) = tray::build_tray(&handle) {
                 handle.state::<AppState>().store_tray(tray);
             }
 
-            if let Err(err) = register_shortcuts(&handle) {
+            if let Err(err) = shortcuts::register_shortcuts(&handle) {
                 eprintln!("Failed to register shortcuts: {err}");
             }
 
-            if let Err(err) = toggle_settings_window(&handle) {
+            if let Err(err) = tray::toggle_settings_window(&handle) {
                 eprintln!("Failed to open settings window on launch: {err}");
             }
 
@@ -156,30 +151,30 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-type AppRuntime = Wry;
+pub(crate) type AppRuntime = Wry;
 
 type GlimpseResult<T> = Result<T>;
 
-struct AppState {
-    recorder: RecorderManager,
+pub struct AppState {
+    pub(crate) recorder: RecorderManager,
     http: Client,
     local_transcriber: Arc<local_transcription::LocalTranscriber>,
     storage: Arc<storage::StorageManager>,
     settings_store: Arc<SettingsStore>,
     settings: parking_lot::Mutex<UserSettings>,
-    tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
-    settings_close_handler_registered: AtomicBool,
-    hold_shortcut_down: AtomicBool,
-    toggle_recording_active: AtomicBool,
+    pub(crate) tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
+    pub(crate) settings_close_handler_registered: AtomicBool,
+    pub(crate) hold_shortcut_down: AtomicBool,
+    pub(crate) toggle_recording_active: AtomicBool,
     /// Tracks which mode started the current recording: "hold", "toggle", or "smart"
-    active_recording_mode: parking_lot::Mutex<Option<String>>,
+    pub(crate) active_recording_mode: parking_lot::Mutex<Option<String>>,
     /// Smart mode state
-    smart_toggle_active: AtomicBool,
-    smart_press_time: parking_lot::Mutex<Option<chrono::DateTime<chrono::Local>>>,
+    pub(crate) smart_toggle_active: AtomicBool,
+    pub(crate) smart_press_time: parking_lot::Mutex<Option<chrono::DateTime<chrono::Local>>>,
 }
 
 impl AppState {
-    fn new(
+    pub fn new(
         settings_store: Arc<SettingsStore>,
         settings: UserSettings,
         app_handle: &AppHandle<AppRuntime>,
@@ -215,7 +210,7 @@ impl AppState {
         }
     }
 
-    fn current_settings(&self) -> UserSettings {
+    pub fn current_settings(&self) -> UserSettings {
         match self.settings_store.load() {
             Ok(latest) => {
                 *self.settings.lock() = latest.clone();
@@ -228,7 +223,7 @@ impl AppState {
         }
     }
 
-    fn persist_settings(&self, next: UserSettings) -> GlimpseResult<UserSettings> {
+    pub fn persist_settings(&self, next: UserSettings) -> GlimpseResult<UserSettings> {
         self.settings_store.save(&next)?;
         *self.settings.lock() = next.clone();
         Ok(next)
@@ -250,7 +245,7 @@ impl AppState {
         Arc::clone(&self.storage)
     }
 
-    fn store_tray(&self, tray: TrayIcon<AppRuntime>) {
+    pub fn store_tray(&self, tray: TrayIcon<AppRuntime>) {
         *self.tray.lock() = Some(tray);
     }
 
@@ -445,13 +440,13 @@ fn update_settings(
         .persist_settings(next)
         .map_err(|err| err.to_string())?;
 
-    register_shortcuts(&app).map_err(|err| err.to_string())?;
+    shortcuts::register_shortcuts(&app).map_err(|err| err.to_string())?;
 
     if prev.transcription_mode != next.transcription_mode
         || prev.local_model != next.local_model
         || prev.microphone_device != next.microphone_device
     {
-        if let Err(err) = refresh_tray_menu(&app, &next) {
+        if let Err(err) = tray::refresh_tray_menu(&app, &next) {
             eprintln!("Failed to refresh tray menu: {err}");
         }
     }
@@ -778,20 +773,33 @@ async fn retry_transcription(
                     {
                         Ok(Ok(())) => pasted = true,
                         Ok(Err(err)) => {
-                            emit_transcription_error(
-                                &app_handle,
-                                format!("Auto paste failed: {err}"),
-                                "auto_paste",
-                                saved_for_task.path.display().to_string(),
-                            );
+                            let err_str = err.to_string();
+                            let is_accessibility_issue =
+                                err_str.to_lowercase().contains("accessibility")
+                                    || err_str.to_lowercase().contains("permission")
+                                    || err_str.to_lowercase().contains("not allowed")
+                                    || err_str.to_lowercase().contains("assistive");
+
+                            if is_accessibility_issue {
+                                toast::show(
+                                    &app_handle,
+                                    "warning",
+                                    Some("Accessibility Required"),
+                                    "Enable accessibility access in System Settings to auto-paste transcriptions.",
+                                );
+                            } else {
+                                toast::show(
+                                    &app_handle,
+                                    "error",
+                                    None,
+                                    &format!("Auto paste failed: {err}"),
+                                );
+                            }
+                            eprintln!("Auto paste failed: {err}");
                         }
                         Err(err) => {
-                            emit_transcription_error(
-                                &app_handle,
-                                format!("Auto paste task error: {err}"),
-                                "auto_paste",
-                                saved_for_task.path.display().to_string(),
-                            );
+                            toast::show(&app_handle, "error", None, "Auto paste failed");
+                            eprintln!("Auto paste task error: {err}");
                         }
                     }
                 }
@@ -915,301 +923,19 @@ async fn undo_llm_cleanup(
     }
 }
 
-fn register_shortcuts(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
-    let settings = app.state::<AppState>().current_settings();
-    let manager = app.global_shortcut();
-
-    if let Err(err) = manager.unregister_all() {
-        eprintln!("Failed to clear shortcuts: {err}");
-    }
-
-    if settings.smart_enabled {
-        let smart_shortcut = settings.smart_shortcut.clone();
-        manager.on_shortcut(smart_shortcut.as_str(), move |app, _shortcut, event| {
-            if event.state == ShortcutState::Pressed {
-                if let Err(err) = handle_smart_shortcut_press(app) {
-                    eprintln!("Smart shortcut press error: {err}");
-                }
-            } else if event.state == ShortcutState::Released {
-                if let Err(err) = handle_smart_shortcut_release(app) {
-                    eprintln!("Smart shortcut release error: {err}");
-                }
-            }
-        })?;
-    }
-
-    let hold_keys: std::collections::HashSet<&str> = settings
-        .hold_shortcut
-        .split('+')
-        .map(|s| s.trim())
-        .collect();
-    let toggle_keys: std::collections::HashSet<&str> = settings
-        .toggle_shortcut
-        .split('+')
-        .map(|s| s.trim())
-        .collect();
-    let hold_is_subset_of_toggle =
-        settings.hold_enabled && settings.toggle_enabled && hold_keys.is_subset(&toggle_keys);
-    let _toggle_is_subset_of_hold =
-        settings.hold_enabled && settings.toggle_enabled && toggle_keys.is_subset(&hold_keys);
-
-    if settings.hold_enabled {
-        let hold_shortcut = settings.hold_shortcut.clone();
-        let check_toggle_overlap = hold_is_subset_of_toggle;
-        let toggle_shortcut_clone = settings.toggle_shortcut.clone();
-        manager.on_shortcut(hold_shortcut.as_str(), move |app, shortcut, event| {
-            if check_toggle_overlap {
-                let pressed_shortcut = shortcut.to_string();
-                if pressed_shortcut.to_lowercase() == toggle_shortcut_clone.to_lowercase() {
-                    return;
-                }
-            }
-
-            if event.state == ShortcutState::Pressed {
-                if let Err(err) = handle_hold_shortcut_press(app) {
-                    eprintln!("Hold shortcut press error: {err}");
-                }
-            } else if event.state == ShortcutState::Released {
-                if let Err(err) = handle_hold_shortcut_release(app) {
-                    eprintln!("Hold shortcut release error: {err}");
-                }
-            }
-        })?;
-    }
-
-    if settings.toggle_enabled {
-        let toggle_shortcut = settings.toggle_shortcut.clone();
-        manager.on_shortcut(toggle_shortcut.as_str(), move |app, _shortcut, event| {
-            if event.state == ShortcutState::Pressed {
-                if let Err(err) = handle_toggle_shortcut_press(app) {
-                    eprintln!("Toggle shortcut press error: {err}");
-                }
-            }
-        })?;
-    }
-
-    Ok(())
-}
-
-fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
-    let state = app.state::<AppState>();
-
-    if state.is_toggle_recording_active() || state.get_active_recording_mode().is_some() {
-        return Ok(());
-    }
-
-    if state.mark_hold_shortcut_down() {
-        return Ok(());
-    }
-
-    let settings = state.current_settings();
-    match state.recorder().start(settings.microphone_device) {
-        Ok(started) => {
-            state.set_active_recording_mode(Some("hold"));
-            show_overlay(app);
-            emit_event(
-                app,
-                EVENT_RECORDING_MODE_CHANGE,
-                RecordingModePayload {
-                    mode: "hold".to_string(),
-                },
-            );
-            emit_event(
-                app,
-                EVENT_RECORDING_START,
-                RecordingStartPayload {
-                    started_at: started.to_rfc3339(),
-                },
-            );
-        }
-        Err(err) => {
-            state.clear_hold_shortcut_state();
-            emit_error(app, format!("Unable to start recording: {err}"));
-        }
-    }
-
-    Ok(())
-}
-
-/// Minimum recording duration in milliseconds to process (prevents accidental taps)
-const MIN_RECORDING_DURATION_MS: i64 = 300;
-
-/// Threshold in milliseconds for smart mode to decide between toggle (tap) and hold
-const SMART_MODE_TAP_THRESHOLD_MS: i64 = 200;
-
-fn handle_smart_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
-    let state = app.state::<AppState>();
-
-    if state.is_toggle_recording_active() {
-        return handle_toggle_shortcut_press(app);
-    }
-
-    if state.get_active_recording_mode().as_deref() == Some("hold") {
-        return Ok(());
-    }
-
-    state.set_smart_press_time(Some(chrono::Local::now()));
-    handle_hold_shortcut_press(app)
-}
-
-fn handle_smart_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
-    let state = app.state::<AppState>();
-
-    let press_time = state.get_smart_press_time();
-    state.set_smart_press_time(None);
-
-    if let Some(start_time) = press_time {
-        let now = chrono::Local::now();
-        let held_duration_ms = (now - start_time).num_milliseconds();
-
-        if held_duration_ms < SMART_MODE_TAP_THRESHOLD_MS {
-            if state.get_active_recording_mode().as_deref() == Some("hold") {
-                state.clear_hold_shortcut_state();
-                state.set_toggle_recording_active(true);
-                state.set_active_recording_mode(Some("toggle"));
-                emit_event(
-                    app,
-                    EVENT_RECORDING_MODE_CHANGE,
-                    RecordingModePayload {
-                        mode: "toggle".to_string(),
-                    },
-                );
-            }
-            return Ok(());
-        }
-
-        handle_hold_shortcut_release(app)
-    } else {
-        Ok(())
-    }
-}
-
-fn handle_hold_shortcut_release(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
-    let state = app.state::<AppState>();
-    if !state.clear_hold_shortcut_state() {
-        return Ok(());
-    }
-
-    if state.get_active_recording_mode().as_deref() != Some("hold") {
-        return Ok(());
-    }
-
-    match state.recorder().stop() {
-        Ok(Some(recording)) => {
-            let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
-
-            if duration_ms < MIN_RECORDING_DURATION_MS {
-                state.set_active_recording_mode(None);
-                hide_overlay(app);
-                return Ok(());
-            }
-
-            state.set_active_recording_mode(None);
-            emit_event(
-                app,
-                EVENT_RECORDING_STOP,
-                RecordingStopPayload {
-                    ended_at: recording.ended_at.to_rfc3339(),
-                },
-            );
-            persist_recording_async(app.clone(), recording);
-        }
-        Ok(None) => {
-            state.set_active_recording_mode(None);
-            hide_overlay(app);
-        }
-        Err(err) => emit_error(app, format!("Unable to stop recording: {err}")),
-    }
-
-    Ok(())
-}
-
-fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> {
-    let state = app.state::<AppState>();
-
-    if state.get_active_recording_mode().as_deref() == Some("hold") {
-        return Ok(());
-    }
-
-    if state.is_toggle_recording_active() {
-        state.set_toggle_recording_active(false);
-
-        match state.recorder().stop() {
-            Ok(Some(recording)) => {
-                let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
-
-                if duration_ms < MIN_RECORDING_DURATION_MS {
-                    state.set_active_recording_mode(None);
-                    hide_overlay(app);
-                    return Ok(());
-                }
-
-                state.set_active_recording_mode(None);
-                emit_event(
-                    app,
-                    EVENT_RECORDING_STOP,
-                    RecordingStopPayload {
-                        ended_at: recording.ended_at.to_rfc3339(),
-                    },
-                );
-                persist_recording_async(app.clone(), recording);
-            }
-            Ok(None) => {
-                state.set_active_recording_mode(None);
-                hide_overlay(app);
-            }
-            Err(err) => {
-                state.set_active_recording_mode(None);
-                emit_error(app, format!("Unable to stop recording: {err}"));
-            }
-        }
-    } else {
-        let settings = state.current_settings();
-        match state.recorder().start(settings.microphone_device) {
-            Ok(started) => {
-                state.set_toggle_recording_active(true);
-                state.set_active_recording_mode(Some("toggle"));
-                show_overlay(app);
-                emit_event(
-                    app,
-                    EVENT_RECORDING_MODE_CHANGE,
-                    RecordingModePayload {
-                        mode: "toggle".to_string(),
-                    },
-                );
-                emit_event(
-                    app,
-                    EVENT_RECORDING_START,
-                    RecordingStartPayload {
-                        started_at: started.to_rfc3339(),
-                    },
-                );
-            }
-            Err(err) => {
-                emit_error(app, format!("Unable to start recording: {err}"));
-            }
-        }
-    }
-
-    Ok(())
-}
-
-fn show_overlay(app: &AppHandle<AppRuntime>) {
-    if let Some(toast) = app.get_webview_window(TOAST_WINDOW_LABEL) {
-        let _ = toast.hide();
-    }
+pub(crate) fn show_overlay(app: &AppHandle<AppRuntime>) {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
-        let _ = window.show();
+        platform::overlay::show(app, &window);
     }
 }
 
-fn hide_overlay(app: &AppHandle<AppRuntime>) {
+pub(crate) fn hide_overlay(app: &AppHandle<AppRuntime>) {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
-        let _ = window.hide();
+        platform::overlay::hide(app, &window);
     }
 }
 
-fn stop_active_recording(app: &AppHandle<AppRuntime>) {
+pub(crate) fn stop_active_recording(app: &AppHandle<AppRuntime>) {
     let state = app.state::<AppState>();
     if let Err(err) = state.recorder().stop() {
         eprintln!("Failed to stop recorder: {err}");
@@ -1225,82 +951,10 @@ fn stop_active_recording(app: &AppHandle<AppRuntime>) {
 fn toast_dismissed(app: AppHandle<AppRuntime>) {
     stop_active_recording(&app);
     hide_overlay(&app);
-    if let Some(toast_window) = app.get_webview_window(TOAST_WINDOW_LABEL) {
-        let _ = toast_window.hide();
-    }
+    toast::hide(&app);
 }
 
-fn emit_toast(app: &AppHandle<AppRuntime>, payload: ToastPayload) {
-    if let Some(toast_window) = app.get_webview_window(TOAST_WINDOW_LABEL) {
-        position_toast_window(app, &toast_window);
-        let _ = toast_window.show();
-    }
-
-    emit_event(app, EVENT_TOAST_SHOW, payload);
-}
-
-fn show_toast(app: &AppHandle<AppRuntime>, toast_type: &str, title: Option<&str>, message: &str) {
-    emit_toast(
-        app,
-        ToastPayload {
-            toast_type: toast_type.to_string(),
-            title: title.map(String::from),
-            message: message.to_string(),
-            auto_dismiss: None,
-            duration: None,
-            retry_id: None,
-            mode: None,
-        },
-    );
-}
-
-#[allow(dead_code)]
-fn show_toast_with_options(
-    app: &AppHandle<AppRuntime>,
-    toast_type: &str,
-    title: Option<&str>,
-    message: &str,
-    auto_dismiss: Option<bool>,
-    duration: Option<u64>,
-) {
-    emit_toast(
-        app,
-        ToastPayload {
-            toast_type: toast_type.to_string(),
-            title: title.map(String::from),
-            message: message.to_string(),
-            auto_dismiss,
-            duration,
-            retry_id: None,
-            mode: None,
-        },
-    );
-}
-
-#[allow(dead_code)]
-fn hide_toast(app: &AppHandle<AppRuntime>) {
-    emit_event(app, EVENT_TOAST_HIDE, ());
-}
-
-fn position_toast_window(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime>) {
-    if let Some(main_window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
-        if let Ok(main_pos) = main_window.outer_position() {
-            let x = main_pos.x;
-            let y = main_pos.y - 168;
-            let _ = toast_window.set_position(tauri::PhysicalPosition::new(x, y));
-            return;
-        }
-    }
-
-    if let Ok(Some(monitor)) = toast_window.current_monitor() {
-        let screen = monitor.size();
-        let x = (screen.width as i32 - 185) / 2;
-        let y = ((screen.height as f64 * 0.88) as i32) - 108;
-        let _ = toast_window.set_position(tauri::PhysicalPosition::new(x, y));
-    }
-}
-
-fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecording) {
+pub(crate) fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecording) {
     let base_dir = match recordings_root(&app) {
         Ok(path) => path,
         Err(err) => {
@@ -1370,7 +1024,7 @@ fn emit_complete(
     queue_transcription(app, saved, recording);
 }
 
-fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
+pub(crate) fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
     emit_event(
         app,
         EVENT_RECORDING_ERROR,
@@ -1380,10 +1034,14 @@ fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
     );
     stop_active_recording(app);
     let toast_message = simplify_recording_error(&message);
-    show_toast(app, "error", None, &toast_message);
+    toast::show(app, "error", None, &toast_message);
 }
 
-fn emit_event<T: Serialize + Clone>(app: &AppHandle<AppRuntime>, event: &str, payload: T) {
+pub(crate) fn emit_event<T: Serialize + Clone>(
+    app: &AppHandle<AppRuntime>,
+    event: &str,
+    payload: T,
+) {
     if let Err(err) = app.emit(event, payload) {
         eprintln!("Failed to emit {event}: {err}");
     }
@@ -1581,9 +1239,9 @@ fn handle_empty_transcription(app: &AppHandle<AppRuntime>, audio_path: &Path) {
         },
     );
 
-    emit_toast(
+    toast::emit_toast(
         app,
-        ToastPayload {
+        toast::Payload {
             toast_type: "warning".to_string(),
             title: None,
             message: "No words detected. Recording deleted.".to_string(),
@@ -1591,6 +1249,8 @@ fn handle_empty_transcription(app: &AppHandle<AppRuntime>, audio_path: &Path) {
             duration: Some(3000),
             retry_id: None,
             mode: None,
+            action: None,
+            action_label: None,
         },
     );
 
@@ -1655,9 +1315,9 @@ fn emit_transcription_error(
         None
     };
 
-    emit_toast(
+    toast::emit_toast(
         app,
-        ToastPayload {
+        toast::Payload {
             toast_type: "error".to_string(),
             title: None,
             message: toast_message,
@@ -1669,6 +1329,8 @@ fn emit_transcription_error(
             } else {
                 "cloud".into()
             }),
+            action: None,
+            action_label: None,
         },
     );
 }
@@ -1764,11 +1426,21 @@ fn count_words(text: &str) -> u32 {
 fn simplify_recording_error(message: &str) -> String {
     let msg_lower = message.to_lowercase();
 
-    if msg_lower.contains("microphone") || msg_lower.contains("audio") {
-        return "Microphone unavailable".to_string();
+    // Check for permission-related errors first
+    if msg_lower.contains("permission")
+        || msg_lower.contains("not allowed")
+        || msg_lower.contains("access denied")
+        || msg_lower.contains("coreaudio")
+    // macOS specific permission error
+    {
+        return "Microphone permission needed. Check System Settings.".to_string();
     }
-    if msg_lower.contains("permission") {
-        return "Microphone permission needed".to_string();
+
+    if msg_lower.contains("microphone")
+        || msg_lower.contains("audio")
+        || msg_lower.contains("input device")
+    {
+        return "Microphone unavailable".to_string();
     }
 
     if message.len() <= 30 {
@@ -1832,323 +1504,6 @@ fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
     Ok(data_dir)
 }
 
-fn build_tray_menu(
-    app: &AppHandle<AppRuntime>,
-    settings: &UserSettings,
-) -> tauri::Result<Menu<AppRuntime>> {
-    let mut menu = MenuBuilder::new(app);
-
-    let mode_cloud = CheckMenuItemBuilder::with_id(MENU_ID_MODE_CLOUD, "Cloud")
-        .checked(matches!(
-            settings.transcription_mode,
-            TranscriptionMode::Cloud
-        ))
-        .build(app)?;
-    let mode_local = CheckMenuItemBuilder::with_id(MENU_ID_MODE_LOCAL, "Local")
-        .checked(matches!(
-            settings.transcription_mode,
-            TranscriptionMode::Local
-        ))
-        .build(app)?;
-    let mode_submenu = SubmenuBuilder::new(app, "Mode")
-        .item(&mode_cloud)
-        .item(&mode_local)
-        .build()?;
-    menu = menu.item(&mode_submenu);
-
-    let mut mic_submenu = SubmenuBuilder::new(app, "Microphone");
-    let default_mic = CheckMenuItemBuilder::with_id(MENU_ID_MIC_DEFAULT, "System Default")
-        .checked(settings.microphone_device.is_none())
-        .build(app)?;
-    mic_submenu = mic_submenu.item(&default_mic);
-
-    match audio::list_input_devices() {
-        Ok(devices) => {
-            if devices.is_empty() {
-                let unavailable = MenuItem::with_id(
-                    app,
-                    "menu_mic_none",
-                    "No input devices found",
-                    false,
-                    None::<&str>,
-                )?;
-                mic_submenu = mic_submenu.item(&unavailable);
-            } else {
-                for device in devices {
-                    let label = if device.is_default {
-                        format!("{} (Default)", device.name)
-                    } else {
-                        device.name.clone()
-                    };
-                    let checked = settings.microphone_device.as_deref() == Some(device.id.as_str());
-                    // Prefix device IDs to avoid collisions with MENU_ID_MIC_DEFAULT (e.g., device id "default")
-                    let item = CheckMenuItemBuilder::with_id(
-                        format!("{MENU_ID_MIC_PREFIX}dev:{}", device.id),
-                        label,
-                    )
-                    .checked(checked)
-                    .build(app)?;
-                    mic_submenu = mic_submenu.item(&item);
-                }
-            }
-        }
-        Err(err) => {
-            let unavailable = MenuItem::with_id(
-                app,
-                "menu_mic_error",
-                format!("Microphone unavailable ({err})"),
-                false,
-                None::<&str>,
-            )?;
-            mic_submenu = mic_submenu.item(&unavailable);
-        }
-    }
-    menu = menu.item(&mic_submenu.build()?);
-
-    if matches!(settings.transcription_mode, TranscriptionMode::Local) {
-        let mut model_submenu = SubmenuBuilder::new(app, "Model");
-        for model in model_manager::list_models() {
-            let installed = model_manager::check_model_status(app.clone(), model.key.clone())
-                .map(|s| s.installed)
-                .unwrap_or(false);
-            let label = if installed {
-                model.label.clone()
-            } else {
-                format!("{} (Not downloaded)", model.label)
-            };
-            let item = CheckMenuItemBuilder::with_id(
-                format!("{MENU_ID_MODEL_PREFIX}{}", model.key),
-                label,
-            )
-            .enabled(installed)
-            .checked(installed && settings.local_model == model.key)
-            .build(app)?;
-            model_submenu = model_submenu.item(&item);
-        }
-        menu = menu.item(&model_submenu.build()?);
-    }
-
-    menu = menu.separator();
-    let check_updates = MenuItem::with_id(
-        app,
-        MENU_ID_CHECK_UPDATES,
-        "Check for Updates",
-        true,
-        None::<&str>,
-    )?;
-    let send_feedback =
-        MenuItem::with_id(app, MENU_ID_FEEDBACK, "Send Feedback", true, None::<&str>)?;
-    menu = menu.item(&check_updates).item(&send_feedback);
-    menu = menu.separator();
-
-    let open_settings =
-        MenuItem::with_id(app, "open_settings", "Open Glimpse", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit_glimpse", "Quit Glimpse", true, None::<&str>)?;
-    menu = menu.item(&open_settings).item(&quit);
-
-    menu.build()
-}
-
-pub(crate) fn refresh_tray_menu(
-    app: &AppHandle<AppRuntime>,
-    settings: &UserSettings,
-) -> tauri::Result<()> {
-    let state = app.state::<AppState>();
-    if let Some(tray) = state.tray.lock().clone() {
-        let menu = build_tray_menu(app, settings)?;
-        tray.set_menu(Some(menu))?;
-    }
-    Ok(())
-}
-
-fn set_transcription_mode_from_menu(app: &AppHandle<AppRuntime>, mode: TranscriptionMode) {
-    let state = app.state::<AppState>();
-    let mut settings = state.current_settings();
-    if settings.transcription_mode == mode {
-        return;
-    }
-    settings.transcription_mode = mode;
-    match state.persist_settings(settings.clone()) {
-        Ok(saved) => {
-            if let Err(err) = refresh_tray_menu(app, &saved) {
-                eprintln!("Failed to refresh tray menu: {err}");
-            }
-            if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
-                eprintln!("Failed to emit settings change: {err}");
-            }
-        }
-        Err(err) => eprintln!("Failed to update transcription mode: {err}"),
-    }
-}
-
-fn set_local_model_from_menu(app: &AppHandle<AppRuntime>, model_key: &str) {
-    if model_manager::definition(model_key).is_none() {
-        eprintln!("Ignoring unknown model selection: {model_key}");
-        return;
-    }
-
-    match model_manager::check_model_status(app.clone(), model_key.to_string()) {
-        Ok(status) if status.installed => {}
-        Ok(_) => {
-            eprintln!("Model not installed: {model_key}");
-            return;
-        }
-        Err(err) => {
-            eprintln!("Failed to check model status for {model_key}: {err}");
-            return;
-        }
-    }
-
-    let state = app.state::<AppState>();
-    let mut settings = state.current_settings();
-    if settings.local_model == model_key {
-        return;
-    }
-    settings.local_model = model_key.to_string();
-    match state.persist_settings(settings.clone()) {
-        Ok(saved) => {
-            if let Err(err) = refresh_tray_menu(app, &saved) {
-                eprintln!("Failed to refresh tray menu: {err}");
-            }
-            if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
-                eprintln!("Failed to emit settings change: {err}");
-            }
-        }
-        Err(err) => eprintln!("Failed to update model selection: {err}"),
-    }
-}
-
-fn set_microphone_from_menu(app: &AppHandle<AppRuntime>, device_id: Option<&str>) {
-    let state = app.state::<AppState>();
-    let mut settings = state.current_settings();
-    if settings.microphone_device.as_deref() == device_id {
-        return;
-    }
-    settings.microphone_device = device_id.map(|id| id.to_string());
-    match state.persist_settings(settings.clone()) {
-        Ok(saved) => {
-            if let Err(err) = refresh_tray_menu(app, &saved) {
-                eprintln!("Failed to refresh tray menu: {err}");
-            }
-            if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
-                eprintln!("Failed to emit settings change: {err}");
-            }
-        }
-        Err(err) => eprintln!("Failed to update microphone selection: {err}"),
-    }
-}
-
-fn handle_tray_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
-    match id {
-        MENU_ID_MODE_LOCAL => set_transcription_mode_from_menu(app, TranscriptionMode::Local),
-        MENU_ID_MODE_CLOUD => set_transcription_mode_from_menu(app, TranscriptionMode::Cloud),
-        MENU_ID_MIC_DEFAULT => set_microphone_from_menu(app, None),
-        MENU_ID_FEEDBACK => {
-            if let Err(err) = app.opener().open_url(FEEDBACK_URL, None::<&str>) {
-                eprintln!("Failed to open feedback link: {err}");
-            }
-        }
-        MENU_ID_CHECK_UPDATES => {
-            if let Err(err) = toggle_settings_window(app) {
-                eprintln!("Failed to open settings for update check: {err}");
-            }
-            let _ = app.emit("navigate:about", ());
-        }
-        _ => {
-            if let Some(model_key) = id.strip_prefix(MENU_ID_MODEL_PREFIX) {
-                set_local_model_from_menu(app, model_key);
-            } else if let Some(device_id_raw) = id.strip_prefix(MENU_ID_MIC_PREFIX) {
-                let device_id = device_id_raw.strip_prefix("dev:").unwrap_or(device_id_raw);
-                set_microphone_from_menu(app, Some(device_id));
-            }
-        }
-    }
-}
-
-fn build_tray(app: &AppHandle<AppRuntime>) -> tauri::Result<TrayIcon<AppRuntime>> {
-    let settings = app.state::<AppState>().current_settings();
-    let menu = build_tray_menu(app, &settings)?;
-
-    let icon_bytes = include_bytes!("../icons/tray.png");
-    let icon = tauri::image::Image::from_bytes(icon_bytes)?.to_owned();
-
-    TrayIconBuilder::new()
-        .icon(icon)
-        .icon_as_template(true)
-        .menu(&menu)
-        .on_tray_icon_event(|tray, event| match event {
-            TrayIconEvent::Click {
-                button,
-                button_state,
-                ..
-            } if button == MouseButton::Left && button_state == MouseButtonState::Up => {
-                if let Err(err) = toggle_settings_window(tray.app_handle()) {
-                    eprintln!("Failed to toggle settings window: {err}");
-                }
-            }
-            _ => {}
-        })
-        .on_menu_event(|app, event| match event.id().as_ref() {
-            "open_settings" => {
-                if let Err(err) = toggle_settings_window(app) {
-                    eprintln!("Failed to open settings window: {err}");
-                }
-            }
-            "quit_glimpse" => {
-                app.exit(0);
-            }
-            other => handle_tray_menu_event(app, other),
-        })
-        .build(app)
-}
-
-fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
-    let state = app.state::<AppState>();
-    let mut reset_close_flag = false;
-
-    let window = if let Some(existing) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
-        existing
-    } else {
-        reset_close_flag = true;
-        WebviewWindowBuilder::new(app, SETTINGS_WINDOW_LABEL, WebviewUrl::default())
-            .title("Glimpse Settings")
-            .inner_size(900.0, 650.0)
-            .min_inner_size(625.0, 400.0)
-            .resizable(true)
-            .visible(false)
-            .hidden_title(true)
-            .build()?
-    };
-
-    if reset_close_flag {
-        state
-            .settings_close_handler_registered
-            .store(false, Ordering::SeqCst);
-    }
-
-    let _ = app.set_activation_policy(ActivationPolicy::Regular);
-
-    window.show()?;
-    window.set_focus()?;
-
-    let already_registered = state
-        .settings_close_handler_registered
-        .swap(true, Ordering::SeqCst);
-    if !already_registered {
-        let app_handle = app.clone();
-        let window_clone = window.clone();
-        window.on_window_event(move |event| {
-            if let WindowEvent::CloseRequested { api, .. } = event {
-                api.prevent_close();
-                let _ = window_clone.hide();
-                let _ = app_handle.set_activation_policy(ActivationPolicy::Accessory);
-            }
-        });
-    }
-
-    Ok(())
-}
-
 fn position_overlay(window: &WebviewWindow<AppRuntime>) {
     if let Ok(Some(monitor)) = window.current_monitor() {
         if let Ok(size) = window.outer_size() {
@@ -2161,17 +1516,17 @@ fn position_overlay(window: &WebviewWindow<AppRuntime>) {
 }
 
 #[derive(Serialize, Clone)]
-struct RecordingModePayload {
+pub(crate) struct RecordingModePayload {
     mode: String,
 }
 
 #[derive(Serialize, Clone)]
-struct RecordingStartPayload {
+pub(crate) struct RecordingStartPayload {
     started_at: String,
 }
 
 #[derive(Serialize, Clone)]
-struct RecordingStopPayload {
+pub(crate) struct RecordingStopPayload {
     ended_at: String,
 }
 
@@ -2203,19 +1558,4 @@ struct TranscriptionCompletePayload {
 struct TranscriptionErrorPayload {
     message: String,
     stage: String,
-}
-
-#[derive(Serialize, Clone)]
-struct ToastPayload {
-    #[serde(rename = "type")]
-    toast_type: String,
-    title: Option<String>,
-    message: String,
-    #[serde(rename = "autoDismiss")]
-    auto_dismiss: Option<bool>,
-    duration: Option<u64>,
-    #[serde(rename = "retryId")]
-    retry_id: Option<String>,
-    #[serde(rename = "mode")]
-    mode: Option<String>,
 }

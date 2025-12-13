@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, Context, Result};
 use crate::AppRuntime;
+use anyhow::{anyhow, Context, Result};
 use serde::Serialize;
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -310,7 +310,7 @@ pub async fn download_model(
 
     // Refresh tray menu so newly downloaded models become selectable
     let settings = state.current_settings();
-    if let Err(err) = crate::refresh_tray_menu(&app, &settings) {
+    if let Err(err) = crate::tray::refresh_tray_menu(&app, &settings) {
         eprintln!("Failed to refresh tray menu after download: {err}");
     }
 
@@ -329,7 +329,7 @@ pub fn delete_model(app: AppHandle<AppRuntime>, model: String) -> Result<ModelSt
     // Refresh tray menu so deleted models are disabled immediately
     if let Some(state) = app.try_state::<crate::AppState>() {
         let settings = state.current_settings();
-        if let Err(err) = crate::refresh_tray_menu(&app, &settings) {
+        if let Err(err) = crate::tray::refresh_tray_menu(&app, &settings) {
             eprintln!("Failed to refresh tray menu after delete: {err}");
         }
     }

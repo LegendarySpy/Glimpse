@@ -5,7 +5,7 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>Glimpse needs microphone access to transcribe your voice to text.</string>
     <key>NSAppleEventsUsageDescription</key>
-    <string>Glimpse uses accessibility features to automatically paste transcribed text into your applications.</string>
+    <string>Glimpse uses Apple Events automation (via System Events) only to help check and guide required permissions (such as Accessibility) on macOS.</string>
 </dict>
 </plist>
 

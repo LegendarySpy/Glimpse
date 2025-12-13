@@ -4,6 +4,11 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
+    checkAccessibilityPermission,
+    checkMicrophonePermission,
+    requestAccessibilityPermission,
+} from "tauri-plugin-macos-permissions-api";
+import {
     X,
     Keyboard,
     Cpu,
@@ -27,6 +32,9 @@ import {
 
     Mail,
     HelpCircle,
+    Shield,
+    Accessibility,
+    Check,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
 import AccountView from "./AccountView";
@@ -157,7 +165,7 @@ const SettingsModal = ({
     const [captureActive, setCaptureActive] = useState<"smart" | "hold" | "toggle" | null>(null);
     const pressedModifiers = useRef<Set<string>>(new Set());
     const primaryKey = useRef<string | null>(null);
-    const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account" | "advanced">("general");
     const [shortcutsExpanded, setShortcutsExpanded] = useState(false);
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
@@ -170,6 +178,8 @@ const SettingsModal = ({
     const [authError, setAuthError] = useState<string | null>(null);
     const [showEmailForm, setShowEmailForm] = useState(false);
     const [showFAQModal, setShowFAQModal] = useState(false);
+    const [micPermission, setMicPermission] = useState<boolean | null>(null);
+    const [accessibilityPermission, setAccessibilityPermission] = useState<boolean | null>(null);
     const [authEmail, setAuthEmail] = useState("");
     const [authPassword, setAuthPassword] = useState("");
 
@@ -187,6 +197,37 @@ const SettingsModal = ({
     useEffect(() => {
         localStorage.setItem("glimpse_cloud_sync_enabled", String(cloudSyncEnabled));
     }, [cloudSyncEnabled]);
+
+    useEffect(() => {
+        if (activeTab === "advanced" && isOpen) {
+            const checkPermissions = async () => {
+                try {
+                    const nativeMic = await checkMicrophonePermission();
+                    if (nativeMic) {
+                        setMicPermission(true);
+                    } else {
+                        try {
+                            const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+                            setMicPermission(result.state === 'granted');
+                        } catch {
+                            setMicPermission(false);
+                        }
+                    }
+                } catch {
+                    setMicPermission(false);
+                }
+                try {
+                    const acc = await checkAccessibilityPermission();
+                    setAccessibilityPermission(acc);
+                } catch {
+                    setAccessibilityPermission(false);
+                }
+            };
+            checkPermissions();
+            const interval = setInterval(checkPermissions, 1500);
+            return () => clearInterval(interval);
+        }
+    }, [activeTab, isOpen]);
 
     const handleOpenDataDir = useCallback(async () => {
         if (!appInfo?.data_dir_path) return;
@@ -667,6 +708,12 @@ const SettingsModal = ({
                                         label="General"
                                         active={activeTab === "general"}
                                         onClick={() => setActiveTab("general")}
+                                    />
+                                    <ModalNavItem
+                                        icon={<Shield size={14} />}
+                                        label="Advanced"
+                                        active={activeTab === "advanced"}
+                                        onClick={() => setActiveTab("advanced")}
                                     />
                                     <ModalNavItem
                                         icon={<Info size={14} />}
@@ -1586,6 +1633,114 @@ const SettingsModal = ({
                                                             </motion.div>
                                                         );
                                                     })}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {activeTab === "advanced" && (
+                                        <motion.div
+                                            key="advanced"
+                                            variants={tabContentVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
+                                            className="space-y-5"
+                                        >
+                                            <header>
+                                                <h1 className="text-lg font-medium text-[#e8e8eb]">Advanced</h1>
+                                                <p className="mt-1 text-[12px] text-[#6b6b76]">System permissions and troubleshooting.</p>
+                                            </header>
+
+                                            <div className="space-y-3">
+                                                <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] px-1">Permissions</p>
+
+                                                {/* Microphone Permission */}
+                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
+                                                                <Mic size={16} className="text-[#6b6b76]" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[13px] font-medium text-[#e8e8eb]">Microphone Access</p>
+                                                                <p className="text-[11px] text-[#6b6b76]">Required for voice transcription</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            {micPermission === null ? (
+                                                                <span className="text-[11px] text-[#6b6b76] flex items-center gap-1.5">
+                                                                    <Loader2 size={11} className="animate-spin" />
+                                                                    Checking...
+                                                                </span>
+                                                            ) : micPermission ? (
+                                                                <span className="text-[11px] text-emerald-400 flex items-center gap-1">
+                                                                    <Check size={12} />
+                                                                    Enabled
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-[11px] text-amber-400">Not enabled</span>
+                                                            )}
+                                                            <motion.button
+                                                                onClick={() => invoke("open_microphone_settings")}
+                                                                className="rounded-lg bg-[#1a1a1e] border border-[#2a2a30] px-3 py-1.5 text-[11px] font-medium text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb] transition-colors"
+                                                                whileTap={{ scale: 0.97 }}
+                                                            >
+                                                                Open Settings
+                                                            </motion.button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Accessibility Permission */}
+                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
+                                                                <Accessibility size={16} className="text-[#6b6b76]" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[13px] font-medium text-[#e8e8eb]">Accessibility Access</p>
+                                                                <p className="text-[11px] text-[#6b6b76]">Required for automatic text paste</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            {accessibilityPermission === null ? (
+                                                                <span className="text-[11px] text-[#6b6b76] flex items-center gap-1.5">
+                                                                    <Loader2 size={11} className="animate-spin" />
+                                                                    Checking...
+                                                                </span>
+                                                            ) : accessibilityPermission ? (
+                                                                <span className="text-[11px] text-emerald-400 flex items-center gap-1">
+                                                                    <Check size={12} />
+                                                                    Enabled
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-[11px] text-amber-400">Not enabled</span>
+                                                            )}
+                                                            <motion.button
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        const granted = await requestAccessibilityPermission();
+                                                                        if (!granted) await invoke("open_accessibility_settings");
+                                                                    } catch {
+                                                                        await invoke("open_accessibility_settings");
+                                                                    }
+                                                                }}
+                                                                className="rounded-lg bg-[#1a1a1e] border border-[#2a2a30] px-3 py-1.5 text-[11px] font-medium text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb] transition-colors"
+                                                                whileTap={{ scale: 0.97 }}
+                                                            >
+                                                                Open Settings
+                                                            </motion.button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-2 py-2 mt-4">
+                                                    <Info size={12} className="text-[#6b6b76] shrink-0" />
+                                                    <p className="text-[10px] text-[#6b6b76]">
+                                                        After enabling permissions in System Settings, you may need to restart Glimpse for changes to take effect.
+                                                    </p>
                                                 </div>
                                             </div>
                                         </motion.div>

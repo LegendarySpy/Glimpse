@@ -58,6 +58,7 @@ mod macos {
         }
 
         let result = unsafe { AXIsProcessTrusted() };
+        #[cfg(debug_assertions)]
         eprintln!("[Glimpse] AXIsProcessTrusted() returned: {}", result);
         Some(result != 0)
     }
@@ -72,6 +73,7 @@ mod macos {
         match output {
             Ok(result) => {
                 let success = result.status.success();
+                #[cfg(debug_assertions)]
                 eprintln!("[Glimpse] Accessibility osascript check: {}", success);
                 success
             }

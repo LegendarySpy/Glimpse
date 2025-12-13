@@ -6,7 +6,6 @@ import {
     checkAccessibilityPermission,
     requestAccessibilityPermission,
     checkMicrophonePermission,
-    requestMicrophonePermission,
 } from "tauri-plugin-macos-permissions-api";
 import {
     Mic,
@@ -275,10 +274,27 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const checkMicPermission = useCallback(async () => {
         try {
-            const granted = await checkMicrophonePermission();
-            setMicPermission(granted);
+            // First try the native plugin
+            const nativeGranted = await checkMicrophonePermission();
+            if (nativeGranted) {
+                setMicPermission(true);
+                return;
+            }
+
+            try {
+                const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+                if (result.state === 'granted') {
+                    setMicPermission(true);
+                    return;
+                }
+            } catch {
+                // Permissions API not supported or failed
+            }
+
+            setMicPermission(false);
         } catch (err) {
             console.error("Failed to check microphone permission:", err);
+            setMicPermission(false);
         } finally {
             setIsCheckingMic(false);
         }
@@ -316,7 +332,11 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const handleRequestMicrophoneAccess = async () => {
         try {
-            await requestMicrophonePermission();
+            // Use getUserMedia to trigger the native permission dialog
+            // This works cross-platform and is more reliable than the plugin
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Immediately stop the stream - we just needed to trigger the permission
+            stream.getTracks().forEach(track => track.stop());
             await checkMicPermission();
         } catch (err) {
             console.error("Failed to request microphone:", err);

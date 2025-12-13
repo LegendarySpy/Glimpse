@@ -14,6 +14,8 @@ export interface ToastPayload {
   duration?: number;
   retryId?: string;
   mode?: "local" | "cloud";
+  action?: string;
+  actionLabel?: string;
 }
 
 interface ToastState extends ToastPayload {
@@ -145,13 +147,13 @@ const ToastOverlay: React.FC = () => {
 
   return (
     <div
-      className="w-full h-full flex items-end justify-center"
+      className="w-full h-full flex flex-col justify-end items-center pb-6"
       onClick={handleBackgroundClick}
       onContextMenu={(e) => e.preventDefault()}
     >
       <div
         className={`
-          relative w-full bg-black rounded-2xl border px-4 py-3
+          relative w-full max-h-[160px] bg-black rounded-2xl border px-4 py-3 overflow-hidden
           ${colors.border}
           ${toast.isLeaving ? "animate-toast-out" : "animate-toast-in"}
         `}
@@ -180,6 +182,24 @@ const ToastOverlay: React.FC = () => {
                 className="mt-2 text-[11px] text-blue-400 hover:text-white disabled:text-gray-600 transition-colors"
               >
                 {isRetrying ? "Retrying…" : "Retry transcription"}
+              </button>
+            )}
+            {toast.action && toast.actionLabel && (
+              <button
+                type="button"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  try {
+                    await invoke(toast.action!);
+                    dismissWithCleanup();
+                  } catch (err) {
+                    console.error("Action failed:", err);
+                  }
+                }}
+                className="mt-2 text-[11px] text-blue-400 hover:text-white transition-colors block"
+              >
+                {toast.actionLabel}
               </button>
             )}
           </div>
