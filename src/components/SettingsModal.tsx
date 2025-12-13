@@ -35,6 +35,8 @@ import {
     Sliders,
     Accessibility,
     Check,
+    Eye,
+    EyeOff,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
 import AccountView from "./AccountView";
@@ -182,6 +184,7 @@ const SettingsModal = ({
     const [accessibilityPermission, setAccessibilityPermission] = useState<boolean | null>(null);
     const [authEmail, setAuthEmail] = useState("");
     const [authPassword, setAuthPassword] = useState("");
+    const [authShowPassword, setAuthShowPassword] = useState(false);
 
     const [cloudSyncEnabled, setCloudSyncEnabled] = useState(() => {
         const stored = localStorage.getItem("glimpse_cloud_sync_enabled");
@@ -890,15 +893,24 @@ const SettingsModal = ({
                                                                                 required
                                                                                 className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
                                                                             />
-                                                                            <input
-                                                                                type="password"
-                                                                                placeholder="Password"
-                                                                                value={authPassword}
-                                                                                onChange={(e) => setAuthPassword(e.target.value)}
-                                                                                required
-                                                                                minLength={8}
-                                                                                className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
-                                                                            />
+                                                                            <div className="relative">
+                                                                                <input
+                                                                                    type={authShowPassword ? "text" : "password"}
+                                                                                    placeholder="Password"
+                                                                                    value={authPassword}
+                                                                                    onChange={(e) => setAuthPassword(e.target.value)}
+                                                                                    required
+                                                                                    minLength={8}
+                                                                                    className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 pr-9 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
+                                                                                />
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setAuthShowPassword(!authShowPassword)}
+                                                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                                                >
+                                                                                    {authShowPassword ? <EyeOff size={12} /> : <Eye size={12} />}
+                                                                                </button>
+                                                                            </div>
                                                                             <button
                                                                                 type="submit"
                                                                                 className="mt-auto w-full rounded-xl bg-amber-400 py-2.5 text-[11px] font-semibold text-black hover:bg-amber-300 transition-colors"
