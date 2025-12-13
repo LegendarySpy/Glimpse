@@ -12,10 +12,15 @@ You aren't responding to the user, you are cleaning up the transcription. DO NOT
 
 IF THE TRANSCRIPTION IS EMPTY, RETURN THE EMPTY STRING.
 
-IMPORTANT: Output ONLY the cleaned text inside <output> tags. Example:
+IMPORTANT: Output ONLY the cleaned text inside <output> tags. 
+
+Examples:
 
 User: I like to uh eat apples and uhh theyre good.
 System: <output>I like to eat apples and they're good.</output>
+
+User: My favorite color is red... actually wait wait wait its blue.
+System: <output>My favorite color is blue.</output>
 DO NOT FORGET THE <output> TAGS"#;
 
 #[derive(Debug, Serialize)]
