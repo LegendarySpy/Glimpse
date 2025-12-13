@@ -28,7 +28,9 @@ use recorder::{
 };
 use reqwest::Client;
 use serde::Serialize;
-use settings::{default_local_model, LlmProvider, SettingsStore, TranscriptionMode, UserSettings};
+use settings::{
+    default_local_model, LlmProvider, Replacement, SettingsStore, TranscriptionMode, UserSettings,
+};
 use tauri::async_runtime;
 use tauri::tray::TrayIcon;
 use tauri::Emitter;
@@ -123,6 +125,8 @@ pub fn run() {
             update_settings,
             get_dictionary,
             set_dictionary,
+            get_replacements,
+            set_replacements,
             get_app_info,
             open_data_dir,
             get_transcriptions,
@@ -539,6 +543,108 @@ fn set_dictionary(
     Ok(cleaned)
 }
 
+fn sanitize_replacements(replacements: &[Replacement]) -> Vec<Replacement> {
+    let mut seen = HashSet::new();
+    let mut cleaned = Vec::new();
+
+    for r in replacements {
+        let from = r.from.trim();
+        let to = r.to.trim();
+        if from.is_empty() {
+            continue;
+        }
+        let key = from.to_lowercase();
+        if seen.insert(key) {
+            let from_capped: String = from.chars().take(100).collect();
+            let to_capped: String = to.chars().take(200).collect();
+            cleaned.push(Replacement {
+                from: from_capped.trim().to_string(),
+                to: to_capped.trim().to_string(),
+            });
+        }
+        if cleaned.len() >= 64 {
+            break;
+        }
+    }
+
+    cleaned
+}
+
+pub fn apply_replacements(text: &str, replacements: &[Replacement]) -> String {
+    if replacements.is_empty() {
+        return text.to_string();
+    }
+
+    let mut result = text.to_string();
+    for r in replacements {
+        if r.from.is_empty() {
+            continue;
+        }
+        let pattern = format!(r"(?i)\b{}\b", regex::escape(&r.from));
+        if let Ok(re) = regex::Regex::new(&pattern) {
+            result = re
+                .replace_all(&result, |caps: &regex::Captures| {
+                    let matched = &caps[0];
+                    apply_case_pattern(matched, &r.to)
+                })
+                .to_string();
+        }
+    }
+    result
+}
+
+fn apply_case_pattern(matched: &str, replacement: &str) -> String {
+    if replacement.is_empty() {
+        return String::new();
+    }
+
+    let first_char = matched.chars().next();
+    let is_first_upper = first_char.map(|c| c.is_uppercase()).unwrap_or(false);
+    let is_all_upper = matched.len() > 1
+        && matched
+            .chars()
+            .all(|c| !c.is_alphabetic() || c.is_uppercase());
+
+    if is_all_upper {
+        replacement.to_uppercase()
+    } else if is_first_upper {
+        let mut chars = replacement.chars();
+        match chars.next() {
+            Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+            None => String::new(),
+        }
+    } else {
+        replacement.to_string()
+    }
+}
+
+#[tauri::command]
+fn get_replacements(state: tauri::State<AppState>) -> Result<Vec<Replacement>, String> {
+    let mut settings = state.current_settings();
+    let cleaned = sanitize_replacements(&settings.replacements);
+    if cleaned != settings.replacements {
+        settings.replacements = cleaned.clone();
+        state
+            .persist_settings(settings)
+            .map_err(|err| err.to_string())?;
+    }
+    Ok(cleaned)
+}
+
+#[tauri::command]
+fn set_replacements(
+    replacements: Vec<Replacement>,
+    state: tauri::State<AppState>,
+) -> Result<Vec<Replacement>, String> {
+    let cleaned = sanitize_replacements(&replacements);
+    let mut settings = state.current_settings();
+    settings.replacements = cleaned.clone();
+    state
+        .persist_settings(settings)
+        .map_err(|err| err.to_string())?;
+    Ok(cleaned)
+}
+
 #[derive(Serialize)]
 struct AppInfo {
     version: String,
@@ -760,6 +866,9 @@ async fn retry_transcription(
                     } else {
                         (raw_transcript.clone(), false)
                     };
+
+                let final_transcript =
+                    apply_replacements(&final_transcript, &settings.replacements);
 
                 if count_words(&final_transcript) == 0 {
                     handle_empty_transcription(&app_handle, &saved_for_task.path);
@@ -1115,6 +1224,9 @@ fn queue_transcription(
                     } else {
                         (raw_transcript.clone(), false)
                     };
+
+                let final_transcript =
+                    apply_replacements(&final_transcript, &settings.replacements);
 
                 if count_words(&final_transcript) == 0 {
                     handle_empty_transcription(&app_handle, &saved_for_task.path);

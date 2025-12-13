@@ -25,6 +25,13 @@ const KEY_LLM_API_KEY: &str = "llm_api_key";
 const KEY_LLM_MODEL: &str = "llm_model";
 const KEY_USER_CONTEXT: &str = "user_context";
 const KEY_DICTIONARY: &str = "dictionary";
+const KEY_REPLACEMENTS: &str = "replacements";
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Replacement {
+    pub from: String,
+    pub to: String,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSettings {
@@ -65,6 +72,8 @@ pub struct UserSettings {
     pub user_context: String,
     #[serde(default)]
     pub dictionary: Vec<String>,
+    #[serde(default)]
+    pub replacements: Vec<Replacement>,
 }
 
 fn default_smart_shortcut() -> String {
@@ -104,6 +113,7 @@ impl Default for UserSettings {
             llm_model: String::new(),
             user_context: String::new(),
             dictionary: Vec::new(),
+            replacements: Vec::new(),
         }
     }
 }
@@ -247,6 +257,8 @@ impl SettingsStore {
             self.read_value(&conn, KEY_USER_CONTEXT, settings.user_context.clone())?;
         settings.dictionary =
             self.read_value(&conn, KEY_DICTIONARY, settings.dictionary.clone())?;
+        settings.replacements =
+            self.read_value(&conn, KEY_REPLACEMENTS, settings.replacements.clone())?;
 
         Ok(settings)
     }
@@ -291,6 +303,7 @@ impl SettingsStore {
         self.write_value(&conn, KEY_LLM_MODEL, &settings.llm_model)?;
         self.write_value(&conn, KEY_USER_CONTEXT, &settings.user_context)?;
         self.write_value(&conn, KEY_DICTIONARY, &settings.dictionary)?;
+        self.write_value(&conn, KEY_REPLACEMENTS, &settings.replacements)?;
         Ok(())
     }
 

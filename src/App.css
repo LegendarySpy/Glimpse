@@ -35,6 +35,17 @@
   --color-local-50: rgba(165, 179, 254, 0.50);
   --color-local-80: rgba(165, 179, 254, 0.80);
 
+  --color-accent: #8F6FF7;
+  --color-accent-light: #A78BFA;
+  --color-accent-dark: #7C5CE7;
+  --color-accent-hover: #9D7FF9;
+  --color-accent-5: rgba(143, 111, 247, 0.05);
+  --color-accent-10: rgba(143, 111, 247, 0.10);
+  --color-accent-20: rgba(143, 111, 247, 0.20);
+  --color-accent-30: rgba(143, 111, 247, 0.30);
+  --color-accent-50: rgba(143, 111, 247, 0.50);
+  --color-accent-80: rgba(143, 111, 247, 0.80);
+
   --color-bg-primary: #030303;
   --color-bg-secondary: #0a0a0c;
   --color-bg-tertiary: #0d0d10;
