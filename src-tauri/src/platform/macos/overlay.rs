@@ -24,7 +24,6 @@ pub fn init(app: &AppHandle<AppRuntime>, overlay_window: &WebviewWindow<AppRunti
         .map_err(|err| anyhow!(format!("{err:?}")))
         .context("convert main overlay window to macOS NSPanel")?;
 
-    let _ = overlay_window.set_ignore_cursor_events(true);
     let panel = app
         .get_webview_panel(crate::MAIN_WINDOW_LABEL)
         .map_err(|err| anyhow!(format!("{err:?}")))
@@ -44,24 +43,33 @@ pub fn init(app: &AppHandle<AppRuntime>, overlay_window: &WebviewWindow<AppRunti
 
     panel.set_becomes_key_only_if_needed(true);
     panel.set_floating_panel(true);
+    panel.set_ignores_mouse_events(true);
 
     Ok(())
 }
 
 pub fn show(
-    _app: &AppHandle<AppRuntime>,
-    overlay_window: &WebviewWindow<AppRuntime>,
+    app: &AppHandle<AppRuntime>,
+    _overlay_window: &WebviewWindow<AppRuntime>,
 ) -> Result<()> {
-    // IMPORTANT: Do not call NSPanel methods here.
-    // Shortcuts/recording events may run on background threads; AppKit APIs must be main-thread.
-    let _ = overlay_window.show();
+    let app_clone = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        if let Ok(panel) = app_clone.get_webview_panel(crate::MAIN_WINDOW_LABEL) {
+            panel.show();
+        }
+    });
     Ok(())
 }
 
 pub fn hide(
-    _app: &AppHandle<AppRuntime>,
-    overlay_window: &WebviewWindow<AppRuntime>,
+    app: &AppHandle<AppRuntime>,
+    _overlay_window: &WebviewWindow<AppRuntime>,
 ) -> Result<()> {
-    let _ = overlay_window.hide();
+    let app_clone = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        if let Ok(panel) = app_clone.get_webview_panel(crate::MAIN_WINDOW_LABEL) {
+            panel.hide();
+        }
+    });
     Ok(())
 }

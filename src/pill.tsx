@@ -77,13 +77,14 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   }, [analyser]);
 
   const hideOverlay = useCallback(async () => {
+    stop();
     try {
       const window = getCurrentWindow();
       await window.hide();
     } catch (err) {
       console.error("Failed to hide window:", err);
     }
-  }, []);
+  }, [stop]);
 
   const dismissOverlay = useCallback(() => {
     setStatus("idle");
@@ -448,6 +449,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       }),
       listen<TranscriptionCompletePayload>("transcription:complete", () => {
         setStatus("idle");
+        stop();
         hideOverlay();
       }),
       listen<TranscriptionErrorPayload>("transcription:error", () => {

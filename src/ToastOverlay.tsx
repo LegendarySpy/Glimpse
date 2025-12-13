@@ -34,6 +34,7 @@ const ToastOverlay: React.FC = () => {
   const [toast, setToast] = useState<ToastState | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dismissAnimationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastRef = useRef<ToastState | null>(null);
 
   useEffect(() => {
@@ -54,10 +55,17 @@ const ToastOverlay: React.FC = () => {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    if (dismissAnimationTimerRef.current) {
+      clearTimeout(dismissAnimationTimerRef.current);
+    }
     setToast((t) => (t ? { ...t, isLeaving: true } : null));
-    setTimeout(() => {
+    dismissAnimationTimerRef.current = setTimeout(async () => {
+      dismissAnimationTimerRef.current = null;
       setToast(null);
-      getCurrentWindow().hide();
+      try {
+        await invoke("toast_dismissed");
+      } catch { /* ignore */ }
+      await getCurrentWindow().hide();
     }, 120);
   };
 
@@ -124,8 +132,19 @@ const ToastOverlay: React.FC = () => {
     });
 
     const unsub2 = listen("toast:hide", () => dismiss());
-    const unsub3 = listen("recording:start", () => {
-      if (toastRef.current) dismiss();
+    const unsub3 = listen("recording:start", async () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      if (dismissAnimationTimerRef.current) {
+        clearTimeout(dismissAnimationTimerRef.current);
+        dismissAnimationTimerRef.current = null;
+      }
+      if (toastRef.current) {
+        setToast(null);
+        await getCurrentWindow().hide();
+      }
     });
 
     return () => {

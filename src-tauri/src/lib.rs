@@ -925,6 +925,7 @@ async fn undo_llm_cleanup(
 
 pub(crate) fn show_overlay(app: &AppHandle<AppRuntime>) {
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
+        position_overlay_on_cursor_screen(&window);
         platform::overlay::show(app, &window);
     }
 }
@@ -1512,6 +1513,49 @@ fn position_overlay(window: &WebviewWindow<AppRuntime>) {
             let y = ((screen.height as f64) * 0.88) as i32;
             let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
         }
+    }
+}
+
+fn position_overlay_on_cursor_screen(window: &WebviewWindow<AppRuntime>) {
+    let cursor_pos = match window.cursor_position() {
+        Ok(pos) => pos,
+        Err(_) => {
+            position_overlay(window);
+            return;
+        }
+    };
+
+    let monitors = match window.available_monitors() {
+        Ok(m) => m,
+        Err(_) => {
+            position_overlay(window);
+            return;
+        }
+    };
+
+    let target_monitor = monitors.into_iter().find(|m| {
+        let pos = m.position();
+        let size = m.size();
+        cursor_pos.x >= pos.x as f64
+            && cursor_pos.x < (pos.x + size.width as i32) as f64
+            && cursor_pos.y >= pos.y as f64
+            && cursor_pos.y < (pos.y + size.height as i32) as f64
+    });
+
+    let monitor = match target_monitor {
+        Some(m) => m,
+        None => {
+            position_overlay(window);
+            return;
+        }
+    };
+
+    if let Ok(size) = window.outer_size() {
+        let mon_pos = monitor.position();
+        let mon_size = monitor.size();
+        let x = mon_pos.x + ((mon_size.width.saturating_sub(size.width)) / 2) as i32;
+        let y = mon_pos.y + ((mon_size.height as f64) * 0.88) as i32;
+        let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
     }
 }
 

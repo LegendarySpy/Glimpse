@@ -19,8 +19,6 @@ tauri_panel! {
 }
 
 pub fn init(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime>) -> Result<()> {
-    // Convert once during app setup (main thread). After conversion, regular
-    // `toast_window.show()/hide()` will use the NSPanel-backed window.
     toast_window
         .to_panel::<ToastPanel>()
         .map_err(|err| anyhow!(format!("{err:?}")))
@@ -29,8 +27,8 @@ pub fn init(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime
     if let Ok(panel) = app.get_webview_panel(toast::WINDOW_LABEL) {
         let style = StyleMask::empty().borderless().nonactivating_panel();
         panel.set_style_mask(style.into());
-
         panel.set_level(PanelLevel::Floating.into());
+
         let behavior = CollectionBehavior::new()
             .can_join_all_spaces()
             .stationary()
@@ -40,26 +38,31 @@ pub fn init(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime
 
         panel.set_becomes_key_only_if_needed(true);
         panel.set_floating_panel(true);
+        panel.set_ignores_mouse_events(true);
+        panel.hide();
     }
-    let _ = toast_window.set_ignore_cursor_events(true);
-
-    let _ = app;
-    let _ = toast_window.hide();
 
     Ok(())
 }
 
-pub fn show(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime>) -> Result<()> {
-    let _ = app;
-    let _ = toast_window.set_ignore_cursor_events(false);
-    let _ = toast_window.show();
+pub fn show(app: &AppHandle<AppRuntime>, _toast_window: &WebviewWindow<AppRuntime>) -> Result<()> {
+    let app_clone = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        if let Ok(panel) = app_clone.get_webview_panel(toast::WINDOW_LABEL) {
+            panel.set_ignores_mouse_events(false);
+            panel.show();
+        }
+    });
     Ok(())
 }
 
-pub fn hide(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime>) -> Result<()> {
-    let _ = app;
-    let _ = toast_window.hide();
-    let _ = toast_window.set_ignore_cursor_events(true);
-
+pub fn hide(app: &AppHandle<AppRuntime>, _toast_window: &WebviewWindow<AppRuntime>) -> Result<()> {
+    let app_clone = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        if let Ok(panel) = app_clone.get_webview_panel(toast::WINDOW_LABEL) {
+            panel.hide();
+            panel.set_ignores_mouse_events(true);
+        }
+    });
     Ok(())
 }
