@@ -24,6 +24,7 @@ pub fn init(app: &AppHandle<AppRuntime>, overlay_window: &WebviewWindow<AppRunti
         .map_err(|err| anyhow!(format!("{err:?}")))
         .context("convert main overlay window to macOS NSPanel")?;
 
+    let _ = overlay_window.set_ignore_cursor_events(true);
     let panel = app
         .get_webview_panel(crate::MAIN_WINDOW_LABEL)
         .map_err(|err| anyhow!(format!("{err:?}")))

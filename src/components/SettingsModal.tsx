@@ -32,7 +32,7 @@ import {
 
     Mail,
     HelpCircle,
-    Shield,
+    Sliders,
     Accessibility,
     Check,
 } from "lucide-react";
@@ -710,7 +710,7 @@ const SettingsModal = ({
                                         onClick={() => setActiveTab("general")}
                                     />
                                     <ModalNavItem
-                                        icon={<Shield size={14} />}
+                                        icon={<Sliders size={14} />}
                                         label="Advanced"
                                         active={activeTab === "advanced"}
                                         onClick={() => setActiveTab("advanced")}
