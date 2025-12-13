@@ -41,6 +41,7 @@ pub fn init(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime
         panel.set_becomes_key_only_if_needed(true);
         panel.set_floating_panel(true);
     }
+    let _ = toast_window.set_ignore_cursor_events(true);
 
     let _ = app;
     let _ = toast_window.hide();
@@ -49,18 +50,16 @@ pub fn init(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime
 }
 
 pub fn show(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime>) -> Result<()> {
-    // IMPORTANT: Do not call NSPanel methods here.
-    // Toasts can be triggered from background tokio workers; macOS AppKit APIs must run on main thread.
-    // After `init()` converts this window into a non-activating NSPanel, normal window show/hide is safe.
     let _ = app;
+    let _ = toast_window.set_ignore_cursor_events(false);
     let _ = toast_window.show();
     Ok(())
 }
 
 pub fn hide(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime>) -> Result<()> {
-    // IMPORTANT: Do not call NSPanel methods here.
     let _ = app;
     let _ = toast_window.hide();
+    let _ = toast_window.set_ignore_cursor_events(true);
 
     Ok(())
 }
