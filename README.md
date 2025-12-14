@@ -31,7 +31,7 @@ Pre-built releases are available on the [Releases page](https://github.com/Legen
 
 ### Prerequisites
 
-- macOS 13+
+- macOS 11+
 - [Rust](https://rustup.rs/) 1.74+
 - [Bun](https://bun.sh/) (or npm/pnpm)
 - Xcode Command Line Tools
