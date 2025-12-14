@@ -170,11 +170,10 @@ fn prepare_audio(samples: &[i16], sample_rate: u32) -> PreparedAudio {
     };
 
     const MIN_SAMPLES: usize = 16_000;
-    if data.len() < MIN_SAMPLES {
-        let mut padded = vec![0.0f32; 16_000];
-        padded.append(&mut data);
-        data = padded;
-    }
+    const EXTRA_PADDING: usize = 4_000;
+
+    let padding_needed = MIN_SAMPLES.saturating_sub(data.len()) + EXTRA_PADDING;
+    data.extend(std::iter::repeat(0.0f32).take(padding_needed));
 
     PreparedAudio { data }
 }

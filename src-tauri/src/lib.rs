@@ -37,7 +37,6 @@ use tauri::tray::TrayIcon;
 use tauri::Emitter;
 use tauri::{AppHandle, Manager, WebviewWindow, Wry};
 
-use dotenvy_macro::dotenv;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 use tauri_plugin_aptabase::EventTracker;
@@ -64,8 +63,10 @@ pub fn run() {
     let _guard = rt.enter();
     tauri::async_runtime::set(rt.handle().clone());
 
+    let aptabase_key = std::env::var("APTABASE_KEY").unwrap_or("A-EU-DEV-PLACEHOLDER".to_string());
+
     let builder = tauri::Builder::default()
-        .plugin(tauri_plugin_aptabase::Builder::new(dotenv!("APTABASE_KEY")).build())
+        .plugin(tauri_plugin_aptabase::Builder::new(&aptabase_key).build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
