@@ -1,6 +1,16 @@
-# Glimpse
+<div align="center">
+  <h1>Glimpse</h1>
+  <img
+    src="https://github.com/user-attachments/assets/c34a35a5-e2c9-469f-87c4-4c0d20c8082d"
+    width="256"
+    height="256"
+    alt="current"
+  />
+    <p>Glimpse is a voice-to-text productivity app that lets you create and build at the speed of speech. Think of it as an open-source alternative to Superwhisper or Wisprflow.
+</p>
+</div>
 
-Glimpse is a voice-to-text productivity app that lets you create and build at the speed of speech. Think of it as an open-source alternative to Superwhisper or Wisprflow.
+
 
 > [!NOTE]
 > **macOS only** — Glimpse currently supports macOS 11+ exclusively. Windows and Linux support may be added in the future.
