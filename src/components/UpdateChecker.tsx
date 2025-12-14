@@ -4,6 +4,7 @@ import { relaunch } from "@tauri-apps/plugin-process"
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { Download, RefreshCw, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import WhatsNewModal from "./WhatsNewModal"
 
 interface UpdateCheckerProps {
     autoCheck?: boolean
@@ -16,6 +17,7 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
     const [progress, setProgress] = useState(0)
     const [error, setError] = useState<string | null>(null)
     const [installed, setInstalled] = useState(false)
+    const [whatsNewOpen, setWhatsNewOpen] = useState(false)
 
     const checkForUpdates = useCallback(async () => {
         setChecking(true)
@@ -38,16 +40,16 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
     }, [autoCheck, checkForUpdates])
 
     useEffect(() => {
-        let unlisten: UnlistenFn | undefined
+        let unlistenCheck: UnlistenFn | undefined
 
         listen("updater:check", () => {
             checkForUpdates()
         }).then((fn) => {
-            unlisten = fn
+            unlistenCheck = fn
         })
 
         return () => {
-            unlisten?.()
+            unlistenCheck?.()
         }
     }, [checkForUpdates])
 
@@ -191,27 +193,36 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
     }
 
     return (
-        <div className="flex items-center gap-3 rounded-lg border border-[#1e1e22] bg-[#111113] px-4 py-3 h-[52px]">
-            {checking ? (
-                <>
-                    <Loader2 size={16} className="text-[#6b6b76] animate-spin shrink-0" />
-                    <p className="flex-1 text-[12px] text-[#6b6b76]">Checking for updates...</p>
-                </>
-            ) : (
-                <>
-                    <CheckCircle size={16} className="text-[#4a4a54] shrink-0" />
-                    <p className="flex-1 text-[12px] text-[#e8e8eb]">You're up to date!</p>
-                    <motion.button
-                        onClick={checkForUpdates}
-                        className="flex items-center gap-1.5 rounded-lg border border-[#2a2a30] px-2.5 py-1.5 text-[11px] text-[#6b6b76] hover:bg-[#1a1a1e] hover:border-[#3a3a45] transition-colors"
-                        whileTap={{ scale: 0.97 }}
-                    >
-                        <RefreshCw size={12} />
-                        Check
-                    </motion.button>
-                </>
-            )}
-        </div>
+        <>
+            <div className="flex items-center gap-3 rounded-lg border border-[#1e1e22] bg-[#111113] px-4 py-3 h-[52px]">
+                {checking ? (
+                    <>
+                        <Loader2 size={16} className="text-[#6b6b76] animate-spin shrink-0" />
+                        <p className="flex-1 text-[12px] text-[#6b6b76]">Checking for updates...</p>
+                    </>
+                ) : (
+                    <>
+                        <CheckCircle size={16} className="text-[#4a4a54] shrink-0" />
+                        <p className="flex-1 text-[12px] text-[#e8e8eb]">You're up to date!</p>
+                        <button
+                            onClick={() => setWhatsNewOpen(true)}
+                            className="text-[11px] text-[#6b6b76] hover:text-[#a0a0ab] underline underline-offset-2 transition-colors"
+                        >
+                            What's new?
+                        </button>
+                        <motion.button
+                            onClick={checkForUpdates}
+                            className="flex items-center gap-1.5 rounded-lg border border-[#2a2a30] px-2.5 py-1.5 text-[11px] text-[#6b6b76] hover:bg-[#1a1a1e] hover:border-[#3a3a45] transition-colors"
+                            whileTap={{ scale: 0.97 }}
+                        >
+                            <RefreshCw size={12} />
+                            Check
+                        </motion.button>
+                    </>
+                )}
+            </div>
+            <WhatsNewModal isOpen={whatsNewOpen} onClose={() => setWhatsNewOpen(false)} />
+        </>
     )
 }
 

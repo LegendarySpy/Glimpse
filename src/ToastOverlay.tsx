@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import DotMatrix from "./components/DotMatrix";
 
 // Types
 export type ToastType = "error" | "info" | "success" | "warning" | "update";
@@ -114,6 +115,10 @@ const ToastOverlay: React.FC = () => {
   useEffect(() => {
     const unsub1 = listen<ToastPayload>("toast:show", (ev) => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (dismissAnimationTimerRef.current) {
+        clearTimeout(dismissAnimationTimerRef.current);
+        dismissAnimationTimerRef.current = null;
+      }
       setToast({ ...ev.payload, isLeaving: false });
       setIsRetrying(false);
 
@@ -125,8 +130,9 @@ const ToastOverlay: React.FC = () => {
         warning: 5000,
         update: 0,
       };
+      const autoDismiss = ev.payload.autoDismiss !== false;
       const dur = ev.payload.duration ?? durations[ev.payload.type];
-      if (dur > 0) {
+      if (dur > 0 && autoDismiss) {
         timerRef.current = setTimeout(dismiss, dur);
       }
     });
@@ -189,9 +195,25 @@ const ToastOverlay: React.FC = () => {
         </button>
 
         {/* Content */}
-        <div className="flex items-start gap-2 pr-5">
-          <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${colors.dot} ${toast.type === "error" ? "animate-pulse" : ""}`} />
+        <div className="flex items-start gap-3 pr-5">
+          {toast.type === "update" ? (
+            <div className="mt-0.5 shrink-0">
+              <DotMatrix
+                rows={2}
+                cols={2}
+                activeDots={[0, 1, 2, 3]}
+                dotSize={4}
+                gap={2}
+                color="#a78bfa"
+              />
+            </div>
+          ) : (
+            <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${colors.dot} ${toast.type === "error" ? "animate-pulse" : ""}`} />
+          )}
           <div className="flex-1 min-w-0">
+            {toast.type === "update" && (
+              <p className="text-[10px] text-violet-400 font-medium mb-0.5">GLIMPSE</p>
+            )}
             <p className="text-[12px] text-gray-200 leading-relaxed">{toast.message}</p>
             {showRetry && (
               <button
@@ -216,9 +238,9 @@ const ToastOverlay: React.FC = () => {
                     console.error("Action failed:", err);
                   }
                 }}
-                className="mt-2 text-[11px] text-blue-400 hover:text-white transition-colors block"
+                className={`mt-2 text-[11px] ${toast.type === "update" ? "text-violet-400" : "text-blue-400"} hover:text-white transition-colors block font-medium`}
               >
-                {toast.actionLabel}
+                {toast.actionLabel} →
               </button>
             )}
           </div>
