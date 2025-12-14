@@ -19,6 +19,13 @@ jobs:
             args: '--target universal-apple-darwin'
 
     runs-on: ${{ matrix.platform }}
+    
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+      CMAKE_OSX_DEPLOYMENT_TARGET: "11.0"
+      CFLAGS: "-U__ARM_FEATURE_MATMUL_INT8"
+      CXXFLAGS: "-U__ARM_FEATURE_MATMUL_INT8"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -39,7 +46,6 @@ jobs:
         run: bun run build
 
       - name: import Apple Developer Certificate
-        # Prevents keychain from locking automatically for 3600 seconds.
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -64,9 +70,6 @@ jobs:
       - name: build and publish
         uses: tauri-apps/tauri-action@v0
         env:
-          CFLAGS: "-U__ARM_FEATURE_MATMUL_INT8"
-          CXXFLAGS: "-U__ARM_FEATURE_MATMUL_INT8"
-          MACOSX_DEPLOYMENT_TARGET: "14.0"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
