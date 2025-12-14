@@ -57,13 +57,11 @@ pub(crate) const FEEDBACK_URL: &str = "https://github.com/LegendarySpy/Glimpse/i
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    dotenvy::dotenv().ok();
-
     let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
     let _guard = rt.enter();
     tauri::async_runtime::set(rt.handle().clone());
 
-    let aptabase_key = std::env::var("APTABASE_KEY").unwrap_or("A-EU-DEV-PLACEHOLDER".to_string());
+    let aptabase_key = option_env!("APTABASE_KEY").unwrap_or("A-DEV-0000000000");
 
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_aptabase::Builder::new(&aptabase_key).build())
