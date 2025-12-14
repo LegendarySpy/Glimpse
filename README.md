@@ -69,6 +69,18 @@ bun tauri build
 - [ ] Edit mode: rewrite selected text with full context
 - [ ] Ask mode: query what's on your screen
 
+## Privacy
+
+Glimpse collects anonymous usage analytics via [Aptabase](https://aptabase.com/) to help improve the app. This includes:
+
+- App launches and session duration
+- Which transcription engine is used (local vs cloud)
+- Model downloads and onboarding completion
+
+**What's NOT collected:** transcription content, API keys, prompts, or any personally identifiable information.
+
+Analytics are privacy-first and GDPR compliant. No opt-out is currently provided, but the data is fully anonymous. For full transparency, see [`src-tauri/src/analytics.rs`](src-tauri/src/analytics.rs) for exactly what's tracked.
+
 ## License
 
 Glimpse is licensed under the **GNU Affero General Public License v3 (AGPL-3.0)**. You can self-host or modify it as long as changes remain open. A paid hosted option will be available for those who prefer a managed instance.

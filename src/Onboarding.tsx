@@ -31,6 +31,7 @@ import {
     CloudCog,
     HelpCircle,
     User,
+    Copy,
 } from "lucide-react";
 import DotMatrix from "./components/DotMatrix";
 import FAQModal from "./components/FAQModal";
@@ -254,8 +255,9 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [authShowPassword, setAuthShowPassword] = useState(false);
     const [authLoading, setAuthLoading] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
+    const [authErrorCopied, setAuthErrorCopied] = useState(false);
 
-    const [cloudSyncEnabled, setCloudSyncEnabled] = useState(true);
+    const [cloudSyncEnabled, setCloudSyncEnabled] = useState(false);
     const [showFAQModal, setShowFAQModal] = useState(false);
 
     const [smartShortcut, setSmartShortcut] = useState("Control+Space");
@@ -265,7 +267,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const steps: OnboardingStep[] = selectedMode === "cloud"
         ? ["welcome", "cloud-signin", "cloud-profile", "cloud-sync", "microphone", "accessibility", "ready"]
-        : ["welcome", "local-model", "cleanup", "local-signin", "microphone", "accessibility", "ready"];
+        : ["welcome", "local-model", "cleanup", "microphone", "accessibility", "ready"];
     const currentStepIndex = steps.indexOf(step);
 
     useEffect(() => {
@@ -788,8 +790,20 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="w-full mb-4 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400"
                                 >
-                                    <AlertCircle size={16} />
-                                    <span>{authError}</span>
+                                    <AlertCircle size={16} className="shrink-0" />
+                                    <span className="flex-1">{authError}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(authError);
+                                            setAuthErrorCopied(true);
+                                            setTimeout(() => setAuthErrorCopied(false), 1500);
+                                        }}
+                                        className="shrink-0 p-1 rounded hover:bg-red-500/20 transition-colors"
+                                        title="Copy error"
+                                    >
+                                        {authErrorCopied ? <Check size={14} /> : <Copy size={14} />}
+                                    </button>
                                 </motion.div>
                             )}
 
@@ -1444,8 +1458,20 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="w-full mb-4 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400"
                                 >
-                                    <AlertCircle size={16} />
-                                    <span>{authError}</span>
+                                    <AlertCircle size={16} className="shrink-0" />
+                                    <span className="flex-1">{authError}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(authError);
+                                            setAuthErrorCopied(true);
+                                            setTimeout(() => setAuthErrorCopied(false), 1500);
+                                        }}
+                                        className="shrink-0 p-1 rounded hover:bg-red-500/20 transition-colors"
+                                        title="Copy error"
+                                    >
+                                        {authErrorCopied ? <Check size={14} /> : <Copy size={14} />}
+                                    </button>
                                 </motion.div>
                             )}
 

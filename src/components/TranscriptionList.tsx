@@ -5,7 +5,11 @@ import { useTranscriptions } from "../hooks/useTranscriptions";
 import TranscriptionItem from "./TranscriptionItem";
 import DotMatrix from "./DotMatrix";
 
-const TranscriptionList: React.FC = () => {
+interface TranscriptionListProps {
+    showLlmButtons?: boolean;
+}
+
+const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = false }) => {
     const { transcriptions, isLoading, deleteTranscription, retryTranscription, retryLlmCleanup, undoLlmCleanup, clearAllTranscriptions } = useTranscriptions();
     const [searchQuery, setSearchQuery] = useState("");
     const [isClearing, setIsClearing] = useState(false);
@@ -134,6 +138,7 @@ const TranscriptionList: React.FC = () => {
                                     onRetry={retryTranscription}
                                     onRetryLlm={retryLlmCleanup}
                                     onUndoLlm={undoLlmCleanup}
+                                    showLlmButtons={showLlmButtons}
                                 />
                             ))
                         ) : (

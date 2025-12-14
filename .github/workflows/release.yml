@@ -78,6 +78,7 @@ jobs:
           VITE_APPWRITE_ENDPOINT: ${{ secrets.VITE_APPWRITE_ENDPOINT }}
           VITE_APPWRITE_DATABASE_ID: ${{ secrets.VITE_APPWRITE_DATABASE_ID }}
           VITE_APPWRITE_TRANSCRIPTIONS_COLLECTION_ID: ${{ secrets.VITE_APPWRITE_TRANSCRIPTIONS_COLLECTION_ID }}
+          APTABASE_KEY: ${{ secrets.APTABASE_KEY }}
         with:
           tagName: v__VERSION__
           releaseName: 'Glimpse v__VERSION__'

@@ -4,6 +4,7 @@ use anyhow::{anyhow, Result};
 use parking_lot::Mutex;
 use transcribe_rs::{
     engines::{
+        moonshine::{ModelVariant as MoonshineModelVariant, MoonshineEngine, MoonshineModelParams},
         parakeet::{ParakeetEngine, ParakeetModelParams},
         whisper::{WhisperEngine, WhisperInferenceParams},
     },
@@ -28,6 +29,7 @@ struct LoadedEngine {
 enum EngineInstance {
     Parakeet { engine: ParakeetEngine },
     Whisper { engine: WhisperEngine },
+    Moonshine { engine: MoonshineEngine },
 }
 
 struct PreparedAudio {
@@ -77,6 +79,12 @@ impl LocalTranscriber {
                     .map_err(|err| anyhow!("Whisper transcription failed: {err}"))?;
                 result.text
             }
+            EngineInstance::Moonshine { engine } => {
+                let result = engine
+                    .transcribe_samples(prepared.data.clone(), None)
+                    .map_err(|err| anyhow!("Moonshine transcription failed: {err}"))?;
+                result.text
+            }
         };
 
         Ok(TranscriptionSuccess {
@@ -115,6 +123,21 @@ impl LocalTranscriber {
                     .map_err(|err| anyhow!("Failed to load Whisper model: {err}"))?;
                 EngineInstance::Whisper { engine }
             }
+            LocalModelEngine::Moonshine { variant } => {
+                use crate::model_manager::MoonshineVariant;
+                let mut engine = MoonshineEngine::new();
+                let model_variant = match variant {
+                    MoonshineVariant::Tiny => MoonshineModelVariant::Tiny,
+                    MoonshineVariant::Base => MoonshineModelVariant::Base,
+                };
+                engine
+                    .load_model_with_params(
+                        model.path.as_path(),
+                        MoonshineModelParams::variant(model_variant),
+                    )
+                    .map_err(|err| anyhow!("Failed to load Moonshine model: {err}"))?;
+                EngineInstance::Moonshine { engine }
+            }
         };
 
         let mut guard = self.inner.lock();
@@ -140,13 +163,20 @@ fn prepare_audio(samples: &[i16], sample_rate: u32) -> PreparedAudio {
         .map(|sample| *sample as f32 / i16::MAX as f32)
         .collect();
 
-    if sample_rate == 16_000 {
-        PreparedAudio { data: normalized }
+    let mut data = if sample_rate == 16_000 {
+        normalized
     } else {
-        PreparedAudio {
-            data: resample_linear(&normalized, sample_rate.max(1), 16_000),
-        }
+        resample_linear(&normalized, sample_rate.max(1), 16_000)
+    };
+
+    const MIN_SAMPLES: usize = 16_000;
+    if data.len() < MIN_SAMPLES {
+        let mut padded = vec![0.0f32; 16_000];
+        padded.append(&mut data);
+        data = padded;
     }
+
+    PreparedAudio { data }
 }
 
 fn resample_linear(samples: &[f32], from_rate: u32, to_rate: u32) -> Vec<f32> {

@@ -25,9 +25,13 @@ pub fn paste_text(text: &str) -> Result<()> {
 
     let paste_result = send_paste_keystroke();
 
-    thread::sleep(Duration::from_millis(100));
+    thread::spawn(move || {
+        thread::sleep(Duration::from_millis(1000));
 
-    backup.restore(&mut clipboard);
+        if let Ok(mut clipboard) = Clipboard::new() {
+            backup.restore(&mut clipboard);
+        }
+    });
 
     paste_result
 }

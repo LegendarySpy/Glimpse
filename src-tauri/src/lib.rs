@@ -1,3 +1,4 @@
+mod analytics;
 mod assistive;
 mod audio;
 mod crypto;
@@ -36,8 +37,10 @@ use tauri::tray::TrayIcon;
 use tauri::Emitter;
 use tauri::{AppHandle, Manager, WebviewWindow, Wry};
 
+use dotenvy_macro::dotenv;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
+use tauri_plugin_aptabase::EventTracker;
 use tauri_plugin_opener::OpenerExt;
 
 pub(crate) const MAIN_WINDOW_LABEL: &str = "main";
@@ -56,7 +59,13 @@ pub(crate) const FEEDBACK_URL: &str = "https://github.com/LegendarySpy/Glimpse/i
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     dotenvy::dotenv().ok();
+
+    let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    let _guard = rt.enter();
+    tauri::async_runtime::set(rt.handle().clone());
+
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_aptabase::Builder::new(dotenv!("APTABASE_KEY")).build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
@@ -118,6 +127,8 @@ pub fn run() {
                 eprintln!("Failed to open settings window on launch: {err}");
             }
 
+            let _ = app.track_event("app_started", None);
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -147,12 +158,20 @@ pub fn run() {
             open_accessibility_settings,
             open_microphone_settings,
             complete_onboarding,
+            cancel_recording,
             reset_onboarding,
             import_transcription_from_cloud,
             mark_transcription_synced
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|handler, event| match event {
+            tauri::RunEvent::Exit { .. } => {
+                let _ = handler.track_event("app_exited", None);
+                handler.flush_events_blocking();
+            }
+            _ => {}
+        });
 }
 
 pub(crate) type AppRuntime = Wry;
@@ -322,14 +341,16 @@ fn open_microphone_settings() -> Result<(), String> {
 
 #[tauri::command]
 fn complete_onboarding(
-    _app: AppHandle<AppRuntime>,
+    app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
     let mut settings = state.current_settings();
+    let model = settings.local_model.clone();
     settings.onboarding_completed = true;
     state
         .persist_settings(settings)
         .map_err(|err| err.to_string())?;
+    analytics::track_onboarding_completed(&app, &model);
     Ok(())
 }
 
@@ -780,9 +801,10 @@ async fn retry_transcription(
         .get_by_id(&id)
         .ok_or_else(|| "Transcription not found".to_string())?;
 
-    if record.status != storage::TranscriptionStatus::Error {
-        return Err("Can only retry failed transcriptions".to_string());
-    }
+    // Removed status check to allow retrying any transcription
+    // if record.status != storage::TranscriptionStatus::Error {
+    //     return Err("Can only retry failed transcriptions".to_string());
+    // }
 
     let audio_path = PathBuf::from(&record.audio_path);
     if !audio_path.exists() {
@@ -930,6 +952,8 @@ async fn retry_transcription(
                     saved_for_task.path.display().to_string(),
                     llm_cleaned,
                     metadata,
+                    "unknown",
+                    if use_local { "local" } else { "cloud" },
                 );
 
                 hide_overlay(&app_handle);
@@ -1040,6 +1064,13 @@ pub(crate) fn show_overlay(app: &AppHandle<AppRuntime>) {
 }
 
 pub(crate) fn hide_overlay(app: &AppHandle<AppRuntime>) {
+    emit_event(
+        app,
+        EVENT_RECORDING_STOP,
+        RecordingStopPayload {
+            ended_at: chrono::Local::now().to_rfc3339(),
+        },
+    );
     if let Some(window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
         platform::overlay::hide(app, &window);
     }
@@ -1062,6 +1093,12 @@ fn toast_dismissed(app: AppHandle<AppRuntime>) {
     stop_active_recording(&app);
     hide_overlay(&app);
     toast::hide(&app);
+}
+
+#[tauri::command]
+fn cancel_recording(app: AppHandle<AppRuntime>) {
+    stop_active_recording(&app);
+    hide_overlay(&app);
 }
 
 pub(crate) fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecording) {
@@ -1275,6 +1312,8 @@ fn queue_transcription(
                     saved_for_task.path.display().to_string(),
                     llm_cleaned,
                     metadata,
+                    "unknown",
+                    if use_local { "local" } else { "cloud" },
                 );
 
                 hide_overlay(&app_handle);
@@ -1311,7 +1350,18 @@ fn emit_transcription_complete_with_cleanup(
     audio_path: String,
     llm_cleaned: bool,
     metadata: storage::TranscriptionMetadata,
+    mode: &str,
+    engine: &str,
 ) {
+    analytics::track_transcription_completed(
+        app,
+        mode,
+        engine,
+        Some(&metadata.speech_model),
+        llm_cleaned,
+        metadata.audio_duration_seconds as f64,
+    );
+
     emit_event(
         app,
         EVENT_TRANSCRIPTION_COMPLETE,
@@ -1385,6 +1435,16 @@ fn emit_transcription_error(
     stage: &str,
     audio_path: String,
 ) {
+    let engine = if stage == "local" { "local" } else { "cloud" };
+    let reason = if message.contains("No speech") || message.contains("empty") {
+        "no_speech"
+    } else if message.contains("Model") || message.contains("model") {
+        "model_error"
+    } else {
+        "api_error"
+    };
+    analytics::track_transcription_failed(app, stage, engine, reason);
+
     emit_event(
         app,
         EVENT_TRANSCRIPTION_ERROR,

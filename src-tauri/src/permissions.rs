@@ -58,8 +58,6 @@ mod macos {
         }
 
         let result = unsafe { AXIsProcessTrusted() };
-        #[cfg(debug_assertions)]
-        eprintln!("[Glimpse] AXIsProcessTrusted() returned: {}", result);
         Some(result != 0)
     }
 

@@ -18,11 +18,7 @@ const faqItems = [
     },
     {
         question: "What's Glimpse Cloud?",
-        answer: "An optional paid upgrade with cross-device sync, faster cloud processing, and enhanced AI models.",
-    },
-    {
-        question: "How is sync free?",
-        answer: "Sync is free because the costs of cloud storage and processing are minimal and we believe that everyone should have access to this basic functionality.",
+        answer: "An optional paid upgrade with cross-device sync, faster cloud processing, and better AI models.",
     },
     {
         question: "How is my data used?",

@@ -10,9 +10,10 @@ interface TranscriptionItemProps {
     onRetry: (id: string) => Promise<void>;
     onRetryLlm?: (id: string) => Promise<void>;
     onUndoLlm?: (id: string) => Promise<void>;
+    showLlmButtons?: boolean;
 }
 
-const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm }) => {
+const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm, showLlmButtons = false }) => {
     const [copied, setCopied] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isRetrying, setIsRetrying] = useState(false);
@@ -321,18 +322,16 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                         right: menuRef.current ? window.innerWidth - menuRef.current.getBoundingClientRect().right : 0,
                                     }}
                                 >
-                                    {isError && (
-                                        <button
-                                            onClick={handleRetry}
-                                            disabled={isRetrying}
-                                            className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-[#c8c8d2] hover:bg-[#1a1a1e] transition-colors disabled:opacity-50"
-                                        >
-                                            <RotateCw size={12} className="text-[#fbbf24]" />
-                                            <span>Retry</span>
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={handleRetry}
+                                        disabled={isRetrying}
+                                        className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-[#c8c8d2] hover:bg-[#1a1a1e] transition-colors disabled:opacity-50"
+                                    >
+                                        <RotateCw size={12} className="text-[#fbbf24]" />
+                                        <span>Retry</span>
+                                    </button>
 
-                                    {!isError && onRetryLlm && (
+                                    {!isError && onRetryLlm && showLlmButtons && (
                                         <button
                                             onClick={handleRetryLlm}
                                             disabled={isRetryingLlm}
@@ -343,7 +342,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                         </button>
                                     )}
 
-                                    {!isError && record.llm_cleaned && record.raw_text && onUndoLlm && (
+                                    {!isError && record.llm_cleaned && record.raw_text && onUndoLlm && showLlmButtons && (
                                         <button
                                             onClick={handleUndoLlm}
                                             disabled={isUndoingLlm}

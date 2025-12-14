@@ -1,7 +1,7 @@
 {
   "name": "glimpse",
   "private": true,
-  "version": "0.3.7",
+  "version": "0.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@aptabase/tauri": "^0.4.1",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-deep-link": "^2.4.5",
     "@tauri-apps/plugin-http": "^2.5.4",

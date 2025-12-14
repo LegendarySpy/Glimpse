@@ -37,6 +37,7 @@ import {
     Check,
     Eye,
     EyeOff,
+    Copy,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
 import AccountView from "./AccountView";
@@ -164,6 +165,8 @@ const SettingsModal = ({
     const [downloadState, setDownloadState] = useState<Record<string, DownloadEvent>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [authErrorCopied, setAuthErrorCopied] = useState(false);
+    const [errorCopied, setErrorCopied] = useState(false);
     const [captureActive, setCaptureActive] = useState<"smart" | "hold" | "toggle" | null>(null);
     const pressedModifiers = useRef<Set<string>>(new Set());
     const primaryKey = useRef<string | null>(null);
@@ -186,10 +189,18 @@ const SettingsModal = ({
     const [authPassword, setAuthPassword] = useState("");
     const [authShowPassword, setAuthShowPassword] = useState(false);
 
+    const isSubscriber = currentUser?.labels?.includes("subscriber") ?? false;
+
     const [cloudSyncEnabled, setCloudSyncEnabled] = useState(() => {
         const stored = localStorage.getItem("glimpse_cloud_sync_enabled");
-        return stored !== null ? stored === "true" : true;
+        return stored !== null ? stored === "true" : false;
     });
+
+    useEffect(() => {
+        if (!isSubscriber && cloudSyncEnabled) {
+            setCloudSyncEnabled(false);
+        }
+    }, [isSubscriber, cloudSyncEnabled]);
 
     useEffect(() => {
         if (isOpen && initialTab) {
@@ -767,8 +778,20 @@ const SettingsModal = ({
 
                                             {authError && (
                                                 <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
-                                                    <AlertCircle size={16} />
-                                                    <span>{authError}</span>
+                                                    <AlertCircle size={16} className="shrink-0" />
+                                                    <span className="flex-1">{authError}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(authError);
+                                                            setAuthErrorCopied(true);
+                                                            setTimeout(() => setAuthErrorCopied(false), 1500);
+                                                        }}
+                                                        className="shrink-0 p-1 rounded hover:bg-red-500/20 transition-colors"
+                                                        title="Copy error"
+                                                    >
+                                                        {authErrorCopied ? <Check size={14} /> : <Copy size={14} />}
+                                                    </button>
                                                 </div>
                                             )}
 
@@ -1388,10 +1411,22 @@ const SettingsModal = ({
                                                         exit={{ opacity: 0, height: 0 }}
                                                         className="pt-4 border-t border-[#1e1e22]"
                                                     >
-                                                        <p className="flex items-center gap-1.5 text-[11px] text-red-400">
-                                                            <AlertCircle size={12} />
-                                                            {error}
-                                                        </p>
+                                                        <div className="flex items-center gap-1.5 text-[11px] text-red-400">
+                                                            <AlertCircle size={12} className="shrink-0" />
+                                                            <span className="flex-1">{error}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(error || "");
+                                                                    setErrorCopied(true);
+                                                                    setTimeout(() => setErrorCopied(false), 1500);
+                                                                }}
+                                                                className="shrink-0 p-0.5 rounded hover:bg-red-500/20 transition-colors"
+                                                                title="Copy error"
+                                                            >
+                                                                {errorCopied ? <Check size={11} /> : <Copy size={11} />}
+                                                            </button>
+                                                        </div>
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>

@@ -15,7 +15,8 @@ import {
     EyeOff,
     X,
     Cloud,
-    CreditCard
+    CreditCard,
+    Copy
 } from "lucide-react";
 import type { Models } from "appwrite";
 import {
@@ -52,6 +53,7 @@ const AccountView = ({
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [passwordErrorCopied, setPasswordErrorCopied] = useState(false);
     const [passwordSuccess, setPasswordSuccess] = useState(false);
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -268,22 +270,33 @@ const AccountView = ({
 
                     <div className="flex items-center justify-between p-4 hover:bg-[#111115] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-[#1a1a22] text-[#a0a0ab]">
+                            <div className={`p-2 rounded-lg ${isSubscriber ? "bg-[#1a1a22] text-[#a0a0ab]" : "bg-[#1a1a22] text-[#4a4a54]"}`}>
                                 <CloudCog size={16} />
                             </div>
                             <div>
-                                <div className="text-[13px] text-[#f0f0f5] font-medium">History Sync</div>
-                                <div className="text-[11px] text-[#6b6b76]">Sync transcriptions across devices</div>
+                                <div className={`text-[13px] font-medium ${isSubscriber ? "text-[#f0f0f5]" : "text-[#6b6b76]"}`}>History Sync</div>
+                                <div className="text-[11px] text-[#6b6b76]">
+                                    {isSubscriber ? "Sync transcriptions across devices" : "Cloud feature"}
+                                </div>
                             </div>
                         </div>
-                        <button
-                            onClick={onCloudSyncToggle}
-                            className={`relative w-9 h-5 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-[#2a2a34]"}`}
-                        >
-                            <div
-                                className={`absolute top-[2px] h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${cloudSyncEnabled ? "translate-x-[18px]" : "translate-x-[2px]"}`}
-                            />
-                        </button>
+                        {isSubscriber ? (
+                            <button
+                                onClick={onCloudSyncToggle}
+                                className={`relative w-9 h-5 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-[#2a2a34]"}`}
+                            >
+                                <div
+                                    className={`absolute top-[2px] h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${cloudSyncEnabled ? "translate-x-[18px]" : "translate-x-[2px]"}`}
+                                />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => openUrl("https://glimpse-app.lemonsqueezy.com/buy/16bdbd7d-2aa4-4c4e-a101-482386083ea7")}
+                                className="px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-[11px] font-medium text-amber-400 hover:bg-amber-400/20 transition-colors"
+                            >
+                                Upgrade
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -396,7 +409,19 @@ const AccountView = ({
                                     {passwordError && (
                                         <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-200 text-[11px]">
                                             <AlertCircle size={12} className="shrink-0" />
-                                            {passwordError}
+                                            <span className="flex-1">{passwordError}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(passwordError);
+                                                    setPasswordErrorCopied(true);
+                                                    setTimeout(() => setPasswordErrorCopied(false), 1500);
+                                                }}
+                                                className="shrink-0 p-0.5 rounded hover:bg-red-500/20 transition-colors"
+                                                title="Copy error"
+                                            >
+                                                {passwordErrorCopied ? <Check size={11} /> : <Copy size={11} />}
+                                            </button>
                                         </div>
                                     )}
 

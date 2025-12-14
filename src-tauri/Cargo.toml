@@ -1,6 +1,6 @@
 [package]
 name = "Glimpse"
-version = "0.3.7"
+version = "0.4.0"
 description = "Open-source voice-to-text productivity app built with Tauri"
 authors = ["LegendarySpy"]
 edition = "2021"
@@ -33,9 +33,11 @@ crossbeam-channel = "0.5"
 webrtc-vad = "0.2"
 reqwest = { version = "0.12", default-features = false, features = ["json", "multipart", "stream", "rustls-tls"] }
 dotenvy = "0.15"
+dotenvy_macro = "0.15"
+tauri-plugin-aptabase = { git = "https://github.com/aptabase/tauri-plugin-aptabase" }
 arboard = "3"
 mime_guess = "2"
-transcribe-rs = "0.1.4"
+transcribe-rs = { version = "0.2.0", features = ["whisper", "parakeet", "moonshine"] }
 uuid = { version = "1.18.1", features = ["v4"] }
 minimp3 = "0.5"
 aes-gcm = "0.10"
@@ -51,6 +53,7 @@ tauri-plugin-deep-link = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-process = "2.3.1"
 tauri-plugin-updater = "2.9.0"
+tokio = { version = "1", features = ["rt-multi-thread"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2.1" }

@@ -16,10 +16,17 @@ pub enum ModelStorage {
     File { artifact: &'static str },
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum MoonshineVariant {
+    Tiny,
+    Base,
+}
+
 #[derive(Debug, Clone)]
 pub enum LocalModelEngine {
     Parakeet { quantized: bool },
     Whisper,
+    Moonshine { variant: MoonshineVariant },
 }
 
 #[derive(Debug, Clone)]
@@ -102,6 +109,36 @@ const WHISPER_LARGE_V3_TURBO_Q8_FILES: [ModelFileDescriptor; 1] = [ModelFileDesc
     name: "ggml-large-v3-turbo-q8_0.bin",
 }];
 
+const MOONSHINE_TINY_FILES: [ModelFileDescriptor; 3] = [
+    ModelFileDescriptor {
+        url: "https://huggingface.co/UsefulSensors/moonshine/resolve/main/onnx/merged/tiny/float/encoder_model.onnx",
+        name: "encoder_model.onnx",
+    },
+    ModelFileDescriptor {
+        url: "https://huggingface.co/UsefulSensors/moonshine/resolve/main/onnx/merged/tiny/float/decoder_model_merged.onnx",
+        name: "decoder_model_merged.onnx",
+    },
+    ModelFileDescriptor {
+        url: "https://huggingface.co/UsefulSensors/moonshine/resolve/main/onnx/merged/base/float/tokenizer.json",
+        name: "tokenizer.json",
+    },
+];
+
+const MOONSHINE_BASE_FILES: [ModelFileDescriptor; 3] = [
+    ModelFileDescriptor {
+        url: "https://huggingface.co/UsefulSensors/moonshine/resolve/main/onnx/merged/base/float/encoder_model.onnx",
+        name: "encoder_model.onnx",
+    },
+    ModelFileDescriptor {
+        url: "https://huggingface.co/UsefulSensors/moonshine/resolve/main/onnx/merged/base/float/decoder_model_merged.onnx",
+        name: "decoder_model_merged.onnx",
+    },
+    ModelFileDescriptor {
+        url: "https://huggingface.co/UsefulSensors/moonshine/resolve/main/onnx/merged/base/float/tokenizer.json",
+        name: "tokenizer.json",
+    },
+];
+
 pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
     ModelDefinition {
         key: "whisper_large_v3_turbo_q8",
@@ -151,6 +188,32 @@ pub const MODEL_DEFINITIONS: &[ModelDefinition] = &[
             artifact: "ggml-small-q5_1.bin",
         },
         tags: &["English", "Custom Words", "CPU Friendly"],
+    },
+    ModelDefinition {
+        key: "moonshine_tiny",
+        label: "Moonshine Tiny",
+        description: "Ultra-fast lightweight model, great for quick transcriptions.",
+        size_mb: 110.0,
+        files: &MOONSHINE_TINY_FILES,
+        engine: LocalModelEngine::Moonshine {
+            variant: MoonshineVariant::Tiny,
+        },
+        variant: "Tiny",
+        storage: ModelStorage::Directory,
+        tags: &["English", "Fast", "Lightweight"],
+    },
+    ModelDefinition {
+        key: "moonshine_base",
+        label: "Moonshine Base",
+        description: "Balanced speed and accuracy with Moonshine architecture.",
+        size_mb: 250.0,
+        files: &MOONSHINE_BASE_FILES,
+        engine: LocalModelEngine::Moonshine {
+            variant: MoonshineVariant::Base,
+        },
+        variant: "Base",
+        storage: ModelStorage::Directory,
+        tags: &["English", "Balanced"],
     },
 ];
 
@@ -261,6 +324,7 @@ fn engine_label(engine: &LocalModelEngine) -> &'static str {
     match engine {
         LocalModelEngine::Parakeet { .. } => "Parakeet (ONNX)",
         LocalModelEngine::Whisper => "Whisper (GGML)",
+        LocalModelEngine::Moonshine { .. } => "Moonshine (ONNX)",
     }
 }
 
@@ -306,9 +370,10 @@ pub async fn download_model(
         .await
         .map_err(|err| err.to_string())?;
 
+    crate::analytics::track_model_downloaded(&app, &model, def.size_mb);
+
     let status = ModelStatus::from_definition(&dir, def);
 
-    // Refresh tray menu so newly downloaded models become selectable
     let settings = state.current_settings();
     if let Err(err) = crate::tray::refresh_tray_menu(&app, &settings) {
         eprintln!("Failed to refresh tray menu after download: {err}");

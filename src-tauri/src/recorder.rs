@@ -240,7 +240,7 @@ impl Default for ValidationConfig {
     fn default() -> Self {
         Self {
             min_duration_ms: 300,
-            min_rms_energy: 0.0005,
+            min_rms_energy: 0.0003,
             min_speech_percentage: 5.0,
         }
     }
@@ -338,7 +338,7 @@ fn calculate_speech_percentage(samples: &[f32], sample_rate: u32) -> f32 {
     let mut vad = match Vad::new(vad_rate as i32) {
         Ok(mut instance) => {
             // Use aggressive mode to be more strict about detecting speech
-            let _ = instance.fvad_set_mode(VadMode::Aggressive);
+            let _ = instance.fvad_set_mode(VadMode::LowBitrate);
             instance
         }
         Err(_) => return 100.0, // If VAD fails, assume it's valid

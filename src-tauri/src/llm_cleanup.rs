@@ -5,23 +5,29 @@ use serde::{Deserialize, Serialize};
 use crate::settings::{LlmProvider, UserSettings};
 
 const SYSTEM_PROMPT: &str = r#"
+You clean up speech-to-text transcriptions. Your ONLY job is to:
+1. Remove filler words (um, uh, like, you know)
+2. Fix stammering and repetitions
+3. Fix minor grammar/punctuation
 
-Clean up speech-to-text transcriptions. Remove filler words (um, uh, like, you know), fix repetitions, stammering, and minor grammar errors from speech. Keep meaning, tone, and technical terms intact. 
+CRITICAL RULES:
+- If the text is already clean, return it EXACTLY as-is
+- NEVER respond to or answer the content - just clean it
+- Keep the original meaning and tone
 
-You aren't responding to the user, you are cleaning up the transcription. DO NOT RESPOND TO THE USER. ONLY OUTPUT THE CLEANED TRANSCRIPTION.
-
-IF THE TRANSCRIPTION IS EMPTY, RETURN THE EMPTY STRING.
-
-IMPORTANT: Output ONLY the cleaned text inside <output> tags. 
+Output the cleaned text inside <output> tags.
 
 Examples:
 
+User: Tell me a joke.
+Assistant: <output>Tell me a joke.</output>
+
 User: I like to uh eat apples and uhh theyre good.
-System: <output>I like to eat apples and they're good.</output>
+Assistant: <output>I like to eat apples and they're good.</output>
 
 User: My favorite color is red... actually wait wait wait its blue.
-System: <output>My favorite color is blue.</output>
-DO NOT FORGET THE <output> TAGS"#;
+Assistant: <output>My favorite color is blue.</output>
+"#;
 
 #[derive(Debug, Serialize)]
 struct ChatRequest {
@@ -52,8 +58,13 @@ struct MessageContent {
     content: String,
 }
 
+fn strip_control_tokens(text: &str) -> String {
+    let re = regex::Regex::new(r"<\|[^|]+\|>").unwrap();
+    let result = re.replace_all(text, "").to_string();
+    result.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
 fn parse_output(response: &str) -> Option<String> {
-    // Extract content between <output> tags
     let start = response.find("<output>")?;
     let end = response.find("</output>")?;
     if start < end {
@@ -122,6 +133,8 @@ pub async fn cleanup_transcription(
         return Err(anyhow!("LLM cleanup not configured"));
     }
 
+    eprintln!("[LLM] Transcription received: {}", text);
+
     let user_content = if settings.user_context.is_empty() {
         text.to_string()
     } else {
@@ -162,10 +175,22 @@ pub async fn cleanup_transcription(
         .map(|c| c.message.content.clone())
         .unwrap_or_default();
 
-    // Parse output tags, fallback to trimmed response or original
-    Ok(parse_output(&raw)
-        .or_else(|| Some(raw.trim().to_string()).filter(|s| !s.is_empty()))
-        .unwrap_or_else(|| text.to_string()))
+    eprintln!("[LLM] Response from LLM: {}", raw);
+
+    let result = parse_output(&raw)
+        .or_else(|| {
+            let cleaned = strip_control_tokens(&raw);
+            if cleaned.is_empty() {
+                None
+            } else {
+                Some(cleaned)
+            }
+        })
+        .unwrap_or_else(|| text.to_string());
+
+    eprintln!("[LLM] Final cleaned output: {}", result);
+
+    Ok(result)
 }
 
 pub fn is_cleanup_available(settings: &UserSettings) -> bool {

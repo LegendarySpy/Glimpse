@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
 import { useSharedAnalyser } from "./hooks/useSharedAnalyser";
 
 type PillStatus = "idle" | "listening" | "processing" | "error";
@@ -79,6 +80,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const hideOverlay = useCallback(async () => {
     stop();
     try {
+      invoke("cancel_recording"); // Tell backend to stop recording too
       const window = getCurrentWindow();
       await window.hide();
     } catch (err) {
@@ -436,8 +438,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         }
       }),
       listen("recording:stop", () => {
-        setStatus("processing");
-
+        setStatus((current) => current === "listening" ? "processing" : current);
         stop();
       }),
       listen<RecordingErrorPayload>("recording:error", () => {

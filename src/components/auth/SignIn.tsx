@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, Copy, Check } from "lucide-react";
 import { login, createAccount, createOAuth2Session } from "../../lib/auth";
 import { OAuthProvider } from "appwrite";
 
@@ -68,6 +68,7 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errorCopied, setErrorCopied] = useState(false);
 
     const handleSubmit = useCallback(
         async (e: React.FormEvent) => {
@@ -124,8 +125,20 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-4 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400"
                     >
-                        <AlertCircle size={16} />
-                        <span>{error}</span>
+                        <AlertCircle size={16} className="shrink-0" />
+                        <span className="flex-1">{error}</span>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                navigator.clipboard.writeText(error);
+                                setErrorCopied(true);
+                                setTimeout(() => setErrorCopied(false), 1500);
+                            }}
+                            className="shrink-0 p-1 rounded hover:bg-red-500/20 transition-colors"
+                            title="Copy error"
+                        >
+                            {errorCopied ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
                     </motion.div>
                 )}
 

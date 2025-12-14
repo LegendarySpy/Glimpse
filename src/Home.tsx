@@ -60,6 +60,8 @@ const Home = () => {
     const [showFAQ, setShowFAQ] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
 
+    const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
+
     const sidebarWidth = isSidebarCollapsed ? 68 : 200;
 
     const loadUser = useCallback(async () => {
@@ -78,8 +80,9 @@ const Home = () => {
 
         const loadSettings = async () => {
             try {
-                const settings = await invoke<StoredSettings>("get_settings");
+                const settings = await invoke<StoredSettings & { llm_cleanup_enabled: boolean }>("get_settings");
                 setTranscriptionMode(settings.transcription_mode);
+                setLlmCleanupEnabled(settings.llm_cleanup_enabled);
             } catch (err) {
                 console.error("Failed to load settings:", err);
             }
@@ -88,8 +91,9 @@ const Home = () => {
         loadSettings();
         loadUser();
 
-        listen<StoredSettings>("settings:changed", (event) => {
+        listen<StoredSettings & { llm_cleanup_enabled: boolean }>("settings:changed", (event) => {
             setTranscriptionMode(event.payload.transcription_mode);
+            setLlmCleanupEnabled(event.payload.llm_cleanup_enabled);
         }).then((fn) => {
             unlistenSettings = fn;
         });
@@ -127,6 +131,8 @@ const Home = () => {
     const isCloudMode = transcriptionMode === "cloud";
     const logoColor = isCloudMode ? "var(--color-cloud)" : "var(--color-local)";
     const logoActiveDots = isCloudMode ? [0, 3] : [1, 2];
+
+    const showLlmButtons = isCloudMode || llmCleanupEnabled;
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -353,7 +359,7 @@ const Home = () => {
                                     </p>
                                 </div>
 
-                                <TranscriptionList />
+                                <TranscriptionList showLlmButtons={showLlmButtons} />
                             </motion.div>
                         )}
 
