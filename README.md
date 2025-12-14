@@ -23,6 +23,7 @@ Pre-built releases are available on the [Releases page](https://github.com/Legen
 
 - **Local transcription** — Runs entirely on-device using Whisper or Parakeet models
 - **Cloud transcription** — Optional paid cloud mode for those who prefer it
+- **Replacements** - Directly replace words in sentences for other defined words
 - **Custom dictionary** — Define custom words and phrases for accurate transcription
 - **Assistive text insertion** — Automatically inserts transcribed text where you're typing
 - **More coming soon** — See the [Roadmap](#roadmap) below
