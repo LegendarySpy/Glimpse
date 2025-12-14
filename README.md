@@ -3,7 +3,7 @@
 Glimpse is a voice-to-text productivity app that lets you create and build at the speed of speech. Think of it as an open-source alternative to Superwhisper or Wisprflow.
 
 > [!NOTE]
-> **macOS only** — Glimpse currently supports macOS 13+ exclusively. Windows and Linux support may be added in the future.
+> **macOS only** — Glimpse currently supports macOS 11+ exclusively. Windows and Linux support may be added in the future.
 
 ## Download
 
