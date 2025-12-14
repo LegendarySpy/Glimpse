@@ -38,12 +38,15 @@ import {
     Eye,
     EyeOff,
     Copy,
+    Bug,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
 import AccountView from "./AccountView";
 import FAQModal from "./FAQModal";
 import { UpdateChecker } from "./UpdateChecker";
+import DebugSection from "./DebugSection";
 import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../lib/auth";
+import WhatsNewModal from "./WhatsNewModal";
 
 import { OAuthProvider } from "appwrite";
 
@@ -170,7 +173,7 @@ const SettingsModal = ({
     const [captureActive, setCaptureActive] = useState<"smart" | "hold" | "toggle" | null>(null);
     const pressedModifiers = useRef<Set<string>>(new Set());
     const primaryKey = useRef<string | null>(null);
-    const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account" | "advanced">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account" | "advanced" | "developer">("general");
     const [shortcutsExpanded, setShortcutsExpanded] = useState(false);
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
@@ -188,8 +191,10 @@ const SettingsModal = ({
     const [authEmail, setAuthEmail] = useState("");
     const [authPassword, setAuthPassword] = useState("");
     const [authShowPassword, setAuthShowPassword] = useState(false);
+    const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
     const isSubscriber = currentUser?.labels?.includes("subscriber") ?? false;
+    const isDeveloper = currentUser?.labels?.includes("dev") ?? false;
 
     const [cloudSyncEnabled, setCloudSyncEnabled] = useState(() => {
         const stored = localStorage.getItem("glimpse_cloud_sync_enabled");
@@ -211,6 +216,20 @@ const SettingsModal = ({
     useEffect(() => {
         localStorage.setItem("glimpse_cloud_sync_enabled", String(cloudSyncEnabled));
     }, [cloudSyncEnabled]);
+
+    useEffect(() => {
+        let unlisten: (() => void) | undefined;
+
+        listen("open_whats_new", () => {
+            setWhatsNewOpen(true);
+        }).then((fn) => {
+            unlisten = fn;
+        });
+
+        return () => {
+            unlisten?.();
+        };
+    }, []);
 
     useEffect(() => {
         if (activeTab === "advanced" && isOpen) {
@@ -755,6 +774,18 @@ const SettingsModal = ({
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
+
+                                {isDeveloper && (
+                                    <div className="space-y-1">
+                                        <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-red-400/60">Developer</p>
+                                        <ModalNavItem
+                                            icon={<Bug size={14} />}
+                                            label="Debug"
+                                            active={activeTab === "developer"}
+                                            onClick={() => setActiveTab("developer")}
+                                        />
+                                    </div>
+                                )}
 
                             </nav>
                         </aside>
@@ -1876,6 +1907,19 @@ const SettingsModal = ({
                                             </div>
                                         </motion.div>
                                     )}
+
+                                    {activeTab === "developer" && isDeveloper && (
+                                        <motion.div
+                                            key="developer"
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.15 }}
+                                            className="p-6"
+                                        >
+                                            <DebugSection />
+                                        </motion.div>
+                                    )}
                                 </AnimatePresence>
                             </div>
                         </main>
@@ -1884,6 +1928,7 @@ const SettingsModal = ({
             )}
 
             <FAQModal isOpen={showFAQModal} onClose={() => setShowFAQModal(false)} />
+            <WhatsNewModal isOpen={whatsNewOpen} onClose={() => setWhatsNewOpen(false)} />
         </AnimatePresence>
     );
 

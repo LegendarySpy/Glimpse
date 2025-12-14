@@ -26,6 +26,14 @@ type StoredSettings = {
   dictionary: string[];
 };
 
+type AppInfo = {
+  version: string;
+  data_dir_size_bytes: number;
+  data_dir_path: string;
+};
+
+const VERSION_STORAGE_KEY = "glimpse_last_version";
+
 function App() {
   const [windowLabel, setWindowLabel] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +66,28 @@ function App() {
         }
       };
       checkOnboarding();
+
+      const checkVersionAndShowToast = async () => {
+        try {
+          const info = await invoke<AppInfo>("get_app_info");
+          const currentVersion = info.version;
+          const storedVersion = localStorage.getItem(VERSION_STORAGE_KEY);
+
+          if (storedVersion && storedVersion !== currentVersion) {
+            await invoke("debug_show_toast", {
+              toastType: "update",
+              message: `Updated to v${currentVersion}`,
+              action: "open_whats_new",
+              actionLabel: "See what's new",
+            });
+          }
+
+          localStorage.setItem(VERSION_STORAGE_KEY, currentVersion);
+        } catch (err) {
+          console.error("Failed to check version:", err);
+        }
+      };
+      checkVersionAndShowToast();
     } else {
       setIsLoading(false);
     }

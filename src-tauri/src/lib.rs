@@ -160,7 +160,9 @@ pub fn run() {
             cancel_recording,
             reset_onboarding,
             import_transcription_from_cloud,
-            mark_transcription_synced
+            mark_transcription_synced,
+            debug_show_toast,
+            open_whats_new
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -690,6 +692,50 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
         data_dir_size_bytes,
         data_dir_path,
     })
+}
+
+#[tauri::command]
+fn debug_show_toast(
+    toast_type: String,
+    message: String,
+    action: Option<String>,
+    action_label: Option<String>,
+    app: AppHandle<AppRuntime>,
+) {
+    toast::emit_toast(
+        &app,
+        toast::Payload {
+            toast_type,
+            title: None,
+            message,
+            auto_dismiss: Some(true),
+            duration: Some(8000),
+            retry_id: None,
+            mode: None,
+            action,
+            action_label,
+        },
+    );
+}
+
+#[tauri::command]
+fn open_whats_new(app: AppHandle<AppRuntime>) {
+    if let Err(err) = tray::toggle_settings_window(&app) {
+        eprintln!("Failed to open settings window: {err}");
+        return;
+    }
+
+    let app_clone = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(500));
+        if let Err(e) = app_clone.emit("navigate:about", ()) {
+            eprintln!("Failed to emit navigate:about: {e}");
+        }
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        if let Err(e) = app_clone.emit("open_whats_new", ()) {
+            eprintln!("Failed to emit open_whats_new: {e}");
+        }
+    });
 }
 
 #[tauri::command]
