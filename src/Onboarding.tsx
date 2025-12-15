@@ -714,7 +714,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                     </div>
                                     <div className="relative flex items-center gap-3 rounded-xl border border-[#1a1a22] bg-[#0d0d12]/90 px-3 py-2 text-[10px] text-[#d0d0da] leading-relaxed">
                                         <DotMatrix rows={3} cols={5} activeDots={[0, 2, 4, 6, 8, 10, 12, 14]} dotSize={2} gap={2} color="#2a2a34" />
-                                        <p className="flex-1">Cloud is optional ($5.99/mo) if you want these perks. Cloud provides better models and faster cleanup & delivery.</p>
+                                        <p className="flex-1">Get better models and faster cleanup & delivery ($5.99/mo) with cloud.</p>
                                     </div>
                                 </button>
 
