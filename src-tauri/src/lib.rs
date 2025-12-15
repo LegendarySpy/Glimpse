@@ -162,6 +162,7 @@ pub fn run() {
             import_transcription_from_cloud,
             mark_transcription_synced,
             debug_show_toast,
+            fetch_llm_models,
             open_whats_new
         ])
         .build(tauri::generate_context!())
@@ -716,6 +717,26 @@ fn debug_show_toast(
             action_label,
         },
     );
+}
+
+#[tauri::command]
+async fn fetch_llm_models(
+    endpoint: String,
+    provider: String,
+    api_key: String,
+    state: tauri::State<'_, AppState>,
+) -> Result<Vec<String>, String> {
+    let llm_provider = match provider.as_str() {
+        "lmstudio" => LlmProvider::LmStudio,
+        "ollama" => LlmProvider::Ollama,
+        "openai" => LlmProvider::OpenAI,
+        "custom" => LlmProvider::Custom,
+        _ => LlmProvider::None,
+    };
+
+    llm_cleanup::fetch_available_models(&state.http(), &endpoint, &llm_provider, &api_key)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

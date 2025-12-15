@@ -204,3 +204,66 @@ pub fn resolved_model_name(settings: &UserSettings) -> Option<String> {
         Some(resolve_model(settings))
     }
 }
+
+#[derive(Debug, Deserialize)]
+struct ModelsResponse {
+    data: Vec<ModelEntry>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ModelEntry {
+    id: String,
+}
+
+fn get_base_url(endpoint: &str, provider: &LlmProvider) -> String {
+    let base = if endpoint.is_empty() {
+        match provider {
+            LlmProvider::LmStudio => "http://localhost:1234",
+            LlmProvider::Ollama => "http://localhost:11434",
+            LlmProvider::OpenAI => "https://api.openai.com",
+            _ => "",
+        }
+    } else {
+        endpoint
+    };
+
+    base.trim_end_matches('/')
+        .trim_end_matches("/v1/chat/completions")
+        .trim_end_matches("/v1")
+        .to_string()
+}
+
+pub async fn fetch_available_models(
+    client: &Client,
+    endpoint: &str,
+    provider: &LlmProvider,
+    api_key: &str,
+) -> Result<Vec<String>> {
+    let base = get_base_url(endpoint, provider);
+    if base.is_empty() {
+        return Ok(vec![]);
+    }
+
+    let url = format!("{}/v1/models", base);
+    let mut req = client.get(&url);
+
+    if !api_key.is_empty() {
+        req = req.header("Authorization", format!("Bearer {}", api_key));
+    }
+
+    let resp = req
+        .timeout(std::time::Duration::from_secs(5))
+        .send()
+        .await
+        .context("Failed to reach models endpoint")?;
+
+    if !resp.status().is_success() {
+        return Err(anyhow!("Models endpoint returned error: {}", resp.status()));
+    }
+
+    let data: ModelsResponse = resp
+        .json()
+        .await
+        .context("Failed to parse models response")?;
+    Ok(data.data.into_iter().map(|m| m.id).collect())
+}
