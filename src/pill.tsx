@@ -424,8 +424,18 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     setTimeout(() => setIsErrorFlashing(false), 1200);
   }, []);
 
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+
   useEffect(() => {
     const unlisteners: Promise<UnlistenFn>[] = [
+      listen("tauri://window-show", () => {
+        if (statusRef.current === "idle") {
+          stop();
+        }
+      }),
       listen<{ mode: string }>("recording:mode_change", () => {
       }),
       listen<RecordingStartPayload>("recording:start", async () => {
@@ -464,8 +474,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         try { (await p)(); } catch { }
       });
       stop();
+      stopAllAnimations();
     };
-  }, [start, stop, setErrorState, hideOverlay]);
+  }, [start, stop, setErrorState, hideOverlay, stopAllAnimations]);
 
   const setupCanvas = useCallback(() => {
     const canvas = canvasRef.current;

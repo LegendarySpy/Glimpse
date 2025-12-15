@@ -274,10 +274,6 @@ impl AppState {
         *self.tray.lock() = Some(tray);
     }
 
-    fn mark_hold_shortcut_down(&self) -> bool {
-        self.hold_shortcut_down.swap(true, Ordering::SeqCst)
-    }
-
     fn clear_hold_shortcut_state(&self) -> bool {
         self.hold_shortcut_down.swap(false, Ordering::SeqCst)
     }
@@ -308,6 +304,32 @@ impl AppState {
 
     fn get_smart_press_time(&self) -> Option<chrono::DateTime<chrono::Local>> {
         *self.smart_press_time.lock()
+    }
+
+    fn try_start_recording(&self, mode: &str) -> bool {
+        let mut active_mode = self.active_recording_mode.lock();
+
+        if self.toggle_recording_active.load(Ordering::SeqCst) || active_mode.is_some() {
+            return false;
+        }
+        *active_mode = Some(mode.to_string());
+        if mode == "hold" {
+            self.hold_shortcut_down.store(true, Ordering::SeqCst);
+        } else if mode == "toggle" {
+            self.toggle_recording_active.store(true, Ordering::SeqCst);
+        }
+        true
+    }
+
+    fn abort_recording_start(&self) {
+        let mut active_mode = self.active_recording_mode.lock();
+        if let Some(mode) = active_mode.take() {
+            if mode == "hold" {
+                self.hold_shortcut_down.store(false, Ordering::SeqCst);
+            } else if mode == "toggle" {
+                self.toggle_recording_active.store(false, Ordering::SeqCst);
+            }
+        }
     }
 }
 

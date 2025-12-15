@@ -131,18 +131,13 @@ fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> 
 
     let state = app.state::<AppState>();
 
-    if state.is_toggle_recording_active() || state.get_active_recording_mode().is_some() {
-        return Ok(());
-    }
-
-    if state.mark_hold_shortcut_down() {
+    if !state.try_start_recording("hold") {
         return Ok(());
     }
 
     let settings = state.current_settings();
     match state.recorder().start(settings.microphone_device) {
         Ok(started) => {
-            state.set_active_recording_mode(Some("hold"));
             show_overlay(app);
             emit_event(
                 app,
@@ -161,7 +156,7 @@ fn handle_hold_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()> 
             check_accessibility_warning(app);
         }
         Err(err) => {
-            state.clear_hold_shortcut_state();
+            state.abort_recording_start();
             emit_error(app, format!("Unable to start recording: {err}"));
         }
     }
@@ -273,7 +268,6 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
                 if duration_ms < MIN_RECORDING_DURATION_MS {
                     state.set_active_recording_mode(None);
                     hide_overlay(app);
-                    state.set_active_recording_mode(None);
                     return Ok(());
                 }
 
@@ -301,11 +295,13 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
             return Ok(());
         }
 
+        if !state.try_start_recording("toggle") {
+            return Ok(());
+        }
+
         let settings = state.current_settings();
         match state.recorder().start(settings.microphone_device) {
             Ok(started) => {
-                state.set_toggle_recording_active(true);
-                state.set_active_recording_mode(Some("toggle"));
                 show_overlay(app);
                 emit_event(
                     app,
@@ -324,6 +320,7 @@ fn handle_toggle_shortcut_press(app: &AppHandle<AppRuntime>) -> GlimpseResult<()
                 check_accessibility_warning(app);
             }
             Err(err) => {
+                state.abort_recording_start();
                 emit_error(app, format!("Unable to start recording: {err}"));
             }
         }

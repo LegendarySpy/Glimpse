@@ -28,6 +28,8 @@ const notifySubscribers = () => {
   subscribers.forEach((callback) => callback());
 };
 
+let isStarting = false;
+
 const ensureAudioContext = () => {
   if (!sharedState.audioContext) {
     const AudioContextClass =
@@ -44,7 +46,8 @@ const ensureAudioContext = () => {
 };
 
 const startSharedAnalyser = async () => {
-  if (sharedState.isListening) return;
+  if (sharedState.isListening || isStarting) return;
+  isStarting = true;
 
   let localStream: MediaStream | null = null;
 
@@ -55,8 +58,6 @@ const startSharedAnalyser = async () => {
       await audioContext.resume();
     }
 
-    // Disable voice processing to prevent macOS Mic Mode menu bar button
-    // These settings are for standard audio recording, not VoIP
     localStream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: false,
@@ -77,18 +78,18 @@ const startSharedAnalyser = async () => {
     sharedState.analyser = analyser;
     sharedState.isListening = true;
     sharedState.error = null;
+    isStarting = false;
     notifySubscribers();
   } catch (error) {
     console.error("Error accessing microphone:", error);
     sharedState.error = "Mic Access Denied";
     sharedState.isListening = false;
+    isStarting = false;
 
-    // Stop the locally created stream if it exists
     if (localStream) {
       (localStream as MediaStream).getTracks().forEach(t => t.stop());
     }
 
-    // Also clear shared state stream if it exists
     if (sharedState.stream) {
       sharedState.stream.getTracks().forEach(t => t.stop());
       sharedState.stream = null;
