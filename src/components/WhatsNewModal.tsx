@@ -188,7 +188,7 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                         </div>
 
                         <div className="px-5 py-5 overflow-y-auto settings-scroll" style={{ maxHeight: 'calc(70vh - 140px)' }}>
-                            {loading && (
+                            {(loading || !release) && !error && (
                                 <div className="flex items-center justify-center py-8">
                                     <Loader2 size={20} className="animate-spin text-[#6b6b76]" />
                                 </div>

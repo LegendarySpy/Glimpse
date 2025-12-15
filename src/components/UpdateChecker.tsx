@@ -212,11 +212,11 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
                         </button>
                         <motion.button
                             onClick={checkForUpdates}
-                            className="flex items-center gap-1.5 rounded-lg border border-[#2a2a30] px-2.5 py-1.5 text-[11px] text-[#6b6b76] hover:bg-[#1a1a1e] hover:border-[#3a3a45] transition-colors"
-                            whileTap={{ scale: 0.97 }}
+                            className="p-1.5 rounded-md text-[#6b6b76] hover:text-[#a0a0ab] hover:bg-[#1a1a1e] transition-colors"
+                            whileTap={{ scale: 0.95 }}
+                            title="Check for updates"
                         >
-                            <RefreshCw size={12} />
-                            Check
+                            <RefreshCw size={14} />
                         </motion.button>
                     </>
                 )}
