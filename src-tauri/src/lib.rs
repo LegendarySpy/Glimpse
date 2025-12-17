@@ -7,10 +7,10 @@ mod llm_cleanup;
 mod local_transcription;
 mod model_manager;
 mod permissions;
+mod pill;
 mod platform;
 mod recorder;
 mod settings;
-mod shortcuts;
 mod storage;
 mod toast;
 mod transcription;
@@ -18,11 +18,12 @@ mod tray;
 
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
+use pill::PillController;
 use recorder::{
     validate_recording, CompletedRecording, RecorderManager, RecordingRejectionReason,
     RecordingSaved,
@@ -35,7 +36,7 @@ use settings::{
 use tauri::async_runtime;
 use tauri::tray::TrayIcon;
 use tauri::Emitter;
-use tauri::{AppHandle, Manager, WebviewWindow, Wry};
+use tauri::{AppHandle, Manager, Wry};
 
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
@@ -48,7 +49,6 @@ pub(crate) const EVENT_RECORDING_START: &str = "recording:start";
 pub(crate) const EVENT_RECORDING_STOP: &str = "recording:stop";
 pub(crate) const EVENT_RECORDING_COMPLETE: &str = "recording:complete";
 pub(crate) const EVENT_RECORDING_ERROR: &str = "recording:error";
-pub(crate) const EVENT_RECORDING_MODE_CHANGE: &str = "recording:mode_change";
 pub(crate) const EVENT_TRANSCRIPTION_START: &str = "transcription:start";
 pub(crate) const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
 pub(crate) const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
@@ -98,19 +98,12 @@ pub fn run() {
             ));
 
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
-                position_overlay(&window);
                 let _ = window.hide();
-
-                // On macOS, convert the overlay window to a non-activating NSPanel so showing it
-                // doesn't steal focus from the user's active text field.
                 platform::overlay::init(&handle, &window);
             }
 
             if let Some(toast_window) = handle.get_webview_window(toast::WINDOW_LABEL) {
                 let _ = toast_window.hide();
-
-                // Toast dismissal is handled via timer/click/Escape in the toast UI.
-                // Platform-specific toast window/panel initialization lives in `platform::toast`.
                 platform::toast::init(&handle, &toast_window);
             }
 
@@ -118,7 +111,7 @@ pub fn run() {
                 handle.state::<AppState>().store_tray(tray);
             }
 
-            if let Err(err) = shortcuts::register_shortcuts(&handle) {
+            if let Err(err) = pill::register_shortcuts(&handle) {
                 eprintln!("Failed to register shortcuts: {err}");
             }
 
@@ -181,7 +174,7 @@ pub(crate) type AppRuntime = Wry;
 type GlimpseResult<T> = Result<T>;
 
 pub struct AppState {
-    pub(crate) recorder: RecorderManager,
+    pill: Arc<PillController>,
     http: Client,
     local_transcriber: Arc<local_transcription::LocalTranscriber>,
     storage: Arc<storage::StorageManager>,
@@ -189,13 +182,6 @@ pub struct AppState {
     settings: parking_lot::Mutex<UserSettings>,
     pub(crate) tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
     pub(crate) settings_close_handler_registered: AtomicBool,
-    pub(crate) hold_shortcut_down: AtomicBool,
-    pub(crate) toggle_recording_active: AtomicBool,
-    /// Tracks which mode started the current recording: "hold", "toggle", or "smart"
-    pub(crate) active_recording_mode: parking_lot::Mutex<Option<String>>,
-    /// Smart mode state
-    pub(crate) smart_toggle_active: AtomicBool,
-    pub(crate) smart_press_time: parking_lot::Mutex<Option<chrono::DateTime<chrono::Local>>>,
 }
 
 impl AppState {
@@ -218,8 +204,10 @@ impl AppState {
         let storage = storage::StorageManager::new(storage_path)
             .expect("Failed to initialize transcription storage");
 
+        let recorder = Arc::new(RecorderManager::new());
+
         Self {
-            recorder: RecorderManager::new(),
+            pill: Arc::new(PillController::new(Arc::clone(&recorder))),
             http,
             local_transcriber: Arc::new(local_transcription::LocalTranscriber::new()),
             storage: Arc::new(storage),
@@ -227,11 +215,6 @@ impl AppState {
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
             settings_close_handler_registered: AtomicBool::new(false),
-            hold_shortcut_down: AtomicBool::new(false),
-            toggle_recording_active: AtomicBool::new(false),
-            active_recording_mode: parking_lot::Mutex::new(None),
-            smart_toggle_active: AtomicBool::new(false),
-            smart_press_time: parking_lot::Mutex::new(None),
         }
     }
 
@@ -254,8 +237,8 @@ impl AppState {
         Ok(next)
     }
 
-    fn recorder(&self) -> &RecorderManager {
-        &self.recorder
+    pub fn pill(&self) -> &PillController {
+        &self.pill
     }
 
     fn http(&self) -> Client {
@@ -272,64 +255,6 @@ impl AppState {
 
     pub fn store_tray(&self, tray: TrayIcon<AppRuntime>) {
         *self.tray.lock() = Some(tray);
-    }
-
-    fn clear_hold_shortcut_state(&self) -> bool {
-        self.hold_shortcut_down.swap(false, Ordering::SeqCst)
-    }
-
-    fn is_toggle_recording_active(&self) -> bool {
-        self.toggle_recording_active.load(Ordering::SeqCst)
-    }
-
-    fn set_toggle_recording_active(&self, active: bool) {
-        self.toggle_recording_active.store(active, Ordering::SeqCst);
-    }
-
-    fn set_active_recording_mode(&self, mode: Option<&str>) {
-        *self.active_recording_mode.lock() = mode.map(String::from);
-    }
-
-    fn get_active_recording_mode(&self) -> Option<String> {
-        self.active_recording_mode.lock().clone()
-    }
-
-    fn set_smart_toggle_active(&self, active: bool) {
-        self.smart_toggle_active.store(active, Ordering::SeqCst);
-    }
-
-    fn set_smart_press_time(&self, time: Option<chrono::DateTime<chrono::Local>>) {
-        *self.smart_press_time.lock() = time;
-    }
-
-    fn get_smart_press_time(&self) -> Option<chrono::DateTime<chrono::Local>> {
-        *self.smart_press_time.lock()
-    }
-
-    fn try_start_recording(&self, mode: &str) -> bool {
-        let mut active_mode = self.active_recording_mode.lock();
-
-        if self.toggle_recording_active.load(Ordering::SeqCst) || active_mode.is_some() {
-            return false;
-        }
-        *active_mode = Some(mode.to_string());
-        if mode == "hold" {
-            self.hold_shortcut_down.store(true, Ordering::SeqCst);
-        } else if mode == "toggle" {
-            self.toggle_recording_active.store(true, Ordering::SeqCst);
-        }
-        true
-    }
-
-    fn abort_recording_start(&self) {
-        let mut active_mode = self.active_recording_mode.lock();
-        if let Some(mode) = active_mode.take() {
-            if mode == "hold" {
-                self.hold_shortcut_down.store(false, Ordering::SeqCst);
-            } else if mode == "toggle" {
-                self.toggle_recording_active.store(false, Ordering::SeqCst);
-            }
-        }
     }
 }
 
@@ -489,7 +414,7 @@ fn update_settings(
         .persist_settings(next)
         .map_err(|err| err.to_string())?;
 
-    shortcuts::register_shortcuts(&app).map_err(|err| err.to_string())?;
+    pill::register_shortcuts(&app).map_err(|err| err.to_string())?;
 
     if prev.transcription_mode != next.transcription_mode
         || prev.local_model != next.local_model
@@ -1144,36 +1069,12 @@ async fn undo_llm_cleanup(
     }
 }
 
-pub(crate) fn show_overlay(app: &AppHandle<AppRuntime>) {
-    if let Some(window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
-        position_overlay_on_cursor_screen(&window);
-        platform::overlay::show(app, &window);
-    }
-}
-
 pub(crate) fn hide_overlay(app: &AppHandle<AppRuntime>) {
-    emit_event(
-        app,
-        EVENT_RECORDING_STOP,
-        RecordingStopPayload {
-            ended_at: chrono::Local::now().to_rfc3339(),
-        },
-    );
-    if let Some(window) = app.get_webview_window(MAIN_WINDOW_LABEL) {
-        platform::overlay::hide(app, &window);
-    }
+    app.state::<AppState>().pill().reset(app);
 }
 
 pub(crate) fn stop_active_recording(app: &AppHandle<AppRuntime>) {
-    let state = app.state::<AppState>();
-    if let Err(err) = state.recorder().stop() {
-        eprintln!("Failed to stop recorder: {err}");
-    }
-    state.set_active_recording_mode(None);
-    state.set_toggle_recording_active(false);
-    state.clear_hold_shortcut_state();
-    state.set_smart_toggle_active(false);
-    state.set_smart_press_time(None);
+    app.state::<AppState>().pill().cancel(app);
 }
 
 #[tauri::command]
@@ -1267,9 +1168,9 @@ pub(crate) fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
             message: message.clone(),
         },
     );
-    stop_active_recording(app);
-    let toast_message = simplify_recording_error(&message);
-    toast::show(app, "error", None, &toast_message);
+    app.state::<AppState>()
+        .pill()
+        .transition_to_error(app, &message);
 }
 
 pub(crate) fn emit_event<T: Serialize + Clone>(
@@ -1542,7 +1443,9 @@ fn emit_transcription_error(
         },
     );
 
-    stop_active_recording(app);
+    app.state::<AppState>()
+        .pill()
+        .transition_to_error(app, &message);
 
     let settings = app.state::<AppState>().current_settings();
     let is_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
@@ -1683,34 +1586,6 @@ fn count_words(text: &str) -> u32 {
         .count() as u32
 }
 
-/// Simplifies recording error messages
-fn simplify_recording_error(message: &str) -> String {
-    let msg_lower = message.to_lowercase();
-
-    // Check for permission-related errors first
-    if msg_lower.contains("permission")
-        || msg_lower.contains("not allowed")
-        || msg_lower.contains("access denied")
-        || msg_lower.contains("coreaudio")
-    // macOS specific permission error
-    {
-        return "Microphone permission needed. Check System Settings.".to_string();
-    }
-
-    if msg_lower.contains("microphone")
-        || msg_lower.contains("audio")
-        || msg_lower.contains("input device")
-    {
-        return "Microphone unavailable".to_string();
-    }
-
-    if message.len() <= 30 {
-        return message.to_string();
-    }
-
-    "Recording failed".to_string()
-}
-
 fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
     use minimp3::{Decoder, Frame};
     use std::io::Read;
@@ -1763,65 +1638,6 @@ fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
         .context("App data directory not found")?;
     data_dir.push("recordings");
     Ok(data_dir)
-}
-
-fn position_overlay(window: &WebviewWindow<AppRuntime>) {
-    if let Ok(Some(monitor)) = window.current_monitor() {
-        if let Ok(size) = window.outer_size() {
-            let screen = monitor.size();
-            let x = (screen.width.saturating_sub(size.width) / 2) as i32;
-            let y = ((screen.height as f64) * 0.88) as i32;
-            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
-        }
-    }
-}
-
-fn position_overlay_on_cursor_screen(window: &WebviewWindow<AppRuntime>) {
-    let cursor_pos = match window.cursor_position() {
-        Ok(pos) => pos,
-        Err(_) => {
-            position_overlay(window);
-            return;
-        }
-    };
-
-    let monitors = match window.available_monitors() {
-        Ok(m) => m,
-        Err(_) => {
-            position_overlay(window);
-            return;
-        }
-    };
-
-    let target_monitor = monitors.into_iter().find(|m| {
-        let pos = m.position();
-        let size = m.size();
-        cursor_pos.x >= pos.x as f64
-            && cursor_pos.x < (pos.x + size.width as i32) as f64
-            && cursor_pos.y >= pos.y as f64
-            && cursor_pos.y < (pos.y + size.height as i32) as f64
-    });
-
-    let monitor = match target_monitor {
-        Some(m) => m,
-        None => {
-            position_overlay(window);
-            return;
-        }
-    };
-
-    if let Ok(size) = window.outer_size() {
-        let mon_pos = monitor.position();
-        let mon_size = monitor.size();
-        let x = mon_pos.x + ((mon_size.width.saturating_sub(size.width)) / 2) as i32;
-        let y = mon_pos.y + ((mon_size.height as f64) * 0.88) as i32;
-        let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
-    }
-}
-
-#[derive(Serialize, Clone)]
-pub(crate) struct RecordingModePayload {
-    mode: String,
 }
 
 #[derive(Serialize, Clone)]
