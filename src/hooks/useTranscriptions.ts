@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -9,7 +9,7 @@ import {
     findByLocalId
 } from "../lib";
 
-export interface TranscriptionRecord {
+export type TranscriptionRecord = {
     id: string;
     timestamp: string;
     text: string;
@@ -23,7 +23,7 @@ export interface TranscriptionRecord {
     word_count: number;
     audio_duration_seconds: number;
     synced: boolean;
-}
+};
 
 interface UseTranscriptionsOptions {
     cloudSyncEnabled?: boolean;
@@ -31,6 +31,7 @@ interface UseTranscriptionsOptions {
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000;
+const PAGE_SIZE = 50;
 
 async function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -77,12 +78,18 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
     }, [options.cloudSyncEnabled]);
 
     const [transcriptions, setTranscriptions] = useState<TranscriptionRecord[]>([]);
+    const [totalCount, setTotalCount] = useState(0);
+    const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSyncing, setIsSyncing] = useState(false);
 
     const [userId, setUserId] = useState<string | null>(null);
     const [isSubscriber, setIsSubscriber] = useState(false);
+
+    // Keep track of loaded offsets to prevent duplicate fetches
+    const loadedOffsets = useRef<Set<number>>(new Set());
+    const fetchingOffsets = useRef<Set<number>>(new Set());
 
     useEffect(() => {
         const checkUser = async () => {
@@ -98,19 +105,79 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         checkUser();
     }, []);
 
-    const loadTranscriptions = useCallback(async () => {
+    const fetchPage = useCallback(async (offset: number, query: string) => {
         try {
-            setIsLoading(true);
-            setError(null);
-            const records = await invoke<TranscriptionRecord[]>("get_transcriptions");
-            setTranscriptions(records);
+            const records = await invoke<TranscriptionRecord[]>("list_transcriptions_paginated", {
+                limit: PAGE_SIZE,
+                offset,
+                searchQuery: query || null,
+            });
+            return records;
+        } catch (err) {
+            console.error("Failed to fetch page:", err);
+            throw err;
+        }
+    }, []);
+
+    const searchTranscriptions = useCallback(async (query: string) => {
+        setSearchQuery(query);
+        setIsLoading(true);
+        loadedOffsets.current.clear();
+        fetchingOffsets.current.clear();
+        try {
+            // Get total count first
+            const count = await invoke<number>("get_transcription_count", {
+                searchQuery: query || null,
+            });
+            setTotalCount(count);
+
+            // Fetch first page
+            const firstPage = await fetchPage(0, query);
+            setTranscriptions(firstPage);
+            loadedOffsets.current.add(0);
         } catch (err) {
             setError(err instanceof Error ? err.message : String(err));
-            console.error("Failed to load transcriptions:", err);
         } finally {
             setIsLoading(false);
         }
+    }, [fetchPage]);
+
+    const loadMore = useCallback(async (offset: number) => {
+        if (loadedOffsets.current.has(offset)) return;
+        if (fetchingOffsets.current.has(offset)) return;
+
+        // Don't load if we're past the total count known (roughly)
+        if (offset >= totalCount && totalCount > 0) return;
+
+        try {
+            fetchingOffsets.current.add(offset);
+            const newRecords = await fetchPage(offset, searchQuery);
+
+            setTranscriptions(prev => {
+                const copy = [...prev];
+                newRecords.forEach((record, index) => {
+                    copy[offset + index] = record;
+                });
+                return copy;
+            });
+            loadedOffsets.current.add(offset);
+        } catch (err) {
+            console.error("Failed to load more:", err);
+        } finally {
+            fetchingOffsets.current.delete(offset);
+        }
+    }, [fetchPage, searchQuery, totalCount]);
+
+    // Initial load
+    useEffect(() => {
+        searchTranscriptions("");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const loadTranscriptions = useCallback(async () => {
+        // Alias for refreshing current view
+        return searchTranscriptions(searchQuery);
+    }, [searchTranscriptions, searchQuery]);
 
     const syncToCloud = useCallback(async (record: TranscriptionRecord) => {
         if (!userId || !resolvedCloudSyncEnabled || !isSubscriber) return null;
@@ -352,6 +419,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
     return {
         transcriptions,
+        totalCount,
         isLoading,
         error,
         isSyncing,
@@ -361,6 +429,8 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         undoLlmCleanup,
         clearAllTranscriptions,
         refresh: loadTranscriptions,
+        searchTranscriptions, // Exposed for UI
+        loadMore,             // Exposed for infinite scroll
         syncToCloud,
         syncAllToCloud,
         syncFromCloud,

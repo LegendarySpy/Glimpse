@@ -11,9 +11,11 @@ interface TranscriptionItemProps {
     onRetryLlm?: (id: string) => Promise<void>;
     onUndoLlm?: (id: string) => Promise<void>;
     showLlmButtons?: boolean;
+    searchQuery?: string;
+    skipAnimation?: boolean;
 }
 
-const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm, showLlmButtons = false }) => {
+const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm, showLlmButtons = false, searchQuery = "", skipAnimation = false }) => {
     const [copied, setCopied] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isRetrying, setIsRetrying] = useState(false);
@@ -146,11 +148,22 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
         ? displayText.slice(0, 300) + "..."
         : displayText;
 
+    const highlightText = (text: string | null, query: string) => {
+        if (!text || !query.trim()) return text;
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        return parts.map((part, i) =>
+            regex.test(part) ? (
+                <mark key={i} className="bg-amber-400/30 text-amber-200 rounded-sm px-0.5">{part}</mark>
+            ) : part
+        );
+    };
+
     return (
         <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={skipAnimation ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+            exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
             className="group relative snap-start"
         >
@@ -228,7 +241,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                         </div>
                     ) : (
                         <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#c8c8d2] select-text cursor-text">
-                            {truncatedText}
+                            {highlightText(truncatedText, searchQuery)}
                         </p>
                     )}
 
