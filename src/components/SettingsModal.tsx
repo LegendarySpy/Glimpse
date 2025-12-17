@@ -23,8 +23,6 @@ import {
     Mic,
     ChevronDown,
     Wand2,
-    Server,
-    Key,
     RotateCcw,
     FolderOpen,
     HelpCircle,
@@ -42,10 +40,10 @@ import { UpdateChecker } from "./UpdateChecker";
 import DebugSection from "./DebugSection";
 import { getCurrentUser, logout, type User as AppwriteUser } from "../lib/auth";
 import WhatsNewModal from "./WhatsNewModal";
+import { type LlmProvider, LlmProviderConfig } from "./LlmProviderConfig";
 
 
 type TranscriptionMode = "cloud" | "local";
-type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "custom";
 
 type StoredSettings = {
     smart_shortcut: string;
@@ -174,10 +172,7 @@ const SettingsModal = ({
     const [llmEndpoint, setLlmEndpoint] = useState("");
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
-    const [availableModels, setAvailableModels] = useState<string[]>([]);
-    const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
-    const [modelsLoading, setModelsLoading] = useState(false);
-    const modelDropdownRef = useRef<HTMLDivElement>(null);
+
 
     const [authLoading, setAuthLoading] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
@@ -405,57 +400,7 @@ const SettingsModal = ({
         setAuthError(null);
     };
 
-    const fetchAvailableModels = useCallback(async () => {
-        setModelsLoading(true);
-        try {
-            const models = await invoke<string[]>("fetch_llm_models", {
-                endpoint: llmEndpoint,
-                provider: llmProvider,
-                apiKey: llmApiKey,
-            });
-            setAvailableModels(models);
-        } catch {
-            setAvailableModels([]);
-        } finally {
-            setModelsLoading(false);
-        }
-    }, [llmEndpoint, llmProvider, llmApiKey]);
 
-    useEffect(() => {
-        if (modelDropdownOpen) {
-            fetchAvailableModels();
-        }
-    }, [modelDropdownOpen, fetchAvailableModels]);
-
-    useEffect(() => {
-        if (!modelDropdownOpen) return;
-
-        const handleClickOutside = (event: MouseEvent) => {
-            if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
-                setModelDropdownOpen(false);
-            }
-        };
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                setModelDropdownOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEscape);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleEscape);
-        };
-    }, [modelDropdownOpen]);
-
-    useEffect(() => {
-        if (!llmCleanupEnabled) {
-            setModelDropdownOpen(false);
-        }
-    }, [llmCleanupEnabled]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -1384,148 +1329,17 @@ const SettingsModal = ({
                                                                 style={{ overflow: "visible" }}
                                                             >
                                                                 <div className="pt-3 border-t border-[#1e1e22] space-y-3">
-                                                                    <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Provider</label>
-                                                                        <div className="grid grid-cols-4 gap-2">
-                                                                            <LlmProviderButton
-                                                                                label="LM Studio"
-                                                                                active={llmProvider === "lmstudio"}
-                                                                                onClick={() => setLlmProvider("lmstudio")}
-                                                                            />
-                                                                            <LlmProviderButton
-                                                                                label="Ollama"
-                                                                                active={llmProvider === "ollama"}
-                                                                                onClick={() => setLlmProvider("ollama")}
-                                                                            />
-                                                                            <LlmProviderButton
-                                                                                label="OpenAI"
-                                                                                active={llmProvider === "openai"}
-                                                                                onClick={() => setLlmProvider("openai")}
-                                                                            />
-                                                                            <LlmProviderButton
-                                                                                label="Custom"
-                                                                                active={llmProvider === "custom"}
-                                                                                onClick={() => setLlmProvider("custom")}
-                                                                            />
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
-                                                                            <Server size={10} />
-                                                                            Endpoint {llmProvider !== "custom" && <span className="text-[#4a4a54]">(optional override)</span>}
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={llmEndpoint}
-                                                                            onChange={(e) => setLlmEndpoint(e.target.value)}
-                                                                            placeholder={
-                                                                                llmProvider === "lmstudio" ? "http://localhost:1234" :
-                                                                                    llmProvider === "ollama" ? "http://localhost:11434" :
-                                                                                        llmProvider === "openai" ? "https://api.openai.com" :
-                                                                                            "https://your-llm-endpoint.com"
-                                                                            }
-                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
-                                                                        />
-                                                                    </div>
-
-                                                                    <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
-                                                                            <Key size={10} />
-                                                                            API Key {llmProvider !== "openai" && <span className="text-[#4a4a54]">(if required)</span>}
-                                                                        </label>
-                                                                        <input
-                                                                            type="password"
-                                                                            value={llmApiKey}
-                                                                            onChange={(e) => setLlmApiKey(e.target.value)}
-                                                                            placeholder={llmProvider === "openai" ? "sk-..." : "Optional"}
-                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
-                                                                        />
-                                                                    </div>
-
-                                                                    <div className="space-y-1.5" ref={modelDropdownRef}>
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
-                                                                            <Cpu size={10} />
-                                                                            Model {<span className="text-[#4a4a54]">(leave empty for default)</span>}
-                                                                        </label>
-                                                                        <div className="relative">
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => {
-                                                                                    if (!modelDropdownOpen) {
-                                                                                        setModelsLoading(true);
-                                                                                    }
-                                                                                    setModelDropdownOpen(!modelDropdownOpen);
-                                                                                }}
-                                                                                className="w-full flex items-center justify-between rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-left hover:border-[#3a3a40] focus:border-[#4a4a54] focus:outline-none transition-colors"
-                                                                            >
-                                                                                <span className={llmModel ? "text-[#e8e8eb]" : "text-[#4a4a54]"}>
-                                                                                    {llmModel || (
-                                                                                        llmProvider === "lmstudio" ? "Uses loaded model" :
-                                                                                            llmProvider === "ollama" ? "llama3.2" :
-                                                                                                llmProvider === "openai" ? "gpt-4o-mini" :
-                                                                                                    "model-name"
-                                                                                    )}
-                                                                                </span>
-                                                                                <ChevronDown
-                                                                                    size={14}
-                                                                                    className={`text-[#6b6b76] transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
-                                                                                />
-                                                                            </button>
-                                                                            <AnimatePresence>
-                                                                                {modelDropdownOpen && (
-                                                                                    <motion.div
-                                                                                        initial={{ opacity: 0, y: -4 }}
-                                                                                        animate={{ opacity: 1, y: 0 }}
-                                                                                        exit={{ opacity: 0, y: -4 }}
-                                                                                        transition={{ duration: 0.15 }}
-                                                                                        className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-[#2a2a30] bg-[#141416] shadow-xl shadow-black/40 overflow-hidden"
-                                                                                        style={{ maxHeight: "280px" }}
-                                                                                    >
-                                                                                        <div className="overflow-y-auto" style={{ maxHeight: "220px" }}>
-                                                                                            {modelsLoading ? (
-                                                                                                <div className="flex items-center justify-center gap-2 py-4 text-[11px] text-[#6b6b76]">
-                                                                                                    <Loader2 size={12} className="animate-spin" />
-                                                                                                    <span>Loading models...</span>
-                                                                                                </div>
-                                                                                            ) : availableModels.length > 0 ? (
-                                                                                                availableModels.map((model) => (
-                                                                                                    <button
-                                                                                                        key={model}
-                                                                                                        type="button"
-                                                                                                        onClick={() => {
-                                                                                                            setLlmModel(model);
-                                                                                                            setModelDropdownOpen(false);
-                                                                                                        }}
-                                                                                                        className={`w-full text-left px-3 py-2 text-[12px] transition-colors ${llmModel === model
-                                                                                                            ? "bg-amber-400/10 text-amber-400"
-                                                                                                            : "text-[#a0a0ab] hover:bg-[#1a1a1e] hover:text-[#e8e8eb]"
-                                                                                                            }`}
-                                                                                                    >
-                                                                                                        {model}
-                                                                                                    </button>
-                                                                                                ))
-                                                                                            ) : (
-                                                                                                <div className="px-3 py-4 text-[11px] text-[#6b6b76] text-center">
-                                                                                                    No models found. Check endpoint.
-                                                                                                </div>
-                                                                                            )}
-                                                                                        </div>
-                                                                                        <div className="border-t border-[#2a2a30] p-2">
-                                                                                            <input
-                                                                                                type="text"
-                                                                                                value={llmModel}
-                                                                                                onChange={(e) => setLlmModel(e.target.value)}
-                                                                                                placeholder="Or type custom model name..."
-                                                                                                className="w-full rounded-md bg-[#1a1a1e] border border-[#2a2a30] py-1.5 px-2.5 text-[11px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
-                                                                                                onClick={(e) => e.stopPropagation()}
-                                                                                            />
-                                                                                        </div>
-                                                                                    </motion.div>
-                                                                                )}
-                                                                            </AnimatePresence>
-                                                                        </div>
-                                                                    </div>
+                                                                    <LlmProviderConfig
+                                                                        provider={llmProvider}
+                                                                        setProvider={setLlmProvider}
+                                                                        endpoint={llmEndpoint}
+                                                                        setEndpoint={setLlmEndpoint}
+                                                                        apiKey={llmApiKey}
+                                                                        setApiKey={setLlmApiKey}
+                                                                        model={llmModel}
+                                                                        setModel={setLlmModel}
+                                                                        showModelDropdown={true}
+                                                                    />
 
                                                                     <div className="flex items-start gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-3 py-2">
                                                                         <Info size={12} className="text-[#6b6b76] shrink-0 mt-0.5" />
@@ -1930,21 +1744,6 @@ const ModeButton = ({ icon, label, description, active, onClick, variant = "clou
         </motion.button>
     );
 };
-
-const LlmProviderButton = ({ label, active, onClick }: {
-    label: string; active: boolean; onClick: () => void;
-}) => (
-    <motion.button
-        onClick={onClick}
-        className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${active
-            ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-            : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
-            }`}
-        whileTap={{ scale: 0.97 }}
-    >
-        {label}
-    </motion.button>
-);
 
 const ModelProgress = ({ percent, status }: { percent: number; status: string }) => {
     const cols = 50;

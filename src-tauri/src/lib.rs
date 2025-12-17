@@ -680,7 +680,8 @@ async fn fetch_llm_models(
         "ollama" => LlmProvider::Ollama,
         "openai" => LlmProvider::OpenAI,
         "custom" => LlmProvider::Custom,
-        _ => LlmProvider::None,
+        "none" => LlmProvider::None,
+        _ => LlmProvider::Custom,
     };
 
     llm_cleanup::fetch_available_models(&state.http(), &endpoint, &llm_provider, &api_key)
