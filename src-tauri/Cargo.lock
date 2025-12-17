@@ -4,7 +4,11 @@ version = 4
 
 [[package]]
 name = "Glimpse"
+<<<<<<< HEAD
 version = "0.4.1"
+=======
+version = "0.4.2"
+>>>>>>> main
 dependencies = [
  "aes-gcm",
  "anyhow",

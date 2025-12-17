@@ -1,5 +1,6 @@
 <div align="center">
   <h1>Glimpse</h1>
+    <p>(in beta)</p>
   <img
     src="https://github.com/user-attachments/assets/c34a35a5-e2c9-469f-87c4-4c0d20c8082d"
     width="256"

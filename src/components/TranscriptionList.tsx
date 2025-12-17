@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { Search, X } from "lucide-react";
+import { Virtuoso } from "react-virtuoso";
 import { useTranscriptions } from "../hooks/useTranscriptions";
 import TranscriptionItem from "./TranscriptionItem";
 import DotMatrix from "./DotMatrix";
@@ -10,10 +11,44 @@ interface TranscriptionListProps {
 }
 
 const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = false }) => {
-    const { transcriptions, isLoading, deleteTranscription, retryTranscription, retryLlmCleanup, undoLlmCleanup, clearAllTranscriptions } = useTranscriptions();
+    const {
+        transcriptions,
+        totalCount,
+        isLoading,
+        deleteTranscription,
+        retryTranscription,
+        retryLlmCleanup,
+        undoLlmCleanup,
+        clearAllTranscriptions,
+        searchTranscriptions,
+        loadMore
+    } = useTranscriptions();
+
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
     const [isClearing, setIsClearing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const hasLoadedOnce = useRef(false);
+
+    // Track if we've ever loaded data
+    useEffect(() => {
+        if (transcriptions.length > 0 && !hasLoadedOnce.current) {
+            hasLoadedOnce.current = true;
+        }
+    }, [transcriptions.length]);
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Trigger search when debounced query changes
+    useEffect(() => {
+        searchTranscriptions(debouncedQuery);
+    }, [debouncedQuery, searchTranscriptions]);
 
     const confirmClearAll = async () => {
         setIsClearing(true);
@@ -27,16 +62,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
         }
     };
 
-    const filteredTranscriptions = useMemo(() => {
-        if (!searchQuery.trim()) return transcriptions;
-        const query = searchQuery.toLowerCase();
-        return transcriptions.filter(record =>
-            record.text.toLowerCase().includes(query) ||
-            record.raw_text?.toLowerCase().includes(query)
-        );
-    }, [transcriptions, searchQuery]);
-
-    if (isLoading && transcriptions.length === 0) {
+    if (isLoading && transcriptions.length === 0 && !debouncedQuery && !hasLoadedOnce.current) {
         return (
             <div className="flex items-center justify-center py-12">
                 <DotMatrix
@@ -53,28 +79,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
         );
     }
 
-    if (transcriptions.length === 0) {
-        return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-16 px-6"
-            >
-                <DotMatrix
-                    rows={4}
-                    cols={4}
-                    activeDots={[0, 3, 5, 6, 9, 10, 12, 15]}
-                    dotSize={4}
-                    gap={4}
-                    color="#4a4a54"
-                    className="opacity-40 mb-4"
-                />
-                <p className="text-[13px] text-[#5a5a64] text-center max-w-xs">
-                    Your recent transcriptions will appear here
-                </p>
-            </motion.div>
-        );
-    }
+    const showEmptyState = totalCount === 0 && !debouncedQuery && !isLoading;
 
     return (
         <motion.div
@@ -120,50 +125,95 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                 </div>
             </div>
 
-            <div className="bg-[#0a0a0c] rounded-xl border border-[#1a1a1e] overflow-hidden relative">
+            <div className="bg-[#0a0a0c] rounded-xl border border-[#1a1a1e] overflow-hidden relative" style={{ height: 460 }}>
                 <div className="absolute top-0 left-0 right-2 h-[6px] bg-gradient-to-b from-[#0a0a0c] to-transparent z-10 pointer-events-none" />
-
                 <div className="absolute bottom-0 left-0 right-2 h-[6px] bg-gradient-to-t from-[#0a0a0c] to-transparent z-10 pointer-events-none" />
 
-                <div
-                    className="max-h-[460px] overflow-y-auto custom-scrollbar scrollbar-balanced snap-y snap-proximity pt-[6px] scroll-pt-[6px]"
-                >
-                    <AnimatePresence mode="popLayout">
-                        {filteredTranscriptions.length > 0 ? (
-                            filteredTranscriptions.map((record) => (
-                                <TranscriptionItem
-                                    key={record.id}
-                                    record={record}
-                                    onDelete={deleteTranscription}
-                                    onRetry={retryTranscription}
-                                    onRetryLlm={retryLlmCleanup}
-                                    onUndoLlm={undoLlmCleanup}
-                                    showLlmButtons={showLlmButtons}
-                                />
-                            ))
-                        ) : (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="flex flex-col items-center justify-center py-8 px-4"
-                            >
-                                <Search size={20} className="text-[#3a3a42] mb-2" />
-                                <p className="text-[12px] text-[#4a4a54] text-center">
-                                    No results for "{searchQuery}"
-                                </p>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                {showEmptyState ? (
+                    <div className="h-full flex flex-col items-center justify-center">
+                        <DotMatrix
+                            rows={4}
+                            cols={4}
+                            activeDots={[0, 3, 5, 6, 9, 10, 12, 15]}
+                            dotSize={4}
+                            gap={4}
+                            color="#4a4a54"
+                            className="opacity-40 mb-4"
+                        />
+                        <p className="text-[13px] text-[#5a5a64] text-center max-w-xs">
+                            Your recent transcriptions will appear here
+                        </p>
+                    </div>
+                ) : transcriptions.length > 0 || isLoading ? (
+                    <Virtuoso
+                        style={{ height: '100%' }}
+                        totalCount={totalCount}
+                        rangeChanged={({ startIndex, endIndex }) => {
+                            const PAGE_SIZE = 50;
+                            const startPage = Math.floor(startIndex / PAGE_SIZE) * PAGE_SIZE;
+                            const endPage = Math.floor(endIndex / PAGE_SIZE) * PAGE_SIZE;
+
+                            for (let offset = startPage; offset <= endPage; offset += PAGE_SIZE) {
+                                loadMore(offset);
+                            }
+                        }}
+                        overscan={200}
+                        itemContent={(index) => {
+                            const record = transcriptions[index];
+                            if (!record) {
+                                return (
+                                    <div className="pb-1 pl-1 pr-2">
+                                        <div className="h-[100px] w-full rounded-lg bg-[#131316] border border-[#1a1a1e] flex items-center justify-center">
+                                            <DotMatrix
+                                                rows={1}
+                                                cols={3}
+                                                activeDots={[0, 1, 2]}
+                                                dotSize={3}
+                                                gap={2}
+                                                color="#2a2a30"
+                                                animated
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div className="pb-1 pl-1">
+                                    <TranscriptionItem
+                                        key={record.id}
+                                        record={record}
+                                        onDelete={deleteTranscription}
+                                        onRetry={retryTranscription}
+                                        onRetryLlm={retryLlmCleanup}
+                                        onUndoLlm={undoLlmCleanup}
+                                        showLlmButtons={showLlmButtons}
+                                        searchQuery={debouncedQuery}
+                                        skipAnimation={!!debouncedQuery}
+                                    />
+                                </div>
+                            );
+                        }}
+                        className="custom-scrollbar scrollbar-balanced"
+                    />
+                ) : (
+                    <div className="h-full flex flex-col items-center justify-center">
+                        <div className="flex flex-col items-center justify-center py-8 px-4">
+                            <Search size={20} className="text-[#3a3a42] mb-2" />
+                            <p className="text-[12px] text-[#4a4a54] text-center">
+                                No results for "{searchQuery}"
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="flex items-center justify-between px-4 pt-2">
                 <span className="text-[9px] text-[#3a3a42] uppercase tracking-wider">
                     {searchQuery ? (
-                        `${filteredTranscriptions.length} of ${transcriptions.length} transcriptions`
+                        `${transcriptions.length} result${transcriptions.length === 1 ? '' : 's'}`
                     ) : (
-                        `${transcriptions.length} ${transcriptions.length === 1 ? 'transcription' : 'transcriptions'}`
+                        `${totalCount} ${totalCount === 1 ? 'transcription' : 'transcriptions'}`
                     )}
                 </span>
                 {transcriptions.length > 0 && (
