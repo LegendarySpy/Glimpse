@@ -851,6 +851,7 @@ async fn retry_transcription(
                         Ok(ready_model) => {
                             let dictionary_prompt =
                                 dictionary_prompt_for_model(&ready_model, &settings);
+                            let language = settings.language.clone();
                             let transcriber = app_handle.state::<AppState>().local_transcriber();
                             match async_runtime::spawn_blocking(move || {
                                 transcriber.transcribe(
@@ -858,6 +859,7 @@ async fn retry_transcription(
                                     &samples,
                                     sample_rate,
                                     dictionary_prompt.as_deref(),
+                                    Some(&language),
                                 )
                             })
                             .await
@@ -1204,6 +1206,7 @@ fn queue_transcription(
             match model_manager::ensure_model_ready(&app_handle, &model_key) {
                 Ok(ready_model) => {
                     let dictionary_prompt = dictionary_prompt_for_model(&ready_model, &settings);
+                    let language = settings.language.clone();
                     let transcriber = app_handle.state::<AppState>().local_transcriber();
                     let local_recording = recording_for_task.clone();
                     match async_runtime::spawn_blocking(move || {
@@ -1212,6 +1215,7 @@ fn queue_transcription(
                             &local_recording.samples,
                             local_recording.sample_rate,
                             dictionary_prompt.as_deref(),
+                            Some(&language),
                         )
                     })
                     .await

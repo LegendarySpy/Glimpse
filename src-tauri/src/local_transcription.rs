@@ -49,6 +49,7 @@ impl LocalTranscriber {
         samples: &[i16],
         sample_rate: u32,
         initial_prompt: Option<&str>,
+        language: Option<&str>,
     ) -> Result<TranscriptionSuccess> {
         self.ensure_engine(model)?;
         let prepared = prepare_audio(samples, sample_rate);
@@ -69,10 +70,15 @@ impl LocalTranscriber {
                 result.text
             }
             EngineInstance::Whisper { engine } => {
-                let params = initial_prompt.map(|prompt| WhisperInferenceParams {
-                    initial_prompt: Some(prompt.to_string()),
-                    ..Default::default()
-                });
+                let params = if initial_prompt.is_some() || language.is_some() {
+                    Some(WhisperInferenceParams {
+                        initial_prompt: initial_prompt.map(|s| s.to_string()),
+                        language: language.map(|s| s.to_string()),
+                        ..Default::default()
+                    })
+                } else {
+                    None
+                };
 
                 let result = engine
                     .transcribe_samples(prepared.data.clone(), params)
