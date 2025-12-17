@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           # Universal macOS build
-          - platform: 'macos-latest'
+          - platform: 'macos-15'
             args: '--target universal-apple-darwin'
 
     runs-on: ${{ matrix.platform }}
