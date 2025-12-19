@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, ChevronLeft, Home as HomeIcon, Book, Brain, User, Info, HelpCircle, Github, Mail, X } from "lucide-react";
+import { Settings, ChevronLeft, Home as HomeIcon, Book, Brain, User, Info, HelpCircle, Github, X } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import SettingsModal from "./components/SettingsModal";
@@ -58,6 +58,7 @@ const Home = () => {
     const [currentUser, setCurrentUser] = useState<AppwriteUser | null>(null);
     const [showSupportPopup, setShowSupportPopup] = useState(false);
     const [showFAQ, setShowFAQ] = useState(false);
+    const [appVersion, setAppVersion] = useState("-");
     const popupRef = useRef<HTMLDivElement>(null);
 
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
@@ -90,6 +91,10 @@ const Home = () => {
 
         loadSettings();
         loadUser();
+
+        invoke<{ version: string }>("get_app_info")
+            .then((info) => setAppVersion(info.version))
+            .catch((err) => console.error("Failed to load app version:", err));
 
         listen<StoredSettings & { llm_cleanup_enabled: boolean }>("settings:changed", (event) => {
             setTranscriptionMode(event.payload.transcription_mode);
@@ -285,17 +290,20 @@ const Home = () => {
                                                 <div className="text-[10px] text-[#6b6b76]">Report bugs & features</div>
                                             </div>
                                         </a>
-                                        <a
-                                            href="mailto:wip"
-                                            onClick={() => setShowSupportPopup(false)}
-                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group"
+                                        <button
+                                            onClick={() => {
+                                                setShowSupportPopup(false);
+                                                setSettingsTab("about");
+                                                setIsSettingsOpen(true);
+                                            }}
+                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group w-full text-left"
                                         >
-                                            <Mail size={16} className="text-[#5865F2]" />
+                                            <Info size={16} className="text-[#5865F2]" />
                                             <div>
-                                                <div className="text-[12px] font-medium text-[#e8e8eb]">Email</div>
-                                                <div className="text-[10px] text-[#6b6b76]">wip</div>
+                                                <div className="text-[12px] font-medium text-[#e8e8eb]">About</div>
+                                                <div className="text-[10px] text-[#6b6b76]">v{appVersion} • {isCloudMode ? "Cloud" : "Local"}</div>
                                             </div>
-                                        </a>
+                                        </button>
                                     </div>
                                 </motion.div>
                             )}

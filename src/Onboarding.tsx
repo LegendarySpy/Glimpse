@@ -14,9 +14,6 @@ import {
     Download,
     Trash2,
     ChevronLeft,
-    Server,
-    Key,
-    Cpu,
     ChevronRight,
     Check,
     ExternalLink,
@@ -27,6 +24,7 @@ import {
 } from "lucide-react";
 import DotMatrix from "./components/DotMatrix";
 import FAQModal from "./components/FAQModal";
+import { LlmProviderConfig, type LlmProvider } from "./components/LlmProviderConfig";
 
 
 type ModelInfo = {
@@ -232,7 +230,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     });
     const [modelStatus, setModelStatus] = useState<Record<string, ModelStatus>>({});
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
-    const [llmProvider, setLlmProvider] = useState<"lmstudio" | "ollama" | "openai" | "custom" | "none">("none");
+    const [llmProvider, setLlmProvider] = useState<LlmProvider>("none");
     const [llmEndpoint, setLlmEndpoint] = useState("");
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
@@ -1056,83 +1054,17 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                     </motion.button>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Provider</label>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                            {[
-                                                { label: "LM Studio", key: "lmstudio" as const },
-                                                { label: "Ollama", key: "ollama" as const },
-                                                { label: "OpenAI", key: "openai" as const },
-                                                { label: "Custom", key: "custom" as const },
-                                            ].map((opt) => (
-                                                <motion.button
-                                                    key={opt.key}
-                                                    onClick={() => setLlmProvider(opt.key)}
-                                                    className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${llmProvider === opt.key
-                                                        ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-                                                        : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
-                                                        }`}
-                                                    whileTap={{ scale: 0.97 }}
-                                                >
-                                                    {opt.label}
-                                                </motion.button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
-                                            <Server size={10} />
-                                            Endpoint {llmProvider !== "custom" && <span className="text-[#4a4a54]">(optional override)</span>}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={llmEndpoint}
-                                            onChange={(e) => setLlmEndpoint(e.target.value)}
-                                            placeholder={
-                                                llmProvider === "lmstudio" ? "http://localhost:1234" :
-                                                    llmProvider === "ollama" ? "http://localhost:11434" :
-                                                        llmProvider === "openai" ? "https://api.openai.com" :
-                                                            "https://your-llm-endpoint.com"
-                                            }
-                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
-                                            <Key size={10} />
-                                            API Key {llmProvider !== "openai" && <span className="text-[#4a4a54]">(if required)</span>}
-                                        </label>
-                                        <input
-                                            type="password"
-                                            value={llmApiKey}
-                                            onChange={(e) => setLlmApiKey(e.target.value)}
-                                            placeholder={llmProvider === "openai" ? "sk-..." : "Optional"}
-                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
-                                            <Cpu size={10} />
-                                            Model <span className="text-[#4a4a54]">(leave empty for default)</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={llmModel}
-                                            onChange={(e) => setLlmModel(e.target.value)}
-                                            placeholder={
-                                                llmProvider === "lmstudio" ? "Uses loaded model" :
-                                                    llmProvider === "ollama" ? "llama3.2" :
-                                                        llmProvider === "openai" ? "gpt-4o-mini" :
-                                                            "model-name"
-                                            }
-                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
-                                        />
-                                    </div>
-                                </div>
+                                <LlmProviderConfig
+                                    provider={llmProvider}
+                                    setProvider={setLlmProvider}
+                                    endpoint={llmEndpoint}
+                                    setEndpoint={setLlmEndpoint}
+                                    apiKey={llmApiKey}
+                                    setApiKey={setLlmApiKey}
+                                    model={llmModel}
+                                    setModel={setLlmModel}
+                                    showModelDropdown={false}
+                                />
                             </div>
 
                             <button

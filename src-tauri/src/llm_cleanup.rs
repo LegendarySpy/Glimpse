@@ -95,9 +95,9 @@ fn get_endpoint(settings: &UserSettings) -> Result<String> {
             .is_empty()
             .then_some("https://api.openai.com")
             .unwrap_or(&settings.llm_endpoint),
-        LlmProvider::Custom => {
+        _ => {
             if settings.llm_endpoint.is_empty() {
-                return Err(anyhow!("Custom endpoint not configured"));
+                return Err(anyhow!("Endpoint not configured"));
             }
             if settings.llm_endpoint.contains("/v1/chat/completions") {
                 return Ok(settings.llm_endpoint.clone());

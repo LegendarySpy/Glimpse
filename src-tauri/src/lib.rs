@@ -18,7 +18,7 @@ mod tray;
 
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -184,6 +184,8 @@ pub struct AppState {
     settings: parking_lot::Mutex<UserSettings>,
     pub(crate) tray: parking_lot::Mutex<Option<TrayIcon<AppRuntime>>>,
     pub(crate) settings_close_handler_registered: AtomicBool,
+    transcription_cancelled: AtomicBool,
+    pending_recording_path: parking_lot::Mutex<Option<PathBuf>>,
 }
 
 impl AppState {
@@ -217,6 +219,8 @@ impl AppState {
             settings: parking_lot::Mutex::new(settings),
             tray: parking_lot::Mutex::new(None),
             settings_close_handler_registered: AtomicBool::new(false),
+            transcription_cancelled: AtomicBool::new(false),
+            pending_recording_path: parking_lot::Mutex::new(None),
         }
     }
 
@@ -257,6 +261,26 @@ impl AppState {
 
     pub fn store_tray(&self, tray: TrayIcon<AppRuntime>) {
         *self.tray.lock() = Some(tray);
+    }
+
+    pub fn request_cancellation(&self) {
+        self.transcription_cancelled.store(true, Ordering::SeqCst);
+    }
+
+    pub fn is_cancelled(&self) -> bool {
+        self.transcription_cancelled.load(Ordering::SeqCst)
+    }
+
+    pub fn clear_cancellation(&self) {
+        self.transcription_cancelled.store(false, Ordering::SeqCst);
+    }
+
+    pub fn set_pending_path(&self, path: Option<PathBuf>) {
+        *self.pending_recording_path.lock() = path;
+    }
+
+    pub fn take_pending_path(&self) -> Option<PathBuf> {
+        self.pending_recording_path.lock().take()
     }
 }
 
@@ -680,7 +704,8 @@ async fn fetch_llm_models(
         "ollama" => LlmProvider::Ollama,
         "openai" => LlmProvider::OpenAI,
         "custom" => LlmProvider::Custom,
-        _ => LlmProvider::None,
+        "none" => LlmProvider::None,
+        _ => LlmProvider::Custom,
     };
 
     llm_cleanup::fetch_available_models(&state.http(), &endpoint, &llm_provider, &api_key)
@@ -1114,8 +1139,13 @@ fn toast_dismissed(app: AppHandle<AppRuntime>) {
 
 #[tauri::command]
 fn cancel_recording(app: AppHandle<AppRuntime>) {
-    stop_active_recording(&app);
-    hide_overlay(&app);
+    let state = app.state::<AppState>();
+    if state.pill().status() == pill::PillStatus::Processing {
+        state.pill().cancel_processing(&app);
+    } else {
+        stop_active_recording(&app);
+        hide_overlay(&app);
+    }
 }
 
 pub(crate) fn persist_recording_async(app: AppHandle<AppRuntime>, recording: CompletedRecording) {
@@ -1218,12 +1248,18 @@ fn queue_transcription(
 ) {
     emit_transcription_start(app, &saved);
 
-    let http = app.state::<AppState>().http();
+    let state = app.state::<AppState>();
+    state.clear_cancellation();
+    state.set_pending_path(Some(saved.path.clone()));
+
+    let http = state.http();
     let app_handle = app.clone();
     let saved_for_task = saved.clone();
     let recording_for_task = recording.clone();
 
     async_runtime::spawn(async move {
+        let is_cancelled = || app_handle.state::<AppState>().is_cancelled();
+
         let settings = app_handle.state::<AppState>().current_settings();
         let config = transcription::TranscriptionConfig::from_settings(&settings);
         let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
@@ -1258,6 +1294,8 @@ fn queue_transcription(
 
         match result {
             Ok(result) => {
+                if is_cancelled() { return; }
+
                 let raw_transcript = result.transcript.clone();
                 let reported_model = result.speech_model.clone();
 
@@ -1265,6 +1303,8 @@ fn queue_transcription(
                     handle_empty_transcription(&app_handle, &saved_for_task.path);
                     return;
                 }
+
+                if is_cancelled() { return; }
 
                 let (final_transcript, llm_cleaned) =
                     if llm_cleanup::is_cleanup_available(&settings) {
@@ -1288,6 +1328,8 @@ fn queue_transcription(
                     handle_empty_transcription(&app_handle, &saved_for_task.path);
                     return;
                 }
+
+                if is_cancelled() { return; }
 
                 let mut pasted = false;
                 if config.auto_paste && !final_transcript.trim().is_empty() {

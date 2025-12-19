@@ -143,6 +143,19 @@ pub enum LlmProvider {
     LmStudio,
     Ollama,
     OpenAI,
+    Anthropic,
+    Google,
+    Xai,
+    Groq,
+    Cerebras,
+    Sambanova,
+    Together,
+    OpenRouter,
+    Perplexity,
+    DeepSeek,
+    Fireworks,
+    Mistral,
+    #[serde(other)]
     Custom,
 }
 
