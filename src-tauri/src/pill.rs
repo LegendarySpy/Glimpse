@@ -131,7 +131,8 @@ impl PillController {
     fn reset_recording_state(&self) {
         *self.recording_mode.lock() = None;
         *self.smart_press_time.lock() = None;
-        *self.hold_key_down.lock() = false;
+        // Note: hold_key_down is intentionally NOT cleared here.
+        // It tracks physical key state and should only change via actual key events.
         *self.shortcut_origin.lock() = None;
     }
 
@@ -173,6 +174,11 @@ impl PillController {
             return;
         }
 
+        // Ignore if key is already held (prevents repeat-triggered recordings after errors)
+        if *self.hold_key_down.lock() {
+            return;
+        }
+
         if !check_mic_permission(app) {
             return;
         }
@@ -181,7 +187,6 @@ impl PillController {
             return;
         }
 
-        // Set origin if not already set (smart mode sets it before calling this)
         {
             let mut origin = self.shortcut_origin.lock();
             if origin.is_none() {
