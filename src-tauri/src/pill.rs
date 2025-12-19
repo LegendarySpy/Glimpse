@@ -40,6 +40,13 @@ pub enum RecordingMode {
     Toggle,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ShortcutOrigin {
+    Hold,
+    Toggle,
+    Smart,
+}
+
 #[derive(Serialize, Clone)]
 pub struct PillStatePayload {
     pub status: PillStatus,
@@ -51,6 +58,7 @@ pub struct PillController {
     recording_mode: Mutex<Option<RecordingMode>>,
     smart_press_time: Mutex<Option<DateTime<Local>>>,
     hold_key_down: Mutex<bool>,
+    shortcut_origin: Mutex<Option<ShortcutOrigin>>,
     recorder: Arc<RecorderManager>,
 }
 
@@ -61,6 +69,7 @@ impl PillController {
             recording_mode: Mutex::new(None),
             smart_press_time: Mutex::new(None),
             hold_key_down: Mutex::new(false),
+            shortcut_origin: Mutex::new(None),
             recorder,
         }
     }
@@ -123,6 +132,7 @@ impl PillController {
         *self.recording_mode.lock() = None;
         *self.smart_press_time.lock() = None;
         *self.hold_key_down.lock() = false;
+        *self.shortcut_origin.lock() = None;
     }
 
     fn is_recording(&self) -> bool {
@@ -156,12 +166,27 @@ impl PillController {
     }
 
     fn handle_hold_press(&self, app: &AppHandle<AppRuntime>) {
+        if self.status() == PillStatus::Processing {
+            if *self.shortcut_origin.lock() == Some(ShortcutOrigin::Hold) {
+                self.cancel_processing(app);
+            }
+            return;
+        }
+
         if !check_mic_permission(app) {
             return;
         }
 
         if !self.try_start_recording(RecordingMode::Hold) {
             return;
+        }
+
+        // Set origin if not already set (smart mode sets it before calling this)
+        {
+            let mut origin = self.shortcut_origin.lock();
+            if origin.is_none() {
+                *origin = Some(ShortcutOrigin::Hold);
+            }
         }
 
         let state = app.state::<AppState>();
@@ -199,6 +224,13 @@ impl PillController {
     }
 
     fn handle_toggle_press(&self, app: &AppHandle<AppRuntime>) {
+        if self.status() == PillStatus::Processing {
+            if *self.shortcut_origin.lock() == Some(ShortcutOrigin::Toggle) {
+                self.cancel_processing(app);
+            }
+            return;
+        }
+
         if self.active_mode() == Some(RecordingMode::Hold) {
             return;
         }
@@ -213,6 +245,8 @@ impl PillController {
             if !self.try_start_recording(RecordingMode::Toggle) {
                 return;
             }
+
+            *self.shortcut_origin.lock() = Some(ShortcutOrigin::Toggle);
 
             let state = app.state::<AppState>();
             let settings = state.current_settings();
@@ -238,6 +272,13 @@ impl PillController {
     }
 
     fn handle_smart_press(&self, app: &AppHandle<AppRuntime>) {
+        if self.status() == PillStatus::Processing {
+            if *self.shortcut_origin.lock() == Some(ShortcutOrigin::Smart) {
+                self.cancel_processing(app);
+            }
+            return;
+        }
+
         if self.is_recording() && self.active_mode() == Some(RecordingMode::Toggle) {
             self.handle_toggle_press(app);
             return;
@@ -248,6 +289,7 @@ impl PillController {
         }
 
         *self.smart_press_time.lock() = Some(Local::now());
+        *self.shortcut_origin.lock() = Some(ShortcutOrigin::Smart);
         self.handle_hold_press(app);
     }
 
@@ -305,6 +347,23 @@ impl PillController {
         if let Err(err) = self.recorder.stop() {
             eprintln!("Failed to stop recorder: {err}");
         }
+        self.reset(app);
+    }
+
+    pub fn cancel_processing(&self, app: &AppHandle<AppRuntime>) {
+        if self.status() != PillStatus::Processing {
+            return;
+        }
+
+        let state = app.state::<AppState>();
+        state.request_cancellation();
+        let _ = self.recorder.stop();
+
+        if let Some(path) = state.take_pending_path() {
+            let _ = std::fs::remove_file(&path);
+        }
+
+        toast::show(app, "info", None, "Transcription cancelled");
         self.reset(app);
     }
 }
