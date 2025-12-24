@@ -190,7 +190,7 @@ const AccountView = ({
         <div className="max-w-2xl mx-auto space-y-8 pb-10">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <div className="relative group">
+                    <div className="relative">
                         <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-[#2a2a35] to-[#1a1a20] flex items-center justify-center border border-border-secondary shadow-lg overflow-hidden">
                             <span className="text-xl font-medium text-content-primary">
                                 {currentUser.name?.[0]?.toUpperCase() || currentUser.email?.[0]?.toUpperCase() || "?"}
@@ -204,7 +204,7 @@ const AccountView = ({
                             </div>
                         )}
                     </div>
-                    <div>
+                    <div className="group">
                         <div className="flex items-center gap-2">
                             {isEditingName ? (
                                 <div className="flex items-center gap-2 h-[28px]">
@@ -255,6 +255,13 @@ const AccountView = ({
                         </button>
                     </div>
                 </div>
+                <button
+                    onClick={onSignOut}
+                    className="flex items-center gap-2 text-[12px] text-content-muted hover:text-content-primary transition-colors"
+                >
+                    <LogOut size={14} />
+                    Sign out
+                </button>
             </div>
 
             <div className="space-y-3">
@@ -462,16 +469,6 @@ const AccountView = ({
                         ))
                     )}
                 </div>
-            </div>
-
-            <div className="border-t border-border-primary pt-6 flex justify-center">
-                <button
-                    onClick={onSignOut}
-                    className="flex items-center gap-2 text-[12px] text-content-muted hover:text-content-primary transition-colors"
-                >
-                    <LogOut size={14} />
-                    Sign out of {currentUser.name || "account"}
-                </button>
             </div>
 
             <AnimatePresence>
