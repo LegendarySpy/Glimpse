@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Trash2, RotateCw, Check, ChevronDown, ChevronUp, MoreVertical, Wand2, AlertTriangle, Undo2 } from "lucide-react";
+import { Copy, Trash2, RotateCw, Check, ChevronDown, ChevronUp, MoreVertical, Wand2, AlertTriangle, Undo2, Cloud } from "lucide-react";
 import { TranscriptionRecord } from "../hooks/useTranscriptions";
 import DotMatrix from "./DotMatrix";
 
@@ -129,7 +129,10 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
     const isError = record.status === "error";
     const errorMessage = record.error_message || "Transcription failed";
     const displayText = isError ? null : record.text;
-    const speechModelLabel = record.speech_model?.trim() ? record.speech_model : "Unknown model";
+    const speechModelLabel = record.speech_model?.trim() 
+        ? (record.speech_model.startsWith("cloud-") ? record.speech_model.slice(6) : record.speech_model)
+        : "Unknown model";
+    const isCloudModel = record.speech_model?.startsWith("cloud-") ?? false;
     const llmModelLabel = record.llm_model?.trim() || null;
     const wordCountLabel = `${record.word_count || 0} ${record.word_count === 1 ? "word" : "words"}`;
     const formatDuration = (seconds: number) => {
@@ -214,10 +217,19 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                 </span>
                             </>
                         )}
-                        {record.llm_cleaned && !isError && (
+                        {isCloudModel && !isError && (
                             <>
                                 <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
-                                <span className="flex items-center gap-1 text-[9px] text-[#22d3ee]">
+                                <span className="flex items-center gap-1 text-[9px] text-[#fbbf24]">
+                                    <Cloud size={9} />
+                                    Cloud
+                                </span>
+                            </>
+                        )}
+                        {record.llm_cleaned && !isError && !isCloudModel && (
+                            <>
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                <span className="flex items-center gap-1 text-[9px] text-[#A5B3FE]">
                                     <Wand2 size={9} />
                                     Cleaned
                                 </span>
@@ -350,7 +362,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                             disabled={isRetryingLlm}
                                             className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-[#c8c8d2] hover:bg-[#1a1a1e] transition-colors disabled:opacity-50"
                                         >
-                                            <RotateCw size={12} className="text-[#22d3ee]" />
+                                            <RotateCw size={12} className="text-[#A5B3FE]" />
                                             <span>{record.llm_cleaned ? "Retry AI cleanup" : "Run AI cleanup"}</span>
                                         </button>
                                     )}
@@ -384,7 +396,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
 
                 {/* Loading state indicators */}
                 {isRetryingLlm && (
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#22d3ee]">
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#A5B3FE]">
                         <RotateCw size={12} className="animate-spin" />
                         <span>Cleaning...</span>
                     </div>
