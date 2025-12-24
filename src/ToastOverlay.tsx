@@ -97,6 +97,11 @@ const ToastOverlay: React.FC = () => {
     } catch (err) {
       console.error("Retry failed:", err);
       setIsRetrying(false);
+      setToast(prev => prev ? {
+        ...prev,
+        message: typeof err === "string" ? err : "Retry failed. Please try again.",
+        type: "error",
+      } : null);
     }
   };
 

@@ -19,6 +19,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
     const [copied, setCopied] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isRetrying, setIsRetrying] = useState(false);
+    const [retryError, setRetryError] = useState<string | null>(null);
     const [isRetryingLlm, setIsRetryingLlm] = useState(false);
     const [isUndoingLlm, setIsUndoingLlm] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -26,7 +27,6 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
     const [shiftHeld, setShiftHeld] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Track shift key state
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Shift") {
@@ -47,7 +47,6 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
         };
     }, []);
 
-    // Close menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -87,13 +86,14 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
     const handleRetry = async () => {
         if (isRetrying) return;
         setIsRetrying(true);
+        setRetryError(null);
         setMenuOpen(false);
         try {
             await onRetry(record.id);
-            // Keep showing retrying state - it will be removed when new transcription comes in
         } catch (err) {
             console.error("Failed to retry:", err);
             setIsRetrying(false);
+            setRetryError(typeof err === "string" ? err : "Retry failed");
         }
     };
 
@@ -236,7 +236,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                     {isError ? (
                         <div className="flex items-start gap-2 rounded-md border border-red-500/20 bg-red-500/[0.06] px-2.5 py-2">
                             <p className="text-[12px] text-red-300/80">
-                                {errorMessage}
+                                {retryError || errorMessage}
                             </p>
                         </div>
                     ) : (

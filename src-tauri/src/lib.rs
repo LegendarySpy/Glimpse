@@ -135,6 +135,7 @@ pub fn run() {
             get_transcriptions,
             list_transcriptions_paginated,
             get_transcription_count,
+            get_usage_stats,
             delete_transcription,
             delete_all_transcriptions,
             retry_transcription,
@@ -868,6 +869,14 @@ fn get_transcription_count(
 }
 
 #[tauri::command]
+fn get_usage_stats(state: tauri::State<AppState>) -> Result<storage::UsageStats, String> {
+    state
+        .storage()
+        .get_usage_stats()
+        .map_err(|err| format!("Failed to get usage stats: {err}"))
+}
+
+#[tauri::command]
 fn import_transcription_from_cloud(
     record: storage::TranscriptionRecord,
     state: tauri::State<AppState>,
@@ -927,14 +936,15 @@ async fn retry_transcription(
         .get_by_id(&id)
         .ok_or_else(|| "Transcription not found".to_string())?;
 
-    // Removed status check to allow retrying any transcription
-    // if record.status != storage::TranscriptionStatus::Error {
-    //     return Err("Can only retry failed transcriptions".to_string());
-    // }
-
     let audio_path = PathBuf::from(&record.audio_path);
     if !audio_path.exists() {
-        return Err("Audio file not found".to_string());
+        if record.audio_path.contains("placeholder") || record.audio_path.contains("cloud_synced") {
+            return Err(
+                "Cannot retry cloud-synced transcriptions. Audio is only stored locally."
+                    .to_string(),
+            );
+        }
+        return Err("Audio file not found. It may have been deleted.".to_string());
     }
 
     let saved = RecordingSaved {
@@ -944,6 +954,11 @@ async fn retry_transcription(
     };
 
     let _ = state.storage().delete(&id);
+
+    let pill = state.pill();
+    pill.transition_to(&app, pill::PillStatus::Processing);
+
+    state.set_pending_path(Some(saved.path.clone()));
 
     emit_transcription_start(&app, &saved);
 
@@ -1094,7 +1109,6 @@ async fn retry_transcription(
                     stage,
                     saved_for_task.path.display().to_string(),
                 );
-                hide_overlay(&app_handle);
             }
         }
     });
@@ -1431,7 +1445,7 @@ fn queue_transcription(
                         "edit_mode",
                         saved_for_task.path.display().to_string(),
                     );
-                    hide_overlay(&app_handle);
+                    // emit_transcription_error now calls reset() which hides overlay
                     app_handle.state::<AppState>().set_pending_path(None);
                     return;
                 }
@@ -1493,19 +1507,12 @@ fn queue_transcription(
                     {
                         Ok(Ok(())) => pasted = true,
                         Ok(Err(err)) => {
-                            emit_transcription_error(
-                                &app_handle,
-                                format!("Auto paste failed: {err}"),
-                                "auto_paste",
-                                saved_for_task.path.display().to_string(),
-                            );
+                            emit_auto_paste_error(&app_handle, format!("Auto paste failed: {err}"));
                         }
                         Err(err) => {
-                            emit_transcription_error(
+                            emit_auto_paste_error(
                                 &app_handle,
                                 format!("Auto paste task error: {err}"),
-                                "auto_paste",
-                                saved_for_task.path.display().to_string(),
                             );
                         }
                     }
@@ -1559,7 +1566,7 @@ fn queue_transcription(
                     stage,
                     saved_for_task.path.display().to_string(),
                 );
-                hide_overlay(&app_handle);
+                // emit_transcription_error now calls reset() which hides overlay
                 app_handle.state::<AppState>().set_pending_path(None);
             }
         }
@@ -1671,6 +1678,44 @@ fn emit_transcription_error(
     stage: &str,
     audio_path: String,
 ) {
+    emit_transcription_error_inner(app, message, stage, audio_path, true);
+}
+
+/// Emit a transcription error for non-fatal issues (like auto-paste failure).
+/// Does not reset state or save to storage since the transcription itself succeeded.
+fn emit_auto_paste_error(app: &AppHandle<AppRuntime>, message: String) {
+    analytics::track_transcription_failed(app, "auto_paste", "n/a", "paste_error");
+
+    let settings = app.state::<AppState>().current_settings();
+    let is_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
+
+    toast::emit_toast(
+        app,
+        toast::Payload {
+            toast_type: "error".to_string(),
+            title: None,
+            message,
+            auto_dismiss: Some(true),
+            duration: Some(3000),
+            retry_id: None,
+            mode: Some(if is_local {
+                "local".into()
+            } else {
+                "cloud".into()
+            }),
+            action: None,
+            action_label: None,
+        },
+    );
+}
+
+fn emit_transcription_error_inner(
+    app: &AppHandle<AppRuntime>,
+    message: String,
+    stage: &str,
+    audio_path: String,
+    reset_state: bool,
+) {
     let engine = if stage == "local" { "local" } else { "cloud" };
     let reason = if message.contains("No speech") || message.contains("empty") {
         "no_speech"
@@ -1690,11 +1735,11 @@ fn emit_transcription_error(
         },
     );
 
-    app.state::<AppState>()
-        .pill()
-        .transition_to_error(app, &message);
+    let state = app.state::<AppState>();
+    let pill = state.pill();
+    pill.transition_to_error_silent(app);
 
-    let settings = app.state::<AppState>().current_settings();
+    let settings = state.current_settings();
     let is_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
 
     let toast_message = format_transcription_error(&message, is_local);
@@ -1703,7 +1748,7 @@ fn emit_transcription_error(
         ..Default::default()
     };
 
-    let record_result = app.state::<AppState>().storage().save_transcription(
+    let record_result = state.storage().save_transcription(
         String::new(),
         audio_path.clone(),
         storage::TranscriptionStatus::Error,
@@ -1744,6 +1789,11 @@ fn emit_transcription_error(
             action_label: None,
         },
     );
+
+    // Reset to idle after showing toast - this properly resets state machine
+    if reset_state {
+        pill.reset(app);
+    }
 }
 
 /// Creates user-friendly error message based on transcription mode

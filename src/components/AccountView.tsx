@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -16,7 +17,8 @@ import {
     X,
     Cloud,
     CreditCard,
-    Copy
+    Copy,
+    Activity
 } from "lucide-react";
 import type { Models } from "appwrite";
 import {
@@ -27,6 +29,7 @@ import {
     logoutAll,
     type User as AppwriteUser
 } from "../lib/auth";
+import DotMatrix from "./DotMatrix";
 
 interface AccountViewProps {
     currentUser: AppwriteUser | null;
@@ -62,15 +65,33 @@ const AccountView = ({
     const [sessionsLoading, setSessionsLoading] = useState(false);
     const [deletingSession, setDeletingSession] = useState<string | null>(null);
 
+    type UsageStats = {
+        cloud_minutes_this_month: number;
+        cloud_hours_lifetime: number;
+        cloud_transcriptions_count: number;
+        cloud_transcriptions_this_month: number;
+    };
+    const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+
     useEffect(() => {
         if (currentUser) {
             loadSessions();
+            loadUsageStats();
         }
     }, [currentUser]);
 
     useEffect(() => {
         setEditName(currentUser?.name || "");
     }, [currentUser?.name]);
+
+    const loadUsageStats = async () => {
+        try {
+            const stats = await invoke<UsageStats>("get_usage_stats");
+            setUsageStats(stats);
+        } catch (err) {
+            console.error("Failed to load usage stats:", err);
+        }
+    };
 
     const loadSessions = async () => {
         setSessionsLoading(true);
@@ -301,6 +322,88 @@ const AccountView = ({
                 </div>
             </div>
 
+            {/* Cloud Usage Stats Section */}
+            <div className="space-y-3">
+                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-[#4a4a54] pl-1">Cloud Usage</h3>
+                <div className="bg-[#0d0d10] border border-[#1f1f28] rounded-xl overflow-hidden">
+                    {usageStats ? (
+                        <div className="p-5">
+                            <div className="grid grid-cols-2 gap-8">
+                                {/* Monthly Stats */}
+                                {isSubscriber && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <Cloud size={14} className="text-[#6b6b76]" />
+                                                <span className="text-[12px] font-medium text-[#f0f0f5]">This Month</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-[11px] font-mono text-[#a0a0ab] leading-none mb-1">
+                                                    <span className="text-[#f0f0f5]">{usageStats.cloud_minutes_this_month.toFixed(0)}</span>
+                                                    <span className="opacity-50"> / 600 min</span>
+                                                </div>
+                                                <div className="text-[9px] text-[#4a4a54] font-medium">
+                                                    {((usageStats.cloud_minutes_this_month / 600) * 100).toFixed(0)}% used
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <UsageBar
+                                            value={usageStats.cloud_minutes_this_month}
+                                            max={600}
+                                            color="#fbbf24"
+                                            cols={25}
+                                            rows={4}
+                                        />
+
+                                        <div className="flex items-center gap-1.5 pt-1">
+                                            <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#fbbf24" />
+                                            <span className="text-[10px] text-[#6b6b76]">
+                                                {usageStats.cloud_transcriptions_this_month} transcriptions
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Lifetime Stats */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Activity size={14} className="text-[#6b6b76]" />
+                                        <span className="text-[12px] font-medium text-[#f0f0f5]">Lifetime</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <div className="text-[20px] font-mono text-[#4ade80] leading-none mb-1">
+                                                {usageStats.cloud_hours_lifetime < 1
+                                                    ? (usageStats.cloud_hours_lifetime * 60).toFixed(0)
+                                                    : usageStats.cloud_hours_lifetime.toFixed(1)
+                                                }
+                                                <span className="text-[12px] text-[#4ade80]/70 ml-1">
+                                                    {usageStats.cloud_hours_lifetime < 1 ? 'min' : 'hrs'}
+                                                </span>
+                                            </div>
+                                            <div className="text-[10px] text-[#6b6b76]">Audio processed</div>
+                                        </div>
+
+                                        <div>
+                                            <div className="text-[20px] font-mono text-[#f0f0f5] leading-none mb-1">
+                                                {usageStats.cloud_transcriptions_count}
+                                            </div>
+                                            <div className="text-[10px] text-[#6b6b76]">Transcriptions</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="p-8 flex justify-center">
+                            <Loader2 size={18} className="animate-spin text-[#4a4a54]" />
+                        </div>
+                    )}
+                </div>
+            </div>
+
             <div className="space-y-3">
                 <div className="flex items-center justify-between px-1">
                     <h3 className="text-[11px] uppercase tracking-wider font-semibold text-[#4a4a54]">Active Sessions</h3>
@@ -502,6 +605,29 @@ const permissionBasedIcon = (session: Models.Session) => {
         return <Smartphone size={16} fill="currentColor" className="opacity-80" />;
     }
     return <Monitor size={16} fill="currentColor" className="opacity-80" />;
+};
+
+const UsageBar = ({ value, max, color, cols = 40, rows = 2 }: { value: number; max: number; color: string; cols?: number; rows?: number }) => {
+    const totalDots = cols * rows;
+    const percent = Math.min(100, (value / max) * 100);
+    const activeCount = Math.round((percent / 100) * totalDots);
+
+    const activeDots = [];
+    for (let i = 0; i < activeCount && i < totalDots; i++) {
+        activeDots.push(i);
+    }
+
+    return (
+        <DotMatrix
+            rows={rows}
+            cols={cols}
+            activeDots={activeDots}
+            dotSize={3}
+            gap={2}
+            color={color}
+            className="opacity-70"
+        />
+    );
 };
 
 export default AccountView;

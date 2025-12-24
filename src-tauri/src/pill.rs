@@ -118,13 +118,20 @@ impl PillController {
 
     pub fn transition_to_error(&self, app: &AppHandle<AppRuntime>, message: &str) {
         self.reset_recording_state();
+        *self.hold_key_down.lock() = false;
         self.transition_to(app, PillStatus::Error);
         let simple_msg = simplify_recording_error(message);
         toast::show(app, "error", None, &simple_msg);
     }
+    pub fn transition_to_error_silent(&self, app: &AppHandle<AppRuntime>) {
+        self.reset_recording_state();
+        *self.hold_key_down.lock() = false;
+        self.transition_to(app, PillStatus::Error);
+    }
 
     pub fn reset(&self, app: &AppHandle<AppRuntime>) {
         self.reset_recording_state();
+        *self.hold_key_down.lock() = false;
         self.transition_to(app, PillStatus::Idle);
     }
 

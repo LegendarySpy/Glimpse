@@ -87,7 +87,6 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
     const [userId, setUserId] = useState<string | null>(null);
     const [isSubscriber, setIsSubscriber] = useState(false);
 
-    // Keep track of loaded offsets to prevent duplicate fetches
     const loadedOffsets = useRef<Set<number>>(new Set());
     const fetchingOffsets = useRef<Set<number>>(new Set());
 
@@ -125,13 +124,10 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         loadedOffsets.current.clear();
         fetchingOffsets.current.clear();
         try {
-            // Get total count first
             const count = await invoke<number>("get_transcription_count", {
                 searchQuery: query || null,
             });
             setTotalCount(count);
-
-            // Fetch first page
             const firstPage = await fetchPage(0, query);
             setTranscriptions(firstPage);
             loadedOffsets.current.add(0);
@@ -146,7 +142,6 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         if (loadedOffsets.current.has(offset)) return;
         if (fetchingOffsets.current.has(offset)) return;
 
-        // Don't load if we're past the total count known (roughly)
         if (offset >= totalCount && totalCount > 0) return;
 
         try {
@@ -327,6 +322,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
             await invoke("retry_transcription", { id });
         } catch (err) {
             console.error("Failed to retry transcription:", err);
+            throw err; // Re-throw so callers can handle the error
         }
     }, []);
 
