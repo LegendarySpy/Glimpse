@@ -768,24 +768,24 @@ const SettingsModal = ({
                     />
 
                     <motion.div
-                        className="relative flex max-h-[80vh] h-[625px] w-[850px] overflow-hidden rounded-2xl border border-[#2a2a30] bg-[#161618] shadow-2xl shadow-black/50"
+                        className="relative flex max-h-[80vh] h-[625px] w-[850px] overflow-hidden rounded-2xl border border-border-secondary bg-surface-overlay shadow-2xl shadow-black/50"
                         variants={modalVariants}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <motion.button
                             onClick={onClose}
-                            className="absolute right-3 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-lg text-[#6b6b76] hover:bg-[#1e1e22] hover:text-[#a0a0ab] transition-colors"
+                            className="absolute right-3 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-lg text-content-muted hover:bg-surface-elevated hover:text-content-secondary transition-colors"
                             whileTap={{ scale: 0.95 }}
                         >
                             <X size={14} />
                         </motion.button>
-                        <aside className="flex w-44 flex-col border-r border-[#1e1e22] bg-[#111113]">
+                        <aside className="flex w-44 flex-col border-r border-border-primary bg-surface-surface">
                             <div className="px-4 pt-5 pb-4">
-                                <h2 className="text-[13px] font-semibold text-[#e8e8eb]">Settings</h2>
+                                <h2 className="text-[13px] font-semibold text-content-primary">Settings</h2>
                             </div>
                             <nav className="flex-1 px-2 space-y-4">
                                 <div className="space-y-1">
-                                    <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#4a4a54]">Account</p>
+                                    <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-content-disabled">Account</p>
                                     <ModalNavItem
                                         icon={<User size={14} />}
                                         label="Account"
@@ -795,7 +795,7 @@ const SettingsModal = ({
                                 </div>
 
                                 <div className="space-y-1">
-                                    <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#4a4a54]">General</p>
+                                    <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-content-disabled">General</p>
                                     <ModalNavItem
                                         icon={<Keyboard size={14} />}
                                         label="General"
@@ -824,7 +824,7 @@ const SettingsModal = ({
                                             exit={{ opacity: 0, height: 0 }}
                                             transition={{ duration: 0.15 }}
                                         >
-                                            <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#4a4a54]">Local</p>
+                                            <p className="px-2.5 pb-1.5 text-[9px] font-semibold uppercase tracking-wider text-content-disabled">Local</p>
                                             <ModalNavItem
                                                 icon={<Cpu size={14} />}
                                                 label="Models"
@@ -850,7 +850,7 @@ const SettingsModal = ({
                             </nav>
                         </aside>
 
-                        <main className="flex flex-1 flex-col min-h-0 bg-[#161618]">
+                        <main className="flex flex-1 flex-col min-h-0 bg-surface-overlay">
                             <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 settings-scroll">
                                 <AnimatePresence mode="wait">
                                     {activeTab === "account" && (
@@ -863,8 +863,8 @@ const SettingsModal = ({
                                             className="space-y-4"
                                         >
                                             <header>
-                                                <h1 className="text-lg font-medium text-[#e8e8eb]">Account</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Manage your profile, sessions, and subscription.</p>
+                                                <h1 className="text-lg font-medium text-content-primary">Account</h1>
+                                                <p className="mt-1 text-[12px] text-content-muted">Manage your profile, sessions, and subscription.</p>
                                             </header>
 
                                             {authError && (
@@ -889,10 +889,10 @@ const SettingsModal = ({
                                             {authLoading ? (
                                                 <div className="flex flex-col items-center justify-center py-16">
                                                     <Loader2 size={24} className="animate-spin text-amber-400 mb-3" />
-                                                    <p className="text-[12px] text-[#6b6b76] mb-3">Loading...</p>
+                                                    <p className="text-[12px] text-content-muted mb-3">Loading...</p>
                                                     <button
                                                         onClick={handleCancelAuth}
-                                                        className="text-[11px] text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                        className="text-[11px] text-content-disabled hover:text-content-muted transition-colors"
                                                     >
                                                         Cancel
                                                     </button>
@@ -911,18 +911,18 @@ const SettingsModal = ({
 
                                             ) : (
                                                 <div className="grid grid-cols-5 gap-4">
-                                                    <div className="col-span-3 relative rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px]">
+                                                    <div className="col-span-3 relative rounded-2xl border border-border-primary bg-surface-tertiary p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px]">
                                                         <div className="absolute inset-0 pointer-events-none opacity-18">
-                                                            <DotMatrix rows={8} cols={24} activeDots={[1, 4, 7, 10, 12, 15, 18, 20, 23]} dotSize={2} gap={4} color="#2e2e37" />
+                                                            <DotMatrix rows={8} cols={24} activeDots={[1, 4, 7, 10, 12, 15, 18, 20, 23]} dotSize={2} gap={4} color="var(--color-border-secondary)" />
                                                         </div>
                                                         <div className="relative flex flex-col h-full">
                                                             <div className="flex items-center gap-2 mb-3">
-                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="var(--color-cloud)" />
                                                                 <span className="text-[10px] font-semibold text-amber-400">Glimpse Cloud</span>
-                                                                <span className="ml-auto rounded-lg bg-[#1a1a22] px-2 py-0.5 text-[9px] font-medium text-[#6b6b76]">$5.99/mo</span>
+                                                                <span className="ml-auto rounded-lg bg-surface-elevated px-2 py-0.5 text-[9px] font-medium text-content-muted">$5.99/mo</span>
                                                             </div>
 
-                                                            <div className="flex flex-col gap-1.5 text-[11px] text-[#f0f0f5] font-medium mb-4">
+                                                            <div className="flex flex-col gap-1.5 text-[11px] text-content-primary font-medium mb-4">
                                                                 <div className="flex items-center gap-2">
                                                                     <div className="h-1 w-3 rounded-full bg-amber-400/80" />
                                                                     <span>Cross-device sync</span>
@@ -937,16 +937,16 @@ const SettingsModal = ({
                                                                 </div>
                                                             </div>
 
-                                                            <div className="mt-auto flex items-center gap-3 rounded-xl border border-[#1a1a22] bg-[#0d0d12]/90 px-3 py-2 text-[10px] text-[#a0a0ab] leading-relaxed">
-                                                                <DotMatrix rows={3} cols={5} activeDots={[0, 2, 4, 6, 8, 10, 12, 14]} dotSize={2} gap={2} color="#2a2a34" />
+                                                            <div className="mt-auto flex items-center gap-3 rounded-xl border border-border-primary bg-surface-tertiary px-3 py-2 text-[10px] text-content-secondary leading-relaxed">
+                                                                <DotMatrix rows={3} cols={5} activeDots={[0, 2, 4, 6, 8, 10, 12, 14]} dotSize={2} gap={2} color="var(--color-bg-hover)" />
                                                                 <p className="flex-1">Get faster processing, better models and cross-device sync with cloud.</p>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="col-span-2 relative rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px] flex flex-col">
+                                                    <div className="col-span-2 relative rounded-2xl border border-border-primary bg-surface-tertiary p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px] flex flex-col">
                                                         <div className="absolute inset-0 pointer-events-none opacity-18">
-                                                            <DotMatrix rows={8} cols={12} activeDots={[0, 3, 6, 9, 12, 15, 18, 21]} dotSize={2} gap={4} color="#2e2e37" />
+                                                            <DotMatrix rows={8} cols={12} activeDots={[0, 3, 6, 9, 12, 15, 18, 21]} dotSize={2} gap={4} color="var(--color-border-secondary)" />
                                                         </div>
 
                                                         <div className="relative flex flex-col flex-1">
@@ -962,12 +962,12 @@ const SettingsModal = ({
                                                                     >
                                                                         <div className="flex items-center justify-between mb-3">
                                                                             <div className="flex items-center gap-2">
-                                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="#fbbf24" />
-                                                                                <span className="text-[10px] font-semibold text-[#9ca3af]">Continue with Email</span>
+                                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="var(--color-cloud)" />
+                                                                                <span className="text-[10px] font-semibold text-content-secondary">Continue with Email</span>
                                                                             </div>
                                                                             <button
                                                                                 onClick={() => setShowEmailForm(false)}
-                                                                                className="text-[9px] text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                                                className="text-[9px] text-content-disabled hover:text-content-muted transition-colors"
                                                                             >
                                                                                 Back
                                                                             </button>
@@ -1005,7 +1005,7 @@ const SettingsModal = ({
                                                                                 value={authEmail}
                                                                                 onChange={(e) => setAuthEmail(e.target.value)}
                                                                                 required
-                                                                                className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
+                                                                                className="w-full rounded-lg border border-border-primary bg-surface-surface px-3 py-2 text-[11px] text-white placeholder-content-disabled outline-none focus:border-border-hover"
                                                                             />
                                                                             <div className="relative">
                                                                                 <input
@@ -1015,12 +1015,12 @@ const SettingsModal = ({
                                                                                     onChange={(e) => setAuthPassword(e.target.value)}
                                                                                     required
                                                                                     minLength={8}
-                                                                                    className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 pr-9 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
+                                                                                    className="w-full rounded-lg border border-border-primary bg-surface-surface px-3 py-2 pr-9 text-[11px] text-white placeholder-content-disabled outline-none focus:border-border-hover"
                                                                                 />
                                                                                 <button
                                                                                     type="button"
                                                                                     onClick={() => setAuthShowPassword(!authShowPassword)}
-                                                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-content-disabled hover:text-content-muted transition-colors"
                                                                                 >
                                                                                     {authShowPassword ? <EyeOff size={12} /> : <Eye size={12} />}
                                                                                 </button>
@@ -1043,11 +1043,11 @@ const SettingsModal = ({
                                                                         className="relative flex flex-col h-full"
                                                                     >
                                                                         <div className="flex items-center gap-2 mb-3">
-                                                                            <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="#fbbf24" />
-                                                                            <span className="text-[10px] font-semibold text-[#9ca3af]">Sign In</span>
+                                                                            <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="var(--color-cloud)" />
+                                                                            <span className="text-[10px] font-semibold text-content-secondary">Sign In</span>
                                                                         </div>
 
-                                                                        <p className="text-[10px] text-[#6b6b76] mb-4 leading-relaxed">
+                                                                        <p className="text-[10px] text-content-muted mb-4 leading-relaxed">
                                                                             Sign in to sync your transcriptions across devices.
                                                                         </p>
 
@@ -1057,7 +1057,7 @@ const SettingsModal = ({
                                                                                     const url = getOAuth2Url(OAuthProvider.Google, window.location.href);
                                                                                     openUrl(url);
                                                                                 }}
-                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-border-secondary bg-surface-secondary px-3 py-2.5 text-[11px] text-content-primary hover:bg-surface-surface hover:border-border-hover transition-all"
                                                                             >
                                                                                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                                                                                     <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -1072,14 +1072,14 @@ const SettingsModal = ({
                                                                                     const url = getOAuth2Url(OAuthProvider.Github, window.location.href);
                                                                                     openUrl(url);
                                                                                 }}
-                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-border-secondary bg-surface-secondary px-3 py-2.5 text-[11px] text-content-primary hover:bg-surface-surface hover:border-border-hover transition-all"
                                                                             >
                                                                                 <Github size={14} fill="currentColor" />
                                                                                 GitHub
                                                                             </button>
                                                                             <button
                                                                                 onClick={() => setShowEmailForm(true)}
-                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-border-secondary bg-surface-secondary px-3 py-2.5 text-[11px] text-content-primary hover:bg-surface-surface hover:border-border-hover transition-all"
                                                                             >
                                                                                 <Mail size={14} />
                                                                                 Email
@@ -1105,29 +1105,29 @@ const SettingsModal = ({
                                             className="space-y-5"
                                         >
                                             <header>
-                                                <h1 className="text-lg font-medium text-[#e8e8eb]">General</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Configure your recording shortcuts and transcription engine.</p>
+                                                <h1 className="text-lg font-medium text-content-primary">General</h1>
+                                                <p className="mt-1 text-[12px] text-content-muted">Configure your recording shortcuts and transcription engine.</p>
                                             </header>
 
                                             <div className="space-y-3">
-                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] overflow-hidden">
+                                                <div className="rounded-xl border border-border-primary bg-surface-surface overflow-hidden">
                                                     <motion.button
                                                         onClick={() => setShortcutsExpanded(!shortcutsExpanded)}
-                                                        className="w-full p-4 flex items-center justify-between hover:bg-[#1a1a1e] transition-colors"
+                                                        className="w-full p-4 flex items-center justify-between hover:bg-surface-elevated transition-colors"
                                                     >
                                                         <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                                <Keyboard size={14} className="text-[#6b6b76]" />
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                                <Keyboard size={14} className="text-content-muted" />
                                                             </div>
                                                             <div className="text-left">
-                                                                <h3 className="text-[13px] font-medium text-[#e8e8eb]">Shortcuts</h3>
+                                                                <h3 className="text-[13px] font-medium text-content-primary">Shortcuts</h3>
                                                                 <AnimatePresence initial={false}>
                                                                     {!shortcutsExpanded && (
                                                                         <motion.p
                                                                             initial={{ opacity: 0, height: 0, marginTop: 0 }}
                                                                             animate={{ opacity: 1, height: "auto", marginTop: 2 }}
                                                                             exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                                                            className="text-[11px] text-[#6b6b76] font-mono block"
+                                                                            className="text-[11px] text-content-muted font-mono block"
                                                                         >
                                                                             {smartEnabled ? `Smart: ${smartShortcut}` : ""}
                                                                             {smartEnabled && (holdEnabled || toggleEnabled) ? " • " : ""}
@@ -1143,7 +1143,7 @@ const SettingsModal = ({
                                                             animate={{ rotate: shortcutsExpanded ? 90 : 0 }}
                                                             transition={{ duration: 0.2 }}
                                                         >
-                                                            <ChevronRight size={16} className="text-[#6b6b76]" />
+                                                            <ChevronRight size={16} className="text-content-muted" />
                                                         </motion.div>
                                                     </motion.button>
 
@@ -1161,22 +1161,22 @@ const SettingsModal = ({
                                                                 }}
                                                                 className="overflow-hidden"
                                                             >
-                                                                <div className="px-4 pb-4 space-y-3 border-t border-[#1e1e22] pt-4">
+                                                                <div className="px-4 pb-4 space-y-3 border-t border-border-primary pt-4">
                                                                     <div className={`rounded-xl border p-4 transition-colors ${smartEnabled
                                                                         ? "border-amber-400/30 bg-amber-400/5"
-                                                                        : "border-[#1e1e22]/50 bg-[#111113]/50"
+                                                                        : "border-border-primary bg-surface-surface"
                                                                         }`}>
                                                                         <div className="flex items-center justify-between">
                                                                             <div className="flex items-center gap-3">
                                                                                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${smartEnabled
                                                                                     ? "bg-amber-400/10 border-amber-400/30"
-                                                                                    : "bg-[#1a1a1e]/50 border-[#2a2a30]/50"
+                                                                                    : "bg-surface-elevated border-border-secondary"
                                                                                     }`}>
-                                                                                    <Wand2 size={14} className={smartEnabled ? "text-amber-400" : "text-[#4a4a54]"} />
+                                                                                    <Wand2 size={14} className={smartEnabled ? "text-amber-400" : "text-content-disabled"} />
                                                                                 </div>
                                                                                 <div>
-                                                                                    <h3 className={`text-[13px] font-medium ${smartEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>Smart Mode</h3>
-                                                                                    <p className="text-[11px] text-[#4a4a54]">Quick tap = hold, long press = toggle</p>
+                                                                                    <h3 className={`text-[13px] font-medium ${smartEnabled ? "text-content-primary" : "text-content-muted"}`}>Smart Mode</h3>
+                                                                                    <p className="text-[11px] text-content-disabled">Quick tap = hold, long press = toggle</p>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex items-center gap-2">
@@ -1186,7 +1186,7 @@ const SettingsModal = ({
                                                                                         setSmartEnabled(!smartEnabled);
                                                                                     }}
                                                                                     disabled={smartEnabled && !holdEnabled && !toggleEnabled}
-                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${smartEnabled ? "bg-amber-400" : "bg-[#2a2a30]"
+                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${smartEnabled ? "bg-amber-400" : "bg-border-secondary"
                                                                                         } ${smartEnabled && !holdEnabled && !toggleEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
                                                                                     whileTap={!(smartEnabled && !holdEnabled && !toggleEnabled) ? { scale: 0.95 } : {}}
                                                                                 >
@@ -1208,8 +1208,8 @@ const SettingsModal = ({
                                                                                     className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all ${captureActive === "smart"
                                                                                         ? "bg-amber-400 text-black"
                                                                                         : smartEnabled
-                                                                                            ? "bg-[#1a1a1e] border border-[#2a2a30] text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb]"
-                                                                                            : "bg-[#1a1a1e]/50 border border-[#2a2a30]/50 text-[#4a4a54] cursor-not-allowed"
+                                                                                            ? "bg-surface-elevated border border-border-secondary text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary"
+                                                                                            : "bg-surface-elevated border border-border-secondary text-content-disabled cursor-not-allowed"
                                                                                         }`}
                                                                                     whileTap={smartEnabled ? { scale: 0.97 } : {}}
                                                                                 >
@@ -1220,32 +1220,32 @@ const SettingsModal = ({
                                                                         <motion.div
                                                                             className={`mt-3 inline-flex items-center rounded-lg border px-3 py-2 transition-colors ${smartEnabled
                                                                                 ? "border-amber-400/30 bg-amber-400/10"
-                                                                                : "border-[#2a2a30]/50 bg-[#1a1a1e]/50"
+                                                                                : "border-border-secondary bg-surface-elevated"
                                                                                 }`}
                                                                             animate={captureActive === "smart" ? {
                                                                                 borderColor: ["rgba(251, 191, 36, 0.3)", "rgba(251, 191, 36, 0.8)", "rgba(251, 191, 36, 0.3)"]
                                                                             } : {}}
                                                                             transition={{ duration: 1.2, repeat: captureActive === "smart" ? Infinity : 0 }}
                                                                         >
-                                                                            <span className={`font-mono text-[12px] ${smartEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>{smartShortcut}</span>
+                                                                            <span className={`font-mono text-[12px] ${smartEnabled ? "text-content-primary" : "text-content-muted"}`}>{smartShortcut}</span>
                                                                         </motion.div>
                                                                     </div>
 
                                                                     <div className={`rounded-xl border p-4 transition-colors ${holdEnabled
-                                                                        ? "border-[#1e1e22] bg-[#111113]"
-                                                                        : "border-[#1e1e22]/50 bg-[#111113]/50"
+                                                                        ? "border-border-primary bg-surface-surface"
+                                                                        : "border-border-primary bg-surface-surface"
                                                                         }`}>
                                                                         <div className="flex items-center justify-between">
                                                                             <div className="flex items-center gap-3">
                                                                                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${holdEnabled
-                                                                                    ? "bg-[#1a1a1e] border-[#2a2a30]"
-                                                                                    : "bg-[#1a1a1e]/50 border-[#2a2a30]/50"
+                                                                                    ? "bg-surface-elevated border-border-secondary"
+                                                                                    : "bg-surface-elevated border-border-secondary"
                                                                                     }`}>
-                                                                                    <Keyboard size={14} className={holdEnabled ? "text-[#6b6b76]" : "text-[#4a4a54]"} />
+                                                                                    <Keyboard size={14} className={holdEnabled ? "text-content-muted" : "text-content-disabled"} />
                                                                                 </div>
                                                                                 <div>
-                                                                                    <h3 className={`text-[13px] font-medium ${holdEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>Hold Shortcut</h3>
-                                                                                    <p className="text-[11px] text-[#4a4a54]">Hold to record, release to stop</p>
+                                                                                    <h3 className={`text-[13px] font-medium ${holdEnabled ? "text-content-primary" : "text-content-muted"}`}>Hold Shortcut</h3>
+                                                                                    <p className="text-[11px] text-content-disabled">Hold to record, release to stop</p>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex items-center gap-2">
@@ -1255,7 +1255,7 @@ const SettingsModal = ({
                                                                                         setHoldEnabled(!holdEnabled);
                                                                                     }}
                                                                                     disabled={holdEnabled && !toggleEnabled && !smartEnabled}
-                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${holdEnabled ? "bg-amber-400" : "bg-[#2a2a30]"
+                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${holdEnabled ? "bg-amber-400" : "bg-border-secondary"
                                                                                         } ${holdEnabled && !toggleEnabled && !smartEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
                                                                                     whileTap={!(holdEnabled && !toggleEnabled && !smartEnabled) ? { scale: 0.95 } : {}}
                                                                                 >
@@ -1277,8 +1277,8 @@ const SettingsModal = ({
                                                                                     className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all ${captureActive === "hold"
                                                                                         ? "bg-amber-400 text-black"
                                                                                         : holdEnabled
-                                                                                            ? "bg-[#1a1a1e] border border-[#2a2a30] text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb]"
-                                                                                            : "bg-[#1a1a1e]/50 border border-[#2a2a30]/50 text-[#4a4a54] cursor-not-allowed"
+                                                                                            ? "bg-surface-elevated border border-border-secondary text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary"
+                                                                                            : "bg-surface-elevated border border-border-secondary text-content-disabled cursor-not-allowed"
                                                                                         }`}
                                                                                     whileTap={holdEnabled ? { scale: 0.97 } : {}}
                                                                                 >
@@ -1288,33 +1288,33 @@ const SettingsModal = ({
                                                                         </div>
                                                                         <motion.div
                                                                             className={`mt-3 inline-flex items-center rounded-lg border px-3 py-2 transition-colors ${holdEnabled
-                                                                                ? "border-[#2a2a30] bg-[#1a1a1e]"
-                                                                                : "border-[#2a2a30]/50 bg-[#1a1a1e]/50"
+                                                                                ? "border-border-secondary bg-surface-elevated"
+                                                                                : "border-border-secondary bg-surface-elevated"
                                                                                 }`}
                                                                             animate={captureActive === "hold" ? {
-                                                                                borderColor: ["#2a2a30", "#fbbf24", "#2a2a30"]
+                                                                                borderColor: ["var(--color-border-secondary)", "var(--color-cloud)", "var(--color-border-secondary)"]
                                                                             } : {}}
                                                                             transition={{ duration: 1.2, repeat: captureActive === "hold" ? Infinity : 0 }}
                                                                         >
-                                                                            <span className={`font-mono text-[12px] ${holdEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>{holdShortcut}</span>
+                                                                            <span className={`font-mono text-[12px] ${holdEnabled ? "text-content-primary" : "text-content-muted"}`}>{holdShortcut}</span>
                                                                         </motion.div>
                                                                     </div>
 
                                                                     <div className={`rounded-xl border p-4 transition-colors ${toggleEnabled
-                                                                        ? "border-[#1e1e22] bg-[#111113]"
-                                                                        : "border-[#1e1e22]/50 bg-[#111113]/50"
+                                                                        ? "border-border-primary bg-surface-surface"
+                                                                        : "border-border-primary bg-surface-surface"
                                                                         }`}>
                                                                         <div className="flex items-center justify-between">
                                                                             <div className="flex items-center gap-3">
                                                                                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${toggleEnabled
-                                                                                    ? "bg-[#1a1a1e] border-[#2a2a30]"
-                                                                                    : "bg-[#1a1a1e]/50 border-[#2a2a30]/50"
+                                                                                    ? "bg-surface-elevated border-border-secondary"
+                                                                                    : "bg-surface-elevated border-border-secondary"
                                                                                     }`}>
-                                                                                    <Keyboard size={14} className={toggleEnabled ? "text-[#6b6b76]" : "text-[#4a4a54]"} />
+                                                                                    <Keyboard size={14} className={toggleEnabled ? "text-content-muted" : "text-content-disabled"} />
                                                                                 </div>
                                                                                 <div>
-                                                                                    <h3 className={`text-[13px] font-medium ${toggleEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>Toggle Shortcut</h3>
-                                                                                    <p className="text-[11px] text-[#4a4a54]">Press to start, press again to stop</p>
+                                                                                    <h3 className={`text-[13px] font-medium ${toggleEnabled ? "text-content-primary" : "text-content-muted"}`}>Toggle Shortcut</h3>
+                                                                                    <p className="text-[11px] text-content-disabled">Press to start, press again to stop</p>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex items-center gap-2">
@@ -1324,7 +1324,7 @@ const SettingsModal = ({
                                                                                         setToggleEnabled(!toggleEnabled);
                                                                                     }}
                                                                                     disabled={toggleEnabled && !holdEnabled && !smartEnabled}
-                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${toggleEnabled ? "bg-amber-400" : "bg-[#2a2a30]"
+                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${toggleEnabled ? "bg-amber-400" : "bg-border-secondary"
                                                                                         } ${toggleEnabled && !holdEnabled && !smartEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
                                                                                     whileTap={!(toggleEnabled && !holdEnabled && !smartEnabled) ? { scale: 0.95 } : {}}
                                                                                 >
@@ -1346,8 +1346,8 @@ const SettingsModal = ({
                                                                                     className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all ${captureActive === "toggle"
                                                                                         ? "bg-amber-400 text-black"
                                                                                         : toggleEnabled
-                                                                                            ? "bg-[#1a1a1e] border border-[#2a2a30] text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb]"
-                                                                                            : "bg-[#1a1a1e]/50 border border-[#2a2a30]/50 text-[#4a4a54] cursor-not-allowed"
+                                                                                            ? "bg-surface-elevated border border-border-secondary text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary"
+                                                                                            : "bg-surface-elevated border border-border-secondary text-content-disabled cursor-not-allowed"
                                                                                         }`}
                                                                                     whileTap={toggleEnabled ? { scale: 0.97 } : {}}
                                                                                 >
@@ -1357,15 +1357,15 @@ const SettingsModal = ({
                                                                         </div>
                                                                         <motion.div
                                                                             className={`mt-3 inline-flex items-center rounded-lg border px-3 py-2 transition-colors ${toggleEnabled
-                                                                                ? "border-[#2a2a30] bg-[#1a1a1e]"
-                                                                                : "border-[#2a2a30]/50 bg-[#1a1a1e]/50"
+                                                                                ? "border-border-secondary bg-surface-elevated"
+                                                                                : "border-border-secondary bg-surface-elevated"
                                                                                 }`}
                                                                             animate={captureActive === "toggle" ? {
-                                                                                borderColor: ["#2a2a30", "#fbbf24", "#2a2a30"]
+                                                                                borderColor: ["var(--color-border-secondary)", "var(--color-cloud)", "var(--color-border-secondary)"]
                                                                             } : {}}
                                                                             transition={{ duration: 1.2, repeat: captureActive === "toggle" ? Infinity : 0 }}
                                                                         >
-                                                                            <span className={`font-mono text-[12px] ${toggleEnabled ? "text-[#e8e8eb]" : "text-[#6b6b76]"}`}>{toggleShortcut}</span>
+                                                                            <span className={`font-mono text-[12px] ${toggleEnabled ? "text-content-primary" : "text-content-muted"}`}>{toggleShortcut}</span>
                                                                         </motion.div>
                                                                     </div>
                                                                 </div>
@@ -1374,25 +1374,25 @@ const SettingsModal = ({
                                                     </AnimatePresence>
                                                 </div>
 
-                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4 space-y-4">
+                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4 space-y-4">
                                                     <div className="flex items-center gap-3 mb-2">
-                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                            <Mic size={14} className="text-[#6b6b76]" />
+                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                            <Mic size={14} className="text-content-muted" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-[13px] font-medium text-[#e8e8eb]">Audio & Language</h3>
-                                                            <p className="text-[11px] text-[#6b6b76]">Configure input device and transcription language.</p>
+                                                            <h3 className="text-[13px] font-medium text-content-primary">Audio & Language</h3>
+                                                            <p className="text-[11px] text-content-muted">Configure input device and transcription language.</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div className="space-y-1.5">
-                                                            <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Microphone</label>
+                                                            <label className="text-[11px] font-medium text-content-muted ml-1">Microphone</label>
                                                             <div className="relative">
                                                                 <select
                                                                     value={microphoneDevice || ""}
                                                                     onChange={(e) => setMicrophoneDevice(e.target.value || null)}
-                                                                    className="w-full appearance-none rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 pl-3 pr-8 text-[12px] text-[#e8e8eb] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                    className="w-full appearance-none rounded-lg bg-surface-elevated border border-border-secondary py-2 pl-3 pr-8 text-[12px] text-content-primary focus:border-content-disabled focus:outline-none transition-colors"
                                                                 >
                                                                     <option value="">Default System Device</option>
                                                                     {inputDevices.map((device) => (
@@ -1401,19 +1401,19 @@ const SettingsModal = ({
                                                                         </option>
                                                                     ))}
                                                                 </select>
-                                                                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6b6b76]">
+                                                                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted">
                                                                     <ChevronDown size={12} />
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-1.5">
-                                                            <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Language</label>
+                                                            <label className="text-[11px] font-medium text-content-muted ml-1">Language</label>
                                                             <div className="relative">
                                                                 <select
                                                                     value={language}
                                                                     onChange={(e) => setLanguage(e.target.value)}
-                                                                    className="w-full appearance-none rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 pl-3 pr-8 text-[12px] text-[#e8e8eb] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                    className="w-full appearance-none rounded-lg bg-surface-elevated border border-border-secondary py-2 pl-3 pr-8 text-[12px] text-content-primary focus:border-content-disabled focus:outline-none transition-colors"
                                                                 >
                                                                     {languages.map((lang) => (
                                                                         <option key={lang.code} value={lang.code}>
@@ -1421,7 +1421,7 @@ const SettingsModal = ({
                                                                         </option>
                                                                     ))}
                                                                 </select>
-                                                                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6b6b76]">
+                                                                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted">
                                                                     <ChevronDown size={12} />
                                                                 </div>
                                                             </div>
@@ -1431,19 +1431,19 @@ const SettingsModal = ({
                                                 <motion.div
                                                     layout
                                                     transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                                    className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4"
+                                                    className="rounded-xl border border-border-primary bg-surface-surface p-4"
                                                 >
                                                     <div className="flex items-center gap-3 mb-4">
-                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
+                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
                                                             {transcriptionMode === "cloud" ? (
-                                                                <Cloud size={14} className="text-[#6b6b76]" />
+                                                                <Cloud size={14} className="text-content-muted" />
                                                             ) : (
-                                                                <HardDrive size={14} className="text-[#6b6b76]" />
+                                                                <HardDrive size={14} className="text-content-muted" />
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-[13px] font-medium text-[#e8e8eb]">Transcription Engine</h3>
-                                                            <p className="text-[11px] text-[#4a4a54]">Choose how your audio is processed</p>
+                                                            <h3 className="text-[13px] font-medium text-content-primary">Transcription Engine</h3>
+                                                            <p className="text-[11px] text-content-disabled">Choose how your audio is processed</p>
                                                         </div>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-2">
@@ -1500,7 +1500,7 @@ const SettingsModal = ({
                                                         initial={{ opacity: 0, height: 0 }}
                                                         animate={{ opacity: 1, height: "auto" }}
                                                         exit={{ opacity: 0, height: 0 }}
-                                                        className="pt-4 border-t border-[#1e1e22]"
+                                                        className="pt-4 border-t border-border-primary"
                                                     >
                                                         <div className="flex items-center gap-1.5 text-[11px] text-red-400">
                                                             <AlertCircle size={12} className="shrink-0" />
@@ -1534,24 +1534,24 @@ const SettingsModal = ({
                                             className="space-y-5"
                                         >
                                             <header>
-                                                <h1 className="text-lg font-medium text-[#e8e8eb]">Local Models</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">Manage transcription engines and AI cleanup.</p>
+                                                <h1 className="text-lg font-medium text-content-primary">Local Models</h1>
+                                                <p className="mt-1 text-[12px] text-content-muted">Manage transcription engines and AI cleanup.</p>
                                             </header>
-                                            <div className="rounded-xl border border-[#1e1e22] bg-[#111113]">
+                                            <div className="rounded-xl border border-border-primary bg-surface-surface">
                                                 <div className="p-4">
                                                     <div className="flex items-center justify-between mb-3">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                                <Wand2 size={14} className="text-[#6b6b76]" />
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                                <Wand2 size={14} className="text-content-muted" />
                                                             </div>
                                                             <div>
-                                                                <h3 className="text-[13px] font-medium text-[#e8e8eb]">AI Cleanup</h3>
-                                                                <p className="text-[11px] text-[#4a4a54]">Use an LLM to clean up transcriptions</p>
+                                                                <h3 className="text-[13px] font-medium text-content-primary">AI Cleanup</h3>
+                                                                <p className="text-[11px] text-content-disabled">Use an LLM to clean up transcriptions</p>
                                                             </div>
                                                         </div>
                                                         <motion.button
                                                             onClick={() => setLlmCleanupEnabled(!llmCleanupEnabled)}
-                                                            className={`relative w-10 h-5 rounded-full transition-colors ${llmCleanupEnabled ? "bg-amber-400" : "bg-[#2a2a30]"}`}
+                                                            className={`relative w-10 h-5 rounded-full transition-colors ${llmCleanupEnabled ? "bg-amber-400" : "bg-border-secondary"}`}
                                                             whileTap={{ scale: 0.95 }}
                                                         >
                                                             <motion.div
@@ -1571,9 +1571,9 @@ const SettingsModal = ({
                                                                 transition={{ type: "spring", stiffness: 400, damping: 35 }}
                                                                 style={{ overflow: "visible" }}
                                                             >
-                                                                <div className="pt-3 border-t border-[#1e1e22] space-y-3">
+                                                                <div className="pt-3 border-t border-border-primary space-y-3">
                                                                     <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Provider</label>
+                                                                        <label className="text-[11px] font-medium text-content-muted ml-1">Provider</label>
                                                                         <div className="grid grid-cols-4 gap-2">
                                                                             <LlmProviderButton
                                                                                 label="LM Studio"
@@ -1599,9 +1599,9 @@ const SettingsModal = ({
                                                                     </div>
 
                                                                     <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                        <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
                                                                             <Server size={10} />
-                                                                            Endpoint {llmProvider !== "custom" && <span className="text-[#4a4a54]">(optional override)</span>}
+                                                                            Endpoint {llmProvider !== "custom" && <span className="text-content-disabled">(optional override)</span>}
                                                                         </label>
                                                                         <input
                                                                             type="text"
@@ -1613,28 +1613,28 @@ const SettingsModal = ({
                                                                                         llmProvider === "openai" ? "https://api.openai.com" :
                                                                                             "https://your-llm-endpoint.com"
                                                                             }
-                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                            className="w-full rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
                                                                         />
                                                                     </div>
 
                                                                     <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                        <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
                                                                             <Key size={10} />
-                                                                            API Key {llmProvider !== "openai" && <span className="text-[#4a4a54]">(if required)</span>}
+                                                                            API Key {llmProvider !== "openai" && <span className="text-content-disabled">(if required)</span>}
                                                                         </label>
                                                                         <input
                                                                             type="password"
                                                                             value={llmApiKey}
                                                                             onChange={(e) => setLlmApiKey(e.target.value)}
                                                                             placeholder={llmProvider === "openai" ? "sk-..." : "Optional"}
-                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                            className="w-full rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
                                                                         />
                                                                     </div>
 
                                                                     <div className="space-y-1.5" ref={modelDropdownRef}>
-                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                        <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
                                                                             <Cpu size={10} />
-                                                                            Model {<span className="text-[#4a4a54]">(leave empty for default)</span>}
+                                                                            Model {<span className="text-content-disabled">(leave empty for default)</span>}
                                                                         </label>
                                                                         <div className="relative">
                                                                             <button
@@ -1645,9 +1645,9 @@ const SettingsModal = ({
                                                                                     }
                                                                                     setModelDropdownOpen(!modelDropdownOpen);
                                                                                 }}
-                                                                                className="w-full flex items-center justify-between rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-left hover:border-[#3a3a40] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                                className="w-full flex items-center justify-between rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-left hover:border-border-hover focus:border-content-disabled focus:outline-none transition-colors"
                                                                             >
-                                                                                <span className={llmModel ? "text-[#e8e8eb]" : "text-[#4a4a54]"}>
+                                                                                <span className={llmModel ? "text-content-primary" : "text-content-disabled"}>
                                                                                     {llmModel || (
                                                                                         llmProvider === "lmstudio" ? "Uses loaded model" :
                                                                                             llmProvider === "ollama" ? "llama3.2" :
@@ -1657,7 +1657,7 @@ const SettingsModal = ({
                                                                                 </span>
                                                                                 <ChevronDown
                                                                                     size={14}
-                                                                                    className={`text-[#6b6b76] transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
+                                                                                    className={`text-content-muted transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
                                                                                 />
                                                                             </button>
                                                                             <AnimatePresence>
@@ -1667,12 +1667,12 @@ const SettingsModal = ({
                                                                                         animate={{ opacity: 1, y: 0 }}
                                                                                         exit={{ opacity: 0, y: -4 }}
                                                                                         transition={{ duration: 0.15 }}
-                                                                                        className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-[#2a2a30] bg-[#141416] shadow-xl shadow-black/40 overflow-hidden"
+                                                                                        className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-border-secondary bg-surface-surface shadow-xl shadow-black/40 overflow-hidden"
                                                                                         style={{ maxHeight: "280px" }}
                                                                                     >
                                                                                         <div className="overflow-y-auto" style={{ maxHeight: "220px" }}>
                                                                                             {modelsLoading ? (
-                                                                                                <div className="flex items-center justify-center gap-2 py-4 text-[11px] text-[#6b6b76]">
+                                                                                                <div className="flex items-center justify-center gap-2 py-4 text-[11px] text-content-muted">
                                                                                                     <Loader2 size={12} className="animate-spin" />
                                                                                                     <span>Loading models...</span>
                                                                                                 </div>
@@ -1687,25 +1687,25 @@ const SettingsModal = ({
                                                                                                         }}
                                                                                                         className={`w-full text-left px-3 py-2 text-[12px] transition-colors ${llmModel === model
                                                                                                             ? "bg-amber-400/10 text-amber-400"
-                                                                                                            : "text-[#a0a0ab] hover:bg-[#1a1a1e] hover:text-[#e8e8eb]"
+                                                                                                            : "text-content-secondary hover:bg-surface-elevated hover:text-content-primary"
                                                                                                             }`}
                                                                                                     >
                                                                                                         {model}
                                                                                                     </button>
                                                                                                 ))
                                                                                             ) : (
-                                                                                                <div className="px-3 py-4 text-[11px] text-[#6b6b76] text-center">
+                                                                                                <div className="px-3 py-4 text-[11px] text-content-muted text-center">
                                                                                                     No models found. Check endpoint.
                                                                                                 </div>
                                                                                             )}
                                                                                         </div>
-                                                                                        <div className="border-t border-[#2a2a30] p-2">
+                                                                                        <div className="border-t border-border-secondary p-2">
                                                                                             <input
                                                                                                 type="text"
                                                                                                 value={llmModel}
                                                                                                 onChange={(e) => setLlmModel(e.target.value)}
                                                                                                 placeholder="Or type custom model name..."
-                                                                                                className="w-full rounded-md bg-[#1a1a1e] border border-[#2a2a30] py-1.5 px-2.5 text-[11px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                                                className="w-full rounded-md bg-surface-elevated border border-border-secondary py-1.5 px-2.5 text-[11px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
                                                                                                 onClick={(e) => e.stopPropagation()}
                                                                                             />
                                                                                         </div>
@@ -1715,9 +1715,9 @@ const SettingsModal = ({
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="flex items-start gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-3 py-2">
-                                                                        <Info size={12} className="text-[#6b6b76] shrink-0 mt-0.5" />
-                                                                        <p className="text-[10px] text-[#6b6b76]">
+                                                                    <div className="flex items-start gap-2 rounded-lg border border-border-secondary bg-surface-elevated px-3 py-2">
+                                                                        <Info size={12} className="text-content-muted shrink-0 mt-0.5" />
+                                                                        <p className="text-[10px] text-content-muted">
                                                                             Removes filler words, fixes repetitions, and cleans up speech disfluencies while preserving your meaning.
                                                                         </p>
                                                                     </div>
@@ -1729,10 +1729,10 @@ const SettingsModal = ({
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2 mb-3">
-                                                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#1a1a1e] border border-[#2a2a30]">
-                                                        <Cpu size={12} className="text-[#6b6b76]" />
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-surface-elevated border border-border-secondary">
+                                                        <Cpu size={12} className="text-content-muted" />
                                                     </div>
-                                                    <h3 className="text-[12px] font-medium text-[#a0a0ab]">Transcription Engines</h3>
+                                                    <h3 className="text-[12px] font-medium text-content-secondary">Transcription Engines</h3>
                                                 </div>
                                                 <div className="space-y-2">
                                                     {modelCatalog.map((model, index) => {
@@ -1752,13 +1752,13 @@ const SettingsModal = ({
                                                                 transition={{ delay: index * 0.04 }}
                                                                 className={`rounded-xl border p-4 transition-colors ${isActive
                                                                     ? "border-amber-400/30 bg-amber-400/[0.04]"
-                                                                    : "border-[#1e1e22] bg-[#111113] hover:border-[#2a2a30]"
+                                                                    : "border-border-primary bg-surface-surface hover:border-border-secondary"
                                                                     }`}
                                                             >
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center gap-2">
-                                                                            <h3 className="text-[13px] font-medium text-[#e8e8eb]">{model.label}</h3>
+                                                                            <h3 className="text-[13px] font-medium text-content-primary">{model.label}</h3>
                                                                             {isActive && (
                                                                                 <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider bg-amber-400/20 text-amber-400">Active</span>
                                                                             )}
@@ -1771,8 +1771,8 @@ const SettingsModal = ({
                                                                                         key={tag}
                                                                                         className={
                                                                                             isRecommended
-                                                                                                ? "px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border bg-[#A5B4FD26] text-[#A5B4FD] border-[#A5B4FD66]"
-                                                                                                : "px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#1a1a1e] text-[#6b6b76] border border-[#2a2a30]"
+                                                                                                ? "px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border bg-local-10 text-local border-local-40"
+                                                                                                : "px-1.5 py-0.5 rounded text-[9px] font-medium bg-surface-elevated text-content-muted border border-border-secondary"
                                                                                         }
                                                                                     >
                                                                                         {tag}
@@ -1780,19 +1780,19 @@ const SettingsModal = ({
                                                                                 );
                                                                             })}
                                                                         </div>
-                                                                        <p className="text-[11px] text-[#6b6b76] line-clamp-1">{model.description}</p>
+                                                                        <p className="text-[11px] text-content-muted line-clamp-1">{model.description}</p>
                                                                         <div className="mt-2 flex items-center gap-2">
 
-                                                                            <span className="text-[10px] text-[#4a4a54]">{model.variant}</span>
-                                                                            <span className="text-[10px] text-[#4a4a54]">•</span>
-                                                                            <span className="text-[10px] text-[#4a4a54]">{formatBytes(model.size_mb * 1024 * 1024)}</span>
+                                                                            <span className="text-[10px] text-content-disabled">{model.variant}</span>
+                                                                            <span className="text-[10px] text-content-disabled">•</span>
+                                                                            <span className="text-[10px] text-content-disabled">{formatBytes(model.size_mb * 1024 * 1024)}</span>
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex shrink-0 items-center gap-2">
                                                                         {installed && !isActive && (
                                                                             <motion.button
                                                                                 onClick={() => setLocalModel(model.key)}
-                                                                                className="rounded-lg bg-[#1a1a1e] border border-[#2a2a30] px-3 py-1.5 text-[10px] font-medium text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb] transition-colors"
+                                                                                className="rounded-lg bg-surface-elevated border border-border-secondary px-3 py-1.5 text-[10px] font-medium text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary transition-colors"
                                                                                 whileTap={{ scale: 0.97 }}
                                                                             >
                                                                                 Use
@@ -1803,7 +1803,7 @@ const SettingsModal = ({
                                                                             disabled={isDownloading}
                                                                             className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${installed
                                                                                 ? "border-red-500/20 text-red-400 hover:bg-red-500/10"
-                                                                                : "border-[#2a2a30] text-[#6b6b76] hover:bg-[#1a1a1e] hover:text-[#a0a0ab]"
+                                                                                : "border-border-secondary text-content-muted hover:bg-surface-elevated hover:text-content-secondary"
                                                                                 } ${isDownloading ? "opacity-50 cursor-wait" : ""}`}
                                                                             whileTap={!isDownloading ? { scale: 0.95 } : {}}
                                                                         >
@@ -1821,7 +1821,7 @@ const SettingsModal = ({
                                                                     <div className="mt-3">
                                                                         <ModelProgress percent={percent} status={progress?.status ?? "idle"} />
                                                                         {isDownloading && (
-                                                                            <p className="mt-1.5 text-[10px] text-[#6b6b76] tabular-nums truncate">
+                                                                            <p className="mt-1.5 text-[10px] text-content-muted tabular-nums truncate">
                                                                                 {progress?.percent?.toFixed(0)}% · {(progress as Extract<DownloadEvent, { status: "downloading" }>).file}
                                                                             </p>
                                                                         )}
@@ -1851,28 +1851,28 @@ const SettingsModal = ({
                                             className="space-y-5"
                                         >
                                             <header>
-                                                <h1 className="text-lg font-medium text-[#e8e8eb]">Advanced</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">System permissions and troubleshooting.</p>
+                                                <h1 className="text-lg font-medium text-content-primary">Advanced</h1>
+                                                <p className="mt-1 text-[12px] text-content-muted">System permissions and troubleshooting.</p>
                                             </header>
 
                                             <div className="space-y-3">
-                                                <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] px-1">Permissions</p>
+                                                <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled px-1">Permissions</p>
 
                                                 {/* Microphone Permission */}
-                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                                <Mic size={16} className="text-[#6b6b76]" />
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                                <Mic size={16} className="text-content-muted" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-[13px] font-medium text-[#e8e8eb]">Microphone Access</p>
-                                                                <p className="text-[11px] text-[#6b6b76]">Required for voice transcription</p>
+                                                                <p className="text-[13px] font-medium text-content-primary">Microphone Access</p>
+                                                                <p className="text-[11px] text-content-muted">Required for voice transcription</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             {micPermission === null ? (
-                                                                <span className="text-[11px] text-[#6b6b76] flex items-center gap-1.5">
+                                                                <span className="text-[11px] text-content-muted flex items-center gap-1.5">
                                                                     <Loader2 size={11} className="animate-spin" />
                                                                     Checking...
                                                                 </span>
@@ -1886,7 +1886,7 @@ const SettingsModal = ({
                                                             )}
                                                             <motion.button
                                                                 onClick={() => invoke("open_microphone_settings")}
-                                                                className="rounded-lg bg-[#1a1a1e] border border-[#2a2a30] px-3 py-1.5 text-[11px] font-medium text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb] transition-colors"
+                                                                className="rounded-lg bg-surface-elevated border border-border-secondary px-3 py-1.5 text-[11px] font-medium text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary transition-colors"
                                                                 whileTap={{ scale: 0.97 }}
                                                             >
                                                                 Open Settings
@@ -1896,20 +1896,20 @@ const SettingsModal = ({
                                                 </div>
 
                                                 {/* Accessibility Permission */}
-                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                                <Accessibility size={16} className="text-[#6b6b76]" />
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                                <Accessibility size={16} className="text-content-muted" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-[13px] font-medium text-[#e8e8eb]">Accessibility Access</p>
-                                                                <p className="text-[11px] text-[#6b6b76]">Required for automatic text paste</p>
+                                                                <p className="text-[13px] font-medium text-content-primary">Accessibility Access</p>
+                                                                <p className="text-[11px] text-content-muted">Required for automatic text paste</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             {accessibilityPermission === null ? (
-                                                                <span className="text-[11px] text-[#6b6b76] flex items-center gap-1.5">
+                                                                <span className="text-[11px] text-content-muted flex items-center gap-1.5">
                                                                     <Loader2 size={11} className="animate-spin" />
                                                                     Checking...
                                                                 </span>
@@ -1930,7 +1930,7 @@ const SettingsModal = ({
                                                                         await invoke("open_accessibility_settings");
                                                                     }
                                                                 }}
-                                                                className="rounded-lg bg-[#1a1a1e] border border-[#2a2a30] px-3 py-1.5 text-[11px] font-medium text-[#a0a0ab] hover:bg-[#232328] hover:text-[#e8e8eb] transition-colors"
+                                                                className="rounded-lg bg-surface-elevated border border-border-secondary px-3 py-1.5 text-[11px] font-medium text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary transition-colors"
                                                                 whileTap={{ scale: 0.97 }}
                                                             >
                                                                 Open Settings
@@ -1939,31 +1939,31 @@ const SettingsModal = ({
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-2 py-2 mt-4">
-                                                    <Info size={12} className="text-[#6b6b76] shrink-0" />
-                                                    <p className="text-[10px] text-[#6b6b76]">
+                                                <div className="flex items-center gap-2 rounded-lg border border-border-secondary bg-surface-elevated px-2 py-2 mt-4">
+                                                    <Info size={12} className="text-content-muted shrink-0" />
+                                                    <p className="text-[10px] text-content-muted">
                                                         After enabling permissions in System Settings, you may need to restart Glimpse for changes to take effect.
                                                     </p>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-3">
-                                                <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] px-1">Features</p>
+                                                <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled px-1">Features</p>
 
-                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                                <Wand2 size={16} className="text-[#6b6b76]" />
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                                <Wand2 size={16} className="text-content-muted" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-[13px] font-medium text-[#e8e8eb]">Edit Mode</p>
-                                                                <p className="text-[11px] text-[#6b6b76]">Use voice to transform selected text</p>
+                                                                <p className="text-[13px] font-medium text-content-primary">Edit Mode</p>
+                                                                <p className="text-[11px] text-content-muted">Use voice to transform selected text</p>
                                                             </div>
                                                         </div>
                                                         <motion.button
                                                             onClick={() => setEditModeEnabled(!editModeEnabled)}
-                                                            className={`relative w-10 h-5 rounded-full transition-colors ${editModeEnabled ? "bg-amber-400" : "bg-[#2a2a30]"}`}
+                                                            className={`relative w-10 h-5 rounded-full transition-colors ${editModeEnabled ? "bg-amber-400" : "bg-border-secondary"}`}
                                                             whileTap={{ scale: 0.95 }}
                                                         >
                                                             <motion.div
@@ -1982,10 +1982,10 @@ const SettingsModal = ({
                                                                 transition={{ type: "spring", stiffness: 400, damping: 35 }}
                                                                 className="overflow-hidden"
                                                             >
-                                                                <div className="mt-3 pt-3 border-t border-[#1e1e22] space-y-2">
-                                                                    <div className="flex items-start gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-3 py-2">
-                                                                        <Info size={12} className="text-[#6b6b76] shrink-0 mt-0.5" />
-                                                                        <p className="text-[10px] text-[#6b6b76]">
+                                                                <div className="mt-3 pt-3 border-t border-border-primary space-y-2">
+                                                                    <div className="flex items-start gap-2 rounded-lg border border-border-secondary bg-surface-elevated px-3 py-2">
+                                                                        <Info size={12} className="text-content-muted shrink-0 mt-0.5" />
+                                                                        <p className="text-[10px] text-content-muted">
                                                                             Select text in any app, then use your shortcut. Speak a command like "make this formal" or "fix the grammar" to transform the selection.
                                                                         </p>
                                                                     </div>
@@ -2016,44 +2016,44 @@ const SettingsModal = ({
                                             className="space-y-5"
                                         >
                                             <header>
-                                                <h1 className="text-lg font-medium text-[#e8e8eb]">About</h1>
-                                                <p className="mt-1 text-[12px] text-[#6b6b76]">App info and setup options.</p>
+                                                <h1 className="text-lg font-medium text-content-primary">About</h1>
+                                                <p className="mt-1 text-[12px] text-content-muted">App info and setup options.</p>
                                             </header>
 
-                                            <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                            <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1">Version</p>
-                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo?.version ?? "-"}</p>
+                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-1">Version</p>
+                                                        <p className="text-[13px] text-content-primary">{appInfo?.version ?? "-"}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1">Storage Used</p>
-                                                        <p className="text-[13px] text-[#e8e8eb]">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "-"}</p>
+                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-1">Storage Used</p>
+                                                        <p className="text-[13px] text-content-primary">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "-"}</p>
                                                     </div>
                                                 </div>
 
-                                                <div className="mt-4 pt-3 border-t border-[#1e1e22]">
-                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-1.5">Data Location</p>
+                                                <div className="mt-4 pt-3 border-t border-border-primary">
+                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-1.5">Data Location</p>
                                                     <button
                                                         type="button"
                                                         onClick={handleOpenDataDir}
                                                         disabled={!appInfo?.data_dir_path}
-                                                        className="flex w-full items-center gap-2 px-1.5 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#2a2a30] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                        className="flex w-full items-center gap-2 px-1.5 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                                     >
-                                                        <FolderOpen size={12} className="text-[#4a4a54] shrink-0" />
-                                                        <span className="text-[11px] text-[#6b6b76] font-mono truncate border-b border-dotted border-[#6b6b76] pb-[1px] leading-[1.2]">
+                                                        <FolderOpen size={12} className="text-content-disabled shrink-0" />
+                                                        <span className="text-[11px] text-content-muted font-mono truncate border-b border-dotted border-content-muted pb-[1px] leading-[1.2]">
                                                             {appInfo?.data_dir_path ?? "-"}
                                                         </span>
                                                     </button>
                                                 </div>
 
-                                                <div className="mt-4 pt-3 border-t border-[#1e1e22]">
-                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] mb-2">Updates</p>
+                                                <div className="mt-4 pt-3 border-t border-border-primary">
+                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-2">Updates</p>
                                                     <UpdateChecker />
                                                 </div>
                                             </div>
                                             <div className="space-y-2">
-                                                <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] px-1">Setup</p>
+                                                <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled px-1">Setup</p>
                                                 <button
                                                     onClick={async () => {
                                                         try {
@@ -2063,27 +2063,27 @@ const SettingsModal = ({
                                                             console.error("Failed to restart onboarding:", err);
                                                         }
                                                     }}
-                                                    className="w-full flex items-center gap-3 rounded-lg border border-[#1e1e22] bg-[#111113] p-3 text-left hover:bg-[#161618] hover:border-[#2a2a30] transition-colors"
+                                                    className="w-full flex items-center gap-3 rounded-lg border border-border-primary bg-surface-surface p-3 text-left hover:bg-surface-overlay hover:border-border-secondary transition-colors"
                                                 >
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                        <RotateCcw size={14} className="text-[#6b6b76]" />
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                        <RotateCcw size={14} className="text-content-muted" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[12px] font-medium text-[#e8e8eb]">Restart Onboarding</p>
-                                                        <p className="text-[10px] text-[#4a4a54]">Re-run the initial setup wizard</p>
+                                                        <p className="text-[12px] font-medium text-content-primary">Restart Onboarding</p>
+                                                        <p className="text-[10px] text-content-disabled">Re-run the initial setup wizard</p>
                                                     </div>
                                                 </button>
 
                                                 <button
                                                     onClick={() => setShowFAQModal(true)}
-                                                    className="w-full flex items-center gap-3 rounded-lg border border-[#1e1e22] bg-[#111113] p-3 text-left hover:bg-[#161618] hover:border-[#2a2a30] transition-colors"
+                                                    className="w-full flex items-center gap-3 rounded-lg border border-border-primary bg-surface-surface p-3 text-left hover:bg-surface-overlay hover:border-border-secondary transition-colors"
                                                 >
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
-                                                        <HelpCircle size={14} className="text-[#6b6b76]" />
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
+                                                        <HelpCircle size={14} className="text-content-muted" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[12px] font-medium text-[#e8e8eb]">FAQ & Help</p>
-                                                        <p className="text-[10px] text-[#4a4a54]">Common questions about Glimpse</p>
+                                                        <p className="text-[12px] font-medium text-content-primary">FAQ & Help</p>
+                                                        <p className="text-[10px] text-content-disabled">Common questions about Glimpse</p>
                                                     </div>
                                                 </button>
                                             </div>
@@ -2142,11 +2142,11 @@ const ModalNavItem = ({ icon, label, active, onClick }: {
 }) => (
     <motion.button
         onClick={onClick}
-        className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all ${active ? "bg-[#1a1a1e] text-[#e8e8eb]" : "text-[#6b6b76] hover:bg-[#1a1a1e] hover:text-[#a0a0ab]"
+        className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all ${active ? "bg-surface-elevated text-content-primary" : "text-content-muted hover:bg-surface-elevated hover:text-content-secondary"
             }`}
         whileTap={{ scale: 0.98 }}
     >
-        <div className={active ? "text-amber-400/80" : "text-[#4a4a54]"}>{icon}</div>
+        <div className={active ? "text-amber-400/80" : "text-content-disabled"}>{icon}</div>
         {label}
     </motion.button>
 );
@@ -2156,7 +2156,7 @@ const ModeButton = ({ icon, label, description, active, onClick, variant = "clou
 }) => {
     const colors = variant === "cloud"
         ? { border: "border-amber-400/40", bg: "bg-amber-400/10", icon: "text-amber-400", desc: "text-amber-400/60" }
-        : { border: "border-[#A5B3FE]/40", bg: "bg-[#A5B3FE]/10", icon: "text-[#A5B3FE]", desc: "text-[#A5B3FE]/60" };
+        : { border: "border-local-40", bg: "bg-local-10", icon: "text-local", desc: "text-local-60" };
 
     const isActive = !loading && active;
 
@@ -2165,13 +2165,13 @@ const ModeButton = ({ icon, label, description, active, onClick, variant = "clou
             onClick={onClick}
             className={`rounded-xl border p-3 text-left transition-all ${isActive
                 ? `${colors.border} ${colors.bg}`
-                : "border-[#2a2a30] bg-[#1a1a1e] hover:border-[#3a3a42]"
+                : "border-border-secondary bg-surface-elevated hover:border-border-hover"
                 }`}
             whileTap={{ scale: 0.98 }}
         >
-            <div className={`mb-1.5 ${isActive ? colors.icon : "text-[#6b6b76]"}`}>{icon}</div>
-            <div className={`text-[12px] font-medium ${isActive ? "text-[#e8e8eb]" : "text-[#a0a0ab]"}`}>{label}</div>
-            <div className={`text-[10px] ${isActive ? colors.desc : "text-[#4a4a54]"}`}>{description}</div>
+            <div className={`mb-1.5 ${isActive ? colors.icon : "text-content-muted"}`}>{icon}</div>
+            <div className={`text-[12px] font-medium ${isActive ? "text-content-primary" : "text-content-secondary"}`}>{label}</div>
+            <div className={`text-[10px] ${isActive ? colors.desc : "text-content-disabled"}`}>{description}</div>
         </motion.button>
     );
 };
@@ -2183,7 +2183,7 @@ const LlmProviderButton = ({ label, active, onClick }: {
         onClick={onClick}
         className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${active
             ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-            : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
+            : "border-border-secondary bg-surface-elevated text-content-secondary hover:border-border-hover hover:text-content-primary"
             }`}
         whileTap={{ scale: 0.97 }}
     >
@@ -2205,7 +2205,7 @@ const ModelProgress = ({ percent, status }: { percent: number; status: string })
         return dots;
     }, [activeCount, totalDots]);
 
-    const color = status === "error" ? "#f87171" : status === "complete" ? "#4ade80" : "#fbbf24";
+    const color = status === "error" ? "var(--color-error)" : status === "complete" ? "var(--color-success)" : "var(--color-cloud)";
 
     return (
         <DotMatrix

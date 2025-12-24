@@ -191,13 +191,13 @@ const AccountView = ({
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div className="relative group">
-                        <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-[#2a2a35] to-[#1a1a20] flex items-center justify-center border border-[#2a2a34] shadow-lg overflow-hidden">
-                            <span className="text-xl font-medium text-[#f0f0f5]">
+                        <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-[#2a2a35] to-[#1a1a20] flex items-center justify-center border border-border-secondary shadow-lg overflow-hidden">
+                            <span className="text-xl font-medium text-content-primary">
                                 {currentUser.name?.[0]?.toUpperCase() || currentUser.email?.[0]?.toUpperCase() || "?"}
                             </span>
                         </div>
                         {isSubscriber && (
-                            <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-[#030303] flex items-center justify-center p-0.5">
+                            <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-surface-primary flex items-center justify-center p-0.5">
                                 <div className="h-full w-full rounded-full bg-amber-400 flex items-center justify-center text-black">
                                     <Cloud size={10} strokeWidth={3} />
                                 </div>
@@ -213,7 +213,7 @@ const AccountView = ({
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
                                         autoFocus
-                                        className="bg-[#1a1a22] border border-[#2a2a34] rounded px-2 py-0 text-[18px] font-medium text-white focus:border-amber-400/50 outline-none w-48 h-full"
+                                        className="bg-surface-elevated border border-border-secondary rounded px-2 py-0 text-[18px] font-medium text-white focus:border-amber-400/50 outline-none w-48 h-full"
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter") handleSaveName();
                                             if (e.key === "Escape") {
@@ -225,7 +225,7 @@ const AccountView = ({
                                     <button
                                         onClick={handleSaveName}
                                         disabled={nameLoading}
-                                        className="h-[28px] w-[28px] flex items-center justify-center rounded hover:bg-[#2a2a34] text-amber-400"
+                                        className="h-[28px] w-[28px] flex items-center justify-center rounded hover:bg-border-secondary text-amber-400"
                                     >
                                         <Check size={16} />
                                     </button>
@@ -237,17 +237,17 @@ const AccountView = ({
                                     </h1>
                                     <button
                                         onClick={() => setIsEditingName(true)}
-                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-[#6b6b76] hover:text-[#a0a0ab]"
+                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-content-muted hover:text-content-secondary"
                                     >
                                         <Pencil size={12} />
                                     </button>
                                 </div>
                             )}
                         </div>
-                        <p className="text-[13px] text-[#6b6b76] mb-1.5">{currentUser.email}</p>
+                        <p className="text-[13px] text-content-muted mb-1.5">{currentUser.email}</p>
                         <button
                             onClick={() => setShowPasswordModal(true)}
-                            className="flex items-center gap-1.5 text-[11px] text-[#4a4a54] hover:text-[#f0f0f5] transition-colors group/pass"
+                            className="flex items-center gap-1.5 text-[11px] text-content-disabled hover:text-content-primary transition-colors group/pass"
                         >
                             <Lock size={10} />
                             <span className="font-mono">••••••••</span>
@@ -258,16 +258,16 @@ const AccountView = ({
             </div>
 
             <div className="space-y-3">
-                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-[#4a4a54] pl-1">Account Settings</h3>
-                <div className="bg-[#0d0d10] border border-[#1f1f28] rounded-xl overflow-hidden divide-y divide-[#1a1a22]">
-                    <div className="flex items-center justify-between p-4 hover:bg-[#111115] transition-colors group">
+                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled pl-1">Account Settings</h3>
+                <div className="bg-surface-tertiary border border-border-primary rounded-xl overflow-hidden divide-y divide-surface-elevated">
+                    <div className="flex items-center justify-between p-4 hover:bg-surface-surface transition-colors group">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-[#1a1a22] text-[#a0a0ab]">
+                            <div className="p-2 rounded-lg bg-surface-elevated text-content-secondary">
                                 <CreditCard size={16} />
                             </div>
                             <div>
-                                <div className="text-[13px] text-[#f0f0f5] font-medium">Subscription</div>
-                                <div className="text-[11px] text-[#6b6b76]">
+                                <div className="text-[13px] text-content-primary font-medium">Subscription</div>
+                                <div className="text-[11px] text-content-muted">
                                     {isSubscriber ? "Active Pro Plan" : "Free Plan"}
                                 </div>
                             </div>
@@ -289,14 +289,14 @@ const AccountView = ({
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between p-4 hover:bg-[#111115] transition-colors">
+                    <div className="flex items-center justify-between p-4 hover:bg-surface-surface transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${isSubscriber ? "bg-[#1a1a22] text-[#a0a0ab]" : "bg-[#1a1a22] text-[#4a4a54]"}`}>
+                            <div className={`p-2 rounded-lg ${isSubscriber ? "bg-surface-elevated text-content-secondary" : "bg-surface-elevated text-content-disabled"}`}>
                                 <CloudCog size={16} />
                             </div>
                             <div>
-                                <div className={`text-[13px] font-medium ${isSubscriber ? "text-[#f0f0f5]" : "text-[#6b6b76]"}`}>History Sync</div>
-                                <div className="text-[11px] text-[#6b6b76]">
+                                <div className={`text-[13px] font-medium ${isSubscriber ? "text-content-primary" : "text-content-muted"}`}>History Sync</div>
+                                <div className="text-[11px] text-content-muted">
                                     {isSubscriber ? "Sync transcriptions across devices" : "Cloud feature"}
                                 </div>
                             </div>
@@ -304,7 +304,7 @@ const AccountView = ({
                         {isSubscriber ? (
                             <button
                                 onClick={onCloudSyncToggle}
-                                className={`relative w-9 h-5 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-[#2a2a34]"}`}
+                                className={`relative w-9 h-5 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-border-secondary"}`}
                             >
                                 <div
                                     className={`absolute top-[2px] h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${cloudSyncEnabled ? "translate-x-[18px]" : "translate-x-[2px]"}`}
@@ -324,8 +324,8 @@ const AccountView = ({
 
             {/* Cloud Usage Stats Section */}
             <div className="space-y-3">
-                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-[#4a4a54] pl-1">Cloud Usage</h3>
-                <div className="bg-[#0d0d10] border border-[#1f1f28] rounded-xl overflow-hidden">
+                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled pl-1">Cloud Usage</h3>
+                <div className="bg-surface-tertiary border border-border-primary rounded-xl overflow-hidden">
                     {usageStats ? (
                         <div className="p-5">
                             <div className="grid grid-cols-2 gap-8">
@@ -334,15 +334,15 @@ const AccountView = ({
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
-                                                <Cloud size={14} className="text-[#6b6b76]" />
-                                                <span className="text-[12px] font-medium text-[#f0f0f5]">This Month</span>
+                                                <Cloud size={14} className="text-content-muted" />
+                                                <span className="text-[12px] font-medium text-content-primary">This Month</span>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-[11px] font-mono text-[#a0a0ab] leading-none mb-1">
-                                                    <span className="text-[#f0f0f5]">{usageStats.cloud_minutes_this_month.toFixed(0)}</span>
+                                                <div className="text-[11px] font-mono text-content-secondary leading-none mb-1">
+                                                    <span className="text-content-primary">{usageStats.cloud_minutes_this_month.toFixed(0)}</span>
                                                     <span className="opacity-50"> / 600 min</span>
                                                 </div>
-                                                <div className="text-[9px] text-[#4a4a54] font-medium">
+                                                <div className="text-[9px] text-content-disabled font-medium">
                                                     {((usageStats.cloud_minutes_this_month / 600) * 100).toFixed(0)}% used
                                                 </div>
                                             </div>
@@ -351,14 +351,14 @@ const AccountView = ({
                                         <UsageBar
                                             value={usageStats.cloud_minutes_this_month}
                                             max={600}
-                                            color="#fbbf24"
+                                            color="var(--color-cloud)"
                                             cols={25}
                                             rows={4}
                                         />
 
                                         <div className="flex items-center gap-1.5 pt-1">
-                                            <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#fbbf24" />
-                                            <span className="text-[10px] text-[#6b6b76]">
+                                            <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-cloud)" />
+                                            <span className="text-[10px] text-content-muted">
                                                 {usageStats.cloud_transcriptions_this_month} transcriptions
                                             </span>
                                         </div>
@@ -368,29 +368,29 @@ const AccountView = ({
                                 {/* Lifetime Stats */}
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <Activity size={14} className="text-[#6b6b76]" />
-                                        <span className="text-[12px] font-medium text-[#f0f0f5]">Lifetime</span>
+                                        <Activity size={14} className="text-content-muted" />
+                                        <span className="text-[12px] font-medium text-content-primary">Lifetime</span>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <div className="text-[20px] font-mono text-[#4ade80] leading-none mb-1">
+                                            <div className="text-[20px] font-mono text-success leading-none mb-1">
                                                 {usageStats.cloud_hours_lifetime < 1
                                                     ? (usageStats.cloud_hours_lifetime * 60).toFixed(0)
                                                     : usageStats.cloud_hours_lifetime.toFixed(1)
                                                 }
-                                                <span className="text-[12px] text-[#4ade80]/70 ml-1">
+                                                <span className="text-[12px] text-success/70 ml-1">
                                                     {usageStats.cloud_hours_lifetime < 1 ? 'min' : 'hrs'}
                                                 </span>
                                             </div>
-                                            <div className="text-[10px] text-[#6b6b76]">Audio processed</div>
+                                            <div className="text-[10px] text-content-muted">Audio processed</div>
                                         </div>
 
                                         <div>
-                                            <div className="text-[20px] font-mono text-[#f0f0f5] leading-none mb-1">
+                                            <div className="text-[20px] font-mono text-content-primary leading-none mb-1">
                                                 {usageStats.cloud_transcriptions_count}
                                             </div>
-                                            <div className="text-[10px] text-[#6b6b76]">Transcriptions</div>
+                                            <div className="text-[10px] text-content-muted">Transcriptions</div>
                                         </div>
                                     </div>
                                 </div>
@@ -398,7 +398,7 @@ const AccountView = ({
                         </div>
                     ) : (
                         <div className="p-8 flex justify-center">
-                            <Loader2 size={18} className="animate-spin text-[#4a4a54]" />
+                            <Loader2 size={18} className="animate-spin text-content-disabled" />
                         </div>
                     )}
                 </div>
@@ -406,7 +406,7 @@ const AccountView = ({
 
             <div className="space-y-3">
                 <div className="flex items-center justify-between px-1">
-                    <h3 className="text-[11px] uppercase tracking-wider font-semibold text-[#4a4a54]">Active Sessions</h3>
+                    <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled">Active Sessions</h3>
                     {sessions.length > 1 && (
                         <button
                             onClick={handleSignOutAll}
@@ -417,21 +417,21 @@ const AccountView = ({
                     )}
                 </div>
 
-                <div className="bg-[#0d0d10] border border-[#1f1f28] rounded-xl overflow-hidden divide-y divide-[#1a1a22]">
+                <div className="bg-surface-tertiary border border-border-primary rounded-xl overflow-hidden divide-y divide-surface-elevated">
                     {sessionsLoading ? (
                         <div className="p-8 flex justify-center">
-                            <Loader2 size={18} className="animate-spin text-[#4a4a54]" />
+                            <Loader2 size={18} className="animate-spin text-content-disabled" />
                         </div>
                     ) : (
                         sessions.map((session) => (
-                            <div key={session.$id} className="flex items-center justify-between p-4 hover:bg-[#111115] transition-colors group">
+                            <div key={session.$id} className="flex items-center justify-between p-4 hover:bg-surface-surface transition-colors group">
                                 <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-lg ${session.current ? "bg-amber-400/10 text-amber-400" : "bg-[#1a1a22] text-[#a0a0ab]"}`}>
+                                    <div className={`p-2 rounded-lg ${session.current ? "bg-amber-400/10 text-amber-400" : "bg-surface-elevated text-content-secondary"}`}>
                                         {permissionBasedIcon(session)}
                                     </div>
                                     <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[13px] text-[#f0f0f5] font-medium">
+                                            <span className="text-[13px] text-content-primary font-medium">
                                                 {session.clientName || "Unknown Device"}
                                             </span>
                                             {session.current && (
@@ -440,7 +440,7 @@ const AccountView = ({
                                                 </span>
                                             )}
                                         </div>
-                                        <span className="text-[11px] text-[#6b6b76]">
+                                        <span className="text-[11px] text-content-muted">
                                             {session.osName}, {session.countryName || "Unknown Location"}
                                         </span>
                                     </div>
@@ -449,7 +449,7 @@ const AccountView = ({
                                     <button
                                         onClick={() => handleDeleteSession(session.$id)}
                                         disabled={deletingSession === session.$id}
-                                        className="text-[11px] font-medium text-[#4a4a54] hover:text-red-400 transition-colors px-2 py-1 opacity-0 group-hover:opacity-100 disabled:opacity-100"
+                                        className="text-[11px] font-medium text-content-disabled hover:text-red-400 transition-colors px-2 py-1 opacity-0 group-hover:opacity-100 disabled:opacity-100"
                                     >
                                         {deletingSession === session.$id ? (
                                             <Loader2 size={12} className="animate-spin text-red-400" />
@@ -464,10 +464,10 @@ const AccountView = ({
                 </div>
             </div>
 
-            <div className="border-t border-[#1f1f28] pt-6 flex justify-center">
+            <div className="border-t border-border-primary pt-6 flex justify-center">
                 <button
                     onClick={onSignOut}
-                    className="flex items-center gap-2 text-[12px] text-[#6b6b76] hover:text-[#f0f0f5] transition-colors"
+                    className="flex items-center gap-2 text-[12px] text-content-muted hover:text-content-primary transition-colors"
                 >
                     <LogOut size={14} />
                     Sign out of {currentUser.name || "account"}
@@ -488,13 +488,13 @@ const AccountView = ({
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="w-[380px] rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-6 shadow-2xl"
+                            className="w-[380px] rounded-2xl border border-border-primary bg-surface-tertiary p-6 shadow-2xl"
                         >
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-[15px] font-medium text-white">Change Password</h3>
                                 <button
                                     onClick={closePasswordModal}
-                                    className="p-1 rounded-lg hover:bg-[#1a1a22] text-[#4a4a54] hover:text-white transition-colors"
+                                    className="p-1 rounded-lg hover:bg-surface-elevated text-content-disabled hover:text-white transition-colors"
                                 >
                                     <X size={16} />
                                 </button>
@@ -505,7 +505,7 @@ const AccountView = ({
                                     <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                                         <Check size={20} className="text-emerald-400" />
                                     </div>
-                                    <p className="text-[13px] text-[#f0f0f5]">Password updated successfully</p>
+                                    <p className="text-[13px] text-content-primary">Password updated successfully</p>
                                 </div>
                             ) : (
                                 <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -536,12 +536,12 @@ const AccountView = ({
                                                     value={currentPassword}
                                                     onChange={(e) => setCurrentPassword(e.target.value)}
                                                     placeholder="Current password"
-                                                    className="w-full bg-[#111115] border border-[#2a2a34] rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-[#4a4a54] focus:border-[#4a4a54] outline-none transition-colors"
+                                                    className="w-full bg-surface-surface border border-border-secondary rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-content-disabled focus:border-content-disabled outline-none transition-colors"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                                    className="absolute right-3 top-2.5 text-[#4a4a54] hover:text-[#a0a0ab]"
+                                                    className="absolute right-3 top-2.5 text-content-disabled hover:text-content-secondary"
                                                 >
                                                     {showCurrentPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                                                 </button>
@@ -555,12 +555,12 @@ const AccountView = ({
                                                     value={newPassword}
                                                     onChange={(e) => setNewPassword(e.target.value)}
                                                     placeholder="New password"
-                                                    className="w-full bg-[#111115] border border-[#2a2a34] rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-[#4a4a54] focus:border-[#4a4a54] outline-none transition-colors"
+                                                    className="w-full bg-surface-surface border border-border-secondary rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-content-disabled focus:border-content-disabled outline-none transition-colors"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowNewPassword(!showNewPassword)}
-                                                    className="absolute right-3 top-2.5 text-[#4a4a54] hover:text-[#a0a0ab]"
+                                                    className="absolute right-3 top-2.5 text-content-disabled hover:text-content-secondary"
                                                 >
                                                     {showNewPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                                                 </button>
@@ -573,7 +573,7 @@ const AccountView = ({
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                                 placeholder="Confirm new password"
-                                                className="w-full bg-[#111115] border border-[#2a2a34] rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-[#4a4a54] focus:border-[#4a4a54] outline-none transition-colors"
+                                                className="w-full bg-surface-surface border border-border-secondary rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-content-disabled focus:border-content-disabled outline-none transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -581,7 +581,7 @@ const AccountView = ({
                                     <button
                                         type="submit"
                                         disabled={passwordLoading}
-                                        className="w-full bg-[#f0f0f5] hover:bg-white text-black font-medium rounded-xl py-2.5 text-[13px] transition-colors disabled:opacity-50 mt-2"
+                                        className="w-full bg-content-primary hover:bg-white text-black font-medium rounded-xl py-2.5 text-[13px] transition-colors disabled:opacity-50 mt-2"
                                     >
                                         {passwordLoading ? (
                                             <Loader2 size={14} className="animate-spin mx-auto" />

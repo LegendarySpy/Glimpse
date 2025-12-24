@@ -71,7 +71,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                     activeDots={[0, 1, 2, 3, 4, 5, 6, 7]}
                     dotSize={3}
                     gap={3}
-                    color="#6b6b76"
+                    color="var(--color-text-muted)"
                     animated
                     className="opacity-50"
                 />
@@ -95,28 +95,28 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                         activeDots={[0, 1, 2]}
                         dotSize={3}
                         gap={2}
-                        color="#fbbf24"
+                        color="var(--color-cloud)"
                         className="opacity-60"
                     />
-                    <h2 className="text-[11px] text-[#6b6b76] uppercase tracking-wider font-semibold">
+                    <h2 className="text-[11px] text-content-muted uppercase tracking-wider font-semibold">
                         Recent Transcriptions
                     </h2>
                 </div>
 
                 <div className="relative">
-                    <div className="flex items-center gap-2 bg-[#0a0a0c] border border-[#1a1a1e] rounded-lg px-2.5 py-1.5 focus-within:border-[#2a2a30] transition-colors">
-                        <Search size={12} className="text-[#4a4a54] shrink-0" />
+                    <div className="flex items-center gap-2 bg-surface-secondary border border-border-primary rounded-lg px-2.5 py-1.5 focus-within:border-border-secondary transition-colors">
+                        <Search size={12} className="text-content-disabled shrink-0" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search..."
-                            className="bg-transparent text-[11px] text-[#c8c8d2] placeholder-[#4a4a54] outline-none w-28 focus:w-36 transition-all"
+                            className="bg-transparent text-[11px] text-content-secondary placeholder-content-disabled outline-none w-28 focus:w-36 transition-all"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery("")}
-                                className="text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                className="text-content-disabled hover:text-content-muted transition-colors"
                             >
                                 <X size={12} />
                             </button>
@@ -125,9 +125,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                 </div>
             </div>
 
-            <div className="bg-[#0a0a0c] rounded-xl border border-[#1a1a1e] overflow-hidden relative" style={{ height: 460 }}>
-                <div className="absolute top-0 left-0 right-2 h-[6px] bg-gradient-to-b from-[#0a0a0c] to-transparent z-10 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 right-2 h-[6px] bg-gradient-to-t from-[#0a0a0c] to-transparent z-10 pointer-events-none" />
+            <div className="bg-surface-secondary rounded-xl border border-border-primary overflow-hidden relative" style={{ height: 460 }}>
 
                 {showEmptyState ? (
                     <div className="h-full flex flex-col items-center justify-center">
@@ -137,10 +135,10 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                             activeDots={[0, 3, 5, 6, 9, 10, 12, 15]}
                             dotSize={4}
                             gap={4}
-                            color="#4a4a54"
+                            color="var(--color-text-disabled)"
                             className="opacity-40 mb-4"
                         />
-                        <p className="text-[13px] text-[#5a5a64] text-center max-w-xs">
+                        <p className="text-[13px] text-content-muted text-center max-w-xs">
                             Your recent transcriptions will appear here
                         </p>
                     </div>
@@ -158,19 +156,22 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                             }
                         }}
                         overscan={200}
+                        components={{
+                            Header: () => <div className="h-1" />,
+                        }}
                         itemContent={(index) => {
                             const record = transcriptions[index];
                             if (!record) {
                                 return (
                                     <div className="pb-1 pl-1 pr-2">
-                                        <div className="h-[100px] w-full rounded-lg bg-[#131316] border border-[#1a1a1e] flex items-center justify-center">
+                                        <div className="h-[100px] w-full rounded-lg bg-surface-surface border border-border-primary flex items-center justify-center">
                                             <DotMatrix
                                                 rows={1}
                                                 cols={3}
                                                 activeDots={[0, 1, 2]}
                                                 dotSize={3}
                                                 gap={2}
-                                                color="#2a2a30"
+                                                color="var(--color-border-secondary)"
                                                 animated
                                             />
                                         </div>
@@ -199,8 +200,8 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                 ) : (
                     <div className="h-full flex flex-col items-center justify-center">
                         <div className="flex flex-col items-center justify-center py-8 px-4">
-                            <Search size={20} className="text-[#3a3a42] mb-2" />
-                            <p className="text-[12px] text-[#4a4a54] text-center">
+                            <Search size={20} className="text-border-hover mb-2" />
+                            <p className="text-[12px] text-content-disabled text-center">
                                 No results for "{searchQuery}"
                             </p>
                         </div>
@@ -209,7 +210,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
             </div>
 
             <div className="flex items-center justify-between px-4 pt-2">
-                <span className="text-[9px] text-[#3a3a42] uppercase tracking-wider">
+                <span className="text-[9px] text-border-hover uppercase tracking-wider">
                     {searchQuery ? (
                         `${transcriptions.length} result${transcriptions.length === 1 ? '' : 's'}`
                     ) : (
@@ -229,7 +230,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                             <button
                                 onClick={() => setShowConfirm(false)}
                                 disabled={isClearing}
-                                className="text-[9px] text-[#5a5a64] uppercase tracking-wider hover:text-[#8a8a94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="text-[9px] text-content-muted uppercase tracking-wider hover:text-content-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
@@ -237,7 +238,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                     ) : (
                         <button
                             onClick={() => setShowConfirm(true)}
-                            className="text-[9px] text-[#5a5a64] uppercase tracking-wider hover:text-red-400 transition-colors"
+                            className="text-[9px] text-content-muted uppercase tracking-wider hover:text-red-400 transition-colors"
                         >
                             Clear All
                         </button>

@@ -59,7 +59,7 @@ const PageSwitcher = ({
                     <motion.span
                         className="text-[12px] font-medium"
                         animate={{
-                            color: activePage === page.key ? "#e8e8eb" : "#5a5a64",
+                            color: activePage === page.key ? "var(--color-text-primary)" : "var(--color-content-muted)",
                         }}
                         transition={{ duration: 0.2 }}
                     >
@@ -249,13 +249,13 @@ const DictionaryView = () => {
                                 activeDots={[0, 1, 2, 3]}
                                 dotSize={3}
                                 gap={3}
-                                color="#fbbf24"
+                                color="var(--color-cloud)"
                             />
                             <div>
-                                <p className="text-3xl font-medium text-[#e8e8eb] tracking-tight">
+                                <p className="text-3xl font-medium text-content-primary tracking-tight">
                                     Word Dictionary
                                 </p>
-                                <p className="text-[14px] text-[#9a9aa3] mt-1">
+                                <p className="text-[14px] text-content-secondary mt-1">
                                     Add custom words or phrases that arent in the default dictionary.
                                 </p>
                             </div>
@@ -272,9 +272,9 @@ const DictionaryView = () => {
                             </div>
                         )}
 
-                        <div className="rounded-xl border border-[#1a1a1e] bg-[#0a0a0c]">
-                            <div className="flex items-center gap-2 border-b border-[#121216] px-4 py-3">
-                                <BookOpen size={16} className="text-[#e8e8eb]" />
+                        <div className="rounded-xl border border-border-primary bg-surface-secondary">
+                            <div className="flex items-center gap-2 border-b border-border-primary px-4 py-3">
+                                <BookOpen size={16} className="text-content-primary" />
                                 <input
                                     value={newEntry}
                                     onChange={(e) => setNewEntry(e.target.value)}
@@ -285,17 +285,17 @@ const DictionaryView = () => {
                                         }
                                     }}
                                     placeholder="Search or add a word..."
-                                    className="flex-1 bg-transparent text-[14px] text-[#e8e8eb] placeholder-[#4a4a54] outline-none"
+                                    className="flex-1 bg-transparent text-[14px] text-content-primary placeholder-content-disabled outline-none"
                                 />
                                 {isSearching && entries.length > 0 && (
-                                    <span className="text-[12px] text-[#8a8a94] whitespace-nowrap">
+                                    <span className="text-[12px] text-content-muted whitespace-nowrap">
                                         {filteredEntries.length} of {entries.length}
                                     </span>
                                 )}
                                 <button
                                     onClick={handleAdd}
                                     disabled={!newEntry.trim() || saving || entries.includes(newEntry.trim())}
-                                    className="flex items-center gap-1 rounded-lg bg-[#1a1a1e] px-3 py-1.5 text-[13px] text-[#e8e8eb] hover:bg-[#222228] disabled:opacity-40 transition-colors"
+                                    className="flex items-center gap-1 rounded-lg bg-surface-elevated px-3 py-1.5 text-[13px] text-content-primary hover:bg-surface-elevated-hover disabled:opacity-40 transition-colors"
                                 >
                                     {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
                                     Add
@@ -311,24 +311,24 @@ const DictionaryView = () => {
                                             activeDots={[0, 1, 2, 3, 4, 5]}
                                             dotSize={3}
                                             gap={3}
-                                            color="#6b6b76"
+                                            color="var(--color-content-muted)"
                                             animated
                                             className="opacity-60"
                                         />
                                     </div>
                                 ) : filteredEntries.length === 0 ? (
-                                    <div className="flex flex-col items-start gap-2 px-4 py-6 text-[#6b6b76]">
+                                    <div className="flex flex-col items-start gap-2 px-4 py-6 text-content-muted">
                                         {isSearching ? (
                                             <>
                                                 <p className="text-[14px] font-medium">No matches found</p>
-                                                <p className="text-[12px] text-[#5a5a64]">
+                                                <p className="text-[12px] text-content-muted">
                                                     Press Enter to add "{newEntry.trim()}" as a new entry.
                                                 </p>
                                             </>
                                         ) : (
                                             <>
                                                 <p className="text-[14px] font-medium">No entries yet</p>
-                                                <p className="text-[12px] text-[#5a5a64]">
+                                                <p className="text-[12px] text-content-muted">
                                                     Add words, phrases or names that arent in the default dictionary.
                                                 </p>
                                             </>
@@ -346,7 +346,7 @@ const DictionaryView = () => {
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
                                                     transition={{ duration: 0.18, ease: "easeOut" }}
-                                                    className="group flex items-center gap-3 border-b border-[#121216] px-4 py-3 last:border-none"
+                                                    className="group flex items-center gap-3 border-b border-border-primary px-4 py-3 last:border-none"
                                                 >
                                                     {editingIndex === originalIndex ? (
                                                         <input
@@ -364,15 +364,15 @@ const DictionaryView = () => {
                                                                 }
                                                             }}
                                                             onBlur={() => handleEditCommit()}
-                                                            className="flex-1 rounded-md border border-[#1f1f24] bg-[#0f0f12] px-2.5 py-1.5 text-[14px] text-[#e8e8eb] outline-none focus:border-[#2a2a30]"
+                                                            className="flex-1 rounded-md border border-border-primary bg-surface-tertiary px-2.5 py-1.5 text-[14px] text-content-primary outline-none focus:border-border-secondary"
                                                         />
                                                     ) : (
                                                         <button
                                                             onClick={() => startEditing(originalIndex)}
                                                             className="flex-1 text-left"
                                                         >
-                                                            <p className="text-[14px] text-[#e8e8eb]">{entry}</p>
-                                                            <p className="text-[11px] text-[#5a5a64] opacity-0 transition-opacity group-hover:opacity-100">
+                                                            <p className="text-[14px] text-content-primary">{entry}</p>
+                                                            <p className="text-[11px] text-content-muted opacity-0 transition-opacity group-hover:opacity-100">
                                                                 Click to edit
                                                             </p>
                                                         </button>
@@ -380,13 +380,13 @@ const DictionaryView = () => {
 
                                                     <div className="flex items-center gap-2">
                                                         {editingIndex === originalIndex ? (
-                                                            <div className="text-[11px] text-[#6b6b76]">
+                                                            <div className="text-[11px] text-content-muted">
                                                                 Press Enter to save
                                                             </div>
                                                         ) : (
                                                             <button
                                                                 onClick={() => startEditing(originalIndex)}
-                                                                className="rounded-md bg-[#141419] p-1.5 text-[#cfcfd6] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
+                                                                className="rounded-md bg-surface-overlay p-1.5 text-content-secondary opacity-0 transition-all group-hover:opacity-100 hover:bg-surface-elevated"
                                                                 title="Edit"
                                                             >
                                                                 <Edit3 size={14} />
@@ -394,7 +394,7 @@ const DictionaryView = () => {
                                                         )}
                                                         <button
                                                             onClick={() => handleDelete(originalIndex)}
-                                                            className="rounded-md bg-[#141419] p-1.5 text-[#c96b6b] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
+                                                            className="rounded-md bg-surface-overlay p-1.5 text-error opacity-0 transition-all group-hover:opacity-100 hover:bg-surface-elevated"
                                                             title="Delete"
                                                         >
                                                             <Trash2 size={14} />
@@ -408,13 +408,13 @@ const DictionaryView = () => {
                             </div>
 
                             {error && (
-                                <div className="border-t border-[#121216] px-4 py-2 text-[12px] text-red-300">
+                                <div className="border-t border-border-primary px-4 py-2 text-[12px] text-red-300">
                                     {error}
                                 </div>
                             )}
                         </div>
 
-                        <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-[#3a3a42]">
+                        <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-content-disabled">
                             {entries.length} {entries.length === 1 ? "entry" : "entries"}
                             {saving ? " · Saving..." : ""}
                         </p>
@@ -439,25 +439,25 @@ const DictionaryView = () => {
                                 color="var(--color-accent)"
                             />
                             <div>
-                                <p className="text-3xl font-medium text-[#e8e8eb] tracking-tight">
+                                <p className="text-3xl font-medium text-content-primary tracking-tight">
                                     Direct Replacements
                                 </p>
-                                <p className="text-[14px] text-[#9a9aa3] mt-1">
+                                <p className="text-[14px] text-content-secondary mt-1">
                                     Automatically replace words in your transcriptions.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="rounded-xl border border-[#1a1a1e] bg-[#0a0a0c]">
-                            <div className="flex items-center gap-2 border-b border-[#121216] px-4 py-3">
+                        <div className="rounded-xl border border-border-primary bg-surface-secondary">
+                            <div className="flex items-center gap-2 border-b border-border-primary px-4 py-3">
                                 <Replace size={16} className="shrink-0" style={{ color: 'var(--color-accent)' }} />
                                 <input
                                     value={newFrom}
                                     onChange={(e) => setNewFrom(e.target.value)}
                                     placeholder="Find word..."
-                                    className="flex-1 min-w-0 bg-transparent text-[14px] text-[#e8e8eb] placeholder-[#4a4a54] outline-none"
+                                    className="flex-1 min-w-0 bg-transparent text-[14px] text-content-primary placeholder-content-disabled outline-none"
                                 />
-                                <ArrowRight size={14} className="text-[#4a4a54] shrink-0" />
+                                <ArrowRight size={14} className="text-content-disabled shrink-0" />
                                 <input
                                     value={newTo}
                                     onChange={(e) => setNewTo(e.target.value)}
@@ -468,7 +468,7 @@ const DictionaryView = () => {
                                         }
                                     }}
                                     placeholder="Replace with..."
-                                    className="flex-1 min-w-0 bg-transparent text-[14px] text-[#e8e8eb] placeholder-[#4a4a54] outline-none"
+                                    className="flex-1 min-w-0 bg-transparent text-[14px] text-content-primary placeholder-content-disabled outline-none"
                                 />
                                 <button
                                     onClick={handleAddReplacement}
@@ -477,7 +477,7 @@ const DictionaryView = () => {
                                         saving ||
                                         replacements.some((r) => r.from.toLowerCase() === newFrom.trim().toLowerCase())
                                     }
-                                    className="flex items-center gap-1 rounded-lg bg-[#1a1a1e] px-3 py-1.5 text-[13px] text-[#e8e8eb] hover:bg-[#222228] disabled:opacity-40 transition-colors shrink-0"
+                                    className="flex items-center gap-1 rounded-lg bg-surface-elevated px-3 py-1.5 text-[13px] text-content-primary hover:bg-surface-elevated-hover disabled:opacity-40 transition-colors shrink-0"
                                 >
                                     {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
                                     Add
@@ -493,15 +493,15 @@ const DictionaryView = () => {
                                             activeDots={[0, 1, 2, 3, 4, 5]}
                                             dotSize={3}
                                             gap={3}
-                                            color="#6b6b76"
+                                            color="var(--color-content-muted)"
                                             animated
                                             className="opacity-60"
                                         />
                                     </div>
                                 ) : replacements.length === 0 ? (
-                                    <div className="flex flex-col items-start gap-2 px-4 py-6 text-[#6b6b76]">
+                                    <div className="flex flex-col items-start gap-2 px-4 py-6 text-content-muted">
                                         <p className="text-[14px] font-medium">No replacements yet</p>
-                                        <p className="text-[12px] text-[#5a5a64]">
+                                        <p className="text-[12px] text-content-muted">
                                             Add word pairs to automatically swap in transcriptions. Matches are case-insensitive.
                                         </p>
                                     </div>
@@ -515,7 +515,7 @@ const DictionaryView = () => {
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
                                                 transition={{ duration: 0.18, ease: "easeOut" }}
-                                                className="group flex items-center gap-3 border-b border-[#121216] px-4 py-3 last:border-none"
+                                                className="group flex items-center gap-3 border-b border-border-primary px-4 py-3 last:border-none"
                                             >
                                                 {editingReplacementIndex === idx ? (
                                                     <div className="flex flex-1 items-center gap-2" data-replacement-edit>
@@ -540,9 +540,9 @@ const DictionaryView = () => {
                                                                     handleEditReplacementCommit();
                                                                 }
                                                             }}
-                                                            className="flex-1 min-w-0 rounded-md border border-[#1f1f24] bg-[#0f0f12] px-2.5 py-1.5 text-[14px] text-[#e8e8eb] outline-none focus:border-[#2a2a30]"
+                                                            className="flex-1 min-w-0 rounded-md border border-border-primary bg-surface-tertiary px-2.5 py-1.5 text-[14px] text-content-primary outline-none focus:border-border-secondary"
                                                         />
-                                                        <ArrowRight size={14} className="text-[#4a4a54] shrink-0" />
+                                                        <ArrowRight size={14} className="text-content-disabled shrink-0" />
                                                         <input
                                                             value={editingTo}
                                                             onChange={(e) => setEditingTo(e.target.value)}
@@ -563,7 +563,7 @@ const DictionaryView = () => {
                                                                     handleEditReplacementCommit();
                                                                 }
                                                             }}
-                                                            className="flex-1 min-w-0 rounded-md border border-[#1f1f24] bg-[#0f0f12] px-2.5 py-1.5 text-[14px] text-[#e8e8eb] outline-none focus:border-[#2a2a30]"
+                                                            className="flex-1 min-w-0 rounded-md border border-border-primary bg-surface-tertiary px-2.5 py-1.5 text-[14px] text-content-primary outline-none focus:border-border-secondary"
                                                         />
                                                     </div>
                                                 ) : (
@@ -571,23 +571,23 @@ const DictionaryView = () => {
                                                         onClick={() => startEditingReplacement(idx)}
                                                         className="flex flex-1 items-center gap-2 text-left"
                                                     >
-                                                        <span className="text-[14px] text-[#e8e8eb]">{replacement.from}</span>
-                                                        <ArrowRight size={14} className="text-[#5a5a64] shrink-0" />
+                                                        <span className="text-[14px] text-content-primary">{replacement.from}</span>
+                                                        <ArrowRight size={14} className="text-content-muted shrink-0" />
                                                         <span className="text-[14px]" style={{ color: 'var(--color-accent)' }}>
-                                                            {replacement.to || <span className="text-[#5a5a64] italic">remove</span>}
+                                                            {replacement.to || <span className="text-content-muted italic">remove</span>}
                                                         </span>
                                                     </button>
                                                 )}
 
                                                 <div className="flex items-center gap-2">
                                                     {editingReplacementIndex === idx ? (
-                                                        <div className="text-[11px] text-[#6b6b76]">
+                                                        <div className="text-[11px] text-content-muted">
                                                             Press Enter to save
                                                         </div>
                                                     ) : (
                                                         <button
                                                             onClick={() => startEditingReplacement(idx)}
-                                                            className="rounded-md bg-[#141419] p-1.5 text-[#cfcfd6] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
+                                                            className="rounded-md bg-surface-overlay p-1.5 text-content-secondary opacity-0 transition-all group-hover:opacity-100 hover:bg-surface-elevated"
                                                             title="Edit"
                                                         >
                                                             <Edit3 size={14} />
@@ -595,7 +595,7 @@ const DictionaryView = () => {
                                                     )}
                                                     <button
                                                         onClick={() => handleDeleteReplacement(idx)}
-                                                        className="rounded-md bg-[#141419] p-1.5 text-[#c96b6b] opacity-0 transition-all group-hover:opacity-100 hover:bg-[#1d1d22]"
+                                                        className="rounded-md bg-surface-overlay p-1.5 text-error opacity-0 transition-all group-hover:opacity-100 hover:bg-surface-elevated"
                                                         title="Delete"
                                                     >
                                                         <Trash2 size={14} />
@@ -608,13 +608,13 @@ const DictionaryView = () => {
                             </div>
 
                             {error && (
-                                <div className="border-t border-[#121216] px-4 py-2 text-[12px] text-red-300">
+                                <div className="border-t border-border-primary px-4 py-2 text-[12px] text-red-300">
                                     {error}
                                 </div>
                             )}
                         </div>
 
-                        <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-[#3a3a42]">
+                        <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-content-disabled">
                             {replacements.length} {replacements.length === 1 ? "replacement" : "replacements"}
                             {saving ? " · Saving..." : ""}
                         </p>
@@ -630,11 +630,11 @@ const DictionaryView = () => {
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #1a1a1e;
+                    background: var(--color-scrollbar-thumb);
                     border-radius: 3px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #252528;
+                    background: var(--color-scrollbar-thumb-hover);
                 }
             `}</style>
         </div>

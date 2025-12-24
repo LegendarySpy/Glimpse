@@ -116,7 +116,7 @@ function App() {
   if (windowLabel === "settings") {
     if (isLoading) {
       return (
-        <div className="settings-view h-screen w-screen overflow-hidden bg-[#0a0a0c]" />
+        <div className="settings-view h-screen w-screen overflow-hidden bg-surface-secondary" />
       );
     }
 

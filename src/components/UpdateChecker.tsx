@@ -130,7 +130,7 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
                         v{update.version} available
                     </p>
                     {update.body && (
-                        <p className="text-[10px] text-[#6b6b76] truncate max-w-[200px]">
+                        <p className="text-[10px] text-content-muted truncate max-w-[200px]">
                             {update.body}
                         </p>
                     )}
@@ -144,7 +144,7 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
                             exit={{ opacity: 0 }}
                             className="flex items-center gap-2"
                         >
-                            <div className="w-20 h-1.5 bg-[#2a2a30] rounded-full overflow-hidden">
+                            <div className="w-20 h-1.5 bg-border-secondary rounded-full overflow-hidden">
                                 <motion.div
                                     className="h-full bg-amber-400 rounded-full"
                                     initial={{ width: 0 }}
@@ -152,7 +152,7 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
                                     transition={{ duration: 0.2 }}
                                 />
                             </div>
-                            <span className="text-[10px] text-[#6b6b76] w-8">{progress}%</span>
+                            <span className="text-[10px] text-content-muted w-8">{progress}%</span>
                         </motion.div>
                     ) : (
                         <motion.button
@@ -194,25 +194,25 @@ export function UpdateChecker({ autoCheck = true }: UpdateCheckerProps) {
 
     return (
         <>
-            <div className="flex items-center gap-3 rounded-lg border border-[#1e1e22] bg-[#111113] px-4 py-3 h-[52px]">
+            <div className="flex items-center gap-3 rounded-lg border border-border-primary bg-surface-surface px-4 py-3 h-[52px]">
                 {checking ? (
                     <>
-                        <Loader2 size={16} className="text-[#6b6b76] animate-spin shrink-0" />
-                        <p className="flex-1 text-[12px] text-[#6b6b76]">Checking for updates...</p>
+                        <Loader2 size={16} className="text-content-muted animate-spin shrink-0" />
+                        <p className="flex-1 text-[12px] text-content-muted">Checking for updates...</p>
                     </>
                 ) : (
                     <>
-                        <CheckCircle size={16} className="text-[#4a4a54] shrink-0" />
-                        <p className="flex-1 text-[12px] text-[#e8e8eb]">You're up to date!</p>
+                        <CheckCircle size={16} className="text-content-disabled shrink-0" />
+                        <p className="flex-1 text-[12px] text-content-primary">You're up to date!</p>
                         <button
                             onClick={() => setWhatsNewOpen(true)}
-                            className="text-[11px] text-[#6b6b76] hover:text-[#a0a0ab] underline underline-offset-2 transition-colors"
+                            className="text-[11px] text-content-muted hover:text-content-secondary underline underline-offset-2 transition-colors"
                         >
                             What's new?
                         </button>
                         <motion.button
                             onClick={checkForUpdates}
-                            className="p-1.5 rounded-md text-[#6b6b76] hover:text-[#a0a0ab] hover:bg-[#1a1a1e] transition-colors"
+                            className="p-1.5 rounded-md text-content-muted hover:text-content-secondary hover:bg-surface-elevated transition-colors"
                             whileTap={{ scale: 0.95 }}
                             title="Check for updates"
                         >

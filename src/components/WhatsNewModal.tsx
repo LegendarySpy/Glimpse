@@ -82,7 +82,7 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                 elements.push(
                     <ul key={`list-${elements.length}`} className="space-y-2.5 mb-4 ml-1">
                         {listItems.map((item, i) => (
-                            <li key={i} className="flex items-start gap-3 text-[13px] leading-relaxed text-[#c8c8cc]">
+                            <li key={i} className="flex items-start gap-3 text-[13px] leading-relaxed text-content-secondary">
                                 <span className="text-amber-400 mt-1 text-[10px]">●</span>
                                 <span>{item}</span>
                             </li>
@@ -109,19 +109,19 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
 
             if (trimmed.startsWith("### ")) {
                 elements.push(
-                    <h4 key={index} className="text-[12px] font-semibold text-[#8b8b96] uppercase tracking-wider mt-5 mb-2">
+                    <h4 key={index} className="text-[12px] font-semibold text-content-muted uppercase tracking-wider mt-5 mb-2">
                         {trimmed.slice(4)}
                     </h4>
                 );
             } else if (trimmed.startsWith("## ")) {
                 elements.push(
-                    <h3 key={index} className="text-[14px] font-medium text-[#e8e8eb] mt-5 mb-2">
+                    <h3 key={index} className="text-[14px] font-medium text-content-primary mt-5 mb-2">
                         {trimmed.slice(3)}
                     </h3>
                 );
             } else if (trimmed.startsWith("# ")) {
                 elements.push(
-                    <h2 key={index} className="text-[15px] font-semibold text-[#e8e8eb] mt-5 mb-2">
+                    <h2 key={index} className="text-[15px] font-semibold text-content-primary mt-5 mb-2">
                         {trimmed.slice(2)}
                     </h2>
                 );
@@ -141,7 +141,7 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                 );
             } else if (!trimmed.startsWith("<!--") && !trimmed.startsWith("**Full Changelog**")) {
                 elements.push(
-                    <p key={index} className="text-[13px] leading-relaxed text-[#c8c8cc] mb-3">
+                    <p key={index} className="text-[13px] leading-relaxed text-content-secondary mb-3">
                         {trimmed}
                     </p>
                 );
@@ -168,20 +168,20 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative w-full max-w-md max-h-[70vh] bg-[#0a0a0c] border border-[#1e1e22] rounded-2xl shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-md max-h-[70vh] bg-surface-secondary border border-border-primary rounded-2xl shadow-2xl overflow-hidden"
                     >
-                        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-[#0a0a0c]/95 backdrop-blur-sm border-b border-[#1e1e22]">
+                        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-surface-secondary backdrop-blur-sm border-b border-border-primary">
                             <div>
-                                <h2 className="text-[15px] font-semibold text-[#e8e8eb]">What's New</h2>
+                                <h2 className="text-[15px] font-semibold text-content-primary">What's New</h2>
                                 {release && (
-                                    <p className="text-[11px] text-[#6b6b76] mt-0.5">
+                                    <p className="text-[11px] text-content-muted mt-0.5">
                                         {version || release.version} • {formatDate(release.publishedAt)}
                                     </p>
                                 )}
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-1.5 rounded-lg text-[#6b6b76] hover:text-[#e8e8eb] hover:bg-[#1a1a1e] transition-colors"
+                                className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors"
                             >
                                 <X size={16} />
                             </button>
@@ -190,7 +190,7 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                         <div className="px-5 py-5 overflow-y-auto settings-scroll" style={{ maxHeight: 'calc(70vh - 140px)' }}>
                             {(loading || !release) && !error && (
                                 <div className="flex items-center justify-center py-8">
-                                    <Loader2 size={20} className="animate-spin text-[#6b6b76]" />
+                                    <Loader2 size={20} className="animate-spin text-content-muted" />
                                 </div>
                             )}
 
@@ -209,10 +209,10 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                         </div>
 
                         {release && (
-                            <div className="sticky bottom-0 px-5 py-3 bg-[#0a0a0c]/95 backdrop-blur-sm border-t border-[#1e1e22]">
+                            <div className="sticky bottom-0 px-5 py-3 bg-surface-secondary backdrop-blur-sm border-t border-border-primary">
                                 <button
                                     onClick={() => openUrl(release.htmlUrl)}
-                                    className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg bg-[#1a1a1e] border border-[#2a2a30] text-[11px] font-medium text-[#a0a0ab] hover:text-[#e8e8eb] hover:border-[#3a3a45] transition-colors"
+                                    className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg bg-surface-elevated border border-border-secondary text-[11px] font-medium text-content-secondary hover:text-content-primary hover:border-border-hover transition-colors"
                                 >
                                     <ExternalLink size={12} />
                                     View on GitHub

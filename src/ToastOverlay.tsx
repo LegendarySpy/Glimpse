@@ -209,7 +209,7 @@ const ToastOverlay: React.FC = () => {
                 activeDots={[0, 1, 2, 3]}
                 dotSize={4}
                 gap={2}
-                color="#a78bfa"
+                color="var(--color-accent)"
               />
             </div>
           ) : (

@@ -630,7 +630,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
       <div className="relative flex flex-col items-center pb-2">
         <div
           ref={containerRef}
-          className={`relative rounded-full bg-[#050505] overflow-hidden ${isErrorFlashing ? "animate-shake" : ""}`}
+          className={`relative rounded-full bg-surface-primary overflow-hidden ${isErrorFlashing ? "animate-shake" : ""}`}
           style={{
             width: PILL_WIDTH,
             height: PILL_HEIGHT,

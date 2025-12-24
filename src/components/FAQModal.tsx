@@ -47,22 +47,22 @@ const FAQModal = ({ isOpen, onClose }: FAQModalProps) => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="relative bg-[#0a0a0c] border border-[#1a1a22] rounded-2xl overflow-hidden max-w-md w-full mx-4 shadow-2xl"
+                        className="relative bg-surface-secondary border border-border-primary rounded-2xl overflow-hidden max-w-md w-full mx-4 shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="relative flex items-center justify-between p-5 border-b border-[#1a1a22]">
+                        <div className="relative flex items-center justify-between p-5 border-b border-border-primary">
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center justify-center w-8 h-8">
                                     <HelpCircle size={16} className="text-amber-400" />
                                 </div>
                                 <div>
                                     <h2 className="text-[15px] font-semibold text-white">Frequently Asked Questions</h2>
-                                    <p className="text-[11px] text-[#6b6b76]">Common questions about Glimpse</p>
+                                    <p className="text-[11px] text-content-muted">Common questions about Glimpse</p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-[#1a1a22] text-[#4a4a54] hover:text-white transition-colors"
+                                className="p-2 rounded-lg hover:bg-surface-elevated text-content-disabled hover:text-white transition-colors"
                             >
                                 <X size={16} />
                             </button>
@@ -72,26 +72,26 @@ const FAQModal = ({ isOpen, onClose }: FAQModalProps) => {
                             {faqItems.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="p-4 rounded-xl bg-[#0d0d10] border border-[#1a1a22] hover:border-[#2a2a34] transition-colors"
+                                    className="p-4 rounded-xl bg-surface-tertiary border border-border-primary hover:border-border-secondary transition-colors"
                                 >
-                                    <h3 className="text-[13px] font-medium text-[#e8e8eb] mb-1.5">
+                                    <h3 className="text-[13px] font-medium text-content-primary mb-1.5">
                                         {item.question}
                                     </h3>
-                                    <p className="text-[12px] text-[#7a7a84] leading-relaxed">
+                                    <p className="text-[12px] text-content-muted leading-relaxed">
                                         {item.answer}
                                     </p>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="relative flex items-center justify-between p-4 border-t border-[#1a1a22] bg-[#08080a]">
+                        <div className="relative flex items-center justify-between p-4 border-t border-border-primary bg-surface-primary">
                             <div className="flex items-center gap-2">
-                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="#fbbf24" />
-                                <span className="text-[10px] text-[#4a4a54]">Glimpse</span>
+                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="var(--color-cloud)" />
+                                <span className="text-[10px] text-content-disabled">Glimpse</span>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="px-4 py-2 rounded-lg bg-[#1a1a22] border border-[#2a2a34] text-[12px] font-medium text-[#a0a0ab] hover:text-white hover:border-[#3a3a45] transition-colors"
+                                className="px-4 py-2 rounded-lg bg-surface-elevated border border-border-secondary text-[12px] font-medium text-content-secondary hover:text-white hover:border-border-hover transition-colors"
                             >
                                 Got it
                             </button>

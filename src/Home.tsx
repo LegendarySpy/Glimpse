@@ -34,11 +34,11 @@ const SidebarItem = ({
         onClick={onClick}
         className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 ${collapsed ? "gap-0" : "gap-3"
             } ${active
-                ? "bg-[#1a1a1e] text-[#e8e8eb]"
-                : "text-[#6b6b76] hover:bg-[#151517] hover:text-[#a0a0ab]"
+                ? "bg-surface-elevated text-content-primary"
+                : "text-content-muted hover:bg-surface-overlay hover:text-content-secondary"
             }`}
     >
-        <div className={`flex items-center justify-center w-[18px] shrink-0 ${active ? "text-[#e8e8eb]" : "group-hover:text-[#a0a0ab]"}`}>
+        <div className={`flex items-center justify-center w-[18px] shrink-0 ${active ? "text-content-primary" : "group-hover:text-content-secondary"}`}>
             {icon}
         </div>
         <span
@@ -149,7 +149,7 @@ const Home = () => {
     };
 
     return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[#0e0e10] font-sans text-white select-none">
+        <div className="flex h-screen w-screen overflow-hidden bg-surface-tertiary font-sans text-white select-none">
             <div
                 data-tauri-drag-region
                 className="fixed top-0 left-0 right-0 h-8 z-50"
@@ -163,7 +163,7 @@ const Home = () => {
                     duration: 0.2,
                     ease: [0.25, 0.1, 0.25, 1]
                 }}
-                className="relative flex flex-col border-r border-[#1a1a1e] bg-[#0a0a0c] shrink-0"
+                className="relative flex flex-col border-r border-border-primary bg-surface-secondary shrink-0"
             >
                 <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
@@ -181,7 +181,7 @@ const Home = () => {
                         </div>
                         <span
                             style={{ width: isSidebarCollapsed ? 0 : 'auto', opacity: isSidebarCollapsed ? 0 : 1 }}
-                            className="text-[14px] font-bold tracking-wide text-[#e8e8eb] whitespace-nowrap overflow-hidden transition-[width,opacity] duration-200 ease-out"
+                            className="text-[14px] font-bold tracking-wide text-content-primary whitespace-nowrap overflow-hidden transition-[width,opacity] duration-200 ease-out"
                         >
                             Glimpse
                         </span>
@@ -212,10 +212,10 @@ const Home = () => {
                     />
                 </nav>
 
-                <div className="p-2 space-y-1 border-t border-[#1a1a1e]/50">
+                <div className="p-2 space-y-1 border-t border-border-primary">
                     <button
                         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                        className="flex w-full items-center rounded-lg h-9 pl-[17px] text-[#4a4a54] hover:text-[#6b6b76]"
+                        className="flex w-full items-center rounded-lg h-9 pl-[17px] text-content-disabled hover:text-content-muted"
                     >
                         <div className="flex items-center justify-center w-[18px]">
                             <motion.div
@@ -230,10 +230,10 @@ const Home = () => {
                     <div className="relative">
                         <button
                             onClick={() => setShowSupportPopup(!showSupportPopup)}
-                            className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 text-[#6b6b76] hover:bg-[#151517] hover:text-[#a0a0ab] ${isSidebarCollapsed ? "gap-0" : "gap-3"
+                            className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 text-content-muted hover:bg-surface-overlay hover:text-content-secondary ${isSidebarCollapsed ? "gap-0" : "gap-3"
                                 }`}
                         >
-                            <div className="flex items-center justify-center w-[18px] shrink-0 group-hover:text-[#a0a0ab]">
+                            <div className="flex items-center justify-center w-[18px] shrink-0 group-hover:text-content-secondary">
                                 <Info size={18} />
                             </div>
                             <span
@@ -252,14 +252,14 @@ const Home = () => {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
                                     transition={{ duration: 0.15, ease: "easeOut" }}
-                                    className="absolute bottom-full left-2 mb-2 w-56 bg-[#111113] border border-[#2a2a30] rounded-xl shadow-xl overflow-hidden z-50"
+                                    className="absolute bottom-full left-2 mb-2 w-56 bg-surface-surface border border-border-secondary rounded-xl shadow-xl overflow-hidden z-50"
                                 >
-                                    <div className="p-3 border-b border-[#1e1e22]">
+                                    <div className="p-3 border-b border-border-primary">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-[12px] font-medium text-[#e8e8eb]">Get Support</span>
+                                            <span className="text-[12px] font-medium text-content-primary">Get Support</span>
                                             <button
                                                 onClick={() => setShowSupportPopup(false)}
-                                                className="p-1 rounded-md hover:bg-[#1a1a1e] text-[#6b6b76] hover:text-[#a0a0ab] transition-colors"
+                                                className="p-1 rounded-md hover:bg-surface-elevated text-content-muted hover:text-content-secondary transition-colors"
                                             >
                                                 <X size={14} />
                                             </button>
@@ -271,12 +271,12 @@ const Home = () => {
                                                 setShowSupportPopup(false);
                                                 setShowFAQ(true);
                                             }}
-                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group w-full text-left"
+                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors group w-full text-left"
                                         >
                                             <HelpCircle size={16} className="text-amber-400" />
                                             <div>
-                                                <div className="text-[12px] font-medium text-[#e8e8eb]">FAQ</div>
-                                                <div className="text-[10px] text-[#6b6b76]">Common questions</div>
+                                                <div className="text-[12px] font-medium text-content-primary">FAQ</div>
+                                                <div className="text-[10px] text-content-muted">Common questions</div>
                                             </div>
                                         </button>
                                         <a
@@ -284,12 +284,12 @@ const Home = () => {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             onClick={() => setShowSupportPopup(false)}
-                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group"
+                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors group"
                                         >
-                                            <Github size={16} className="text-[#a0a0ab]" />
+                                            <Github size={16} className="text-content-secondary" />
                                             <div>
-                                                <div className="text-[12px] font-medium text-[#e8e8eb]">GitHub Issues</div>
-                                                <div className="text-[10px] text-[#6b6b76]">Report bugs & features</div>
+                                                <div className="text-[12px] font-medium text-content-primary">GitHub Issues</div>
+                                                <div className="text-[10px] text-content-muted">Report bugs & features</div>
                                             </div>
                                         </a>
                                         <button
@@ -298,12 +298,12 @@ const Home = () => {
                                                 setSettingsTab("about");
                                                 setIsSettingsOpen(true);
                                             }}
-                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#1a1a1e] transition-colors group w-full text-left"
+                                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors group w-full text-left"
                                         >
                                             <Info size={16} className="text-[#5865F2]" />
                                             <div>
-                                                <div className="text-[12px] font-medium text-[#e8e8eb]">About</div>
-                                                <div className="text-[10px] text-[#6b6b76]">v{appVersion} • {isCloudMode ? "Cloud" : "Local"}</div>
+                                                <div className="text-[12px] font-medium text-content-primary">About</div>
+                                                <div className="text-[10px] text-content-muted">v{appVersion} • {isCloudMode ? "Cloud" : "Local"}</div>
                                             </div>
                                         </button>
                                     </div>
@@ -321,7 +321,7 @@ const Home = () => {
                 </div>
             </motion.aside>
 
-            <main className="flex flex-1 flex-col bg-[#0e0e10] overflow-hidden relative">
+            <main className="flex flex-1 flex-col bg-surface-tertiary overflow-hidden relative">
                 <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
                 {currentUser && (
@@ -330,9 +330,9 @@ const Home = () => {
                             setSettingsTab("account");
                             setIsSettingsOpen(true);
                         }}
-                        className="fixed top-10 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1e1e22] bg-[#111113] hover:bg-[#161618] hover:border-[#2a2a30] transition-colors z-10"
+                        className="fixed top-10 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-primary bg-surface-surface hover:bg-surface-overlay hover:border-border-secondary transition-colors z-10"
                     >
-                        <div className="w-6 h-6 rounded-full bg-[#1a1a1e] border border-[#2a2a30] flex items-center justify-center overflow-hidden">
+                        <div className="w-6 h-6 rounded-full bg-surface-elevated border border-border-secondary flex items-center justify-center overflow-hidden">
                             {(currentUser.prefs as Record<string, string>)?.avatar ? (
                                 <img
                                     src={(currentUser.prefs as Record<string, string>).avatar}
@@ -340,10 +340,10 @@ const Home = () => {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <User size={14} className="text-[#6b6b76]" />
+                                <User size={14} className="text-content-muted" />
                             )}
                         </div>
-                        <span className="text-[12px] text-[#a0a0ab] max-w-[100px] truncate">
+                        <span className="text-[12px] text-content-secondary max-w-[100px] truncate">
                             {currentUser.name || currentUser.email?.split("@")[0] || "Account"}
                         </span>
                     </button>
@@ -361,10 +361,10 @@ const Home = () => {
                                 transition={{ duration: 0.25, ease: "easeOut" }}
                             >
                                 <div className="mb-8">
-                                    <h1 className="text-3xl font-medium text-[#e8e8eb] tracking-tight">
+                                    <h1 className="text-3xl font-medium text-content-primary tracking-tight">
                                         {getGreeting()}
                                     </h1>
-                                    <p className="mt-2 text-[15px] text-[#5a5a64]">
+                                    <p className="mt-2 text-[15px] text-content-muted">
                                         Ready when you are
                                     </p>
                                 </div>
@@ -389,7 +389,7 @@ const Home = () => {
                         {activeView === "brain" && (
                             <motion.div
                                 key="brain"
-                                className="flex flex-col items-center justify-start pt-12 text-[#4a4a54]"
+                                className="flex flex-col items-center justify-start pt-12 text-content-disabled"
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 8 }}

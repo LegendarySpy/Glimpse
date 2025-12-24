@@ -2,17 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border-primary);
+  }
+}
+
 :root {
   font-family: "Inter", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
-  color: #f8f8f8;
+  color: var(--color-text-primary);
   background-color: transparent;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* Cloud - Amber/Yellow - Used for cloud transcription features */
+  /* Opacity scale: 5, 10, 20, 30, 50, 80 for layering/hover states */
   --color-cloud: #FBBF24;
   --color-cloud-light: #FCD34D;
   --color-cloud-dark: #D97706;
@@ -24,17 +34,22 @@
   --color-cloud-50: rgba(251, 191, 36, 0.50);
   --color-cloud-80: rgba(251, 191, 36, 0.80);
 
+  /* Local - Blue/Indigo - Used for local/on-device transcription features */
   --color-local: #A5B3FE;
   --color-local-light: #C4CBFF;
   --color-local-dark: #818CF8;
   --color-local-hover: #8B99FF;
   --color-local-5: rgba(165, 179, 254, 0.05);
   --color-local-10: rgba(165, 179, 254, 0.10);
+  --color-local-15: rgba(165, 179, 254, 0.15);
   --color-local-20: rgba(165, 179, 254, 0.20);
   --color-local-30: rgba(165, 179, 254, 0.30);
+  --color-local-40: rgba(165, 179, 254, 0.40);
   --color-local-50: rgba(165, 179, 254, 0.50);
+  --color-local-60: rgba(165, 179, 254, 0.60);
   --color-local-80: rgba(165, 179, 254, 0.80);
 
+  /* Accent - Purple - Used for general UI accents, buttons, links */
   --color-accent: #8F6FF7;
   --color-accent-light: #A78BFA;
   --color-accent-dark: #7C5CE7;
@@ -46,25 +61,46 @@
   --color-accent-50: rgba(143, 111, 247, 0.50);
   --color-accent-80: rgba(143, 111, 247, 0.80);
 
+  /* Backgrounds */
   --color-bg-primary: #030303;
   --color-bg-secondary: #0a0a0c;
   --color-bg-tertiary: #0d0d10;
+  --color-bg-surface: #111113;
+  --color-bg-overlay: #161618;
   --color-bg-elevated: #1a1a22;
+  --color-bg-elevated-hover: #232328;
   --color-bg-hover: #2a2a34;
 
+  /* Borders */
   --color-border-primary: #1f1f28;
   --color-border-secondary: #2a2a32;
   --color-border-hover: #3a3a45;
 
-  --color-text-primary: #f0f0f5;
+  /* Text */
+  --color-text-primary: #e8e8eb;
   --color-text-secondary: #a0a0ab;
   --color-text-muted: #6b6b76;
   --color-text-disabled: #4a4a54;
 
+  /* Semantic (note: warning matches cloud-hover intentionally) */
   --color-success: #10B981;
   --color-error: #EF4444;
   --color-warning: #F59E0B;
   --color-info: #3B82F6;
+
+  /* Scrollbar */
+  --color-scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+  --color-scrollbar-thumb-subtle: rgba(255, 255, 255, 0.08);
+  --color-scrollbar-thumb-subtle-hover: rgba(255, 255, 255, 0.15);
+
+  /* Toast glows */
+  --color-toast-glow-error: rgba(239, 68, 68, 0.15);
+  --color-toast-glow-error-border: rgba(239, 68, 68, 0.1);
+  --color-toast-glow-info: rgba(59, 130, 246, 0.1);
+  --color-toast-glow-success: rgba(16, 185, 129, 0.1);
+  --color-toast-glow-warning: rgba(245, 158, 11, 0.1);
+  --color-toast-glow-update: rgba(143, 111, 247, 0.1);
 }
 
 *[data-tauri-drag-region] {
@@ -92,11 +128,11 @@ body {
 html.settings-html,
 body.settings-body {
   overflow: hidden;
-  background-color: #030303;
+  background-color: var(--color-bg-primary);
 }
 
 .settings-view {
-  background-color: #030303;
+  background-color: var(--color-bg-primary);
   color: inherit;
 }
 
@@ -127,12 +163,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-scrollbar-thumb-hover);
 }
 
 .settings-scroll {
@@ -151,12 +187,12 @@ body {
 }
 
 .settings-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-scrollbar-thumb-subtle);
   border-radius: 3px;
 }
 
 .settings-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-scrollbar-thumb-subtle-hover);
 }
 
 @keyframes pulse-glow {
@@ -239,23 +275,23 @@ body {
 }
 
 .toast-glow-error {
-  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 8px 32px var(--color-toast-glow-error), 0 0 0 1px var(--color-toast-glow-error-border);
 }
 
 .toast-glow-info {
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 8px 32px var(--color-toast-glow-info), 0 0 0 1px var(--color-toast-glow-info);
 }
 
 .toast-glow-success {
-  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1), 0 0 0 1px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 8px 32px var(--color-toast-glow-success), 0 0 0 1px var(--color-toast-glow-success);
 }
 
 .toast-glow-warning {
-  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.1), 0 0 0 1px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 8px 32px var(--color-toast-glow-warning), 0 0 0 1px var(--color-toast-glow-warning);
 }
 
 .toast-glow-update {
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 8px 32px var(--color-toast-glow-update), 0 0 0 1px var(--color-toast-glow-update);
 }
 
 .line-clamp-3 {

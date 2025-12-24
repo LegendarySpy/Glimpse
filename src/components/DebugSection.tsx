@@ -23,9 +23,9 @@ export function DebugSection() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-2 pb-3 border-b border-[#1e1e22]">
+            <div className="flex items-center gap-2 pb-3 border-b border-border-primary">
                 <Bug size={16} className="text-red-400" />
-                <h3 className="text-[14px] font-semibold text-[#e8e8eb]">Developer Tools</h3>
+                <h3 className="text-[14px] font-semibold text-content-primary">Developer Tools</h3>
                 <span className="ml-auto text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">
                     DEV ONLY
                 </span>
@@ -33,7 +33,7 @@ export function DebugSection() {
 
             <div className="space-y-4">
                 <div>
-                    <p className="text-[11px] font-medium text-[#6b6b76] uppercase tracking-wider mb-3">
+                    <p className="text-[11px] font-medium text-content-muted uppercase tracking-wider mb-3">
                         Toast Notifications
                     </p>
                     <div className="grid grid-cols-2 gap-2">
@@ -81,12 +81,12 @@ export function DebugSection() {
                 </div>
 
                 <div>
-                    <p className="text-[11px] font-medium text-[#6b6b76] uppercase tracking-wider mb-3">
+                    <p className="text-[11px] font-medium text-content-muted uppercase tracking-wider mb-3">
                         Version Tracking
                     </p>
                     <button
                         onClick={resetVersionTracking}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1a1a1e] border border-[#2a2a30] text-[11px] text-[#a0a0ab] hover:bg-[#252528] hover:border-[#3a3a45] transition-colors w-full"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-elevated border border-border-secondary text-[11px] text-content-secondary hover:bg-surface-elevated-hover hover:border-border-hover transition-colors w-full"
                     >
                         <Bell size={12} />
                         Reset Version (trigger update toast on reload)
@@ -94,7 +94,7 @@ export function DebugSection() {
                 </div>
 
                 <div>
-                    <p className="text-[11px] font-medium text-[#6b6b76] uppercase tracking-wider mb-3">
+                    <p className="text-[11px] font-medium text-content-muted uppercase tracking-wider mb-3">
                         Storage
                     </p>
                     <div className="space-y-2">
@@ -111,8 +111,8 @@ export function DebugSection() {
                     </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#1e1e22]">
-                    <p className="text-[10px] text-[#4a4a54] font-mono">
+                <div className="pt-3 border-t border-border-primary">
+                    <p className="text-[10px] text-content-disabled font-mono">
                         This section is only visible to accounts with the 'dev' label.
                     </p>
                 </div>

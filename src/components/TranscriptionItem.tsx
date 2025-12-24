@@ -170,7 +170,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
             transition={{ duration: 0.2 }}
             className="group relative snap-start"
         >
-            <div className={`flex items-start gap-3 py-3 px-4 rounded-lg transition-colors ${isError ? "bg-red-500/[0.03]" : "hover:bg-[#131316]"}`}>
+            <div className={`flex items-start gap-3 py-3 px-4 rounded-lg transition-colors ${isError ? "bg-red-500/[0.03]" : "hover:bg-surface-surface"}`}>
                 {/* Status Indicator */}
                 <div className="mt-1.5 shrink-0">
                     {isRetrying ? (
@@ -180,7 +180,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                             activeDots={[0, 1, 2]}
                             dotSize={4}
                             gap={2}
-                            color="#fbbf24"
+                            color="var(--color-cloud)"
                             animated
                             className="opacity-70"
                         />
@@ -193,7 +193,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                             activeDots={[0]}
                             dotSize={4}
                             gap={1}
-                            color="#4ade80"
+                            color="var(--color-success)"
                             className="opacity-70"
                         />
                     )}
@@ -202,16 +202,16 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] text-[#5a5a64] uppercase tracking-wider font-medium">
+                        <span className="text-[10px] text-content-muted uppercase tracking-wider font-medium">
                             {dateStr}
                         </span>
-                        <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
-                        <span className="text-[10px] text-[#4a4a54] font-mono">
+                        <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
+                        <span className="text-[10px] text-content-disabled font-mono">
                             {timeStr}
                         </span>
                         {isError && (
                             <>
-                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
                                 <span className="text-[9px] text-red-400 font-medium uppercase tracking-wider">
                                     Failed
                                 </span>
@@ -219,8 +219,8 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                         )}
                         {isCloudModel && !isError && (
                             <>
-                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
-                                <span className="flex items-center gap-1 text-[9px] text-[#fbbf24]">
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
+                                <span className="flex items-center gap-1 text-[9px] text-cloud">
                                     <Cloud size={9} />
                                     Cloud
                                 </span>
@@ -228,8 +228,8 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                         )}
                         {record.llm_cleaned && !isError && !isCloudModel && (
                             <>
-                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
-                                <span className="flex items-center gap-1 text-[9px] text-[#A5B3FE]">
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
+                                <span className="flex items-center gap-1 text-[9px] text-local">
                                     <Wand2 size={9} />
                                     Cleaned
                                 </span>
@@ -237,8 +237,8 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                         )}
                         {isRetrying && (
                             <>
-                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
-                                <span className="text-[10px] text-[#fbbf24] uppercase tracking-wider font-medium">
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
+                                <span className="text-[10px] text-cloud uppercase tracking-wider font-medium">
                                     Retrying...
                                 </span>
                             </>
@@ -252,22 +252,22 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                             </p>
                         </div>
                     ) : (
-                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-[#c8c8d2] select-text cursor-text">
+                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-content-secondary select-text cursor-text">
                             {highlightText(truncatedText, searchQuery)}
                         </p>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-3 mt-1 text-[9px] text-[#4a4a54]">
+                    <div className="flex flex-wrap items-center gap-3 mt-1 text-[9px] text-content-disabled">
                         {!isError && (
                             <>
                                 <span>{wordCountLabel}</span>
-                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
                                 <span>{formatDuration(record.audio_duration_seconds ?? 0)}</span>
-                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
                                 <span>Speech: {speechModelLabel}</span>
                                 {llmModelLabel && (
                                     <>
-                                        <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="#3a3a42" />
+                                        <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-border-hover)" />
                                         <span>LLM: {llmModelLabel}</span>
                                     </>
                                 )}
@@ -277,7 +277,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                         {shouldTruncate && (
                             <button
                                 onClick={() => setIsExpanded(!isExpanded)}
-                                className="flex items-center gap-1 text-[9px] text-[#6b6b76] hover:text-[#8a8a96] transition-colors"
+                                className="flex items-center gap-1 text-[9px] text-content-muted hover:text-content-secondary transition-colors"
                             >
                                 {isExpanded ? (
                                     <>
@@ -302,14 +302,14 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                             <motion.button
                                 onClick={handleCopy}
                                 whileTap={{ scale: 0.95 }}
-                                className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 hover:bg-[#1a1a1e] ${copied ? "bg-[#1a1a1e]" : ""
+                                className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 hover:bg-surface-elevated ${copied ? "bg-surface-elevated" : ""
                                     }`}
                                 title={copied ? "Copied" : "Copy transcription"}
                             >
                                 {copied ? (
-                                    <Check size={14} className="text-[#4ade80]" />
+                                    <Check size={14} className="text-success" />
                                 ) : (
-                                    <Copy size={14} className="text-[#c8c8d2]" />
+                                    <Copy size={14} className="text-content-secondary" />
                                 )}
                             </motion.button>
                         )}
@@ -323,14 +323,14 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                 }
                             }}
                             whileTap={{ scale: 0.95 }}
-                            className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 ${shiftHeld ? "hover:bg-red-500/10" : "hover:bg-[#1a1a1e]"
+                            className={`p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 ${shiftHeld ? "hover:bg-red-500/10" : "hover:bg-surface-elevated"
                                 }`}
                             title={shiftHeld ? "Delete" : "More options"}
                         >
                             {shiftHeld ? (
                                 <Trash2 size={14} className="text-red-400" />
                             ) : (
-                                <MoreVertical size={14} className="text-[#6b6b76]" />
+                                <MoreVertical size={14} className="text-content-muted" />
                             )}
                         </motion.button>
 
@@ -341,7 +341,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: -4 }}
                                     transition={{ duration: 0.12 }}
-                                    className="fixed z-[100] min-w-[160px] rounded-lg border border-[#2a2a30] bg-[#161618] shadow-xl shadow-black/50"
+                                    className="fixed z-[100] min-w-[160px] rounded-lg border border-border-secondary bg-surface-overlay shadow-xl shadow-black/50"
                                     style={{
                                         top: menuRef.current ? menuRef.current.getBoundingClientRect().bottom + 4 : 0,
                                         right: menuRef.current ? window.innerWidth - menuRef.current.getBoundingClientRect().right : 0,
@@ -350,9 +350,9 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                     <button
                                         onClick={handleRetry}
                                         disabled={isRetrying}
-                                        className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-[#c8c8d2] hover:bg-[#1a1a1e] transition-colors disabled:opacity-50"
+                                        className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-content-secondary hover:bg-surface-elevated transition-colors disabled:opacity-50"
                                     >
-                                        <RotateCw size={12} className="text-[#fbbf24]" />
+                                        <RotateCw size={12} className="text-cloud" />
                                         <span>Retry</span>
                                     </button>
 
@@ -360,9 +360,9 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                         <button
                                             onClick={handleRetryLlm}
                                             disabled={isRetryingLlm}
-                                            className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-[#c8c8d2] hover:bg-[#1a1a1e] transition-colors disabled:opacity-50"
+                                            className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-content-secondary hover:bg-surface-elevated transition-colors disabled:opacity-50"
                                         >
-                                            <RotateCw size={12} className="text-[#A5B3FE]" />
+                                            <RotateCw size={12} className="text-local" />
                                             <span>{record.llm_cleaned ? "Retry AI cleanup" : "Run AI cleanup"}</span>
                                         </button>
                                     )}
@@ -371,14 +371,14 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                         <button
                                             onClick={handleUndoLlm}
                                             disabled={isUndoingLlm}
-                                            className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-[#c8c8d2] hover:bg-[#1a1a1e] transition-colors disabled:opacity-50"
+                                            className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] text-content-secondary hover:bg-surface-elevated transition-colors disabled:opacity-50"
                                         >
-                                            <Undo2 size={12} className="text-[#f59e0b]" />
+                                            <Undo2 size={12} className="text-warning" />
                                             <span>Undo AI cleanup</span>
                                         </button>
                                     )}
 
-                                    <div className="h-px bg-[#2a2a30] mx-2" />
+                                    <div className="h-px bg-border-secondary mx-2" />
 
                                     <button
                                         onClick={handleDelete}
@@ -396,13 +396,13 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
 
                 {/* Loading state indicators */}
                 {isRetryingLlm && (
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#A5B3FE]">
+                    <div className="flex items-center gap-1.5 text-[10px] text-local">
                         <RotateCw size={12} className="animate-spin" />
                         <span>Cleaning...</span>
                     </div>
                 )}
                 {isUndoingLlm && (
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#f59e0b]">
+                    <div className="flex items-center gap-1.5 text-[10px] text-warning">
                         <Undo2 size={12} className="animate-pulse" />
                         <span>Reverting...</span>
                     </div>

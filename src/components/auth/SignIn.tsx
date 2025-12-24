@@ -99,7 +99,7 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
     }, []);
 
     return (
-        <div className="flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-[#0a0a0c] text-white select-none">
+        <div className="flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-surface-secondary text-white select-none">
             <div data-tauri-drag-region className="absolute top-0 left-0 right-0 h-7" />
 
             <motion.div
@@ -109,10 +109,10 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
             >
                 <div className="flex flex-col items-center mb-8">
                     <GlimpseLogo />
-                    <h1 className="mt-4 text-xl font-semibold text-[#e8e8eb]">
+                    <h1 className="mt-4 text-xl font-semibold text-content-primary">
                         {mode === "signin" ? "Welcome back" : "Create account"}
                     </h1>
-                    <p className="mt-1 text-sm text-[#6b6b76]">
+                    <p className="mt-1 text-sm text-content-muted">
                         {mode === "signin"
                             ? "Sign in to sync your transcriptions"
                             : "Sign up for Glimpse Cloud"}
@@ -150,9 +150,9 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                                 placeholder="Name (optional)"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                                className="w-full rounded-lg border border-border-primary bg-surface-surface px-4 py-3 pl-11 text-sm text-white placeholder-content-disabled outline-none transition-colors focus:border-border-hover focus:bg-surface-overlay"
                             />
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-content-disabled">
                                 <Mail size={16} />
                             </div>
                         </div>
@@ -165,9 +165,9 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                            className="w-full rounded-lg border border-border-primary bg-surface-surface px-4 py-3 pl-11 text-sm text-white placeholder-content-disabled outline-none transition-colors focus:border-border-hover focus:bg-surface-overlay"
                         />
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-content-disabled">
                             <Mail size={16} />
                         </div>
                     </div>
@@ -180,15 +180,15 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             minLength={8}
-                            className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-3 pl-11 pr-11 text-sm text-white placeholder-[#4a4a54] outline-none transition-colors focus:border-[#3a3a45] focus:bg-[#131318]"
+                            className="w-full rounded-lg border border-border-primary bg-surface-surface px-4 py-3 pl-11 pr-11 text-sm text-white placeholder-content-disabled outline-none transition-colors focus:border-border-hover focus:bg-surface-overlay"
                         />
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a4a54]">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-content-disabled">
                             <Lock size={16} />
                         </div>
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-content-disabled hover:text-content-muted transition-colors"
                         >
                             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
@@ -197,7 +197,7 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#e8e8eb] px-5 py-3 text-sm font-semibold text-[#0a0a0c] hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center gap-2 rounded-lg bg-content-primary px-5 py-3 text-sm font-semibold text-surface-secondary hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? (
                             <>
@@ -213,16 +213,16 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                 </form>
 
                 <div className="my-6 flex items-center gap-3">
-                    <div className="flex-1 h-px bg-[#1e1e28]" />
-                    <span className="text-xs text-[#4a4a54]">or continue with</span>
-                    <div className="flex-1 h-px bg-[#1e1e28]" />
+                    <div className="flex-1 h-px bg-border-primary" />
+                    <span className="text-xs text-content-disabled">or continue with</span>
+                    <div className="flex-1 h-px bg-border-primary" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                     <button
                         type="button"
                         onClick={() => handleOAuth(OAuthProvider.Google)}
-                        className="flex items-center justify-center gap-2 rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-2.5 text-sm text-[#c0c0c8] hover:bg-[#161619] hover:border-[#2a2a34] transition-colors"
+                        className="flex items-center justify-center gap-2 rounded-lg border border-border-primary bg-surface-surface px-4 py-2.5 text-sm text-content-secondary hover:bg-surface-overlay hover:border-border-secondary transition-colors"
                     >
                         <svg className="w-4 h-4" viewBox="0 0 24 24">
                             <path
@@ -248,7 +248,7 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                     <button
                         type="button"
                         onClick={() => handleOAuth(OAuthProvider.Github)}
-                        className="flex items-center justify-center gap-2 rounded-lg border border-[#1e1e28] bg-[#111115] px-4 py-2.5 text-sm text-[#c0c0c8] hover:bg-[#161619] hover:border-[#2a2a34] transition-colors"
+                        className="flex items-center justify-center gap-2 rounded-lg border border-border-primary bg-surface-surface px-4 py-2.5 text-sm text-content-secondary hover:bg-surface-overlay hover:border-border-secondary transition-colors"
                     >
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385c.6.105.825-.255.825-.57c0-.285-.015-1.23-.015-2.235c-3.015.555-3.795-.735-4.035-1.41c-.135-.345-.72-1.41-1.23-1.695c-.42-.225-1.02-.78-.015-.795c.945-.015 1.62.87 1.845 1.23c1.08 1.815 2.805 1.305 3.495.99c.105-.78.42-1.305.765-1.605c-2.67-.3-5.46-1.335-5.46-5.925c0-1.305.465-2.385 1.23-3.225c-.12-.3-.54-1.53.12-3.18c0 0 1.005-.315 3.3 1.23c.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23c.66 1.65.24 2.88.12 3.18c.765.84 1.23 1.905 1.23 3.225c0 4.605-2.805 5.625-5.475 5.925c.435.375.81 1.095.81 2.22c0 1.605-.015 2.895-.015 3.3c0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
@@ -257,7 +257,7 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                     </button>
                 </div>
 
-                <p className="mt-6 text-center text-sm text-[#6b6b76]">
+                <p className="mt-6 text-center text-sm text-content-muted">
                     {mode === "signin" ? (
                         <>
                             Don't have an account?{" "}
@@ -293,7 +293,7 @@ export default function SignIn({ onSuccess, onSkip }: SignInProps) {
                     <button
                         type="button"
                         onClick={onSkip}
-                        className="mt-4 w-full text-center text-xs text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                        className="mt-4 w-full text-center text-xs text-content-disabled hover:text-content-muted transition-colors"
                     >
                         Skip for now → Use local mode
                     </button>
