@@ -9,6 +9,7 @@ import DotMatrix from "./components/DotMatrix";
 import TranscriptionList from "./components/TranscriptionList";
 import DictionaryView from "./components/DictionaryView";
 import { getCurrentUser, type User as AppwriteUser } from "./lib/auth";
+import { useCloudTranscription } from "./hooks/useCloudTranscription";
 
 type TranscriptionMode = "cloud" | "local";
 
@@ -62,6 +63,7 @@ const Home = () => {
     const popupRef = useRef<HTMLDivElement>(null);
 
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
+    useCloudTranscription();
 
     const sidebarWidth = isSidebarCollapsed ? 68 : 200;
 

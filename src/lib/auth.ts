@@ -1,7 +1,12 @@
+import { emit } from "@tauri-apps/api/event";
 import { account, ID, type Models } from "./appwrite";
 import type { OAuthProvider } from "appwrite";
 
 export type User = Models.User<Models.Preferences>;
+
+function emitAuthChanged() {
+    emit("auth:changed").catch(() => { });
+}
 
 export async function createAccount(
     email: string,
@@ -20,17 +25,20 @@ export async function login(
     try {
         await account.deleteSession("current");
     } catch {
-        // ignore missing session
     }
-    return account.createEmailPasswordSession(email, password);
+    const session = await account.createEmailPasswordSession(email, password);
+    emitAuthChanged();
+    return session;
 }
 
 export async function logout(): Promise<void> {
     await account.deleteSession("current");
+    emitAuthChanged();
 }
 
 export async function logoutAll(): Promise<void> {
     await account.deleteSessions();
+    emitAuthChanged();
 }
 
 export async function getCurrentUser(): Promise<User | null> {

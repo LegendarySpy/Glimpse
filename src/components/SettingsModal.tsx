@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import {
     checkAccessibilityPermission,
     checkMicrophonePermission,
@@ -23,27 +24,35 @@ import {
     Mic,
     ChevronDown,
     Wand2,
+    Server,
+    Key,
     RotateCcw,
     FolderOpen,
+    Github,
+
+    Mail,
     HelpCircle,
     Sliders,
     Accessibility,
     Check,
+    Eye,
+    EyeOff,
     Copy,
     Bug,
-    CloudCog,
 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
 import AccountView from "./AccountView";
 import FAQModal from "./FAQModal";
 import { UpdateChecker } from "./UpdateChecker";
 import DebugSection from "./DebugSection";
-import { getCurrentUser, logout, type User as AppwriteUser } from "../lib/auth";
+import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../lib/auth";
 import WhatsNewModal from "./WhatsNewModal";
-import { type LlmProvider, LlmProviderConfig } from "./LlmProviderConfig";
+
+import { OAuthProvider } from "appwrite";
 
 
 type TranscriptionMode = "cloud" | "local";
+type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "custom";
 
 type StoredSettings = {
     smart_shortcut: string;
@@ -63,6 +72,7 @@ type StoredSettings = {
     llm_model: string;
     user_context: string;
     dictionary: string[];
+    edit_mode_enabled: boolean;
 };
 
 type AppInfo = {
@@ -172,13 +182,21 @@ const SettingsModal = ({
     const [llmEndpoint, setLlmEndpoint] = useState("");
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
-
+    const [availableModels, setAvailableModels] = useState<string[]>([]);
+    const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
+    const [modelsLoading, setModelsLoading] = useState(false);
+    const modelDropdownRef = useRef<HTMLDivElement>(null);
+    const [editModeEnabled, setEditModeEnabled] = useState(false);
 
     const [authLoading, setAuthLoading] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
+    const [showEmailForm, setShowEmailForm] = useState(false);
     const [showFAQModal, setShowFAQModal] = useState(false);
     const [micPermission, setMicPermission] = useState<boolean | null>(null);
     const [accessibilityPermission, setAccessibilityPermission] = useState<boolean | null>(null);
+    const [authEmail, setAuthEmail] = useState("");
+    const [authPassword, setAuthPassword] = useState("");
+    const [authShowPassword, setAuthShowPassword] = useState(false);
     const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
     const isSubscriber = currentUser?.labels?.includes("subscriber") ?? false;
@@ -190,10 +208,12 @@ const SettingsModal = ({
     });
 
     useEffect(() => {
-        if (!isSubscriber && cloudSyncEnabled) {
+        // Only disable cloud sync if we have a user but they're not a subscriber
+        // Don't disable if currentUser is null (still loading)
+        if (currentUser && !isSubscriber && cloudSyncEnabled) {
             setCloudSyncEnabled(false);
         }
-    }, [isSubscriber, cloudSyncEnabled]);
+    }, [currentUser, isSubscriber, cloudSyncEnabled]);
 
     useEffect(() => {
         if (isOpen && initialTab) {
@@ -284,6 +304,7 @@ const SettingsModal = ({
             setLlmEndpoint(settings.llm_endpoint ?? "");
             setLlmApiKey(settings.llm_api_key ?? "");
             setLlmModel(settings.llm_model ?? "");
+            setEditModeEnabled(settings.edit_mode_enabled ?? false);
         });
 
         return () => {
@@ -332,6 +353,7 @@ const SettingsModal = ({
                     setLlmEndpoint(settings.llm_endpoint ?? "");
                     setLlmApiKey(settings.llm_api_key ?? "");
                     setLlmModel(settings.llm_model ?? "");
+                    setEditModeEnabled(settings.edit_mode_enabled ?? false);
                 } catch (err) {
                     console.error("Failed to load settings:", err);
                     setError("Failed to load settings");
@@ -398,9 +420,60 @@ const SettingsModal = ({
     const handleCancelAuth = () => {
         setAuthLoading(false);
         setAuthError(null);
+        setShowEmailForm(false);
     };
 
+    const fetchAvailableModels = useCallback(async () => {
+        setModelsLoading(true);
+        try {
+            const models = await invoke<string[]>("fetch_llm_models", {
+                endpoint: llmEndpoint,
+                provider: llmProvider,
+                apiKey: llmApiKey,
+            });
+            setAvailableModels(models);
+        } catch {
+            setAvailableModels([]);
+        } finally {
+            setModelsLoading(false);
+        }
+    }, [llmEndpoint, llmProvider, llmApiKey]);
 
+    useEffect(() => {
+        if (modelDropdownOpen) {
+            fetchAvailableModels();
+        }
+    }, [modelDropdownOpen, fetchAvailableModels]);
+
+    useEffect(() => {
+        if (!modelDropdownOpen) return;
+
+        const handleClickOutside = (event: MouseEvent) => {
+            if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+                setModelDropdownOpen(false);
+            }
+        };
+
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setModelDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("keydown", handleEscape);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleEscape);
+        };
+    }, [modelDropdownOpen]);
+
+    useEffect(() => {
+        if (!llmCleanupEnabled) {
+            setModelDropdownOpen(false);
+        }
+    }, [llmCleanupEnabled]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -560,6 +633,7 @@ const SettingsModal = ({
                     llmApiKey,
                     llmModel,
                     userContext: "",
+                    editModeEnabled,
                 });
                 setError(null);
             } catch (err) {
@@ -586,6 +660,7 @@ const SettingsModal = ({
         llmEndpoint,
         llmApiKey,
         llmModel,
+        editModeEnabled,
     ]);
 
     const handleDownload = async (modelKey: string) => {
@@ -829,24 +904,192 @@ const SettingsModal = ({
                                                     onCloudSyncToggle={() => setCloudSyncEnabled(!cloudSyncEnabled)}
                                                     onUserUpdate={async () => {
                                                         await onUpdateUser();
+                                                        setShowEmailForm(false);
                                                     }}
                                                     onSignOut={handleSignOut}
                                                 />
 
                                             ) : (
-                                                <div className="flex flex-col items-center justify-center py-12">
-                                                    <div className="mb-6 rounded-2xl bg-amber-400/10 p-5">
-                                                        <CloudCog size={40} className="text-amber-400" />
+                                                <div className="grid grid-cols-5 gap-4">
+                                                    <div className="col-span-3 relative rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px]">
+                                                        <div className="absolute inset-0 pointer-events-none opacity-18">
+                                                            <DotMatrix rows={8} cols={24} activeDots={[1, 4, 7, 10, 12, 15, 18, 20, 23]} dotSize={2} gap={4} color="#2e2e37" />
+                                                        </div>
+                                                        <div className="relative flex flex-col h-full">
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                                                <span className="text-[10px] font-semibold text-amber-400">Glimpse Cloud</span>
+                                                                <span className="ml-auto rounded-lg bg-[#1a1a22] px-2 py-0.5 text-[9px] font-medium text-[#6b6b76]">$5.99/mo</span>
+                                                            </div>
+
+                                                            <div className="flex flex-col gap-1.5 text-[11px] text-[#f0f0f5] font-medium mb-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <span>Cross-device sync</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <span>Bigger & better models</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <span>Faster processing</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="mt-auto flex items-center gap-3 rounded-xl border border-[#1a1a22] bg-[#0d0d12]/90 px-3 py-2 text-[10px] text-[#a0a0ab] leading-relaxed">
+                                                                <DotMatrix rows={3} cols={5} activeDots={[0, 2, 4, 6, 8, 10, 12, 14]} dotSize={2} gap={2} color="#2a2a34" />
+                                                                <p className="flex-1">Get faster processing, better models and cross-device sync with cloud.</p>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <h2 className="text-lg font-semibold text-[#e8e8eb] mb-2">
-                                                        Cloud Sign-In Coming Soon
-                                                    </h2>
-                                                    <p className="text-sm text-[#6b6b76] mb-4 text-center max-w-[300px] leading-relaxed">
-                                                        We're working on something exciting! Cloud sync and account features will be available soon.
-                                                    </p>
-                                                    <p className="text-xs text-[#4a4a54] text-center">
-                                                        Local transcription works perfectly in the meantime.
-                                                    </p>
+
+                                                    <div className="col-span-2 relative rounded-2xl border border-[#1f1f28] bg-[#0d0d10] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.28)] overflow-hidden min-h-[280px] flex flex-col">
+                                                        <div className="absolute inset-0 pointer-events-none opacity-18">
+                                                            <DotMatrix rows={8} cols={12} activeDots={[0, 3, 6, 9, 12, 15, 18, 21]} dotSize={2} gap={4} color="#2e2e37" />
+                                                        </div>
+
+                                                        <div className="relative flex flex-col flex-1">
+                                                            <AnimatePresence mode="wait">
+                                                                {showEmailForm ? (
+                                                                    <motion.div
+                                                                        key="email-form"
+                                                                        initial={{ opacity: 0 }}
+                                                                        animate={{ opacity: 1 }}
+                                                                        exit={{ opacity: 0, scale: 0.95 }}
+                                                                        transition={{ duration: 0.15 }}
+                                                                        className="relative flex flex-col h-full"
+                                                                    >
+                                                                        <div className="flex items-center justify-between mb-3">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                                                                <span className="text-[10px] font-semibold text-[#9ca3af]">Continue with Email</span>
+                                                                            </div>
+                                                                            <button
+                                                                                onClick={() => setShowEmailForm(false)}
+                                                                                className="text-[9px] text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                                            >
+                                                                                Back
+                                                                            </button>
+                                                                        </div>
+
+                                                                        <form
+                                                                            onSubmit={async (e) => {
+                                                                                e.preventDefault();
+                                                                                setAuthError(null);
+                                                                                setAuthLoading(true);
+                                                                                try {
+                                                                                    try {
+                                                                                        await login(authEmail, authPassword);
+                                                                                    } catch (loginErr) {
+                                                                                        const errorMsg = loginErr instanceof Error ? loginErr.message : "";
+                                                                                        if (errorMsg.includes("Invalid credentials") || errorMsg.includes("user") || errorMsg.includes("not found")) {
+                                                                                            await createAccount(authEmail, authPassword);
+                                                                                        } else {
+                                                                                            throw loginErr;
+                                                                                        }
+                                                                                    }
+                                                                                    await onUpdateUser();
+                                                                                    setShowEmailForm(false);
+                                                                                } catch (err) {
+                                                                                    setAuthError(err instanceof Error ? err.message : "Authentication failed");
+                                                                                } finally {
+                                                                                    setAuthLoading(false);
+                                                                                }
+                                                                            }}
+                                                                            className="flex-1 flex flex-col gap-2"
+                                                                        >
+                                                                            <input
+                                                                                type="email"
+                                                                                placeholder="Email"
+                                                                                value={authEmail}
+                                                                                onChange={(e) => setAuthEmail(e.target.value)}
+                                                                                required
+                                                                                className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
+                                                                            />
+                                                                            <div className="relative">
+                                                                                <input
+                                                                                    type={authShowPassword ? "text" : "password"}
+                                                                                    placeholder="Password"
+                                                                                    value={authPassword}
+                                                                                    onChange={(e) => setAuthPassword(e.target.value)}
+                                                                                    required
+                                                                                    minLength={8}
+                                                                                    className="w-full rounded-lg border border-[#1e1e28] bg-[#111115] px-3 py-2 pr-9 text-[11px] text-white placeholder-[#4a4a54] outline-none focus:border-[#3a3a45]"
+                                                                                />
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setAuthShowPassword(!authShowPassword)}
+                                                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#4a4a54] hover:text-[#6b6b76] transition-colors"
+                                                                                >
+                                                                                    {authShowPassword ? <EyeOff size={12} /> : <Eye size={12} />}
+                                                                                </button>
+                                                                            </div>
+                                                                            <button
+                                                                                type="submit"
+                                                                                className="mt-auto w-full rounded-xl bg-amber-400 py-2.5 text-[11px] font-semibold text-black hover:bg-amber-300 transition-colors"
+                                                                            >
+                                                                                Continue
+                                                                            </button>
+                                                                        </form>
+                                                                    </motion.div>
+                                                                ) : (
+                                                                    <motion.div
+                                                                        key="oauth-options"
+                                                                        initial={{ opacity: 0 }}
+                                                                        animate={{ opacity: 1 }}
+                                                                        exit={{ opacity: 0, scale: 0.95 }}
+                                                                        transition={{ duration: 0.15 }}
+                                                                        className="relative flex flex-col h-full"
+                                                                    >
+                                                                        <div className="flex items-center gap-2 mb-3">
+                                                                            <DotMatrix rows={2} cols={2} activeDots={[0, 1, 2, 3]} dotSize={3} gap={2} color="#fbbf24" />
+                                                                            <span className="text-[10px] font-semibold text-[#9ca3af]">Sign In</span>
+                                                                        </div>
+
+                                                                        <p className="text-[10px] text-[#6b6b76] mb-4 leading-relaxed">
+                                                                            Sign in to sync your transcriptions across devices.
+                                                                        </p>
+
+                                                                        <div className="flex flex-col gap-2 mt-auto">
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    const url = getOAuth2Url(OAuthProvider.Google, window.location.href);
+                                                                                    openUrl(url);
+                                                                                }}
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                            >
+                                                                                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                                                                                    <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                                                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                                                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                                                                    <path fill="#4285F4" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                                                                </svg>
+                                                                                Google
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    const url = getOAuth2Url(OAuthProvider.Github, window.location.href);
+                                                                                    openUrl(url);
+                                                                                }}
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                            >
+                                                                                <Github size={14} fill="currentColor" />
+                                                                                GitHub
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => setShowEmailForm(true)}
+                                                                                className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#2a2a34] bg-[#0c0c10] px-3 py-2.5 text-[11px] text-[#e8e8eb] hover:bg-[#151518] hover:border-[#3a3a45] transition-all"
+                                                                            >
+                                                                                <Mail size={14} />
+                                                                                Email
+                                                                            </button>
+                                                                        </div>
+                                                                    </motion.div>
+                                                                )}
+                                                            </AnimatePresence>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
                                         </motion.div>
@@ -1329,17 +1572,148 @@ const SettingsModal = ({
                                                                 style={{ overflow: "visible" }}
                                                             >
                                                                 <div className="pt-3 border-t border-[#1e1e22] space-y-3">
-                                                                    <LlmProviderConfig
-                                                                        provider={llmProvider}
-                                                                        setProvider={setLlmProvider}
-                                                                        endpoint={llmEndpoint}
-                                                                        setEndpoint={setLlmEndpoint}
-                                                                        apiKey={llmApiKey}
-                                                                        setApiKey={setLlmApiKey}
-                                                                        model={llmModel}
-                                                                        setModel={setLlmModel}
-                                                                        showModelDropdown={true}
-                                                                    />
+                                                                    <div className="space-y-1.5">
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1">Provider</label>
+                                                                        <div className="grid grid-cols-4 gap-2">
+                                                                            <LlmProviderButton
+                                                                                label="LM Studio"
+                                                                                active={llmProvider === "lmstudio"}
+                                                                                onClick={() => setLlmProvider("lmstudio")}
+                                                                            />
+                                                                            <LlmProviderButton
+                                                                                label="Ollama"
+                                                                                active={llmProvider === "ollama"}
+                                                                                onClick={() => setLlmProvider("ollama")}
+                                                                            />
+                                                                            <LlmProviderButton
+                                                                                label="OpenAI"
+                                                                                active={llmProvider === "openai"}
+                                                                                onClick={() => setLlmProvider("openai")}
+                                                                            />
+                                                                            <LlmProviderButton
+                                                                                label="Custom"
+                                                                                active={llmProvider === "custom"}
+                                                                                onClick={() => setLlmProvider("custom")}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="space-y-1.5">
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                            <Server size={10} />
+                                                                            Endpoint {llmProvider !== "custom" && <span className="text-[#4a4a54]">(optional override)</span>}
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={llmEndpoint}
+                                                                            onChange={(e) => setLlmEndpoint(e.target.value)}
+                                                                            placeholder={
+                                                                                llmProvider === "lmstudio" ? "http://localhost:1234" :
+                                                                                    llmProvider === "ollama" ? "http://localhost:11434" :
+                                                                                        llmProvider === "openai" ? "https://api.openai.com" :
+                                                                                            "https://your-llm-endpoint.com"
+                                                                            }
+                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="space-y-1.5">
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                            <Key size={10} />
+                                                                            API Key {llmProvider !== "openai" && <span className="text-[#4a4a54]">(if required)</span>}
+                                                                        </label>
+                                                                        <input
+                                                                            type="password"
+                                                                            value={llmApiKey}
+                                                                            onChange={(e) => setLlmApiKey(e.target.value)}
+                                                                            placeholder={llmProvider === "openai" ? "sk-..." : "Optional"}
+                                                                            className="w-full rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="space-y-1.5" ref={modelDropdownRef}>
+                                                                        <label className="text-[11px] font-medium text-[#6b6b76] ml-1 flex items-center gap-1.5">
+                                                                            <Cpu size={10} />
+                                                                            Model {<span className="text-[#4a4a54]">(leave empty for default)</span>}
+                                                                        </label>
+                                                                        <div className="relative">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    if (!modelDropdownOpen) {
+                                                                                        setModelsLoading(true);
+                                                                                    }
+                                                                                    setModelDropdownOpen(!modelDropdownOpen);
+                                                                                }}
+                                                                                className="w-full flex items-center justify-between rounded-lg bg-[#1a1a1e] border border-[#2a2a30] py-2 px-3 text-[12px] text-left hover:border-[#3a3a40] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                            >
+                                                                                <span className={llmModel ? "text-[#e8e8eb]" : "text-[#4a4a54]"}>
+                                                                                    {llmModel || (
+                                                                                        llmProvider === "lmstudio" ? "Uses loaded model" :
+                                                                                            llmProvider === "ollama" ? "llama3.2" :
+                                                                                                llmProvider === "openai" ? "gpt-4o-mini" :
+                                                                                                    "model-name"
+                                                                                    )}
+                                                                                </span>
+                                                                                <ChevronDown
+                                                                                    size={14}
+                                                                                    className={`text-[#6b6b76] transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
+                                                                                />
+                                                                            </button>
+                                                                            <AnimatePresence>
+                                                                                {modelDropdownOpen && (
+                                                                                    <motion.div
+                                                                                        initial={{ opacity: 0, y: -4 }}
+                                                                                        animate={{ opacity: 1, y: 0 }}
+                                                                                        exit={{ opacity: 0, y: -4 }}
+                                                                                        transition={{ duration: 0.15 }}
+                                                                                        className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-[#2a2a30] bg-[#141416] shadow-xl shadow-black/40 overflow-hidden"
+                                                                                        style={{ maxHeight: "280px" }}
+                                                                                    >
+                                                                                        <div className="overflow-y-auto" style={{ maxHeight: "220px" }}>
+                                                                                            {modelsLoading ? (
+                                                                                                <div className="flex items-center justify-center gap-2 py-4 text-[11px] text-[#6b6b76]">
+                                                                                                    <Loader2 size={12} className="animate-spin" />
+                                                                                                    <span>Loading models...</span>
+                                                                                                </div>
+                                                                                            ) : availableModels.length > 0 ? (
+                                                                                                availableModels.map((model) => (
+                                                                                                    <button
+                                                                                                        key={model}
+                                                                                                        type="button"
+                                                                                                        onClick={() => {
+                                                                                                            setLlmModel(model);
+                                                                                                            setModelDropdownOpen(false);
+                                                                                                        }}
+                                                                                                        className={`w-full text-left px-3 py-2 text-[12px] transition-colors ${llmModel === model
+                                                                                                            ? "bg-amber-400/10 text-amber-400"
+                                                                                                            : "text-[#a0a0ab] hover:bg-[#1a1a1e] hover:text-[#e8e8eb]"
+                                                                                                            }`}
+                                                                                                    >
+                                                                                                        {model}
+                                                                                                    </button>
+                                                                                                ))
+                                                                                            ) : (
+                                                                                                <div className="px-3 py-4 text-[11px] text-[#6b6b76] text-center">
+                                                                                                    No models found. Check endpoint.
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                        <div className="border-t border-[#2a2a30] p-2">
+                                                                                            <input
+                                                                                                type="text"
+                                                                                                value={llmModel}
+                                                                                                onChange={(e) => setLlmModel(e.target.value)}
+                                                                                                placeholder="Or type custom model name..."
+                                                                                                className="w-full rounded-md bg-[#1a1a1e] border border-[#2a2a30] py-1.5 px-2.5 text-[11px] text-[#e8e8eb] placeholder-[#4a4a54] focus:border-[#4a4a54] focus:outline-none transition-colors"
+                                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                            />
+                                                                                        </div>
+                                                                                    </motion.div>
+                                                                                )}
+                                                                            </AnimatePresence>
+                                                                        </div>
+                                                                    </div>
 
                                                                     <div className="flex items-start gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-3 py-2">
                                                                         <Info size={12} className="text-[#6b6b76] shrink-0 mt-0.5" />
@@ -1572,6 +1946,63 @@ const SettingsModal = ({
                                                     </p>
                                                 </div>
                                             </div>
+
+                                            <div className="space-y-3">
+                                                <p className="text-[10px] font-medium uppercase tracking-wider text-[#4a4a54] px-1">Features</p>
+
+                                                <div className="rounded-xl border border-[#1e1e22] bg-[#111113] p-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1a1e] border border-[#2a2a30]">
+                                                                <Wand2 size={16} className="text-[#6b6b76]" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[13px] font-medium text-[#e8e8eb]">Edit Mode</p>
+                                                                <p className="text-[11px] text-[#6b6b76]">Use voice to transform selected text</p>
+                                                            </div>
+                                                        </div>
+                                                        <motion.button
+                                                            onClick={() => setEditModeEnabled(!editModeEnabled)}
+                                                            className={`relative w-10 h-5 rounded-full transition-colors ${editModeEnabled ? "bg-amber-400" : "bg-[#2a2a30]"}`}
+                                                            whileTap={{ scale: 0.95 }}
+                                                        >
+                                                            <motion.div
+                                                                className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
+                                                                animate={{ left: editModeEnabled ? "calc(100% - 18px)" : "2px" }}
+                                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                                            />
+                                                        </motion.button>
+                                                    </div>
+                                                    <AnimatePresence initial={false}>
+                                                        {editModeEnabled && (
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: "auto", opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                                                                className="overflow-hidden"
+                                                            >
+                                                                <div className="mt-3 pt-3 border-t border-[#1e1e22] space-y-2">
+                                                                    <div className="flex items-start gap-2 rounded-lg border border-[#2a2a30] bg-[#1a1a1e] px-3 py-2">
+                                                                        <Info size={12} className="text-[#6b6b76] shrink-0 mt-0.5" />
+                                                                        <p className="text-[10px] text-[#6b6b76]">
+                                                                            Select text in any app, then use your shortcut. Speak a command like "make this formal" or "fix the grammar" to transform the selection.
+                                                                        </p>
+                                                                    </div>
+                                                                    {transcriptionMode === "local" && !llmCleanupEnabled && (
+                                                                        <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2">
+                                                                            <AlertCircle size={12} className="text-red-400 shrink-0 mt-0.5" />
+                                                                            <p className="text-[10px] text-red-400/80">
+                                                                                Edit mode requires LLM cleanup for local transcription. Enable it in Settings → Models.
+                                                                            </p>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            </div>
                                         </motion.div>
                                     )}
 
@@ -1744,6 +2175,21 @@ const ModeButton = ({ icon, label, description, active, onClick, variant = "clou
         </motion.button>
     );
 };
+
+const LlmProviderButton = ({ label, active, onClick }: {
+    label: string; active: boolean; onClick: () => void;
+}) => (
+    <motion.button
+        onClick={onClick}
+        className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${active
+            ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
+            : "border-[#2a2a30] bg-[#1a1a1e] text-[#a0a0ab] hover:border-[#3a3a42] hover:text-[#e8e8eb]"
+            }`}
+        whileTap={{ scale: 0.97 }}
+    >
+        {label}
+    </motion.button>
+);
 
 const ModelProgress = ({ percent, status }: { percent: number; status: string }) => {
     const cols = 50;

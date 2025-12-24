@@ -377,17 +377,30 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
     useEffect(() => {
         if (resolvedCloudSyncEnabled && userId && isSubscriber) {
-            // Run syncs sequentially to avoid race conditions
             (async () => {
                 await syncFromCloud();
                 await syncAllToCloud();
             })();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resolvedCloudSyncEnabled, userId, isSubscriber]);
 
+    const unlistenRef1 = useRef<(() => void) | null>(null);
+    const unlistenRef2 = useRef<(() => void) | null>(null);
+
     useEffect(() => {
-        const unlisten1 = listen<{ id: string }>("transcription:complete", async (event) => {
+        let isCancelled = false;
+
+        if (unlistenRef1.current) {
+            unlistenRef1.current();
+            unlistenRef1.current = null;
+        }
+        if (unlistenRef2.current) {
+            unlistenRef2.current();
+            unlistenRef2.current = null;
+        }
+
+        listen<{ id: string }>("transcription:complete", async (event) => {
+            if (isCancelled) return;
             await loadTranscriptions();
 
             if (resolvedCloudSyncEnabled && userId && isSubscriber) {
@@ -396,6 +409,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
                 if (newRecord && !newRecord.synced) {
                     withRetry(() => syncLocalTranscription(userId, newRecord)).then(async () => {
+                        if (isCancelled) return;
                         await invoke("mark_transcription_synced", { id: newRecord.id });
                         setTranscriptions(prev => prev.map(t =>
                             t.id === newRecord.id ? { ...t, synced: true } : t
@@ -405,15 +419,35 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
                     });
                 }
             }
+        }).then(fn => {
+            if (!isCancelled) {
+                unlistenRef1.current = fn;
+            } else {
+                fn(); // Already cancelled, clean up immediately
+            }
         });
 
-        const unlisten2 = listen("transcription:error", () => {
+        listen("transcription:error", () => {
+            if (isCancelled) return;
             loadTranscriptions();
+        }).then(fn => {
+            if (!isCancelled) {
+                unlistenRef2.current = fn;
+            } else {
+                fn();
+            }
         });
 
         return () => {
-            unlisten1.then(fn => fn());
-            unlisten2.then(fn => fn());
+            isCancelled = true;
+            if (unlistenRef1.current) {
+                unlistenRef1.current();
+                unlistenRef1.current = null;
+            }
+            if (unlistenRef2.current) {
+                unlistenRef2.current();
+                unlistenRef2.current = null;
+            }
         };
     }, [loadTranscriptions, resolvedCloudSyncEnabled, userId, isSubscriber]);
 
@@ -429,8 +463,8 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         undoLlmCleanup,
         clearAllTranscriptions,
         refresh: loadTranscriptions,
-        searchTranscriptions, // Exposed for UI
-        loadMore,             // Exposed for infinite scroll
+        searchTranscriptions,
+        loadMore,
         syncToCloud,
         syncAllToCloud,
         syncFromCloud,

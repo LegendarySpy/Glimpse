@@ -59,7 +59,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; connect-src *; base-uri 'self'; form-action 'self'"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; connect-src 'self' https://*.appwrite.io https://*.cloud.appwrite.io https://api.openai.com https://api.groq.com http://localhost:* http://127.0.0.1:* https:; base-uri 'self'; form-action 'self'"
     },
     "macOSPrivateApi": true
   },

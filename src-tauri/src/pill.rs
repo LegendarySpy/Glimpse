@@ -1,6 +1,6 @@
 use crate::{
-    emit_event, permissions, platform, recorder::RecorderManager, toast, AppRuntime, AppState,
-    MAIN_WINDOW_LABEL,
+    assistive, emit_event, permissions, platform, recorder::RecorderManager, toast, AppRuntime,
+    AppState, MAIN_WINDOW_LABEL,
 };
 use chrono::{DateTime, Local};
 use parking_lot::Mutex;
@@ -134,6 +134,22 @@ impl PillController {
         // Note: hold_key_down is intentionally NOT cleared here.
         // It tracks physical key state and should only change via actual key events.
         *self.shortcut_origin.lock() = None;
+    }
+
+    fn capture_selected_text_if_enabled(&self, app: &AppHandle<AppRuntime>) {
+        let state = app.state::<AppState>();
+        let settings = state.current_settings();
+
+        if !settings.edit_mode_enabled {
+            state.set_pending_selected_text(None);
+            return;
+        }
+
+        let selected_text = match assistive::get_selected_text_ax() {
+            Some(text) if text.len() <= 10_000 => Some(text),
+            _ => None,
+        };
+        state.set_pending_selected_text(selected_text);
     }
 
     fn is_recording(&self) -> bool {
@@ -337,6 +353,7 @@ impl PillController {
                     },
                 );
 
+                self.capture_selected_text_if_enabled(app);
                 crate::persist_recording_async(app.clone(), recording);
             }
             Ok(None) => {

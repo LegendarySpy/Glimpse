@@ -26,6 +26,7 @@ const KEY_LLM_MODEL: &str = "llm_model";
 const KEY_USER_CONTEXT: &str = "user_context";
 const KEY_DICTIONARY: &str = "dictionary";
 const KEY_REPLACEMENTS: &str = "replacements";
+const KEY_EDIT_MODE_ENABLED: &str = "edit_mode_enabled";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Replacement {
@@ -74,6 +75,8 @@ pub struct UserSettings {
     pub dictionary: Vec<String>,
     #[serde(default)]
     pub replacements: Vec<Replacement>,
+    #[serde(default)]
+    pub edit_mode_enabled: bool,
 }
 
 fn default_smart_shortcut() -> String {
@@ -114,6 +117,7 @@ impl Default for UserSettings {
             user_context: String::new(),
             dictionary: Vec::new(),
             replacements: Vec::new(),
+            edit_mode_enabled: false,
         }
     }
 }
@@ -272,6 +276,8 @@ impl SettingsStore {
             self.read_value(&conn, KEY_DICTIONARY, settings.dictionary.clone())?;
         settings.replacements =
             self.read_value(&conn, KEY_REPLACEMENTS, settings.replacements.clone())?;
+        settings.edit_mode_enabled =
+            self.read_value(&conn, KEY_EDIT_MODE_ENABLED, settings.edit_mode_enabled)?;
 
         Ok(settings)
     }
@@ -317,6 +323,7 @@ impl SettingsStore {
         self.write_value(&conn, KEY_USER_CONTEXT, &settings.user_context)?;
         self.write_value(&conn, KEY_DICTIONARY, &settings.dictionary)?;
         self.write_value(&conn, KEY_REPLACEMENTS, &settings.replacements)?;
+        self.write_value(&conn, KEY_EDIT_MODE_ENABLED, &settings.edit_mode_enabled)?;
         Ok(())
     }
 

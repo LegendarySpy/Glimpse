@@ -63,7 +63,8 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const heightsRef = useRef<number[]>([]);
   const animationRef = useRef<number | null>(null);
   const loaderTimeRef = useRef<number>(0);
-  const audioReferenceLevelRef = useRef<number>(100);
+  const audioReferenceLevelRef = useRef<number>(0);
+  const audioFrameCountRef = useRef<number>(0);
 
   // Single source of truth for frontend rendering (backend is the real truth)
   const [status, setStatus] = useState<PillStatus>("idle");
@@ -234,16 +235,24 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
       const SIGNAL_FLOOR = 15;
       const TARGET_PEAK = 200;
+      const MIN_REFERENCE = 40;
+
+      audioFrameCountRef.current++;
 
       if (framePeak > SIGNAL_FLOOR) {
+        // Adaptive rate: fast in first ~30 frames (~0.5s), then stabilize
+        const frameCount = audioFrameCountRef.current;
+        const adaptUp = frameCount < 30 ? 0.3 : 0.1;
+        const adaptDown = frameCount < 30 ? 0.05 : 0.005;
+
         if (framePeak > audioReferenceLevelRef.current) {
-          audioReferenceLevelRef.current += (framePeak - audioReferenceLevelRef.current) * 0.1;
+          audioReferenceLevelRef.current += (framePeak - audioReferenceLevelRef.current) * adaptUp;
         } else {
-          audioReferenceLevelRef.current += (framePeak - audioReferenceLevelRef.current) * 0.005;
+          audioReferenceLevelRef.current += (framePeak - audioReferenceLevelRef.current) * adaptDown;
         }
       }
 
-      const effectiveRef = Math.max(audioReferenceLevelRef.current, 50);
+      const effectiveRef = Math.max(audioReferenceLevelRef.current, MIN_REFERENCE);
       const normalizationFactor = TARGET_PEAK / effectiveRef;
 
       for (let i = 0; i <= centerCol; i++) {
@@ -433,6 +442,12 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
   const startMic = useCallback(async () => {
     const generation = ++micGenerationRef.current;
+
+    // Reset gain calibration and wave heights for fresh start
+    audioReferenceLevelRef.current = 0;
+    audioFrameCountRef.current = 0;
+    heightsRef.current.fill(0);
+
     try {
       if (!audioContextRef.current) {
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;

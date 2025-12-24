@@ -158,6 +158,8 @@ pub fn run() {
             mark_transcription_synced,
             debug_show_toast,
             fetch_llm_models,
+            set_cloud_credentials,
+            clear_cloud_credentials,
             open_whats_new
         ])
         .build(tauri::generate_context!())
@@ -175,6 +177,12 @@ pub(crate) type AppRuntime = Wry;
 
 type GlimpseResult<T> = Result<T>;
 
+#[derive(Clone, Default)]
+pub struct CloudCredentials {
+    pub jwt: String,
+    pub function_url: String,
+}
+
 pub struct AppState {
     pill: Arc<PillController>,
     http: Client,
@@ -186,6 +194,8 @@ pub struct AppState {
     pub(crate) settings_close_handler_registered: AtomicBool,
     transcription_cancelled: AtomicBool,
     pending_recording_path: parking_lot::Mutex<Option<PathBuf>>,
+    cloud_credentials: parking_lot::Mutex<Option<CloudCredentials>>,
+    pending_selected_text: parking_lot::Mutex<Option<String>>,
 }
 
 impl AppState {
@@ -221,6 +231,8 @@ impl AppState {
             settings_close_handler_registered: AtomicBool::new(false),
             transcription_cancelled: AtomicBool::new(false),
             pending_recording_path: parking_lot::Mutex::new(None),
+            cloud_credentials: parking_lot::Mutex::new(None),
+            pending_selected_text: parking_lot::Mutex::new(None),
         }
     }
 
@@ -281,6 +293,26 @@ impl AppState {
 
     pub fn take_pending_path(&self) -> Option<PathBuf> {
         self.pending_recording_path.lock().take()
+    }
+
+    pub fn set_cloud_credentials(&self, jwt: String, function_url: String) {
+        *self.cloud_credentials.lock() = Some(CloudCredentials { jwt, function_url });
+    }
+
+    pub fn clear_cloud_credentials(&self) {
+        *self.cloud_credentials.lock() = None;
+    }
+
+    pub fn get_cloud_credentials(&self) -> Option<CloudCredentials> {
+        self.cloud_credentials.lock().clone()
+    }
+
+    pub fn set_pending_selected_text(&self, text: Option<String>) {
+        *self.pending_selected_text.lock() = text;
+    }
+
+    pub fn take_pending_selected_text(&self) -> Option<String> {
+        self.pending_selected_text.lock().take()
     }
 }
 
@@ -361,6 +393,7 @@ fn update_settings(
     llmApiKey: String,
     llmModel: String,
     userContext: String,
+    editModeEnabled: bool,
     app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<UserSettings, String> {
@@ -435,6 +468,7 @@ fn update_settings(
     next.llm_api_key = llmApiKey;
     next.llm_model = llmModel;
     next.user_context = userContext;
+    next.edit_mode_enabled = editModeEnabled;
 
     let next = state
         .persist_settings(next)
@@ -714,6 +748,22 @@ async fn fetch_llm_models(
 }
 
 #[tauri::command]
+fn set_cloud_credentials(
+    jwt: String,
+    function_url: String,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    state.set_cloud_credentials(jwt, function_url);
+    Ok(())
+}
+
+#[tauri::command]
+fn clear_cloud_credentials(state: tauri::State<AppState>) -> Result<(), String> {
+    state.clear_cloud_credentials();
+    Ok(())
+}
+
+#[tauri::command]
 fn open_whats_new(app: AppHandle<AppRuntime>) {
     if let Err(err) = tray::toggle_settings_window(&app) {
         eprintln!("Failed to open settings window: {err}");
@@ -736,10 +786,22 @@ fn open_whats_new(app: AppHandle<AppRuntime>) {
 #[tauri::command]
 fn open_data_dir(path: Option<String>, app: AppHandle<AppRuntime>) -> Result<(), String> {
     let path = path.ok_or_else(|| "Path is empty".to_string())?;
-    let path = PathBuf::from(path);
+    let path = PathBuf::from(&path);
 
-    if !path.exists() {
-        return Err("Path does not exist".to_string());
+    let data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {e}"))?;
+
+    let canonical_path = path
+        .canonicalize()
+        .map_err(|_| "Path does not exist".to_string())?;
+    let canonical_data_dir = data_dir
+        .canonicalize()
+        .map_err(|e| format!("Failed to canonicalize data dir: {e}"))?;
+
+    if !canonical_path.starts_with(&canonical_data_dir) {
+        return Err("Path is outside app data directory".to_string());
     }
 
     app.opener()
@@ -1032,6 +1094,7 @@ async fn retry_transcription(
                     stage,
                     saved_for_task.path.display().to_string(),
                 );
+                hide_overlay(&app_handle);
             }
         }
     });
@@ -1252,6 +1315,9 @@ fn queue_transcription(
     state.clear_cancellation();
     state.set_pending_path(Some(saved.path.clone()));
 
+    // Take any pending selected text for edit mode
+    let pending_selected_text = state.take_pending_selected_text();
+
     let http = state.http();
     let app_handle = app.clone();
     let saved_for_task = saved.clone();
@@ -1263,6 +1329,18 @@ fn queue_transcription(
         let settings = app_handle.state::<AppState>().current_settings();
         let config = transcription::TranscriptionConfig::from_settings(&settings);
         let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
+
+        let cloud_creds = app_handle.state::<AppState>().get_cloud_credentials();
+        let use_cloud_auth = !use_local && cloud_creds.is_some();
+
+        eprintln!(
+            "[transcription] mode={:?} use_local={} has_cloud_creds={} use_cloud_auth={}",
+            settings.transcription_mode,
+            use_local,
+            cloud_creds.is_some(),
+            use_cloud_auth
+        );
+
         let result = if use_local {
             let model_key = settings.local_model.clone();
             match model_manager::ensure_model_ready(&app_handle, &model_key) {
@@ -1288,13 +1366,46 @@ fn queue_transcription(
                 }
                 Err(err) => Err(err),
             }
+        } else if use_cloud_auth {
+            let creds = cloud_creds.unwrap();
+            let has_selection = pending_selected_text.is_some();
+            eprintln!(
+                "[transcription] Using cloud auth: url={} edit_mode={}",
+                creds.function_url, has_selection
+            );
+            let cloud_config = transcription::CloudTranscriptionConfig::new(
+                creds.function_url,
+                creds.jwt,
+                true, // Cloud always does LLM cleanup server-side
+                if settings.user_context.trim().is_empty() {
+                    None
+                } else {
+                    Some(settings.user_context.clone())
+                },
+            )
+            .with_selected_text(pending_selected_text.clone());
+            match transcription::request_cloud_transcription(&http, &saved_for_task, &cloud_config)
+                .await
+            {
+                Ok(cloud_result) => Ok(transcription::TranscriptionSuccess {
+                    transcript: cloud_result.transcript,
+                    speech_model: Some(cloud_result.speech_model),
+                }),
+                Err(err) => Err(err),
+            }
         } else {
             transcription::request_transcription(&http, &saved_for_task, &config).await
         };
 
+        let skip_client_llm_cleanup = use_cloud_auth;
+
         match result {
             Ok(result) => {
-                if is_cancelled() { return; }
+                if is_cancelled() {
+                    hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().set_pending_path(None);
+                    return;
+                }
 
                 let raw_transcript = result.transcript.clone();
                 let reported_model = result.speech_model.clone();
@@ -1304,10 +1415,47 @@ fn queue_transcription(
                     return;
                 }
 
-                if is_cancelled() { return; }
+                if is_cancelled() {
+                    hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().set_pending_path(None);
+                    return;
+                }
 
-                let (final_transcript, llm_cleaned) =
-                    if llm_cleanup::is_cleanup_available(&settings) {
+                if pending_selected_text.is_some()
+                    && !skip_client_llm_cleanup
+                    && !llm_cleanup::is_cleanup_available(&settings)
+                {
+                    emit_transcription_error(
+                        &app_handle,
+                        "Edit mode requires LLM cleanup to be configured. Enable LLM cleanup in Settings → Models.".to_string(),
+                        "edit_mode",
+                        saved_for_task.path.display().to_string(),
+                    );
+                    hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().set_pending_path(None);
+                    return;
+                }
+
+                let (final_transcript, llm_cleaned) = if !skip_client_llm_cleanup
+                    && llm_cleanup::is_cleanup_available(&settings)
+                {
+                    if let Some(ref selected) = pending_selected_text {
+                        match llm_cleanup::edit_transcription(
+                            &http,
+                            selected,
+                            &raw_transcript,
+                            &settings,
+                        )
+                        .await
+                        {
+                            Ok(edited) => (edited, true),
+                            Err(err) => {
+                                eprintln!("LLM edit failed, using raw transcript: {err}");
+                                (raw_transcript.clone(), false)
+                            }
+                        }
+                    } else {
+                        // Normal cleanup mode
                         match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings)
                             .await
                         {
@@ -1317,9 +1465,12 @@ fn queue_transcription(
                                 (raw_transcript.clone(), false)
                             }
                         }
-                    } else {
-                        (raw_transcript.clone(), false)
-                    };
+                    }
+                } else if skip_client_llm_cleanup {
+                    (raw_transcript.clone(), true)
+                } else {
+                    (raw_transcript.clone(), false)
+                };
 
                 let final_transcript =
                     apply_replacements(&final_transcript, &settings.replacements);
@@ -1329,7 +1480,11 @@ fn queue_transcription(
                     return;
                 }
 
-                if is_cancelled() { return; }
+                if is_cancelled() {
+                    hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().set_pending_path(None);
+                    return;
+                }
 
                 let mut pasted = false;
                 if config.auto_paste && !final_transcript.trim().is_empty() {
@@ -1373,20 +1528,39 @@ fn queue_transcription(
                     saved_for_task.path.display().to_string(),
                     llm_cleaned,
                     metadata,
-                    "unknown",
-                    if use_local { "local" } else { "cloud" },
+                    if use_cloud_auth {
+                        "cloud_auth"
+                    } else {
+                        "unknown"
+                    },
+                    if use_local {
+                        "local"
+                    } else if use_cloud_auth {
+                        "cloud_auth"
+                    } else {
+                        "cloud"
+                    },
                 );
 
                 hide_overlay(&app_handle);
+                app_handle.state::<AppState>().set_pending_path(None);
             }
             Err(err) => {
-                let stage = if use_local { "local" } else { "api" };
+                let stage = if use_local {
+                    "local"
+                } else if use_cloud_auth {
+                    "cloud_auth"
+                } else {
+                    "api"
+                };
                 emit_transcription_error(
                     &app_handle,
                     format!("Transcription failed: {err}"),
                     stage,
                     saved_for_task.path.display().to_string(),
                 );
+                hide_overlay(&app_handle);
+                app_handle.state::<AppState>().set_pending_path(None);
             }
         }
     });
@@ -1488,6 +1662,7 @@ fn handle_empty_transcription(app: &AppHandle<AppRuntime>, audio_path: &Path) {
     }
 
     hide_overlay(app);
+    app.state::<AppState>().set_pending_path(None);
 }
 
 fn emit_transcription_error(
