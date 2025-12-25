@@ -385,10 +385,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                 llmApiKey,
                 llmModel,
                 userContext: "",
+                editModeEnabled: false,
             });
             await invoke("complete_onboarding");
             onComplete();
-        } catch {
+        } catch (err) {
+            console.error("Failed to save onboarding settings:", err);
             onComplete();
         }
     };
