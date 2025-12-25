@@ -32,6 +32,9 @@ Assistant: <output>My favorite color is blue.</output>
 const EDIT_PROMPT: &str = r#"
 Edit the text according to the instruction. Output ONLY the edited text inside <output> tags.
 
+Important rules:
+- When making lists, tables or any other structured content, use markdown syntax unless explicitly asked not to.
+
 Examples:
 
 User: "hey can u help me" + "make formal"
