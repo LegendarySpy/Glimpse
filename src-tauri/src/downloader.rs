@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use tauri::{AppHandle, Emitter, Runtime};
+use tokio_util::sync::CancellationToken;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ModelFileDescriptor {
@@ -39,6 +40,7 @@ pub async fn download_file<R: Runtime>(
     file_name: &str,
     model_name: &str,
     target_dir: &Path,
+    cancel_token: &CancellationToken,
 ) -> Result<()> {
     let target_path = target_dir.join(file_name);
     let mut res = client
@@ -55,26 +57,40 @@ pub async fn download_file<R: Runtime>(
     let mut file = File::create(&target_path).context("Failed to create file")?;
     let mut downloaded: u64 = 0;
 
-    while let Some(chunk) = res.chunk().await.context("Failed to read chunk")? {
-        file.write_all(&chunk).context("Failed to write to file")?;
-        downloaded += chunk.len() as u64;
+    loop {
+        tokio::select! {
+            _ = cancel_token.cancelled() => {
+                drop(file);
+                let _ = std::fs::remove_file(&target_path);
+                return Err(anyhow!("Download cancelled"));
+            }
+            chunk_result = res.chunk() => {
+                match chunk_result.context("Failed to read chunk")? {
+                    Some(chunk) => {
+                        file.write_all(&chunk).context("Failed to write to file")?;
+                        downloaded += chunk.len() as u64;
 
-        let percent = if total_size > 0 {
-            (downloaded as f64 / total_size as f64) * 100.0
-        } else {
-            0.0
-        };
+                        let percent = if total_size > 0 {
+                            (downloaded as f64 / total_size as f64) * 100.0
+                        } else {
+                            0.0
+                        };
 
-        app.emit(
-            "download:progress",
-            DownloadProgressPayload {
-                model: model_name.to_string(),
-                file: file_name.to_string(),
-                downloaded,
-                total: total_size,
-                percent,
-            },
-        )?;
+                        app.emit(
+                            "download:progress",
+                            DownloadProgressPayload {
+                                model: model_name.to_string(),
+                                file: file_name.to_string(),
+                                downloaded,
+                                total: total_size,
+                                percent,
+                            },
+                        )?;
+                    }
+                    None => break,
+                }
+            }
+        }
     }
 
     Ok(())
@@ -86,12 +102,17 @@ pub async fn download_model_files<R: Runtime>(
     model: &str,
     files: &[ModelFileDescriptor],
     target_dir: &Path,
+    cancel_token: &CancellationToken,
 ) -> Result<()> {
     if !target_dir.exists() {
         std::fs::create_dir_all(target_dir).context("Failed to create model directory")?;
     }
 
     for descriptor in files {
+        if cancel_token.is_cancelled() {
+            return Err(anyhow!("Download cancelled"));
+        }
+        
         if let Err(err) = download_file(
             app,
             client,
@@ -99,6 +120,7 @@ pub async fn download_model_files<R: Runtime>(
             descriptor.name,
             model,
             target_dir,
+            cancel_token,
         )
         .await
         {

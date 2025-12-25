@@ -16,11 +16,12 @@ mod toast;
 mod transcription;
 mod tray;
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
+use tokio_util::sync::CancellationToken;
 
 use anyhow::{anyhow, Context, Result};
 use pill::PillController;
@@ -145,6 +146,7 @@ pub fn run() {
             model_manager::check_model_status,
             model_manager::download_model,
             model_manager::delete_model,
+            model_manager::cancel_download,
             audio::list_input_devices,
             toast_dismissed,
             check_microphone_permission,
@@ -197,6 +199,7 @@ pub struct AppState {
     pending_recording_path: parking_lot::Mutex<Option<PathBuf>>,
     cloud_credentials: parking_lot::Mutex<Option<CloudCredentials>>,
     pending_selected_text: parking_lot::Mutex<Option<String>>,
+    download_tokens: parking_lot::Mutex<HashMap<String, CancellationToken>>,
 }
 
 impl AppState {
@@ -234,6 +237,7 @@ impl AppState {
             pending_recording_path: parking_lot::Mutex::new(None),
             cloud_credentials: parking_lot::Mutex::new(None),
             pending_selected_text: parking_lot::Mutex::new(None),
+            download_tokens: parking_lot::Mutex::new(HashMap::new()),
         }
     }
 
@@ -314,6 +318,27 @@ impl AppState {
 
     pub fn take_pending_selected_text(&self) -> Option<String> {
         self.pending_selected_text.lock().take()
+    }
+
+    pub fn create_download_token(&self, model: &str) -> CancellationToken {
+        let token = CancellationToken::new();
+        self.download_tokens
+            .lock()
+            .insert(model.to_string(), token.clone());
+        token
+    }
+
+    pub fn cancel_download(&self, model: &str) -> bool {
+        if let Some(token) = self.download_tokens.lock().remove(model) {
+            token.cancel();
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn clear_download_token(&self, model: &str) {
+        self.download_tokens.lock().remove(model);
     }
 }
 

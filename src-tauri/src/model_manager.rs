@@ -365,10 +365,13 @@ pub async fn download_model(
     ensure_models_root(&app).map_err(|err| err.to_string())?;
     let dir = get_model_dir(&app, &model).map_err(|err| err.to_string())?;
     let client = state.http();
+    let cancel_token = state.create_download_token(&model);
 
-    download_model_files(&app, &client, &model, def.files, &dir)
-        .await
-        .map_err(|err| err.to_string())?;
+    let result = download_model_files(&app, &client, &model, def.files, &dir, &cancel_token).await;
+
+    state.clear_download_token(&model);
+
+    result.map_err(|err| err.to_string())?;
 
     crate::analytics::track_model_downloaded(&app, &model, def.size_mb);
 
@@ -391,7 +394,6 @@ pub fn delete_model(app: AppHandle<AppRuntime>, model: String) -> Result<ModelSt
     }
     let status = ModelStatus::from_definition(&dir, def);
 
-    // Refresh tray menu so deleted models are disabled immediately
     if let Some(state) = app.try_state::<crate::AppState>() {
         let settings = state.current_settings();
         if let Err(err) = crate::tray::refresh_tray_menu(&app, &settings) {
@@ -400,6 +402,14 @@ pub fn delete_model(app: AppHandle<AppRuntime>, model: String) -> Result<ModelSt
     }
 
     Ok(status)
+}
+
+#[tauri::command]
+pub fn cancel_download(
+    model: String,
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<bool, String> {
+    Ok(state.cancel_download(&model))
 }
 
 pub fn ensure_model_ready<R: Runtime>(app: &AppHandle<R>, model: &str) -> Result<ReadyModel> {

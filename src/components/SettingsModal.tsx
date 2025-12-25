@@ -29,7 +29,7 @@ import {
     RotateCcw,
     FolderOpen,
     Github,
-
+    Square,
     Mail,
     HelpCircle,
     Sliders,
@@ -118,6 +118,7 @@ type DownloadEvent =
     | { status: "idle"; percent: number; downloaded: number; total: number; file?: string }
     | { status: "downloading"; percent: number; downloaded: number; total: number; file: string }
     | { status: "complete"; percent: number; downloaded: number; total: number }
+    | { status: "cancelled"; percent: number; downloaded: number; total: number }
     | { status: "error"; percent: number; downloaded: number; total: number; message: string };
 
 const modifierOrder = ["Control", "Shift", "Alt", "Command"];
@@ -513,6 +514,7 @@ const SettingsModal = ({
 
             unlistenError = await listen<{ model: string; error: string }>("download:error", (event) => {
                 const { model, error } = event.payload;
+                if (error.toLowerCase().includes("cancelled")) return;
                 setDownloadState((prev) => ({
                     ...prev,
                     [model]: {
@@ -672,6 +674,10 @@ const SettingsModal = ({
             await invoke("download_model", { model: modelKey });
             refreshModelStatus(modelKey);
         } catch (err) {
+            const errorMsg = String(err);
+            if (errorMsg.toLowerCase().includes("cancelled")) {
+                return;
+            }
             console.error(err);
             setDownloadState((prev) => ({
                 ...prev,
@@ -713,6 +719,24 @@ const SettingsModal = ({
                     total: prev[modelKey]?.total ?? 0,
                 },
             }));
+        }
+    };
+
+    const handleCancelDownload = async (modelKey: string) => {
+        try {
+            await invoke("cancel_download", { model: modelKey });
+            setDownloadState((prev) => ({ ...prev, [modelKey]: { status: "cancelled", percent: 0, downloaded: 0, total: 0 } }));
+            // Auto-clear after brief display
+            setTimeout(() => {
+                setDownloadState((prev) => {
+                    if (prev[modelKey]?.status === "cancelled") {
+                        return { ...prev, [modelKey]: { status: "idle", percent: 0, downloaded: 0, total: 0 } };
+                    }
+                    return prev;
+                });
+            }, 1500);
+        } catch (err) {
+            console.error("Failed to cancel download:", err);
         }
     };
 
@@ -1741,6 +1765,7 @@ const SettingsModal = ({
                                                         const installed = modelStat?.installed;
                                                         const isActive = localModel === model.key && installed;
                                                         const isDownloading = progress?.status === "downloading";
+                                                        const isCancelled = progress?.status === "cancelled";
                                                         const showError = progress?.status === "error";
                                                         const percent = progress?.percent ?? (installed ? 100 : 0);
 
@@ -1798,39 +1823,57 @@ const SettingsModal = ({
                                                                                 Use
                                                                             </motion.button>
                                                                         )}
-                                                                        <motion.button
-                                                                            onClick={() => (installed ? handleDelete(model.key) : handleDownload(model.key))}
-                                                                            disabled={isDownloading}
-                                                                            className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${installed
-                                                                                ? "border-red-500/20 text-red-400 hover:bg-red-500/10"
-                                                                                : "border-border-secondary text-content-muted hover:bg-surface-elevated hover:text-content-secondary"
-                                                                                } ${isDownloading ? "opacity-50 cursor-wait" : ""}`}
-                                                                            whileTap={!isDownloading ? { scale: 0.95 } : {}}
-                                                                        >
-                                                                            {isDownloading ? (
-                                                                                <Loader2 size={12} className="animate-spin" />
-                                                                            ) : installed ? (
-                                                                                <Trash2 size={12} />
-                                                                            ) : (
-                                                                                <Download size={12} />
-                                                                            )}
-                                                                        </motion.button>
+                                                                        {isDownloading ? (
+                                                                            <motion.button
+                                                                                onClick={() => handleCancelDownload(model.key)}
+                                                                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-error/30 text-error hover:bg-error/10 transition-colors"
+                                                                                whileTap={{ scale: 0.95 }}
+                                                                                title="Stop download"
+                                                                            >
+                                                                                <Square size={10} fill="currentColor" />
+                                                                            </motion.button>
+                                                                        ) : (
+                                                                            <motion.button
+                                                                                onClick={() => (installed ? handleDelete(model.key) : handleDownload(model.key))}
+                                                                                disabled={isCancelled}
+                                                                                className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${installed
+                                                                                    ? "border-error/20 text-error hover:bg-error/10"
+                                                                                    : isCancelled
+                                                                                        ? "border-border-secondary text-content-disabled cursor-default"
+                                                                                        : "border-border-secondary text-content-muted hover:bg-surface-elevated hover:text-content-secondary"
+                                                                                    }`}
+                                                                                whileTap={!isCancelled ? { scale: 0.95 } : {}}
+                                                                            >
+                                                                                {installed ? (
+                                                                                    <Trash2 size={12} />
+                                                                                ) : (
+                                                                                    <Download size={12} className={isCancelled ? "" : ""} />
+                                                                                )}
+                                                                            </motion.button>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                                 {(isDownloading || !installed) && (
                                                                     <div className="mt-3">
                                                                         <ModelProgress percent={percent} status={progress?.status ?? "idle"} />
-                                                                        {isDownloading && (
-                                                                            <p className="mt-1.5 text-[10px] text-content-muted tabular-nums truncate">
-                                                                                {progress?.percent?.toFixed(0)}% · {(progress as Extract<DownloadEvent, { status: "downloading" }>).file}
-                                                                            </p>
-                                                                        )}
-                                                                        {showError && (
-                                                                            <p className="mt-1.5 text-[10px] text-red-400 flex items-center gap-1">
-                                                                                <AlertCircle size={10} />
-                                                                                {(progress as Extract<DownloadEvent, { status: "error" }>).message}
-                                                                            </p>
-                                                                        )}
+                                                                        <div className="h-4 flex items-center mt-1.5">
+                                                                            {isDownloading && (
+                                                                                <p className="text-[10px] leading-none text-content-muted tabular-nums truncate w-full">
+                                                                                    {progress?.percent?.toFixed(0)}% · {(progress as Extract<DownloadEvent, { status: "downloading" }>).file}
+                                                                                </p>
+                                                                            )}
+                                                                            {showError && (
+                                                                                <p className="text-[10px] leading-none text-error flex items-center gap-1 w-full truncate">
+                                                                                    <AlertCircle size={10} />
+                                                                                    {(progress as Extract<DownloadEvent, { status: "error" }>).message}
+                                                                                </p>
+                                                                            )}
+                                                                            {isCancelled && (
+                                                                                <p className="text-[10px] leading-none text-content-muted">
+                                                                                    Cancelled
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
                                                                 )}
                                                             </motion.div>

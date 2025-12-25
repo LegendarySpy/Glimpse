@@ -21,6 +21,7 @@ import {
     Check,
     ExternalLink,
     Loader2,
+    Square,
     Wand2,
     AlertTriangle,
     Mail,
@@ -58,7 +59,7 @@ type TranscriptionMode = "cloud" | "local";
 type OnboardingStep = "welcome" | "cloud-signin" | "cloud-profile" | "cloud-sync" | "local-model" | "cleanup" | "local-signin" | "microphone" | "accessibility" | "ready";
 
 type LocalDownloadStatus = {
-    status: "idle" | "downloading" | "complete" | "error";
+    status: "idle" | "downloading" | "complete" | "error" | "cancelled";
     percent: number;
     file?: string;
     message?: string;
@@ -545,6 +546,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                     }),
                     listen<{ model: string; error: string }>("download:error", (event) => {
                         const { model, error } = event.payload;
+                        if (error.toLowerCase().includes("cancelled")) return;
                         setLocalDownload((prev) => ({
                             ...prev,
                             [model]: { status: "error", percent: prev[model]?.percent ?? 0, message: error },
@@ -584,6 +586,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         try {
             await invoke("download_model", { model: modelKey });
         } catch (err) {
+            const errorMsg = String(err);
+            if (errorMsg.toLowerCase().includes("cancelled")) {
+                return;
+            }
             console.error(err);
             setLocalDownload((prev) => ({
                 ...prev,
@@ -606,6 +612,27 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                 ...prev,
                 [modelKey]: { status: "error", percent: prev[modelKey]?.percent ?? 0, message: "Delete failed" },
             }));
+        }
+    };
+
+    const handleCancelDownload = async (modelKey: typeof PARAKEET_KEY | typeof WHISPER_KEY) => {
+        try {
+            await invoke("cancel_download", { model: modelKey });
+            setLocalDownload((prev) => ({
+                ...prev,
+                [modelKey]: { status: "cancelled", percent: 0 },
+            }));
+            // Auto-clear after brief display
+            setTimeout(() => {
+                setLocalDownload((prev) => {
+                    if (prev[modelKey]?.status === "cancelled") {
+                        return { ...prev, [modelKey]: { status: "idle", percent: 0 } };
+                    }
+                    return prev;
+                });
+            }, 1500);
+        } catch (err) {
+            console.error("Failed to cancel download:", err);
         }
     };
 
@@ -1153,42 +1180,51 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                         <div className="flex items-center gap-2">
                                             <span className="text-[10px] font-semibold text-content-secondary">Download</span>
                                             <button
-                                                aria-label={displayState.whisper.status === "complete" ? "Delete model" : "Download model"}
+                                                aria-label={displayState.whisper.status === "downloading" ? "Stop download" : displayState.whisper.status === "complete" ? "Delete model" : "Download model"}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (displayState.whisper.status === "complete") {
+                                                    if (displayState.whisper.status === "downloading") {
+                                                        handleCancelDownload(WHISPER_KEY);
+                                                    } else if (displayState.whisper.status === "complete") {
                                                         handleLocalDelete(WHISPER_KEY);
-                                                    } else {
+                                                    } else if (displayState.whisper.status !== "cancelled") {
                                                         handleLocalDownload(WHISPER_KEY);
                                                     }
                                                 }}
-                                                disabled={displayState.whisper.status === "downloading"}
+                                                disabled={displayState.whisper.status === "cancelled"}
                                                 className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${displayState.whisper.status === "downloading"
-                                                    ? "border-border-secondary text-content-muted cursor-wait"
+                                                    ? "border-error/30 text-error hover:bg-error/10"
                                                     : displayState.whisper.status === "complete"
-                                                        ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
-                                                        : "border-border-secondary text-content-primary hover:border-border-hover"
+                                                        ? "border-error/30 text-error hover:bg-error/10"
+                                                        : displayState.whisper.status === "cancelled"
+                                                            ? "border-border-secondary text-content-disabled cursor-default"
+                                                            : "border-border-secondary text-content-primary hover:border-border-hover"
                                                     }`}
                                             >
                                                 {displayState.whisper.status === "downloading" ? (
-                                                    <Loader2 size={10} className="animate-spin" />
+                                                    <Square size={10} className="fill-current" />
                                                 ) : displayState.whisper.status === "complete" ? (
                                                     <Trash2 size={10} />
                                                 ) : (
-                                                    <Download size={10} className="text-amber-400" />
+                                                    <Download size={10} className={displayState.whisper.status === "cancelled" ? "" : "text-cloud"} />
                                                 )}
                                             </button>
                                         </div>
                                         <ModelProgress percent={displayState.whisper.percent} status={displayState.whisper.status} />
-                                        <div className="h-[14px]">
+                                        <div className="h-4 flex items-center">
                                             {displayState.whisper.status === "downloading" && (
-                                                <p className="text-[10px] text-content-muted tabular-nums">
+                                                <p className="text-[10px] leading-none text-content-muted tabular-nums truncate w-full">
                                                     {displayState.whisper.percent.toFixed(0)}% · {displayState.whisper.file ?? ""}
                                                 </p>
                                             )}
                                             {displayState.whisper.status === "error" && (
-                                                <p className="text-[10px] text-red-400">
+                                                <p className="text-[10px] leading-none text-error truncate w-full">
                                                     {displayState.whisper.message ?? "Download failed"}
+                                                </p>
+                                            )}
+                                            {displayState.whisper.status === "cancelled" && (
+                                                <p className="text-[10px] leading-none text-content-muted">
+                                                    Cancelled
                                                 </p>
                                             )}
                                         </div>
@@ -1253,42 +1289,51 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                         <div className="flex items-center gap-2">
                                             <span className="text-[10px] font-semibold text-content-secondary">Download</span>
                                             <button
-                                                aria-label={displayState.parakeet.status === "complete" ? "Delete model" : "Download model"}
+                                                aria-label={displayState.parakeet.status === "downloading" ? "Stop download" : displayState.parakeet.status === "complete" ? "Delete model" : "Download model"}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (displayState.parakeet.status === "complete") {
+                                                    if (displayState.parakeet.status === "downloading") {
+                                                        handleCancelDownload(PARAKEET_KEY);
+                                                    } else if (displayState.parakeet.status === "complete") {
                                                         handleLocalDelete(PARAKEET_KEY);
-                                                    } else {
+                                                    } else if (displayState.parakeet.status !== "cancelled") {
                                                         handleLocalDownload(PARAKEET_KEY);
                                                     }
                                                 }}
-                                                disabled={displayState.parakeet.status === "downloading"}
+                                                disabled={displayState.parakeet.status === "cancelled"}
                                                 className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors ${displayState.parakeet.status === "downloading"
-                                                    ? "border-border-secondary text-content-muted cursor-wait"
+                                                    ? "border-error/30 text-error hover:bg-error/10"
                                                     : displayState.parakeet.status === "complete"
-                                                        ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
-                                                        : "border-border-secondary text-content-primary hover:border-border-hover"
+                                                        ? "border-error/30 text-error hover:bg-error/10"
+                                                        : displayState.parakeet.status === "cancelled"
+                                                            ? "border-border-secondary text-content-disabled cursor-default"
+                                                            : "border-border-secondary text-content-primary hover:border-border-hover"
                                                     }`}
                                             >
                                                 {displayState.parakeet.status === "downloading" ? (
-                                                    <Loader2 size={10} className="animate-spin" />
+                                                    <Square size={10} className="fill-current" />
                                                 ) : displayState.parakeet.status === "complete" ? (
                                                     <Trash2 size={10} />
                                                 ) : (
-                                                    <Download size={10} className="text-amber-400" />
+                                                    <Download size={10} className={displayState.parakeet.status === "cancelled" ? "" : "text-cloud"} />
                                                 )}
                                             </button>
                                         </div>
                                         <ModelProgress percent={displayState.parakeet.percent} status={displayState.parakeet.status} />
-                                        <div className="h-[14px]">
+                                        <div className="h-4 flex items-center">
                                             {displayState.parakeet.status === "downloading" && (
-                                                <p className="text-[10px] text-content-muted tabular-nums">
+                                                <p className="text-[10px] leading-none text-content-muted tabular-nums truncate w-full">
                                                     {displayState.parakeet.percent.toFixed(0)}% · {displayState.parakeet.file ?? ""}
                                                 </p>
                                             )}
                                             {displayState.parakeet.status === "error" && (
-                                                <p className="text-[10px] text-red-400">
+                                                <p className="text-[10px] leading-none text-error truncate w-full">
                                                     {displayState.parakeet.message ?? "Download failed"}
+                                                </p>
+                                            )}
+                                            {displayState.parakeet.status === "cancelled" && (
+                                                <p className="text-[10px] leading-none text-content-muted">
+                                                    Cancelled
                                                 </p>
                                             )}
                                         </div>
