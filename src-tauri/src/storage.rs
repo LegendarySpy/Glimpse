@@ -71,6 +71,7 @@ pub struct TranscriptionMetadata {
     pub llm_model: Option<String>,
     pub word_count: u32,
     pub audio_duration_seconds: f32,
+    pub synced: bool,
 }
 
 impl Default for TranscriptionMetadata {
@@ -80,6 +81,7 @@ impl Default for TranscriptionMetadata {
             llm_model: None,
             word_count: 0,
             audio_duration_seconds: 0.0,
+            synced: false,
         }
     }
 }
@@ -128,7 +130,7 @@ impl StorageManager {
             llm_model: metadata.llm_model,
             word_count: metadata.word_count,
             audio_duration_seconds: metadata.audio_duration_seconds,
-            synced: false,
+            synced: metadata.synced,
         };
 
         let conn = self.connection.lock();
@@ -167,7 +169,7 @@ impl StorageManager {
             llm_model: metadata.llm_model,
             word_count: metadata.word_count,
             audio_duration_seconds: metadata.audio_duration_seconds,
-            synced: false,
+            synced: metadata.synced,
         };
 
         let conn = self.connection.lock();

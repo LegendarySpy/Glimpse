@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,7 +17,8 @@ import {
     Cloud,
     CreditCard,
     Copy,
-    Activity
+    Activity,
+    RefreshCw
 } from "lucide-react";
 import type { Models } from "appwrite";
 import {
@@ -29,6 +29,7 @@ import {
     logoutAll,
     type User as AppwriteUser
 } from "../lib/auth";
+import { getCloudUsageStats, getCachedUsageStats, type CloudUsageStats } from "../lib";
 import DotMatrix from "./DotMatrix";
 
 interface AccountViewProps {
@@ -65,18 +66,28 @@ const AccountView = ({
     const [sessionsLoading, setSessionsLoading] = useState(false);
     const [deletingSession, setDeletingSession] = useState<string | null>(null);
 
-    type UsageStats = {
-        cloud_minutes_this_month: number;
-        cloud_hours_lifetime: number;
-        cloud_transcriptions_count: number;
-        cloud_transcriptions_this_month: number;
-    };
-    const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+    const [usageStats, setUsageStats] = useState<CloudUsageStats>(() => {
+        if (currentUser?.$id) {
+            const cached = getCachedUsageStats(currentUser.$id);
+            if (cached) return cached;
+        }
+        return {
+            cloud_minutes_this_month: 0,
+            cloud_hours_lifetime: 0,
+            cloud_transcriptions_count: 0,
+            cloud_transcriptions_this_month: 0,
+        };
+    });
+    const [usageStatsLoading, setUsageStatsLoading] = useState(false);
 
     useEffect(() => {
         if (currentUser) {
+            const cached = getCachedUsageStats(currentUser.$id);
+            if (cached) {
+                setUsageStats(cached);
+            }
             loadSessions();
-            loadUsageStats();
+            loadUsageStats(false);
         }
     }, [currentUser]);
 
@@ -84,12 +95,16 @@ const AccountView = ({
         setEditName(currentUser?.name || "");
     }, [currentUser?.name]);
 
-    const loadUsageStats = async () => {
+    const loadUsageStats = async (showLoading = true) => {
+        if (!currentUser?.$id) return;
+        if (showLoading) setUsageStatsLoading(true);
         try {
-            const stats = await invoke<UsageStats>("get_usage_stats");
+            const stats = await getCloudUsageStats(currentUser.$id);
             setUsageStats(stats);
         } catch (err) {
             console.error("Failed to load usage stats:", err);
+        } finally {
+            if (showLoading) setUsageStatsLoading(false);
         }
     };
 
@@ -331,83 +346,91 @@ const AccountView = ({
 
             {/* Cloud Usage Stats Section */}
             <div className="space-y-3">
-                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled pl-1">Cloud Usage</h3>
+                <div className="flex items-center justify-between px-1">
+                    <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled">Cloud Usage</h3>
+                    <button
+                        onClick={() => loadUsageStats(true)}
+                        disabled={usageStatsLoading}
+                        className={`text-[10px] transition-colors flex items-center justify-start gap-1.5 w-[72px] mr-2 ${usageStatsLoading
+                            ? "text-amber-400"
+                            : "text-content-disabled hover:text-content-primary"
+                            }`}
+                        title="Refresh usage stats"
+                    >
+                        <RefreshCw size={10} className={`flex-shrink-0 ${usageStatsLoading ? "animate-spin" : ""}`} />
+                        {usageStatsLoading ? "Refreshing..." : "Refresh"}
+                    </button>
+                </div>
                 <div className="bg-surface-tertiary border border-border-primary rounded-xl overflow-hidden">
-                    {usageStats ? (
-                        <div className="p-5">
-                            <div className="grid grid-cols-2 gap-8">
-                                {/* Monthly Stats */}
-                                {isSubscriber && (
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <Cloud size={14} className="text-content-muted" />
-                                                <span className="text-[12px] font-medium text-content-primary">This Month</span>
+                    <div className="p-5">
+                        <div className="grid grid-cols-2 gap-8">
+                            {/* Monthly Stats */}
+                            {isSubscriber && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <Cloud size={14} className="text-content-muted" />
+                                            <span className="text-[12px] font-medium text-content-primary">This Month</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-[11px] font-mono text-content-secondary leading-none mb-1">
+                                                <span className="text-content-primary">{usageStats.cloud_minutes_this_month.toFixed(0)}</span>
+                                                <span className="opacity-50"> / 600 min</span>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="text-[11px] font-mono text-content-secondary leading-none mb-1">
-                                                    <span className="text-content-primary">{usageStats.cloud_minutes_this_month.toFixed(0)}</span>
-                                                    <span className="opacity-50"> / 600 min</span>
-                                                </div>
-                                                <div className="text-[9px] text-content-disabled font-medium">
-                                                    {((usageStats.cloud_minutes_this_month / 600) * 100).toFixed(0)}% used
-                                                </div>
+                                            <div className="text-[9px] text-content-disabled font-medium">
+                                                {((usageStats.cloud_minutes_this_month / 600) * 100).toFixed(0)}% used
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <UsageBar
-                                            value={usageStats.cloud_minutes_this_month}
-                                            max={600}
-                                            color="var(--color-cloud)"
-                                            cols={25}
-                                            rows={4}
-                                        />
+                                    <UsageBar
+                                        value={usageStats.cloud_minutes_this_month}
+                                        max={600}
+                                        color="var(--color-cloud)"
+                                        cols={25}
+                                        rows={4}
+                                    />
 
-                                        <div className="flex items-center gap-1.5 pt-1">
-                                            <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-cloud)" />
-                                            <span className="text-[10px] text-content-muted">
-                                                {usageStats.cloud_transcriptions_this_month} transcriptions
+                                    <div className="flex items-center gap-1.5 pt-1">
+                                        <DotMatrix rows={1} cols={1} activeDots={[0]} dotSize={2} gap={1} color="var(--color-cloud)" />
+                                        <span className="text-[10px] text-content-muted">
+                                            {usageStats.cloud_transcriptions_this_month} transcriptions
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Lifetime Stats */}
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Activity size={14} className="text-content-muted" />
+                                    <span className="text-[12px] font-medium text-content-primary">Lifetime</span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div className="text-[20px] font-mono text-success leading-none mb-1">
+                                            {usageStats.cloud_hours_lifetime < 1
+                                                ? (usageStats.cloud_hours_lifetime * 60).toFixed(0)
+                                                : usageStats.cloud_hours_lifetime.toFixed(1)
+                                            }
+                                            <span className="text-[12px] text-success/70 ml-1">
+                                                {usageStats.cloud_hours_lifetime < 1 ? 'min' : 'hrs'}
                                             </span>
                                         </div>
-                                    </div>
-                                )}
-
-                                {/* Lifetime Stats */}
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Activity size={14} className="text-content-muted" />
-                                        <span className="text-[12px] font-medium text-content-primary">Lifetime</span>
+                                        <div className="text-[10px] text-content-muted">Audio processed</div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <div className="text-[20px] font-mono text-success leading-none mb-1">
-                                                {usageStats.cloud_hours_lifetime < 1
-                                                    ? (usageStats.cloud_hours_lifetime * 60).toFixed(0)
-                                                    : usageStats.cloud_hours_lifetime.toFixed(1)
-                                                }
-                                                <span className="text-[12px] text-success/70 ml-1">
-                                                    {usageStats.cloud_hours_lifetime < 1 ? 'min' : 'hrs'}
-                                                </span>
-                                            </div>
-                                            <div className="text-[10px] text-content-muted">Audio processed</div>
+                                    <div>
+                                        <div className="text-[20px] font-mono text-content-primary leading-none mb-1">
+                                            {usageStats.cloud_transcriptions_count}
                                         </div>
-
-                                        <div>
-                                            <div className="text-[20px] font-mono text-content-primary leading-none mb-1">
-                                                {usageStats.cloud_transcriptions_count}
-                                            </div>
-                                            <div className="text-[10px] text-content-muted">Transcriptions</div>
-                                        </div>
+                                        <div className="text-[10px] text-content-muted">Transcriptions</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    ) : (
-                        <div className="p-8 flex justify-center">
-                            <Loader2 size={18} className="animate-spin text-content-disabled" />
-                        </div>
-                    )}
+                    </div>
                 </div>
             </div>
 

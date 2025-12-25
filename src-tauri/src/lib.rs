@@ -1085,6 +1085,7 @@ async fn retry_transcription(
                     reported_model.as_deref(),
                     &final_transcript,
                     llm_cleaned,
+                    false,
                 );
 
                 emit_transcription_complete_with_cleanup(
@@ -1525,6 +1526,7 @@ fn queue_transcription(
                     reported_model.as_deref(),
                     &final_transcript,
                     llm_cleaned,
+                    use_cloud_auth, // Cloud transcriptions are already synced server-side
                 );
 
                 emit_transcription_complete_with_cleanup(
@@ -1843,6 +1845,7 @@ fn build_transcription_metadata(
     reported_model: Option<&str>,
     final_text: &str,
     llm_cleaned: bool,
+    synced: bool,
 ) -> storage::TranscriptionMetadata {
     storage::TranscriptionMetadata {
         speech_model: resolve_speech_model_label(settings, use_local, reported_model),
@@ -1853,6 +1856,7 @@ fn build_transcription_metadata(
         },
         word_count: count_words(final_text),
         audio_duration_seconds: compute_audio_duration_seconds(saved),
+        synced,
     }
 }
 

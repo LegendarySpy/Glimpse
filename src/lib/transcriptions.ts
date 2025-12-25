@@ -3,6 +3,13 @@ import { Permission, Role } from "./appwrite";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_TRANSCRIPTIONS_COLLECTION_ID;
+const USAGE_COLLECTION_ID = import.meta.env.VITE_APPWRITE_USAGE_COLLECTION_ID;
+
+export interface UsageRecord extends Document {
+    user_id: string;
+    period: string; // YYYY-MM format
+    audio_seconds_used: number;
+}
 
 export interface CloudTranscription extends Document {
     text: string;
@@ -82,6 +89,7 @@ export async function findByLocalId(userId: string, localId: string): Promise<Cl
     const result = await listDocuments<CloudTranscription>(DATABASE_ID, COLLECTION_ID, [
         Query.equal("user_id", userId),
         Query.equal("local_id", localId),
+        Query.equal("is_deleted", false),
         Query.limit(1),
     ]);
     return result.documents[0] || null;
@@ -131,4 +139,107 @@ export async function syncLocalTranscription(
 export async function validateConnection(): Promise<boolean> {
     await listDocuments<CloudTranscription>(DATABASE_ID, COLLECTION_ID, [Query.limit(1)]);
     return true;
+}
+
+export type CloudUsageStats = {
+    cloud_minutes_this_month: number;
+    cloud_hours_lifetime: number;
+    cloud_transcriptions_count: number;
+    cloud_transcriptions_this_month: number;
+};
+
+const USAGE_CACHE_KEY = "glimpse_cloud_usage_cache";
+
+type UsageCache = {
+    stats: CloudUsageStats;
+    timestamp: number;
+    userId: string;
+    monthKey: string; // YYYY-MM format to detect month changes
+};
+
+function getMonthKey(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export function getCachedUsageStats(userId: string): CloudUsageStats | null {
+    try {
+        const cached = localStorage.getItem(USAGE_CACHE_KEY);
+        if (!cached) return null;
+
+        const data: UsageCache = JSON.parse(cached);
+
+        // Invalidate if different user or month changed
+        if (data.userId !== userId || data.monthKey !== getMonthKey()) {
+            localStorage.removeItem(USAGE_CACHE_KEY);
+            return null;
+        }
+
+        return data.stats;
+    } catch {
+        return null;
+    }
+}
+
+export function setCachedUsageStats(userId: string, stats: CloudUsageStats): void {
+    const cache: UsageCache = {
+        stats,
+        timestamp: Date.now(),
+        userId,
+        monthKey: getMonthKey(),
+    };
+    localStorage.setItem(USAGE_CACHE_KEY, JSON.stringify(cache));
+}
+
+export async function getCloudUsageStats(userId: string): Promise<CloudUsageStats> {
+    const currentPeriod = getMonthKey();
+
+    const usageRecords = await listDocuments<UsageRecord>(DATABASE_ID, USAGE_COLLECTION_ID, [
+        Query.equal("user_id", userId),
+        Query.limit(1000), // Enough for a few years
+    ]);
+
+    let lifetimeSeconds = 0;
+    let monthlySeconds = 0;
+
+    for (const record of usageRecords.documents) {
+        lifetimeSeconds += record.audio_seconds_used || 0;
+        if (record.period === currentPeriod) {
+            monthlySeconds = record.audio_seconds_used || 0;
+        }
+    }
+
+    // For transcription counts, we still need to query transcriptions
+    // but this is optional metadata, not critical for quota enforcement
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    const [monthlyTranscriptions, allTranscriptions] = await Promise.all([
+        listDocuments<CloudTranscription>(DATABASE_ID, COLLECTION_ID, [
+            Query.equal("user_id", userId),
+            Query.equal("status", "success"),
+            Query.equal("is_deleted", false),
+            Query.greaterThanEqual("timestamp", monthStart.toISOString()),
+            Query.limit(1), // We only need the total count
+        ]),
+        listDocuments<CloudTranscription>(DATABASE_ID, COLLECTION_ID, [
+            Query.equal("user_id", userId),
+            Query.equal("status", "success"),
+            Query.equal("is_deleted", false),
+            Query.limit(1),
+        ]),
+    ]);
+
+    const stats: CloudUsageStats = {
+        cloud_minutes_this_month: monthlySeconds / 60,
+        cloud_hours_lifetime: lifetimeSeconds / 3600,
+        cloud_transcriptions_count: allTranscriptions.total,
+        cloud_transcriptions_this_month: monthlyTranscriptions.total,
+    };
+
+    // Cache the fetched stats
+    setCachedUsageStats(userId, stats);
+
+    return stats;
 }

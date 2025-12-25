@@ -86,6 +86,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
     const [userId, setUserId] = useState<string | null>(null);
     const [isSubscriber, setIsSubscriber] = useState(false);
+    const initialSyncDoneRef = useRef(false);
 
     const loadedOffsets = useRef<Set<number>>(new Set());
     const fetchingOffsets = useRef<Set<number>>(new Set());
@@ -372,7 +373,8 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
     }, [loadTranscriptions]);
 
     useEffect(() => {
-        if (resolvedCloudSyncEnabled && userId && isSubscriber) {
+        if (resolvedCloudSyncEnabled && userId && isSubscriber && !initialSyncDoneRef.current) {
+            initialSyncDoneRef.current = true;
             (async () => {
                 await syncFromCloud();
                 await syncAllToCloud();

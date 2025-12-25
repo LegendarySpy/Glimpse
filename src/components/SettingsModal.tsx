@@ -774,7 +774,7 @@ const SettingsModal = ({
                     >
                         <motion.button
                             onClick={onClose}
-                            className="absolute right-3 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-lg text-content-muted hover:bg-surface-elevated hover:text-content-secondary transition-colors"
+                            className="absolute right-2 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-lg text-content-muted hover:bg-surface-elevated hover:text-content-secondary transition-colors"
                             whileTap={{ scale: 0.95 }}
                         >
                             <X size={14} />
@@ -851,7 +851,7 @@ const SettingsModal = ({
                         </aside>
 
                         <main className="flex flex-1 flex-col min-h-0 bg-surface-overlay">
-                            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 settings-scroll">
+                            <div className="flex-1 min-h-0 overflow-y-auto px-6 pt-8 pb-5 settings-scroll">
                                 <AnimatePresence mode="wait">
                                     {activeTab === "account" && (
                                         <motion.div

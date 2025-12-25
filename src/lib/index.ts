@@ -60,7 +60,9 @@ export {
     findByLocalId,
     syncLocalTranscription,
     validateConnection,
+    getCloudUsageStats,
+    getCachedUsageStats,
 } from "./transcriptions";
-export type { CloudTranscription, TranscriptionInput } from "./transcriptions";
+export type { CloudTranscription, TranscriptionInput, CloudUsageStats } from "./transcriptions";
 
 export { Permission, Role } from "./appwrite";
