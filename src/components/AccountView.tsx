@@ -5,21 +5,49 @@ import {
     Lock,
     Loader2,
     Check,
-    Monitor,
-    Smartphone,
     LogOut,
     AlertCircle,
-    CloudCog,
     Pencil,
     Eye,
     EyeOff,
     X,
     Cloud,
-    CreditCard,
     Copy,
     Activity,
-    RefreshCw
+    RefreshCw,
+    Monitor,
+    Smartphone
 } from "lucide-react";
+
+const AppleIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} height="1em" width="1em">
+        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.21-.89 3.12-1.13.57-.15 2.18-.09 3.3.93-2.6 1.4-1.92 5.06 1.34 6.25-.9 2.56-2.05 4.96-2.84 6.18zm-2.17-14.8c1.37-1.78 1.05-3.36 1.05-3.36s-1.35-.11-3.23 2.1c-1.43 1.57-1.16 3.16-1.16 3.16s1.6.14 3.34-1.9z" />
+    </svg>
+);
+
+const WindowsIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} height="1em" width="1em">
+        <path d="M0 3.449L9.75 2.1v9.451H0V3.449zm10.949-1.67L24 0v11.4H10.949V1.779zM0 12.6h9.75v9.451L0 20.699V12.6zm10.949 0H24v11.4l-13.051-1.83V12.6z" />
+    </svg>
+);
+
+const LinuxIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} height="1em" width="1em">
+        <path d="M12 20.125c-.273-.027-.582-.086-.777-.145-.723-.21-1.332-.777-1.605-1.492-.125-.328-.133-.426-.133-1.473V15.75l-.348-.687c-.894-1.77-1.074-2.844-.645-3.832.254-.582.434-.824 1.153-1.57 1.476-1.532 2.761-2.036 4.605-1.801.766.097 1.25.261 1.84.62 1.352.825 2.05 2.145 2.016 3.801-.027 1.426-.645 2.723-1.637 3.442l-.527.382v1.27c0 1.215-.016 1.304-.219 1.636-.312.512-1.015.825-1.777.786-.336-.016-.621-.059-.836-.125l-.234-.07-.305.21c-.496.34-1.02.438-1.57.294zm3.07-1.312c.328-.157.653-.563.805-1.012.055-.164.098-.59.098-1.734v-1.492l.48-.344c1.192-.851 1.649-2.277 1.157-3.605-.332-.903-1.254-1.684-2.223-1.883-.355-.074-1.16-.063-1.488.02-1.715.421-2.613 1.957-2.05 3.507.242.66.726 1.348 1.277 1.817l.422.363v1.64c0 1.489.02 1.579.282 1.805.27.235.805.239 1.242.016v-.098z" />
+    </svg>
+);
+
+const getOsIcon = (osName: string, clientName: string) => {
+    const lowerOs = osName?.toLowerCase() || "";
+    const lowerClient = clientName?.toLowerCase() || "";
+
+    if (lowerOs.includes("mac") || lowerOs.includes("darwin") || lowerOs.includes("ios")) return <AppleIcon className="text-content-secondary w-4 h-4" />;
+    if (lowerOs.includes("win")) return <WindowsIcon className="text-content-secondary w-4 h-4" />;
+    if (lowerOs.includes("linux") || lowerOs.includes("ubuntu") || lowerOs.includes("debian")) return <LinuxIcon className="text-content-secondary w-4 h-4" />;
+    if (lowerOs.includes("android") || lowerClient.includes("phone")) return <Smartphone size={16} className="text-content-secondary" />;
+
+    return <Monitor size={16} className="text-content-secondary" />;
+};
 import type { Models } from "appwrite";
 import {
     updateName,
@@ -202,7 +230,7 @@ const AccountView = ({
     const isSubscriber = currentUser.labels?.includes("subscriber");
 
     return (
-        <div className="max-w-2xl mx-auto space-y-8 pb-10">
+        <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div className="relative">
@@ -228,7 +256,7 @@ const AccountView = ({
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
                                         autoFocus
-                                        className="bg-surface-elevated border border-border-secondary rounded px-2 py-0 text-[18px] font-medium text-white focus:border-amber-400/50 outline-none w-48 h-full"
+                                        className="bg-surface-surface border border-border-primary rounded-lg px-2 py-0 text-[18px] font-medium text-white focus:border-amber-400/50 outline-none w-48 h-full"
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter") handleSaveName();
                                             if (e.key === "Escape") {
@@ -280,13 +308,10 @@ const AccountView = ({
             </div>
 
             <div className="space-y-3">
-                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled pl-1">Account Settings</h3>
-                <div className="bg-surface-tertiary border border-border-primary rounded-xl overflow-hidden divide-y divide-surface-elevated">
-                    <div className="flex items-center justify-between p-4 hover:bg-surface-surface transition-colors group">
+                <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-muted">Account Settings</h3>
+                <div className="bg-surface-surface border border-border-primary rounded-xl overflow-hidden divide-y divide-surface-elevated">
+                    <div className="flex items-center justify-between p-4 hover:bg-surface-elevated transition-colors group">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-surface-elevated text-content-secondary">
-                                <CreditCard size={16} />
-                            </div>
                             <div>
                                 <div className="text-[13px] text-content-primary font-medium">Subscription</div>
                                 <div className="text-[11px] text-content-muted">
@@ -311,11 +336,8 @@ const AccountView = ({
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between p-4 hover:bg-surface-surface transition-colors">
+                    <div className="flex items-center justify-between p-4 hover:bg-surface-elevated transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${isSubscriber ? "bg-surface-elevated text-content-secondary" : "bg-surface-elevated text-content-disabled"}`}>
-                                <CloudCog size={16} />
-                            </div>
                             <div>
                                 <div className={`text-[13px] font-medium ${isSubscriber ? "text-content-primary" : "text-content-muted"}`}>History Sync</div>
                                 <div className="text-[11px] text-content-muted">
@@ -326,10 +348,10 @@ const AccountView = ({
                         {isSubscriber ? (
                             <button
                                 onClick={onCloudSyncToggle}
-                                className={`relative w-9 h-5 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-border-secondary"}`}
+                                className={`relative w-7 h-4 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-border-secondary"}`}
                             >
                                 <div
-                                    className={`absolute top-[2px] h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${cloudSyncEnabled ? "translate-x-[18px]" : "translate-x-[2px]"}`}
+                                    className={`absolute top-[2px] h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${cloudSyncEnabled ? "translate-x-[14px]" : "translate-x-[2px]"}`}
                                 />
                             </button>
                         ) : (
@@ -346,8 +368,8 @@ const AccountView = ({
 
             {/* Cloud Usage Stats Section */}
             <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                    <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled">Cloud Usage</h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-muted">Cloud Usage</h3>
                     <button
                         onClick={() => loadUsageStats(true)}
                         disabled={usageStatsLoading}
@@ -361,8 +383,8 @@ const AccountView = ({
                         {usageStatsLoading ? "Refreshing..." : "Refresh"}
                     </button>
                 </div>
-                <div className="bg-surface-tertiary border border-border-primary rounded-xl overflow-hidden">
-                    <div className="p-5">
+                <div className="bg-surface-surface border border-border-primary rounded-xl overflow-hidden">
+                    <div className="p-4">
                         <div className="grid grid-cols-2 gap-8">
                             {/* Monthly Stats */}
                             {isSubscriber && (
@@ -435,8 +457,8 @@ const AccountView = ({
             </div>
 
             <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                    <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-disabled">Active Sessions</h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-[11px] uppercase tracking-wider font-semibold text-content-muted">Active Sessions</h3>
                     {sessions.length > 1 && (
                         <button
                             onClick={handleSignOutAll}
@@ -447,18 +469,16 @@ const AccountView = ({
                     )}
                 </div>
 
-                <div className="bg-surface-tertiary border border-border-primary rounded-xl overflow-hidden divide-y divide-surface-elevated">
+                <div className="bg-surface-surface border border-border-primary rounded-xl overflow-hidden divide-y divide-surface-elevated">
                     {sessionsLoading ? (
                         <div className="p-8 flex justify-center">
                             <Loader2 size={18} className="animate-spin text-content-disabled" />
                         </div>
                     ) : (
                         sessions.map((session) => (
-                            <div key={session.$id} className="flex items-center justify-between p-4 hover:bg-surface-surface transition-colors group">
+                            <div key={session.$id} className="flex items-center justify-between p-4 hover:bg-surface-elevated transition-colors group">
                                 <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-lg ${session.current ? "bg-amber-400/10 text-amber-400" : "bg-surface-elevated text-content-secondary"}`}>
-                                        {permissionBasedIcon(session)}
-                                    </div>
+                                    {getOsIcon(session.osName, session.clientName)}
                                     <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
                                             <span className="text-[13px] text-content-primary font-medium">
@@ -619,13 +639,7 @@ const AccountView = ({
     );
 };
 
-const permissionBasedIcon = (session: Models.Session) => {
-    const client = session.clientType?.toLowerCase() || "";
-    if (client.includes("mobile") || session.deviceName?.toLowerCase().includes("phone")) {
-        return <Smartphone size={16} fill="currentColor" className="opacity-80" />;
-    }
-    return <Monitor size={16} fill="currentColor" className="opacity-80" />;
-};
+
 
 const UsageBar = ({ value, max, color, cols = 40, rows = 2 }: { value: number; max: number; color: string; cols?: number; rows?: number }) => {
     const totalDots = cols * rows;

@@ -12,28 +12,19 @@ import {
     X,
     Keyboard,
     Cpu,
-    Cloud,
-    HardDrive,
     Download,
     Trash2,
     Loader2,
     AlertCircle,
-    ChevronRight,
     Info,
     User,
-    Mic,
     ChevronDown,
-    Wand2,
     Server,
     Key,
-    RotateCcw,
-    FolderOpen,
     Github,
     Square,
     Mail,
-    HelpCircle,
     Sliders,
-    Accessibility,
     Check,
     Eye,
     EyeOff,
@@ -173,10 +164,10 @@ const SettingsModal = ({
     const [authErrorCopied, setAuthErrorCopied] = useState(false);
     const [errorCopied, setErrorCopied] = useState(false);
     const [captureActive, setCaptureActive] = useState<"smart" | "hold" | "toggle" | null>(null);
+    const [capturePreview, setCapturePreview] = useState<string>("");
     const pressedModifiers = useRef<Set<string>>(new Set());
     const primaryKey = useRef<string | null>(null);
     const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account" | "advanced" | "developer">("general");
-    const [shortcutsExpanded, setShortcutsExpanded] = useState(false);
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
     const [llmProvider, setLlmProvider] = useState<LlmProvider>("none");
@@ -538,7 +529,19 @@ const SettingsModal = ({
     }, [isOpen, refreshModelStatus]);
 
     useEffect(() => {
-        if (!captureActive) return;
+        if (!captureActive) {
+            setCapturePreview("");
+            return;
+        }
+
+        const updatePreview = () => {
+            const mods = Array.from(pressedModifiers.current).sort(
+                (a, b) => ["Control", "Alt", "Shift", "Command"].indexOf(a) - ["Control", "Alt", "Shift", "Command"].indexOf(b)
+            );
+            const key = primaryKey.current ? formatKey(primaryKey.current) : null;
+            const parts = [...mods, key].filter(Boolean);
+            setCapturePreview(parts.length > 0 ? parts.join("+") : "");
+        };
 
         const handleKeyDown = (event: KeyboardEvent) => {
             event.preventDefault();
@@ -548,6 +551,7 @@ const SettingsModal = ({
             } else if (event.code) {
                 primaryKey.current = event.code;
             }
+            updatePreview();
         };
 
         const handleKeyUp = (event: KeyboardEvent) => {
@@ -912,7 +916,7 @@ const SettingsModal = ({
 
                                             {authLoading ? (
                                                 <div className="flex flex-col items-center justify-center py-16">
-                                                    <Loader2 size={24} className="animate-spin text-amber-400 mb-3" />
+                                                    <Loader2 size={24} className="animate-spin text-cloud mb-3" />
                                                     <p className="text-[12px] text-content-muted mb-3">Loading...</p>
                                                     <button
                                                         onClick={handleCancelAuth}
@@ -942,21 +946,21 @@ const SettingsModal = ({
                                                         <div className="relative flex flex-col h-full">
                                                             <div className="flex items-center gap-2 mb-3">
                                                                 <DotMatrix rows={2} cols={2} activeDots={[0, 3]} dotSize={3} gap={2} color="var(--color-cloud)" />
-                                                                <span className="text-[10px] font-semibold text-amber-400">Glimpse Cloud</span>
+                                                                <span className="text-[10px] font-semibold text-cloud">Glimpse Cloud</span>
                                                                 <span className="ml-auto rounded-lg bg-surface-elevated px-2 py-0.5 text-[9px] font-medium text-content-muted">$5.99/mo</span>
                                                             </div>
 
                                                             <div className="flex flex-col gap-1.5 text-[11px] text-content-primary font-medium mb-4">
                                                                 <div className="flex items-center gap-2">
-                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <div className="h-1 w-3 rounded-full bg-cloud/80" />
                                                                     <span>Cross-device sync</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <div className="h-1 w-3 rounded-full bg-cloud/80" />
                                                                     <span>Bigger & better models</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <div className="h-1 w-3 rounded-full bg-amber-400/80" />
+                                                                    <div className="h-1 w-3 rounded-full bg-cloud/80" />
                                                                     <span>Faster processing</span>
                                                                 </div>
                                                             </div>
@@ -1051,7 +1055,7 @@ const SettingsModal = ({
                                                                             </div>
                                                                             <button
                                                                                 type="submit"
-                                                                                className="mt-auto w-full rounded-xl bg-amber-400 py-2.5 text-[11px] font-semibold text-black hover:bg-amber-300 transition-colors"
+                                                                                className="mt-auto w-full rounded-xl bg-cloud py-2.5 text-[11px] font-semibold text-black hover:bg-cloud-light transition-colors"
                                                                             >
                                                                                 Continue
                                                                             </button>
@@ -1126,418 +1130,227 @@ const SettingsModal = ({
                                             initial="hidden"
                                             animate="visible"
                                             exit="exit"
-                                            className="space-y-5"
+                                            className="space-y-6"
                                         >
-                                            <header>
-                                                <h1 className="text-lg font-medium text-content-primary">General</h1>
-                                                <p className="mt-1 text-[12px] text-content-muted">Configure your recording shortcuts and transcription engine.</p>
-                                            </header>
-
-                                            <div className="space-y-3">
-                                                <div className="rounded-xl border border-border-primary bg-surface-surface overflow-hidden">
-                                                    <motion.button
-                                                        onClick={() => setShortcutsExpanded(!shortcutsExpanded)}
-                                                        className="w-full p-4 flex items-center justify-between hover:bg-surface-elevated transition-colors"
+                                            {/* Mode Selector - Primary at top */}
+                                            <div className="space-y-2">
+                                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">Processing</h2>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <button
+                                                        onClick={() => setTranscriptionMode("cloud")}
+                                                        className={`py-3 px-3.5 rounded-lg border text-left transition-all ${transcriptionMode === "cloud"
+                                                            ? "border-cloud-30 bg-cloud-5"
+                                                            : "border-border-primary bg-transparent hover:border-border-secondary"
+                                                            }`}
                                                     >
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                                <Keyboard size={14} className="text-content-muted" />
-                                                            </div>
-                                                            <div className="text-left">
-                                                                <h3 className="text-[13px] font-medium text-content-primary">Shortcuts</h3>
-                                                                <AnimatePresence initial={false}>
-                                                                    {!shortcutsExpanded && (
-                                                                        <motion.p
-                                                                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                                                            animate={{ opacity: 1, height: "auto", marginTop: 2 }}
-                                                                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                                                            className="text-[11px] text-content-muted font-mono block"
-                                                                        >
-                                                                            {smartEnabled ? `Smart: ${smartShortcut}` : ""}
-                                                                            {smartEnabled && (holdEnabled || toggleEnabled) ? " • " : ""}
-                                                                            {holdEnabled ? `Hold: ${holdShortcut}` : ""}
-                                                                            {holdEnabled && toggleEnabled ? " • " : ""}
-                                                                            {toggleEnabled ? `Toggle: ${toggleShortcut}` : ""}
-                                                                        </motion.p>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
+                                                        <div className="flex items-baseline gap-1.5">
+                                                            <span className={`text-[13px] font-medium ${transcriptionMode === "cloud" ? "text-cloud" : "text-content-secondary"
+                                                                }`}>Cloud</span>
+                                                            <span className={`text-[10px] ${transcriptionMode === "cloud" ? "text-cloud-50" : "text-content-disabled"
+                                                                }`}>fast</span>
                                                         </div>
-                                                        <motion.div
-                                                            animate={{ rotate: shortcutsExpanded ? 90 : 0 }}
-                                                            transition={{ duration: 0.2 }}
+                                                        <p className={`text-[10px] mt-1 ${transcriptionMode === "cloud" ? "text-cloud-50" : "text-content-disabled"
+                                                            }`}>Process audio in the cloud</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setTranscriptionMode("local")}
+                                                        className={`py-3 px-3.5 rounded-lg border text-left transition-all ${transcriptionMode === "local"
+                                                            ? "border-local-30 bg-local-5"
+                                                            : "border-border-primary bg-transparent hover:border-border-secondary"
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-baseline gap-1.5">
+                                                            <span className={`text-[13px] font-medium ${transcriptionMode === "local" ? "text-local" : "text-content-secondary"
+                                                                }`}>Local</span>
+                                                            <span className={`text-[10px] ${transcriptionMode === "local" ? "text-local-50" : "text-content-disabled"
+                                                                }`}>private</span>
+                                                        </div>
+                                                        <p className={`text-[10px] mt-1 ${transcriptionMode === "local" ? "text-local-50" : "text-content-disabled"
+                                                            }`}>Runs entirely on your device</p>
+                                                    </button>
+                                                </div>
+                                                <AnimatePresence>
+                                                    {!loading && transcriptionMode === "local" && !modelStatus[localModel]?.installed && (
+                                                        <motion.p
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: "auto" }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            className="text-[10px] text-warning"
                                                         >
-                                                            <ChevronRight size={16} className="text-content-muted" />
-                                                        </motion.div>
-                                                    </motion.button>
-
-                                                    <AnimatePresence initial={false}>
-                                                        {shortcutsExpanded && (
-                                                            <motion.div
-                                                                initial={{ height: 0, opacity: 0 }}
-                                                                animate={{ height: "auto", opacity: 1 }}
-                                                                exit={{ height: 0, opacity: 0 }}
-                                                                transition={{
-                                                                    type: "spring",
-                                                                    stiffness: 400,
-                                                                    damping: 35,
-                                                                    mass: 0.8
-                                                                }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                <div className="px-4 pb-4 space-y-3 border-t border-border-primary pt-4">
-                                                                    <div className={`rounded-xl border p-4 transition-colors ${smartEnabled
-                                                                        ? "border-amber-400/30 bg-amber-400/5"
-                                                                        : "border-border-primary bg-surface-surface"
-                                                                        }`}>
-                                                                        <div className="flex items-center justify-between">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${smartEnabled
-                                                                                    ? "bg-amber-400/10 border-amber-400/30"
-                                                                                    : "bg-surface-elevated border-border-secondary"
-                                                                                    }`}>
-                                                                                    <Wand2 size={14} className={smartEnabled ? "text-amber-400" : "text-content-disabled"} />
-                                                                                </div>
-                                                                                <div>
-                                                                                    <h3 className={`text-[13px] font-medium ${smartEnabled ? "text-content-primary" : "text-content-muted"}`}>Smart Mode</h3>
-                                                                                    <p className="text-[11px] text-content-disabled">Quick tap = hold, long press = toggle</p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <motion.button
-                                                                                    onClick={() => {
-                                                                                        if (!smartEnabled && !holdEnabled && !toggleEnabled) return;
-                                                                                        setSmartEnabled(!smartEnabled);
-                                                                                    }}
-                                                                                    disabled={smartEnabled && !holdEnabled && !toggleEnabled}
-                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${smartEnabled ? "bg-amber-400" : "bg-border-secondary"
-                                                                                        } ${smartEnabled && !holdEnabled && !toggleEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                                                                                    whileTap={!(smartEnabled && !holdEnabled && !toggleEnabled) ? { scale: 0.95 } : {}}
-                                                                                >
-                                                                                    <motion.div
-                                                                                        className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
-                                                                                        animate={{ left: smartEnabled ? "calc(100% - 18px)" : "2px" }}
-                                                                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                                                                    />
-                                                                                </motion.button>
-                                                                                <motion.button
-                                                                                    onClick={() => {
-                                                                                        if (!smartEnabled) return;
-                                                                                        pressedModifiers.current.clear();
-                                                                                        primaryKey.current = null;
-                                                                                        setCaptureActive("smart");
-                                                                                        setError(null);
-                                                                                    }}
-                                                                                    disabled={!smartEnabled}
-                                                                                    className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all ${captureActive === "smart"
-                                                                                        ? "bg-amber-400 text-black"
-                                                                                        : smartEnabled
-                                                                                            ? "bg-surface-elevated border border-border-secondary text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary"
-                                                                                            : "bg-surface-elevated border border-border-secondary text-content-disabled cursor-not-allowed"
-                                                                                        }`}
-                                                                                    whileTap={smartEnabled ? { scale: 0.97 } : {}}
-                                                                                >
-                                                                                    {captureActive === "smart" ? "Listening..." : "Change"}
-                                                                                </motion.button>
-                                                                            </div>
-                                                                        </div>
-                                                                        <motion.div
-                                                                            className={`mt-3 inline-flex items-center rounded-lg border px-3 py-2 transition-colors ${smartEnabled
-                                                                                ? "border-amber-400/30 bg-amber-400/10"
-                                                                                : "border-border-secondary bg-surface-elevated"
-                                                                                }`}
-                                                                            animate={captureActive === "smart" ? {
-                                                                                borderColor: ["rgba(251, 191, 36, 0.3)", "rgba(251, 191, 36, 0.8)", "rgba(251, 191, 36, 0.3)"]
-                                                                            } : {}}
-                                                                            transition={{ duration: 1.2, repeat: captureActive === "smart" ? Infinity : 0 }}
-                                                                        >
-                                                                            <span className={`font-mono text-[12px] ${smartEnabled ? "text-content-primary" : "text-content-muted"}`}>{smartShortcut}</span>
-                                                                        </motion.div>
-                                                                    </div>
-
-                                                                    <div className={`rounded-xl border p-4 transition-colors ${holdEnabled
-                                                                        ? "border-border-primary bg-surface-surface"
-                                                                        : "border-border-primary bg-surface-surface"
-                                                                        }`}>
-                                                                        <div className="flex items-center justify-between">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${holdEnabled
-                                                                                    ? "bg-surface-elevated border-border-secondary"
-                                                                                    : "bg-surface-elevated border-border-secondary"
-                                                                                    }`}>
-                                                                                    <Keyboard size={14} className={holdEnabled ? "text-content-muted" : "text-content-disabled"} />
-                                                                                </div>
-                                                                                <div>
-                                                                                    <h3 className={`text-[13px] font-medium ${holdEnabled ? "text-content-primary" : "text-content-muted"}`}>Hold Shortcut</h3>
-                                                                                    <p className="text-[11px] text-content-disabled">Hold to record, release to stop</p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <motion.button
-                                                                                    onClick={() => {
-                                                                                        if (!holdEnabled && !toggleEnabled && !smartEnabled) return;
-                                                                                        setHoldEnabled(!holdEnabled);
-                                                                                    }}
-                                                                                    disabled={holdEnabled && !toggleEnabled && !smartEnabled}
-                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${holdEnabled ? "bg-amber-400" : "bg-border-secondary"
-                                                                                        } ${holdEnabled && !toggleEnabled && !smartEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                                                                                    whileTap={!(holdEnabled && !toggleEnabled && !smartEnabled) ? { scale: 0.95 } : {}}
-                                                                                >
-                                                                                    <motion.div
-                                                                                        className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
-                                                                                        animate={{ left: holdEnabled ? "calc(100% - 18px)" : "2px" }}
-                                                                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                                                                    />
-                                                                                </motion.button>
-                                                                                <motion.button
-                                                                                    onClick={() => {
-                                                                                        if (!holdEnabled) return;
-                                                                                        pressedModifiers.current.clear();
-                                                                                        primaryKey.current = null;
-                                                                                        setCaptureActive("hold");
-                                                                                        setError(null);
-                                                                                    }}
-                                                                                    disabled={!holdEnabled}
-                                                                                    className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all ${captureActive === "hold"
-                                                                                        ? "bg-amber-400 text-black"
-                                                                                        : holdEnabled
-                                                                                            ? "bg-surface-elevated border border-border-secondary text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary"
-                                                                                            : "bg-surface-elevated border border-border-secondary text-content-disabled cursor-not-allowed"
-                                                                                        }`}
-                                                                                    whileTap={holdEnabled ? { scale: 0.97 } : {}}
-                                                                                >
-                                                                                    {captureActive === "hold" ? "Listening..." : "Change"}
-                                                                                </motion.button>
-                                                                            </div>
-                                                                        </div>
-                                                                        <motion.div
-                                                                            className={`mt-3 inline-flex items-center rounded-lg border px-3 py-2 transition-colors ${holdEnabled
-                                                                                ? "border-border-secondary bg-surface-elevated"
-                                                                                : "border-border-secondary bg-surface-elevated"
-                                                                                }`}
-                                                                            animate={captureActive === "hold" ? {
-                                                                                borderColor: ["var(--color-border-secondary)", "var(--color-cloud)", "var(--color-border-secondary)"]
-                                                                            } : {}}
-                                                                            transition={{ duration: 1.2, repeat: captureActive === "hold" ? Infinity : 0 }}
-                                                                        >
-                                                                            <span className={`font-mono text-[12px] ${holdEnabled ? "text-content-primary" : "text-content-muted"}`}>{holdShortcut}</span>
-                                                                        </motion.div>
-                                                                    </div>
-
-                                                                    <div className={`rounded-xl border p-4 transition-colors ${toggleEnabled
-                                                                        ? "border-border-primary bg-surface-surface"
-                                                                        : "border-border-primary bg-surface-surface"
-                                                                        }`}>
-                                                                        <div className="flex items-center justify-between">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${toggleEnabled
-                                                                                    ? "bg-surface-elevated border-border-secondary"
-                                                                                    : "bg-surface-elevated border-border-secondary"
-                                                                                    }`}>
-                                                                                    <Keyboard size={14} className={toggleEnabled ? "text-content-muted" : "text-content-disabled"} />
-                                                                                </div>
-                                                                                <div>
-                                                                                    <h3 className={`text-[13px] font-medium ${toggleEnabled ? "text-content-primary" : "text-content-muted"}`}>Toggle Shortcut</h3>
-                                                                                    <p className="text-[11px] text-content-disabled">Press to start, press again to stop</p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <motion.button
-                                                                                    onClick={() => {
-                                                                                        if (!toggleEnabled && !holdEnabled && !smartEnabled) return;
-                                                                                        setToggleEnabled(!toggleEnabled);
-                                                                                    }}
-                                                                                    disabled={toggleEnabled && !holdEnabled && !smartEnabled}
-                                                                                    className={`relative w-10 h-5 rounded-full transition-colors ${toggleEnabled ? "bg-amber-400" : "bg-border-secondary"
-                                                                                        } ${toggleEnabled && !holdEnabled && !smartEnabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                                                                                    whileTap={!(toggleEnabled && !holdEnabled && !smartEnabled) ? { scale: 0.95 } : {}}
-                                                                                >
-                                                                                    <motion.div
-                                                                                        className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
-                                                                                        animate={{ left: toggleEnabled ? "calc(100% - 18px)" : "2px" }}
-                                                                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                                                                    />
-                                                                                </motion.button>
-                                                                                <motion.button
-                                                                                    onClick={() => {
-                                                                                        if (!toggleEnabled) return;
-                                                                                        pressedModifiers.current.clear();
-                                                                                        primaryKey.current = null;
-                                                                                        setCaptureActive("toggle");
-                                                                                        setError(null);
-                                                                                    }}
-                                                                                    disabled={!toggleEnabled}
-                                                                                    className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all ${captureActive === "toggle"
-                                                                                        ? "bg-amber-400 text-black"
-                                                                                        : toggleEnabled
-                                                                                            ? "bg-surface-elevated border border-border-secondary text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary"
-                                                                                            : "bg-surface-elevated border border-border-secondary text-content-disabled cursor-not-allowed"
-                                                                                        }`}
-                                                                                    whileTap={toggleEnabled ? { scale: 0.97 } : {}}
-                                                                                >
-                                                                                    {captureActive === "toggle" ? "Listening..." : "Change"}
-                                                                                </motion.button>
-                                                                            </div>
-                                                                        </div>
-                                                                        <motion.div
-                                                                            className={`mt-3 inline-flex items-center rounded-lg border px-3 py-2 transition-colors ${toggleEnabled
-                                                                                ? "border-border-secondary bg-surface-elevated"
-                                                                                : "border-border-secondary bg-surface-elevated"
-                                                                                }`}
-                                                                            animate={captureActive === "toggle" ? {
-                                                                                borderColor: ["var(--color-border-secondary)", "var(--color-cloud)", "var(--color-border-secondary)"]
-                                                                            } : {}}
-                                                                            transition={{ duration: 1.2, repeat: captureActive === "toggle" ? Infinity : 0 }}
-                                                                        >
-                                                                            <span className={`font-mono text-[12px] ${toggleEnabled ? "text-content-primary" : "text-content-muted"}`}>{toggleShortcut}</span>
-                                                                        </motion.div>
-                                                                    </div>
-                                                                </div>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </div>
-
-                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4 space-y-4">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                            <Mic size={14} className="text-content-muted" />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-[13px] font-medium text-content-primary">Audio & Language</h3>
-                                                            <p className="text-[11px] text-content-muted">Configure input device and transcription language.</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div className="space-y-1.5">
-                                                            <label className="text-[11px] font-medium text-content-muted ml-1">Microphone</label>
-                                                            <div className="relative">
-                                                                <select
-                                                                    value={microphoneDevice || ""}
-                                                                    onChange={(e) => setMicrophoneDevice(e.target.value || null)}
-                                                                    className="w-full appearance-none rounded-lg bg-surface-elevated border border-border-secondary py-2 pl-3 pr-8 text-[12px] text-content-primary focus:border-content-disabled focus:outline-none transition-colors"
-                                                                >
-                                                                    <option value="">Default System Device</option>
-                                                                    {inputDevices.map((device) => (
-                                                                        <option key={device.id} value={device.id}>
-                                                                            {device.name} {device.is_default ? "(Default)" : ""}
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
-                                                                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted">
-                                                                    <ChevronDown size={12} />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="space-y-1.5">
-                                                            <label className="text-[11px] font-medium text-content-muted ml-1">Language</label>
-                                                            <div className="relative">
-                                                                <select
-                                                                    value={language}
-                                                                    onChange={(e) => setLanguage(e.target.value)}
-                                                                    className="w-full appearance-none rounded-lg bg-surface-elevated border border-border-secondary py-2 pl-3 pr-8 text-[12px] text-content-primary focus:border-content-disabled focus:outline-none transition-colors"
-                                                                >
-                                                                    {languages.map((lang) => (
-                                                                        <option key={lang.code} value={lang.code}>
-                                                                            {lang.name}
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
-                                                                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted">
-                                                                    <ChevronDown size={12} />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <motion.div
-                                                    layout
-                                                    transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                                    className="rounded-xl border border-border-primary bg-surface-surface p-4"
-                                                >
-                                                    <div className="flex items-center gap-3 mb-4">
-                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                            {transcriptionMode === "cloud" ? (
-                                                                <Cloud size={14} className="text-content-muted" />
-                                                            ) : (
-                                                                <HardDrive size={14} className="text-content-muted" />
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-[13px] font-medium text-content-primary">Transcription Engine</h3>
-                                                            <p className="text-[11px] text-content-disabled">Choose how your audio is processed</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <ModeButton
-                                                            icon={<Cloud size={16} />}
-                                                            label="Cloud"
-                                                            description="Fast & lightweight"
-                                                            active={transcriptionMode === "cloud"}
-                                                            onClick={() => setTranscriptionMode("cloud")}
-                                                            variant="cloud"
-                                                            loading={loading}
-                                                        />
-                                                        <ModeButton
-                                                            icon={<HardDrive size={16} />}
-                                                            label="Local"
-                                                            description="Private & offline"
-                                                            active={transcriptionMode === "local"}
-                                                            onClick={() => setTranscriptionMode("local")}
-                                                            variant="local"
-                                                            loading={loading}
-                                                        />
-                                                    </div>
-
-                                                    <AnimatePresence>
-                                                        {!loading && transcriptionMode === "local" && !modelStatus[localModel]?.installed && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                                                animate={{ opacity: 1, height: "auto", marginTop: 12 }}
-                                                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                                                transition={{ duration: 0.2 }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
-                                                                    <AlertCircle size={14} className="text-amber-400 shrink-0 mt-0.5" />
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <p className="text-[11px] font-medium text-amber-400">No model installed</p>
-                                                                        <p className="text-[10px] text-amber-400/70 mt-0.5">
-                                                                            Download a model from the <button
-                                                                                onClick={() => setActiveTab("models")}
-                                                                                className="underline hover:text-amber-300 transition-colors"
-                                                                            >Models</button> tab to use local transcription.
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </motion.div>
+                                                            No model installed. <button onClick={() => setActiveTab("models")} className="underline hover:text-cloud transition-colors">Download one</button> to use local.
+                                                        </motion.p>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
 
+                                            {/* Bento Grid Layout */}
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {/* Microphone */}
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-medium text-content-muted">Microphone</label>
+                                                    <div className="relative">
+                                                        <select
+                                                            value={microphoneDevice || ""}
+                                                            onChange={(e) => setMicrophoneDevice(e.target.value || null)}
+                                                            className="w-full appearance-none rounded-lg bg-surface-surface border border-border-primary py-2 pl-2.5 pr-7 text-[11px] text-content-primary hover:border-border-secondary focus:border-border-hover focus:outline-none transition-colors"
+                                                        >
+                                                            <option value="">System Default</option>
+                                                            {inputDevices.map((device) => (
+                                                                <option key={device.id} value={device.id}>
+                                                                    {device.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <ChevronDown size={10} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-content-muted" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Language */}
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-medium text-content-muted">Language</label>
+                                                    <div className="relative">
+                                                        <select
+                                                            value={language}
+                                                            onChange={(e) => setLanguage(e.target.value)}
+                                                            className="w-full appearance-none rounded-lg bg-surface-surface border border-border-primary py-2 pl-2.5 pr-7 text-[11px] text-content-primary hover:border-border-secondary focus:border-border-hover focus:outline-none transition-colors"
+                                                        >
+                                                            {languages.map((lang) => (
+                                                                <option key={lang.code} value={lang.code}>{lang.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        <ChevronDown size={10} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-content-muted" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Shortcuts Section */}
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-2">
+                                                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">Shortcuts</h2>
+
+                                                    <div className="space-y-1.5">
+                                                        <ShortcutRow
+                                                            label="Smart"
+                                                            description="tap to hold, long-press to toggle"
+                                                            shortcut={smartShortcut}
+                                                            enabled={smartEnabled}
+                                                            isCapturing={captureActive === "smart"}
+                                                            capturePreview={capturePreview}
+                                                            onToggle={() => {
+                                                                if (!smartEnabled && !holdEnabled && !toggleEnabled) return;
+                                                                setSmartEnabled(!smartEnabled);
+                                                            }}
+                                                            onCapture={() => {
+                                                                if (!smartEnabled) return;
+                                                                pressedModifiers.current.clear();
+                                                                primaryKey.current = null;
+                                                                setCaptureActive("smart");
+                                                                setError(null);
+                                                            }}
+                                                            canDisable={holdEnabled || toggleEnabled}
+                                                        />
+                                                        <ShortcutRow
+                                                            label="Hold"
+                                                            description="hold to talk, release to stop"
+                                                            shortcut={holdShortcut}
+                                                            enabled={holdEnabled}
+                                                            isCapturing={captureActive === "hold"}
+                                                            capturePreview={capturePreview}
+                                                            onToggle={() => {
+                                                                if (!holdEnabled && !toggleEnabled && !smartEnabled) return;
+                                                                setHoldEnabled(!holdEnabled);
+                                                            }}
+                                                            onCapture={() => {
+                                                                if (!holdEnabled) return;
+                                                                pressedModifiers.current.clear();
+                                                                primaryKey.current = null;
+                                                                setCaptureActive("hold");
+                                                                setError(null);
+                                                            }}
+                                                            canDisable={smartEnabled || toggleEnabled}
+                                                        />
+                                                        <ShortcutRow
+                                                            label="Toggle"
+                                                            description="tap to start, tap to stop"
+                                                            shortcut={toggleShortcut}
+                                                            enabled={toggleEnabled}
+                                                            isCapturing={captureActive === "toggle"}
+                                                            capturePreview={capturePreview}
+                                                            onToggle={() => {
+                                                                if (!toggleEnabled && !holdEnabled && !smartEnabled) return;
+                                                                setToggleEnabled(!toggleEnabled);
+                                                            }}
+                                                            onCapture={() => {
+                                                                if (!toggleEnabled) return;
+                                                                pressedModifiers.current.clear();
+                                                                primaryKey.current = null;
+                                                                setCaptureActive("toggle");
+                                                                setError(null);
+                                                            }}
+                                                            canDisable={smartEnabled || holdEnabled}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">Features</h2>
+
+                                                    {/* Edit Mode */}
+                                                    <div className={`rounded-lg border transition-all ${editModeEnabled ? "border-border-secondary bg-surface-surface" : "border-border-primary bg-transparent"
+                                                        }`}>
+                                                        <div className="py-2 px-2.5">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[11px] font-medium text-content-primary">Edit Mode</span>
+                                                                <button
+                                                                    onClick={() => setEditModeEnabled(!editModeEnabled)}
+                                                                    className={`w-7 h-4 rounded-full transition-colors relative ${editModeEnabled ? "bg-cloud" : "bg-border-secondary"
+                                                                        }`}
+                                                                >
+                                                                    <motion.div
+                                                                        className="absolute top-[2px] w-3 h-3 rounded-full bg-white shadow-sm"
+                                                                        animate={{ left: editModeEnabled ? "calc(100% - 14px)" : "2px" }}
+                                                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                                                    />
+                                                                </button>
+                                                            </div>
+                                                            <div className="flex items-center justify-between mt-0.5">
+                                                                <span className="text-[9px] text-content-disabled">transform selected text with voice</span>
+                                                                <div className="relative group">
+                                                                    <button className="p-0.5 text-content-disabled hover:text-content-muted transition-colors">
+                                                                        <Info size={10} />
+                                                                    </button>
+                                                                    <div className="absolute right-0 bottom-full mb-1 hidden group-hover:block z-10">
+                                                                        <div className="bg-surface-overlay border border-border-secondary rounded-lg px-2.5 py-1.5 text-[9px] text-content-secondary w-44 shadow-lg leading-tight">
+                                                                            <p>Select text in any app, use your shortcut, speak a command like "make formal" or "fix grammar"</p>
+                                                                            {transcriptionMode === "local" && !llmCleanupEnabled && (
+                                                                                <p className="text-warning mt-1">Requires LLM in Models tab</p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Error display */}
                                             <AnimatePresence>
                                                 {error && (
                                                     <motion.div
                                                         initial={{ opacity: 0, height: 0 }}
                                                         animate={{ opacity: 1, height: "auto" }}
                                                         exit={{ opacity: 0, height: 0 }}
-                                                        className="pt-4 border-t border-border-primary"
                                                     >
-                                                        <div className="flex items-center gap-1.5 text-[11px] text-red-400">
-                                                            <AlertCircle size={12} className="shrink-0" />
+                                                        <div className="flex items-center gap-2 text-[11px] text-error">
                                                             <span className="flex-1">{error}</span>
                                                             <button
-                                                                type="button"
                                                                 onClick={() => {
                                                                     navigator.clipboard.writeText(error || "");
                                                                     setErrorCopied(true);
                                                                     setTimeout(() => setErrorCopied(false), 1500);
                                                                 }}
-                                                                className="shrink-0 p-0.5 rounded hover:bg-red-500/20 transition-colors"
-                                                                title="Copy error"
+                                                                className="text-error/60 hover:text-error transition-colors"
                                                             >
                                                                 {errorCopied ? <Check size={11} /> : <Copy size={11} />}
                                                             </button>
@@ -1564,18 +1377,13 @@ const SettingsModal = ({
                                             <div className="rounded-xl border border-border-primary bg-surface-surface">
                                                 <div className="p-4">
                                                     <div className="flex items-center justify-between mb-3">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                                <Wand2 size={14} className="text-content-muted" />
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="text-[13px] font-medium text-content-primary">AI Cleanup</h3>
-                                                                <p className="text-[11px] text-content-disabled">Use an LLM to clean up transcriptions</p>
-                                                            </div>
+                                                        <div>
+                                                            <h3 className="text-[13px] font-medium text-content-primary">AI Cleanup</h3>
+                                                            <p className="text-[11px] text-content-disabled">Use an LLM to clean up transcriptions</p>
                                                         </div>
                                                         <motion.button
                                                             onClick={() => setLlmCleanupEnabled(!llmCleanupEnabled)}
-                                                            className={`relative w-10 h-5 rounded-full transition-colors ${llmCleanupEnabled ? "bg-amber-400" : "bg-border-secondary"}`}
+                                                            className={`relative w-10 h-5 rounded-full transition-colors ${llmCleanupEnabled ? "bg-cloud" : "bg-border-secondary"}`}
                                                             whileTap={{ scale: 0.95 }}
                                                         >
                                                             <motion.div
@@ -1710,7 +1518,7 @@ const SettingsModal = ({
                                                                                                             setModelDropdownOpen(false);
                                                                                                         }}
                                                                                                         className={`w-full text-left px-3 py-2 text-[12px] transition-colors ${llmModel === model
-                                                                                                            ? "bg-amber-400/10 text-amber-400"
+                                                                                                            ? "bg-cloud/10 text-cloud"
                                                                                                             : "text-content-secondary hover:bg-surface-elevated hover:text-content-primary"
                                                                                                             }`}
                                                                                                     >
@@ -1752,12 +1560,7 @@ const SettingsModal = ({
                                                 </div>
                                             </div>
                                             <div>
-                                                <div className="flex items-center gap-2 mb-3">
-                                                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-surface-elevated border border-border-secondary">
-                                                        <Cpu size={12} className="text-content-muted" />
-                                                    </div>
-                                                    <h3 className="text-[12px] font-medium text-content-secondary">Transcription Engines</h3>
-                                                </div>
+                                                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-content-disabled mb-3">Transcription Engines</h3>
                                                 <div className="space-y-2">
                                                     {modelCatalog.map((model, index) => {
                                                         const modelStat = modelStatus[model.key];
@@ -1776,7 +1579,7 @@ const SettingsModal = ({
                                                                 animate={{ opacity: 1, y: 0 }}
                                                                 transition={{ delay: index * 0.04 }}
                                                                 className={`rounded-xl border p-4 transition-colors ${isActive
-                                                                    ? "border-amber-400/30 bg-amber-400/[0.04]"
+                                                                    ? "border-cloud-30 bg-cloud/[0.04]"
                                                                     : "border-border-primary bg-surface-surface hover:border-border-secondary"
                                                                     }`}
                                                             >
@@ -1785,7 +1588,7 @@ const SettingsModal = ({
                                                                         <div className="flex items-center gap-2">
                                                                             <h3 className="text-[13px] font-medium text-content-primary">{model.label}</h3>
                                                                             {isActive && (
-                                                                                <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider bg-amber-400/20 text-amber-400">Active</span>
+                                                                                <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider bg-cloud/20 text-cloud">Active</span>
                                                                             )}
                                                                         </div>
                                                                         <div className="flex flex-wrap gap-1.5 mt-1 mb-1.5">
@@ -1891,80 +1694,55 @@ const SettingsModal = ({
                                             initial="hidden"
                                             animate="visible"
                                             exit="exit"
-                                            className="space-y-5"
+                                            className="space-y-6"
                                         >
-                                            <header>
-                                                <h1 className="text-lg font-medium text-content-primary">Advanced</h1>
-                                                <p className="mt-1 text-[12px] text-content-muted">System permissions and troubleshooting.</p>
-                                            </header>
+                                            {/* Permissions Section */}
+                                            <div className="space-y-2">
+                                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">Permissions</h2>
 
-                                            <div className="space-y-3">
-                                                <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled px-1">Permissions</p>
-
-                                                {/* Microphone Permission */}
-                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                                <Mic size={16} className="text-content-muted" />
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {/* Microphone Permission */}
+                                                    <div className="rounded-lg border border-border-primary bg-surface-surface">
+                                                        <div className="py-2.5 px-3">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[11px] font-medium text-content-primary">Microphone</span>
+                                                                {micPermission === null ? (
+                                                                    <Loader2 size={10} className="animate-spin text-content-muted" />
+                                                                ) : micPermission ? (
+                                                                    <span className="text-[10px] text-success flex items-center gap-1">
+                                                                        <Check size={10} />
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-[10px] text-warning">off</span>
+                                                                )}
                                                             </div>
-                                                            <div>
-                                                                <p className="text-[13px] font-medium text-content-primary">Microphone Access</p>
-                                                                <p className="text-[11px] text-content-muted">Required for voice transcription</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            {micPermission === null ? (
-                                                                <span className="text-[11px] text-content-muted flex items-center gap-1.5">
-                                                                    <Loader2 size={11} className="animate-spin" />
-                                                                    Checking...
-                                                                </span>
-                                                            ) : micPermission ? (
-                                                                <span className="text-[11px] text-emerald-400 flex items-center gap-1">
-                                                                    <Check size={12} />
-                                                                    Enabled
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-[11px] text-amber-400">Not enabled</span>
-                                                            )}
-                                                            <motion.button
+                                                            <span className="text-[9px] text-content-disabled block mt-0.5">required for transcription</span>
+                                                            <button
                                                                 onClick={() => invoke("open_microphone_settings")}
-                                                                className="rounded-lg bg-surface-elevated border border-border-secondary px-3 py-1.5 text-[11px] font-medium text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary transition-colors"
-                                                                whileTap={{ scale: 0.97 }}
+                                                                className="mt-2 text-[10px] text-content-muted hover:text-content-secondary transition-colors"
                                                             >
                                                                 Open Settings
-                                                            </motion.button>
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {/* Accessibility Permission */}
-                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                                <Accessibility size={16} className="text-content-muted" />
+                                                    {/* Accessibility Permission */}
+                                                    <div className="rounded-lg border border-border-primary bg-surface-surface">
+                                                        <div className="py-2.5 px-3">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[11px] font-medium text-content-primary">Accessibility</span>
+                                                                {accessibilityPermission === null ? (
+                                                                    <Loader2 size={10} className="animate-spin text-content-muted" />
+                                                                ) : accessibilityPermission ? (
+                                                                    <span className="text-[10px] text-success flex items-center gap-1">
+                                                                        <Check size={10} />
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-[10px] text-warning">off</span>
+                                                                )}
                                                             </div>
-                                                            <div>
-                                                                <p className="text-[13px] font-medium text-content-primary">Accessibility Access</p>
-                                                                <p className="text-[11px] text-content-muted">Required for automatic text paste</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            {accessibilityPermission === null ? (
-                                                                <span className="text-[11px] text-content-muted flex items-center gap-1.5">
-                                                                    <Loader2 size={11} className="animate-spin" />
-                                                                    Checking...
-                                                                </span>
-                                                            ) : accessibilityPermission ? (
-                                                                <span className="text-[11px] text-emerald-400 flex items-center gap-1">
-                                                                    <Check size={12} />
-                                                                    Enabled
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-[11px] text-amber-400">Not enabled</span>
-                                                            )}
-                                                            <motion.button
+                                                            <span className="text-[9px] text-content-disabled block mt-0.5">required for auto-paste</span>
+                                                            <button
                                                                 onClick={async () => {
                                                                     try {
                                                                         const granted = await requestAccessibilityPermission();
@@ -1973,78 +1751,17 @@ const SettingsModal = ({
                                                                         await invoke("open_accessibility_settings");
                                                                     }
                                                                 }}
-                                                                className="rounded-lg bg-surface-elevated border border-border-secondary px-3 py-1.5 text-[11px] font-medium text-content-secondary hover:bg-surface-elevated-hover hover:text-content-primary transition-colors"
-                                                                whileTap={{ scale: 0.97 }}
+                                                                className="mt-2 text-[10px] text-content-muted hover:text-content-secondary transition-colors"
                                                             >
                                                                 Open Settings
-                                                            </motion.button>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center gap-2 rounded-lg border border-border-secondary bg-surface-elevated px-2 py-2 mt-4">
-                                                    <Info size={12} className="text-content-muted shrink-0" />
-                                                    <p className="text-[10px] text-content-muted">
-                                                        After enabling permissions in System Settings, you may need to restart Glimpse for changes to take effect.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-3">
-                                                <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled px-1">Features</p>
-
-                                                <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                                <Wand2 size={16} className="text-content-muted" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-[13px] font-medium text-content-primary">Edit Mode</p>
-                                                                <p className="text-[11px] text-content-muted">Use voice to transform selected text</p>
-                                                            </div>
-                                                        </div>
-                                                        <motion.button
-                                                            onClick={() => setEditModeEnabled(!editModeEnabled)}
-                                                            className={`relative w-10 h-5 rounded-full transition-colors ${editModeEnabled ? "bg-amber-400" : "bg-border-secondary"}`}
-                                                            whileTap={{ scale: 0.95 }}
-                                                        >
-                                                            <motion.div
-                                                                className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
-                                                                animate={{ left: editModeEnabled ? "calc(100% - 18px)" : "2px" }}
-                                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                                            />
-                                                        </motion.button>
-                                                    </div>
-                                                    <AnimatePresence initial={false}>
-                                                        {editModeEnabled && (
-                                                            <motion.div
-                                                                initial={{ height: 0, opacity: 0 }}
-                                                                animate={{ height: "auto", opacity: 1 }}
-                                                                exit={{ height: 0, opacity: 0 }}
-                                                                transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                <div className="mt-3 pt-3 border-t border-border-primary space-y-2">
-                                                                    <div className="flex items-start gap-2 rounded-lg border border-border-secondary bg-surface-elevated px-3 py-2">
-                                                                        <Info size={12} className="text-content-muted shrink-0 mt-0.5" />
-                                                                        <p className="text-[10px] text-content-muted">
-                                                                            Select text in any app, then use your shortcut. Speak a command like "make this formal" or "fix the grammar" to transform the selection.
-                                                                        </p>
-                                                                    </div>
-                                                                    {transcriptionMode === "local" && !llmCleanupEnabled && (
-                                                                        <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2">
-                                                                            <AlertCircle size={12} className="text-red-400 shrink-0 mt-0.5" />
-                                                                            <p className="text-[10px] text-red-400/80">
-                                                                                Edit mode requires LLM cleanup for local transcription. Enable it in Settings → Models.
-                                                                            </p>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </div>
+                                                <p className="text-[9px] text-content-disabled px-0.5">
+                                                    Restart Glimpse after changing permissions in System Settings.
+                                                </p>
                                             </div>
                                         </motion.div>
                                     )}
@@ -2056,79 +1773,68 @@ const SettingsModal = ({
                                             initial="hidden"
                                             animate="visible"
                                             exit="exit"
-                                            className="space-y-5"
+                                            className="space-y-6"
                                         >
-                                            <header>
-                                                <h1 className="text-lg font-medium text-content-primary">About</h1>
-                                                <p className="mt-1 text-[12px] text-content-muted">App info and setup options.</p>
-                                            </header>
+                                            {/* App Info Section */}
+                                            <div className="space-y-2">
+                                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">App Info</h2>
 
-                                            <div className="rounded-xl border border-border-primary bg-surface-surface p-4">
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-1">Version</p>
-                                                        <p className="text-[13px] text-content-primary">{appInfo?.version ?? "-"}</p>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="rounded-lg border border-border-primary bg-surface-surface py-2.5 px-3">
+                                                        <span className="text-[9px] text-content-disabled block">Version</span>
+                                                        <span className="text-[12px] text-content-primary font-medium">{appInfo?.version ?? "-"}</span>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-1">Storage Used</p>
-                                                        <p className="text-[13px] text-content-primary">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "-"}</p>
+                                                    <div className="rounded-lg border border-border-primary bg-surface-surface py-2.5 px-3">
+                                                        <span className="text-[9px] text-content-disabled block">Storage Used</span>
+                                                        <span className="text-[12px] text-content-primary font-medium">{appInfo ? formatBytes(appInfo.data_dir_size_bytes) : "-"}</span>
                                                     </div>
                                                 </div>
 
-                                                <div className="mt-4 pt-3 border-t border-border-primary">
-                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-1.5">Data Location</p>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleOpenDataDir}
+                                                    disabled={!appInfo?.data_dir_path}
+                                                    className="w-full rounded-lg border border-border-primary bg-surface-surface py-2 px-3 text-left hover:border-border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    <span className="text-[9px] text-content-disabled block">Data Location</span>
+                                                    <span className="text-[11px] text-content-muted font-mono truncate block"><span className="border-b border-dotted border-content-disabled pb-[1px]">{appInfo?.data_dir_path ?? "-"}</span></span>
+                                                </button>
+                                            </div>
+
+                                            {/* Updates Section */}
+                                            <div className="space-y-2">
+                                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">Updates</h2>
+                                                <UpdateChecker />
+                                            </div>
+
+                                            {/* Setup Section */}
+                                            <div className="space-y-2">
+                                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">Setup</h2>
+
+                                                <div className="grid grid-cols-2 gap-3">
                                                     <button
-                                                        type="button"
-                                                        onClick={handleOpenDataDir}
-                                                        disabled={!appInfo?.data_dir_path}
-                                                        className="flex w-full items-center gap-2 px-1.5 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                        onClick={async () => {
+                                                            try {
+                                                                await invoke("reset_onboarding");
+                                                                window.location.reload();
+                                                            } catch (err) {
+                                                                console.error("Failed to restart onboarding:", err);
+                                                            }
+                                                        }}
+                                                        className="rounded-lg border border-border-primary bg-surface-surface py-2.5 px-3 text-left hover:border-border-secondary transition-colors"
                                                     >
-                                                        <FolderOpen size={12} className="text-content-disabled shrink-0" />
-                                                        <span className="text-[11px] text-content-muted font-mono truncate border-b border-dotted border-content-muted pb-[1px] leading-[1.2]">
-                                                            {appInfo?.data_dir_path ?? "-"}
-                                                        </span>
+                                                        <span className="text-[11px] font-medium text-content-primary block">Restart Onboarding</span>
+                                                        <span className="text-[9px] text-content-disabled">re-run setup wizard</span>
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => setShowFAQModal(true)}
+                                                        className="rounded-lg border border-border-primary bg-surface-surface py-2.5 px-3 text-left hover:border-border-secondary transition-colors"
+                                                    >
+                                                        <span className="text-[11px] font-medium text-content-primary block">FAQ & Help</span>
+                                                        <span className="text-[9px] text-content-disabled">common questions</span>
                                                     </button>
                                                 </div>
-
-                                                <div className="mt-4 pt-3 border-t border-border-primary">
-                                                    <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled mb-2">Updates</p>
-                                                    <UpdateChecker />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <p className="text-[10px] font-medium uppercase tracking-wider text-content-disabled px-1">Setup</p>
-                                                <button
-                                                    onClick={async () => {
-                                                        try {
-                                                            await invoke("reset_onboarding");
-                                                            window.location.reload();
-                                                        } catch (err) {
-                                                            console.error("Failed to restart onboarding:", err);
-                                                        }
-                                                    }}
-                                                    className="w-full flex items-center gap-3 rounded-lg border border-border-primary bg-surface-surface p-3 text-left hover:bg-surface-overlay hover:border-border-secondary transition-colors"
-                                                >
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                        <RotateCcw size={14} className="text-content-muted" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[12px] font-medium text-content-primary">Restart Onboarding</p>
-                                                        <p className="text-[10px] text-content-disabled">Re-run the initial setup wizard</p>
-                                                    </div>
-                                                </button>
-
-                                                <button
-                                                    onClick={() => setShowFAQModal(true)}
-                                                    className="w-full flex items-center gap-3 rounded-lg border border-border-primary bg-surface-surface p-3 text-left hover:bg-surface-overlay hover:border-border-secondary transition-colors"
-                                                >
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-elevated border border-border-secondary">
-                                                        <HelpCircle size={14} className="text-content-muted" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[12px] font-medium text-content-primary">FAQ & Help</p>
-                                                        <p className="text-[10px] text-content-disabled">Common questions about Glimpse</p>
-                                                    </div>
-                                                </button>
                                             </div>
                                         </motion.div>
                                     )}
@@ -2189,35 +1895,71 @@ const ModalNavItem = ({ icon, label, active, onClick }: {
             }`}
         whileTap={{ scale: 0.98 }}
     >
-        <div className={active ? "text-amber-400/80" : "text-content-disabled"}>{icon}</div>
+        <div className={active ? "text-cloud/80" : "text-content-disabled"}>{icon}</div>
         {label}
     </motion.button>
 );
 
-const ModeButton = ({ icon, label, description, active, onClick, variant = "cloud", loading = false }: {
-    icon: React.ReactNode; label: string; description: string; active: boolean; onClick: () => void; variant?: "cloud" | "local"; loading?: boolean;
-}) => {
-    const colors = variant === "cloud"
-        ? { border: "border-amber-400/40", bg: "bg-amber-400/10", icon: "text-amber-400", desc: "text-amber-400/60" }
-        : { border: "border-local-40", bg: "bg-local-10", icon: "text-local", desc: "text-local-60" };
-
-    const isActive = !loading && active;
-
-    return (
-        <motion.button
-            onClick={onClick}
-            className={`rounded-xl border p-3 text-left transition-all ${isActive
-                ? `${colors.border} ${colors.bg}`
-                : "border-border-secondary bg-surface-elevated hover:border-border-hover"
-                }`}
-            whileTap={{ scale: 0.98 }}
-        >
-            <div className={`mb-1.5 ${isActive ? colors.icon : "text-content-muted"}`}>{icon}</div>
-            <div className={`text-[12px] font-medium ${isActive ? "text-content-primary" : "text-content-secondary"}`}>{label}</div>
-            <div className={`text-[10px] ${isActive ? colors.desc : "text-content-disabled"}`}>{description}</div>
-        </motion.button>
-    );
-};
+const ShortcutRow = ({ label, description, shortcut, enabled, isCapturing, capturePreview, onToggle, onCapture, canDisable }: {
+    label: string;
+    description: string;
+    shortcut: string;
+    enabled: boolean;
+    isCapturing: boolean;
+    capturePreview: string;
+    onToggle: () => void;
+    onCapture: () => void;
+    canDisable: boolean;
+}) => (
+    <div className={`rounded-lg border transition-all ${enabled ? "border-border-secondary bg-surface-surface" : "border-border-primary bg-transparent"
+        }`}>
+        <div className="py-2 px-2.5">
+            {/* Top row: label + toggle */}
+            <div className="flex items-center justify-between">
+                <span className="text-[11px] font-medium text-content-primary">{label}</span>
+                <button
+                    onClick={onToggle}
+                    disabled={enabled && !canDisable}
+                    className={`w-7 h-4 rounded-full transition-colors relative ${enabled ? "bg-cloud" : "bg-border-secondary"
+                        } ${enabled && !canDisable ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                    <motion.div
+                        className="absolute top-[2px] w-3 h-3 rounded-full bg-white shadow-sm"
+                        animate={{ left: enabled ? "calc(100% - 14px)" : "2px" }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                </button>
+            </div>
+            {/* Bottom row: description + shortcut */}
+            <div className="flex items-center justify-between mt-0.5">
+                <span className="text-[9px] text-content-disabled">{description}</span>
+                <motion.button
+                    onClick={onCapture}
+                    disabled={!enabled}
+                    className={`font-mono text-[10px] px-1.5 py-0.5 rounded transition-all ${isCapturing
+                        ? "text-content-primary border border-border-hover"
+                        : enabled
+                            ? "text-content-secondary hover:text-content-primary hover:bg-surface-elevated"
+                            : "text-content-disabled cursor-not-allowed"
+                        }`}
+                >
+                    {isCapturing ? (
+                        <span className="flex items-center gap-1.5">
+                            <motion.span
+                                className="w-1 h-1 rounded-full bg-cloud"
+                                animate={{ opacity: [0.3, 1, 0.3] }}
+                                transition={{ duration: 1, repeat: Infinity }}
+                            />
+                            <span className={capturePreview ? "text-content-primary" : "text-content-muted"}>
+                                {capturePreview || "..."}
+                            </span>
+                        </span>
+                    ) : shortcut}
+                </motion.button>
+            </div>
+        </div>
+    </div>
+);
 
 const LlmProviderButton = ({ label, active, onClick }: {
     label: string; active: boolean; onClick: () => void;
@@ -2225,7 +1967,7 @@ const LlmProviderButton = ({ label, active, onClick }: {
     <motion.button
         onClick={onClick}
         className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${active
-            ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
+            ? "border-cloud-30 bg-cloud-10 text-cloud"
             : "border-border-secondary bg-surface-elevated text-content-secondary hover:border-border-hover hover:text-content-primary"
             }`}
         whileTap={{ scale: 0.97 }}
