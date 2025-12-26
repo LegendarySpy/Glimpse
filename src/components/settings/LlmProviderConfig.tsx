@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Server, Key, Cpu } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
-import { Dropdown } from "./Dropdown";
+import { Dropdown } from "../Dropdown";
 
 export type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "anthropic" | "google" | "xai" | "groq" | "cerebras" | "sambanova" | "together" | "openrouter" | "perplexity" | "deepseek" | "fireworks" | "mistral" | "custom";
 

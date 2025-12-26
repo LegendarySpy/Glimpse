@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Settings, ChevronLeft, Home as HomeIcon, Book, Brain, User, Info, HelpCircle, Github, X } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import SettingsModal from "./components/SettingsModal";
+import SettingsModal from "./components/settings/SettingsModal";
 import FAQModal from "./components/FAQModal";
 import DotMatrix from "./components/DotMatrix";
 import TranscriptionList from "./components/TranscriptionList";
@@ -127,13 +127,13 @@ const Home = () => {
 
         let unlistenAuthError: UnlistenFn | null = null;
         let unlistenAuthChanged: UnlistenFn | null = null;
-        
+
         listen("cloud:auth-error", () => {
             setHasAuthIssue(true);
         }).then((fn) => {
             unlistenAuthError = fn;
         });
-        
+
         listen("auth:changed", () => {
             setHasAuthIssue(false);
             loadUser();

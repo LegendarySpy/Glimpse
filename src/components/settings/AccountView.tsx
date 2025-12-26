@@ -56,9 +56,9 @@ import {
     deleteSessionById,
     logoutAll,
     type User as AppwriteUser
-} from "../lib/auth";
-import { getCloudUsageStats, getCachedUsageStats, type CloudUsageStats } from "../lib";
-import DotMatrix from "./DotMatrix";
+} from "../../lib/auth";
+import { getCloudUsageStats, getCachedUsageStats, type CloudUsageStats } from "../../lib";
+import DotMatrix from "../DotMatrix";
 
 interface AccountViewProps {
     currentUser: AppwriteUser | null;

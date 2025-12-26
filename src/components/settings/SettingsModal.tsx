@@ -30,14 +30,14 @@ import {
     Copy,
     Bug,
 } from "lucide-react";
-import DotMatrix from "./DotMatrix";
+import DotMatrix from "../DotMatrix";
 import AccountView from "./AccountView";
-import FAQModal from "./FAQModal";
+import FAQModal from "../FAQModal";
 import { UpdateChecker } from "./UpdateChecker";
 import DebugSection from "./DebugSection";
-import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../lib/auth";
+import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../../lib/auth";
 import WhatsNewModal from "./WhatsNewModal";
-import { Dropdown } from "./Dropdown";
+import { Dropdown } from "../Dropdown";
 
 import { OAuthProvider } from "appwrite";
 
