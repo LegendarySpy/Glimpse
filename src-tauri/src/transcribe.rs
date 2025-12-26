@@ -8,8 +8,8 @@ use crate::{
     analytics, assistive, cloud, dictionary, llm_cleanup, model_manager,
     recorder::{CompletedRecording, RecordingSaved},
     settings::{TranscriptionMode, UserSettings},
-    storage, toast, transcription_api, AppRuntime, AppState,
-    EVENT_TRANSCRIPTION_COMPLETE, EVENT_TRANSCRIPTION_ERROR, EVENT_TRANSCRIPTION_START,
+    storage, toast, transcription_api, AppRuntime, AppState, EVENT_TRANSCRIPTION_COMPLETE,
+    EVENT_TRANSCRIPTION_ERROR, EVENT_TRANSCRIPTION_START,
 };
 
 #[derive(Serialize, Clone)]
@@ -54,7 +54,10 @@ pub(crate) fn queue_transcription(
         let config = transcription_api::TranscriptionConfig::from_settings(&settings);
         let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
 
-        let cloud_creds = app_handle.state::<AppState>().cloud_manager().get_credentials();
+        let cloud_creds = app_handle
+            .state::<AppState>()
+            .cloud_manager()
+            .get_credentials();
         let use_cloud_auth = !use_local && cloud_creds.is_some();
 
         eprintln!(
@@ -85,7 +88,13 @@ pub(crate) fn queue_transcription(
             )
             .with_selected_text(pending_selected_text.clone());
 
-            match transcription_api::request_cloud_transcription(&http, &saved_for_task, &cloud_config).await {
+            match transcription_api::request_cloud_transcription(
+                &http,
+                &saved_for_task,
+                &cloud_config,
+            )
+            .await
+            {
                 Ok(cloud_result) => {
                     if is_cancelled() {
                         crate::hide_overlay(&app_handle);
@@ -99,7 +108,8 @@ pub(crate) fn queue_transcription(
                         return;
                     }
 
-                    let final_transcript = dictionary::apply_replacements(&final_transcript, &settings.replacements);
+                    let final_transcript =
+                        dictionary::apply_replacements(&final_transcript, &settings.replacements);
 
                     if is_cancelled() {
                         crate::hide_overlay(&app_handle);
@@ -110,13 +120,21 @@ pub(crate) fn queue_transcription(
                     let mut pasted = false;
                     if config.auto_paste && !final_transcript.trim().is_empty() {
                         let text = final_transcript.clone();
-                        match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await {
+                        match async_runtime::spawn_blocking(move || assistive::paste_text(&text))
+                            .await
+                        {
                             Ok(Ok(())) => pasted = true,
                             Ok(Err(err)) => {
-                                emit_auto_paste_error(&app_handle, format!("Auto paste failed: {err}"));
+                                emit_auto_paste_error(
+                                    &app_handle,
+                                    format!("Auto paste failed: {err}"),
+                                );
                             }
                             Err(err) => {
-                                emit_auto_paste_error(&app_handle, format!("Auto paste task error: {err}"));
+                                emit_auto_paste_error(
+                                    &app_handle,
+                                    format!("Auto paste task error: {err}"),
+                                );
                             }
                         }
                     }
@@ -133,7 +151,7 @@ pub(crate) fn queue_transcription(
                         llm_model: cloud_result.llm_model.clone(),
                         word_count: count_words(&final_transcript),
                         audio_duration_seconds: compute_audio_duration_seconds(&saved_for_task),
-                        synced: true, // Cloud transcriptions are synced by definition
+                        synced: false,
                     };
 
                     analytics::track_transcription_completed(
@@ -156,13 +174,18 @@ pub(crate) fn queue_transcription(
 
                     // Save with proper cloud data
                     if cloud_result.llm_cleaned {
-                        let raw = cloud_result.raw_text.unwrap_or_else(|| final_transcript.clone());
-                        let _ = app_handle.state::<AppState>().storage().save_transcription_with_cleanup(
-                            raw,
-                            final_transcript,
-                            saved_for_task.path.display().to_string(),
-                            metadata,
-                        );
+                        let raw = cloud_result
+                            .raw_text
+                            .unwrap_or_else(|| final_transcript.clone());
+                        let _ = app_handle
+                            .state::<AppState>()
+                            .storage()
+                            .save_transcription_with_cleanup(
+                                raw,
+                                final_transcript,
+                                saved_for_task.path.display().to_string(),
+                                metadata,
+                            );
                     } else {
                         let _ = app_handle.state::<AppState>().storage().save_transcription(
                             final_transcript,
@@ -194,7 +217,8 @@ pub(crate) fn queue_transcription(
             let model_key = settings.local_model.clone();
             match model_manager::ensure_model_ready(&app_handle, &model_key) {
                 Ok(ready_model) => {
-                    let dictionary_prompt = dictionary::dictionary_prompt_for_model(&ready_model, &settings);
+                    let dictionary_prompt =
+                        dictionary::dictionary_prompt_for_model(&ready_model, &settings);
                     let language = settings.language.clone();
                     let transcriber = app_handle.state::<AppState>().local_transcriber();
                     let local_recording = recording_for_task.clone();
@@ -241,7 +265,8 @@ pub(crate) fn queue_transcription(
                     return;
                 }
 
-                if pending_selected_text.is_some() && !llm_cleanup::is_cleanup_available(&settings) {
+                if pending_selected_text.is_some() && !llm_cleanup::is_cleanup_available(&settings)
+                {
                     emit_transcription_error(
                         &app_handle,
                         "Edit mode requires LLM cleanup to be configured. Enable LLM cleanup in Settings → Models.".to_string(),
@@ -252,29 +277,44 @@ pub(crate) fn queue_transcription(
                     return;
                 }
 
-                let (final_transcript, llm_cleaned) = if llm_cleanup::is_cleanup_available(&settings) {
-                    if let Some(ref selected) = pending_selected_text {
-                        match llm_cleanup::edit_transcription(&http, selected, &raw_transcript, &settings).await {
-                            Ok(edited) => (edited, true),
-                            Err(err) => {
-                                eprintln!("LLM edit failed, using raw transcript: {err}");
-                                (raw_transcript.clone(), false)
+                let (final_transcript, llm_cleaned) =
+                    if llm_cleanup::is_cleanup_available(&settings) {
+                        if let Some(ref selected) = pending_selected_text {
+                            match llm_cleanup::edit_transcription(
+                                &http,
+                                selected,
+                                &raw_transcript,
+                                &settings,
+                            )
+                            .await
+                            {
+                                Ok(edited) => (edited, true),
+                                Err(err) => {
+                                    eprintln!("LLM edit failed, using raw transcript: {err}");
+                                    (raw_transcript.clone(), false)
+                                }
+                            }
+                        } else {
+                            match llm_cleanup::cleanup_transcription(
+                                &http,
+                                &raw_transcript,
+                                &settings,
+                            )
+                            .await
+                            {
+                                Ok(cleaned) => (cleaned, true),
+                                Err(err) => {
+                                    eprintln!("LLM cleanup failed, using raw transcript: {err}");
+                                    (raw_transcript.clone(), false)
+                                }
                             }
                         }
                     } else {
-                        match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings).await {
-                            Ok(cleaned) => (cleaned, true),
-                            Err(err) => {
-                                eprintln!("LLM cleanup failed, using raw transcript: {err}");
-                                (raw_transcript.clone(), false)
-                            }
-                        }
-                    }
-                } else {
-                    (raw_transcript.clone(), false)
-                };
+                        (raw_transcript.clone(), false)
+                    };
 
-                let final_transcript = dictionary::apply_replacements(&final_transcript, &settings.replacements);
+                let final_transcript =
+                    dictionary::apply_replacements(&final_transcript, &settings.replacements);
 
                 if count_words(&final_transcript) == 0 {
                     handle_empty_transcription(&app_handle, &saved_for_task.path);
@@ -290,13 +330,17 @@ pub(crate) fn queue_transcription(
                 let mut pasted = false;
                 if config.auto_paste && !final_transcript.trim().is_empty() {
                     let text = final_transcript.clone();
-                    match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await {
+                    match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await
+                    {
                         Ok(Ok(())) => pasted = true,
                         Ok(Err(err)) => {
                             emit_auto_paste_error(&app_handle, format!("Auto paste failed: {err}"));
                         }
                         Err(err) => {
-                            emit_auto_paste_error(&app_handle, format!("Auto paste task error: {err}"));
+                            emit_auto_paste_error(
+                                &app_handle,
+                                format!("Auto paste task error: {err}"),
+                            );
                         }
                     }
                 }
@@ -380,7 +424,13 @@ pub(crate) fn retry_transcription_async(
                 },
             );
 
-            match transcription_api::request_cloud_transcription(&http, &saved_for_task, &cloud_config).await {
+            match transcription_api::request_cloud_transcription(
+                &http,
+                &saved_for_task,
+                &cloud_config,
+            )
+            .await
+            {
                 Ok(cloud_result) => {
                     eprintln!(
                         "[retry_transcription] Cloud response: transcript_len={} raw_text_len={:?} llm_cleaned={}",
@@ -395,7 +445,8 @@ pub(crate) fn retry_transcription_async(
                         return;
                     }
 
-                    let final_transcript = dictionary::apply_replacements(&final_transcript, &settings.replacements);
+                    let final_transcript =
+                        dictionary::apply_replacements(&final_transcript, &settings.replacements);
 
                     // Ensure speech_model has cloud- prefix
                     let speech_model = if cloud_result.speech_model.starts_with("cloud-") {
@@ -409,7 +460,7 @@ pub(crate) fn retry_transcription_async(
                         llm_model: cloud_result.llm_model.clone(),
                         word_count: count_words(&final_transcript),
                         audio_duration_seconds: compute_audio_duration_seconds(&saved_for_task),
-                        synced: true,
+                        synced: false, // Let frontend sync to establish local_id linkage
                     };
 
                     analytics::track_transcription_completed(
@@ -431,18 +482,23 @@ pub(crate) fn retry_transcription_async(
                     );
 
                     if cloud_result.llm_cleaned {
-                        let raw = cloud_result.raw_text.unwrap_or_else(|| final_transcript.clone());
+                        let raw = cloud_result
+                            .raw_text
+                            .unwrap_or_else(|| final_transcript.clone());
                         eprintln!(
                             "[retry_transcription] Saving with cleanup: raw_len={} cleaned_len={}",
                             raw.len(),
                             final_transcript.len()
                         );
-                        let _ = app_handle.state::<AppState>().storage().save_transcription_with_cleanup(
-                            raw,
-                            final_transcript,
-                            saved_for_task.path.display().to_string(),
-                            metadata,
-                        );
+                        let _ = app_handle
+                            .state::<AppState>()
+                            .storage()
+                            .save_transcription_with_cleanup(
+                                raw,
+                                final_transcript,
+                                saved_for_task.path.display().to_string(),
+                                metadata,
+                            );
                     } else {
                         eprintln!(
                             "[retry_transcription] Saving without cleanup: text_len={}",
@@ -515,19 +571,25 @@ pub(crate) fn retry_transcription_async(
                     return;
                 }
 
-                let (final_transcript, llm_cleaned) = if llm_cleanup::is_cleanup_available(&settings) {
-                    match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings).await {
-                        Ok(cleaned) => (cleaned, true),
-                        Err(err) => {
-                            eprintln!("LLM cleanup failed during retry, using raw transcript: {err}");
-                            (raw_transcript.clone(), false)
+                let (final_transcript, llm_cleaned) =
+                    if llm_cleanup::is_cleanup_available(&settings) {
+                        match llm_cleanup::cleanup_transcription(&http, &raw_transcript, &settings)
+                            .await
+                        {
+                            Ok(cleaned) => (cleaned, true),
+                            Err(err) => {
+                                eprintln!(
+                                    "LLM cleanup failed during retry, using raw transcript: {err}"
+                                );
+                                (raw_transcript.clone(), false)
+                            }
                         }
-                    }
-                } else {
-                    (raw_transcript.clone(), false)
-                };
+                    } else {
+                        (raw_transcript.clone(), false)
+                    };
 
-                let final_transcript = dictionary::apply_replacements(&final_transcript, &settings.replacements);
+                let final_transcript =
+                    dictionary::apply_replacements(&final_transcript, &settings.replacements);
 
                 if count_words(&final_transcript) == 0 {
                     handle_empty_transcription(&app_handle, &saved_for_task.path);

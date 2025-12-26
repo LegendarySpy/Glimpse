@@ -265,7 +265,13 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
                     ? localRecords.some(r => r.timestamp === doc.timestamp)
                     : false;
 
-                if (existsById || existsByTimestamp) {
+                const existsByContent = localRecords.some(r =>
+                    r.text === doc.text &&
+                    r.speech_model === doc.speech_model &&
+                    Math.abs(r.audio_duration_seconds - doc.audio_duration_seconds) < 0.5
+                );
+
+                if (existsById || existsByTimestamp || existsByContent) {
                     continue;
                 }
 
