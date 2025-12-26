@@ -61,6 +61,7 @@ const Home = () => {
     const [showFAQ, setShowFAQ] = useState(false);
     const [appVersion, setAppVersion] = useState("-");
     const popupRef = useRef<HTMLDivElement>(null);
+    const [hasAuthIssue, setHasAuthIssue] = useState(false);
 
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
     useCloudTranscription();
@@ -116,9 +117,36 @@ const Home = () => {
             unlistenNavigate = fn;
         });
 
+        let unlistenSignIn: UnlistenFn | null = null;
+        listen("navigate:sign-in", () => {
+            setSettingsTab("account");
+            setIsSettingsOpen(true);
+        }).then((fn) => {
+            unlistenSignIn = fn;
+        });
+
+        let unlistenAuthError: UnlistenFn | null = null;
+        let unlistenAuthChanged: UnlistenFn | null = null;
+        
+        listen("cloud:auth-error", () => {
+            setHasAuthIssue(true);
+        }).then((fn) => {
+            unlistenAuthError = fn;
+        });
+        
+        listen("auth:changed", () => {
+            setHasAuthIssue(false);
+            loadUser();
+        }).then((fn) => {
+            unlistenAuthChanged = fn;
+        });
+
         return () => {
             unlistenSettings?.();
             unlistenNavigate?.();
+            unlistenSignIn?.();
+            unlistenAuthError?.();
+            unlistenAuthChanged?.();
         };
     }, [loadUser]);
 
@@ -330,7 +358,7 @@ const Home = () => {
                             setSettingsTab("account");
                             setIsSettingsOpen(true);
                         }}
-                        className="fixed top-10 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-primary bg-surface-surface hover:bg-surface-overlay hover:border-border-secondary transition-colors z-10"
+                        className={`fixed top-10 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border bg-surface-surface hover:bg-surface-overlay hover:border-border-secondary transition-colors z-10 ${hasAuthIssue ? "border-error" : "border-border-primary"}`}
                     >
                         <div className="w-6 h-6 rounded-full bg-surface-elevated border border-border-secondary flex items-center justify-center overflow-hidden">
                             {(currentUser.prefs as Record<string, string>)?.avatar ? (

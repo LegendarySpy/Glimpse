@@ -13,7 +13,7 @@ use transcribe_rs::{
 
 use crate::{
     model_manager::{self, LocalModelEngine, ReadyModel},
-    transcription::{normalize_transcript, TranscriptionSuccess},
+    transcription_api::{normalize_transcript, TranscriptionSuccess},
 };
 
 pub struct LocalTranscriber {

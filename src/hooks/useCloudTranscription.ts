@@ -5,38 +5,33 @@ import { account } from "../lib/appwrite";
 import { getCurrentUser } from "../lib/auth";
 
 const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_TRANSCRIPTION_URL;
+const JWT_REFRESH_INTERVAL = 8 * 60 * 1000; // 8 minutes (JWT expires in 15)
 
 export function useCloudTranscription() {
     const jwtRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-    const isSetup = useRef(false);
 
     const setupCloudCredentials = useCallback(async () => {
         try {
             const user = await getCurrentUser();
             if (!user) {
                 await invoke("clear_cloud_credentials");
-                isSetup.current = false;
                 return;
             }
 
             const isSubscriber = user.labels?.includes("subscriber") ?? false;
             if (!isSubscriber) {
                 await invoke("clear_cloud_credentials");
-                isSetup.current = false;
                 return;
             }
 
             const cloudEnabled = localStorage.getItem("glimpse_cloud_sync_enabled") === "true";
             if (!cloudEnabled) {
                 await invoke("clear_cloud_credentials");
-                isSetup.current = false;
                 return;
             }
 
             if (!CLOUD_FUNCTION_URL) {
-                console.warn("VITE_CLOUD_TRANSCRIPTION_URL not configured");
                 await invoke("clear_cloud_credentials");
-                isSetup.current = false;
                 return;
             }
 
@@ -45,34 +40,21 @@ export function useCloudTranscription() {
                 jwt: jwt.jwt,
                 functionUrl: CLOUD_FUNCTION_URL,
             });
-            isSetup.current = true;
-        } catch (err) {
-            console.error("Failed to setup cloud credentials:", err);
+        } catch {
             await invoke("clear_cloud_credentials").catch(() => {});
-            isSetup.current = false;
-        }
-    }, []);
-
-    const clearCredentials = useCallback(async () => {
-        try {
-            await invoke("clear_cloud_credentials");
-            isSetup.current = false;
-        } catch (err) {
-            console.error("Failed to clear cloud credentials:", err);
         }
     }, []);
 
     useEffect(() => {
         let unlistenAuth: UnlistenFn | null = null;
+        let unlistenAuthError: UnlistenFn | null = null;
 
         setupCloudCredentials();
 
-        // Refresh JWT every 10 minutes (JWT expires in 15 minutes)
+        // Refresh JWT periodically
         jwtRefreshInterval.current = setInterval(() => {
-            if (isSetup.current) {
-                setupCloudCredentials();
-            }
-        }, 10 * 60 * 1000);
+            setupCloudCredentials();
+        }, JWT_REFRESH_INTERVAL);
 
         // Listen for storage changes (cloud sync toggle)
         const handleStorageChange = (e: StorageEvent) => {
@@ -89,17 +71,24 @@ export function useCloudTranscription() {
             unlistenAuth = fn;
         });
 
+        // Listen for auth errors - clear credentials to force refresh on next attempt
+        listen("cloud:auth-error", async () => {
+            await invoke("clear_cloud_credentials").catch(() => {});
+        }).then((fn) => {
+            unlistenAuthError = fn;
+        });
+
         return () => {
             if (jwtRefreshInterval.current) {
                 clearInterval(jwtRefreshInterval.current);
             }
             window.removeEventListener("storage", handleStorageChange);
             unlistenAuth?.();
+            unlistenAuthError?.();
         };
     }, [setupCloudCredentials]);
 
     return {
         refreshCredentials: setupCloudCredentials,
-        clearCredentials,
     };
 }

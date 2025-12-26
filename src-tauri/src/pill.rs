@@ -1,6 +1,6 @@
 use crate::{
-    assistive, emit_event, permissions, platform, recorder::RecorderManager, toast, AppRuntime,
-    AppState, MAIN_WINDOW_LABEL,
+    assistive, cloud, emit_event, permissions, platform, recorder::RecorderManager, toast,
+    AppRuntime, AppState, MAIN_WINDOW_LABEL,
 };
 use chrono::{DateTime, Local};
 use parking_lot::Mutex;
@@ -189,25 +189,31 @@ impl PillController {
         }
     }
 
-    fn handle_hold_press(&self, app: &AppHandle<AppRuntime>) {
+    /// Returns true if recording started successfully, false if blocked by a check
+    fn handle_hold_press(&self, app: &AppHandle<AppRuntime>) -> bool {
         if self.status() == PillStatus::Processing {
             if *self.shortcut_origin.lock() == Some(ShortcutOrigin::Hold) {
                 self.cancel_processing(app);
             }
-            return;
+            return false;
         }
 
         // Ignore if key is already held (prevents repeat-triggered recordings after errors)
         if *self.hold_key_down.lock() {
-            return;
+            return false;
         }
 
         if !check_mic_permission(app) {
-            return;
+            return false;
+        }
+
+        if let Err(e) = cloud::check_cloud_ready(app) {
+            cloud::show_sign_in_required(app, &e);
+            return false;
         }
 
         if !self.try_start_recording(RecordingMode::Hold) {
-            return;
+            return false;
         }
 
         {
@@ -231,10 +237,12 @@ impl PillController {
                     },
                 );
                 check_accessibility_warning(app);
+                true
             }
             Err(err) => {
                 self.reset_recording_state();
                 self.transition_to_error(app, &format!("Unable to start recording: {err}"));
+                false
             }
         }
     }
@@ -267,6 +275,11 @@ impl PillController {
             self.stop_and_process(app);
         } else {
             if !check_mic_permission(app) {
+                return;
+            }
+
+            if let Err(e) = cloud::check_cloud_ready(app) {
+                cloud::show_sign_in_required(app, &e);
                 return;
             }
 
@@ -316,9 +329,11 @@ impl PillController {
             return;
         }
 
-        *self.smart_press_time.lock() = Some(Local::now());
-        *self.shortcut_origin.lock() = Some(ShortcutOrigin::Smart);
-        self.handle_hold_press(app);
+        // Only set state if recording actually starts (cloud check, permissions, etc. pass)
+        if self.handle_hold_press(app) {
+            *self.smart_press_time.lock() = Some(Local::now());
+            *self.shortcut_origin.lock() = Some(ShortcutOrigin::Smart);
+        }
     }
 
     fn handle_smart_release(&self, app: &AppHandle<AppRuntime>) {
@@ -494,7 +509,7 @@ pub fn register_shortcuts(app: &AppHandle<AppRuntime>) -> anyhow::Result<()> {
             let state = app.state::<AppState>();
             let pill = state.pill();
             match event.state {
-                ShortcutState::Pressed => pill.handle_hold_press(app),
+                ShortcutState::Pressed => { let _ = pill.handle_hold_press(app); }
                 ShortcutState::Released => pill.handle_hold_release(app),
             }
         })?;

@@ -176,12 +176,11 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                     {isRetrying ? (
                         <DotMatrix
                             rows={1}
-                            cols={3}
-                            activeDots={[0, 1, 2]}
+                            cols={1}
+                            activeDots={[0]}
                             dotSize={4}
-                            gap={2}
-                            color="var(--color-cloud)"
-                            animated
+                            gap={1}
+                            color="var(--color-warning)"
                             className="opacity-70"
                         />
                     ) : isError ? (
@@ -356,7 +355,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                         <span>Retry</span>
                                     </button>
 
-                                    {!isError && onRetryLlm && showLlmButtons && (
+                                    {!isError && onRetryLlm && showLlmButtons && !isCloudModel && (
                                         <button
                                             onClick={handleRetryLlm}
                                             disabled={isRetryingLlm}
@@ -367,7 +366,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
                                         </button>
                                     )}
 
-                                    {!isError && record.llm_cleaned && record.raw_text && onUndoLlm && showLlmButtons && (
+                                    {!isError && record.llm_cleaned && record.raw_text && onUndoLlm && showLlmButtons && !isCloudModel && (
                                         <button
                                             onClick={handleUndoLlm}
                                             disabled={isUndoingLlm}

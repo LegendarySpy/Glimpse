@@ -46,6 +46,8 @@ pub struct RecordingSaved {
     pub path: PathBuf,
     pub started_at: DateTime<Local>,
     pub ended_at: DateTime<Local>,
+    /// Override duration in seconds (used for retries when we know the original duration)
+    pub duration_override_seconds: Option<f32>,
 }
 
 impl RecorderManager {
@@ -391,6 +393,7 @@ pub fn persist_recording(
         path: file_path,
         started_at: recording.started_at,
         ended_at: recording.ended_at,
+        duration_override_seconds: None,
     })
 }
 

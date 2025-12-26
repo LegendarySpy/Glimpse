@@ -530,6 +530,21 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [status, dismissOverlay]);
 
+  // Store callbacks in refs to avoid effect re-running
+  const startMicRef = useRef(startMic);
+  const stopMicRef = useRef(stopMic);
+  const runAnimationRef = useRef(runAnimation);
+  const stopAllAnimationsRef = useRef(stopAllAnimations);
+  const drawBaseDotsRef = useRef(drawBaseDots);
+
+  useEffect(() => {
+    startMicRef.current = startMic;
+    stopMicRef.current = stopMic;
+    runAnimationRef.current = runAnimation;
+    stopAllAnimationsRef.current = stopAllAnimations;
+    drawBaseDotsRef.current = drawBaseDots;
+  }, [startMic, stopMic, runAnimation, stopAllAnimations, drawBaseDots]);
+
   // Main Event Listener - Persistent, never recreated
   useEffect(() => {
     const unlistenPromise = listen<PillStatePayload>("pill:state", (e) => {
@@ -538,9 +553,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
       // Logic: Backend says X, we do Y
       if (next === "listening" && prev !== "listening") {
-        startMic();
+        startMicRef.current();
       } else if (next !== "listening" && prev === "listening") {
-        stopMic();
+        stopMicRef.current();
       } else if (next === "listening" && prev === "listening") {
         // Ensure animation is running if we're already listening
         // (e.g. if overlay was hidden but state was somehow preserved?)
@@ -552,23 +567,23 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
       // Visuals
       if (next === "processing") {
-        runAnimation("processing");
+        runAnimationRef.current("processing");
       } else if (next === "error") {
         setIsErrorFlashing(true);
-        runAnimation("error");
+        runAnimationRef.current("error");
         setTimeout(() => setIsErrorFlashing(false), 1200);
       } else if (next === "idle") {
-        stopAllAnimations();
-        drawBaseDots();
+        stopAllAnimationsRef.current();
+        drawBaseDotsRef.current();
       }
     });
 
     return () => {
       unlistenPromise.then(unlisten => unlisten());
-      stopMic();
-      stopAllAnimations();
+      stopMicRef.current();
+      stopAllAnimationsRef.current();
     };
-  }, [startMic, stopMic, runAnimation, stopAllAnimations, drawBaseDots]);
+  }, []); // Empty deps - never re-runs
 
   useEffect(() => {
     if (status === "error" && !isErrorFlashing) {
