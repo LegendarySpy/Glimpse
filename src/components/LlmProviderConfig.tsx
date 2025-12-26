@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronDown, Server, Key, Cpu } from "lucide-react";
+import { useState } from "react";
+import { Server, Key, Cpu } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
+import { Dropdown } from "./Dropdown";
 
 export type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "anthropic" | "google" | "xai" | "groq" | "cerebras" | "sambanova" | "together" | "openrouter" | "perplexity" | "deepseek" | "fireworks" | "mistral" | "custom";
 
@@ -56,68 +56,12 @@ export function LlmProviderConfig({
     setModel,
     showModelDropdown = true,
 }: LlmProviderConfigProps) {
-    const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
-    const [providerSearch, setProviderSearch] = useState("");
-    const providerDropdownRef = useRef<HTMLDivElement>(null);
-
-    const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
-    const [modelsLoading, setModelsLoading] = useState(false);
     const [availableModels, setAvailableModels] = useState<string[]>([]);
-    const modelDropdownRef = useRef<HTMLDivElement>(null);
 
     const currentPreset = LLM_PROVIDER_PRESETS.find(p => p.id === provider);
 
-    useEffect(() => {
-        if (!providerDropdownOpen) return;
-
-        const handleClickOutside = (event: MouseEvent) => {
-            if (providerDropdownRef.current && !providerDropdownRef.current.contains(event.target as Node)) {
-                setProviderDropdownOpen(false);
-                setProviderSearch("");
-            }
-        };
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                setProviderDropdownOpen(false);
-                setProviderSearch("");
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEscape);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleEscape);
-        };
-    }, [providerDropdownOpen]);
-
-    useEffect(() => {
-        if (!modelDropdownOpen) return;
-
-        const handleClickOutside = (event: MouseEvent) => {
-            if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
-                setModelDropdownOpen(false);
-            }
-        };
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                setModelDropdownOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEscape);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleEscape);
-        };
-    }, [modelDropdownOpen]);
-
     const fetchModels = async () => {
         if (!endpoint) return;
-        setModelsLoading(true);
         try {
             const models = await invoke<string[]>("fetch_llm_models", {
                 endpoint,
@@ -127,102 +71,36 @@ export function LlmProviderConfig({
             setAvailableModels(models);
         } catch {
             setAvailableModels([]);
-        } finally {
-            setModelsLoading(false);
         }
     };
 
-    useEffect(() => {
-        if (modelDropdownOpen) {
-            fetchModels();
+    const handleProviderSelect = (presetId: string) => {
+        const preset = LLM_PROVIDER_PRESETS.find(p => p.id === presetId);
+        if (preset) {
+            setProvider(preset.id);
+            setEndpoint(preset.endpoint);
+            setModel(preset.defaultModel);
+        } else {
+            setProvider(presetId as LlmProvider);
         }
-    }, [modelDropdownOpen]);
-
-    const handleProviderSelect = (preset: LlmProviderPreset) => {
-        setProvider(preset.id);
-        setEndpoint(preset.endpoint);
-        setModel(preset.defaultModel);
-        setProviderDropdownOpen(false);
-        setProviderSearch("");
     };
 
     return (
         <div className="space-y-3">
-            <div className="space-y-1.5" ref={providerDropdownRef}>
-                <label className="text-[11px] font-medium text-content-muted ml-1">Provider</label>
-                <div className="relative">
-                    <button
-                        type="button"
-                        onClick={() => setProviderDropdownOpen(!providerDropdownOpen)}
-                        className="w-full flex items-center justify-between rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-left hover:border-border-hover focus:border-content-disabled focus:outline-none transition-colors"
-                    >
-                        <div className="flex items-center gap-2">
-                            <Search size={12} className="text-content-muted" />
-                            <span className={provider !== "none" && provider !== "custom" ? "text-content-primary" : "text-content-muted"}>
-                                {provider === "none" || provider === "custom"
-                                    ? "Select a provider..."
-                                    : currentPreset?.label ?? provider}
-                            </span>
-                        </div>
-                        <ChevronDown
-                            size={14}
-                            className={`text-content-muted transition-transform duration-200 ${providerDropdownOpen ? "rotate-180" : ""}`}
-                        />
-                    </button>
-                    <AnimatePresence>
-                        {providerDropdownOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                transition={{ duration: 0.15 }}
-                                className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-border-secondary bg-surface-surface shadow-xl shadow-black/40 overflow-hidden"
-                            >
-                                <div className="p-2 border-b border-border-secondary">
-                                    <div className="relative">
-                                        <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-content-disabled" />
-                                        <input
-                                            type="text"
-                                            value={providerSearch}
-                                            onChange={(e) => setProviderSearch(e.target.value)}
-                                            placeholder="Search providers..."
-                                            autoFocus
-                                            className="w-full rounded-md bg-surface-elevated border border-border-secondary py-1.5 pl-7 pr-2.5 text-[11px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="overflow-y-auto" style={{ maxHeight: "200px" }}>
-                                    {LLM_PROVIDER_PRESETS
-                                        .filter(p => p.label.toLowerCase().includes(providerSearch.toLowerCase()))
-                                        .map((preset) => (
-                                            <button
-                                                key={preset.id}
-                                                type="button"
-                                                onClick={() => handleProviderSelect(preset)}
-                                                className={`w-full text-left px-3 py-2.5 transition-colors flex items-center justify-between ${provider === preset.id
-                                                    ? "bg-amber-400/10 text-amber-400"
-                                                    : "text-content-secondary hover:bg-surface-elevated hover:text-content-primary"
-                                                    }`}
-                                            >
-                                                <span className="text-[12px] font-medium">{preset.label}</span>
-                                                {preset.apiKeyRequired && (
-                                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-border-secondary text-content-muted">
-                                                        API Key
-                                                    </span>
-                                                )}
-                                            </button>
-                                        ))}
-                                    {LLM_PROVIDER_PRESETS.filter(p => p.label.toLowerCase().includes(providerSearch.toLowerCase())).length === 0 && (
-                                        <div className="px-3 py-4 text-[11px] text-content-muted text-center">
-                                            No matching providers
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+            <div className="space-y-1.5">
+                <Dropdown
+                    label="Provider"
+                    value={provider}
+                    onChange={handleProviderSelect}
+                    options={LLM_PROVIDER_PRESETS.map(p => ({
+                        value: p.id,
+                        label: p.label,
+                        description: p.apiKeyRequired ? "Requires API Key" : undefined
+                    }))}
+                    searchable
+                    searchPlaceholder="Search providers..."
+                    placeholder="Select a provider..."
+                />
             </div>
 
             <div className="space-y-1.5">
@@ -254,83 +132,25 @@ export function LlmProviderConfig({
             </div>
 
             {showModelDropdown ? (
-                <div className="space-y-1.5" ref={modelDropdownRef}>
-                    <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
-                        <Cpu size={10} />
-                        Model <span className="text-content-disabled">(leave empty for default)</span>
-                    </label>
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (!modelDropdownOpen) {
-                                    setModelsLoading(true);
-                                }
-                                setModelDropdownOpen(!modelDropdownOpen);
-                            }}
-                            className="w-full flex items-center justify-between rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-left hover:border-border-hover focus:border-content-disabled focus:outline-none transition-colors"
-                        >
-                            <span className={model ? "text-content-primary" : "text-content-disabled"}>
-                                {model || currentPreset?.defaultModel || "Select a model"}
-                            </span>
-                            <ChevronDown
-                                size={14}
-                                className={`text-content-muted transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
-                            />
-                        </button>
-                        <AnimatePresence>
-                            {modelDropdownOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -4 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -4 }}
-                                    transition={{ duration: 0.15 }}
-                                    className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-border-secondary bg-surface-surface shadow-xl shadow-black/40 overflow-hidden"
-                                    style={{ maxHeight: "280px" }}
-                                >
-                                    <div className="p-2 border-b border-border-secondary">
-                                        <input
-                                            type="text"
-                                            value={model}
-                                            onChange={(e) => setModel(e.target.value)}
-                                            placeholder="Type or select a model..."
-                                            autoFocus
-                                            className="w-full rounded-md bg-surface-elevated border border-border-secondary py-1.5 px-2.5 text-[11px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                    </div>
-                                    <div className="overflow-y-auto" style={{ maxHeight: "200px" }}>
-                                        {modelsLoading ? (
-                                            <div className="px-3 py-4 text-[11px] text-content-muted text-center">
-                                                Loading models...
-                                            </div>
-                                        ) : availableModels.length > 0 ? (
-                                            availableModels.map((m) => (
-                                                <button
-                                                    key={m}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setModel(m);
-                                                        setModelDropdownOpen(false);
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2 text-[11px] transition-colors ${model === m
-                                                        ? "bg-amber-400/10 text-amber-400"
-                                                        : "text-content-secondary hover:bg-surface-elevated hover:text-content-primary"
-                                                        }`}
-                                                >
-                                                    {m}
-                                                </button>
-                                            ))
-                                        ) : (
-                                            <div className="px-3 py-4 text-[11px] text-content-muted text-center">
-                                                Type a model name above
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                <div className="space-y-1.5">
+                    <Dropdown
+                        label="Model"
+                        value={model}
+                        onChange={(val) => setModel(val)}
+                        onOpen={fetchModels}
+                        options={[
+                            {
+                                value: "",
+                                label: `Default (${currentPreset?.defaultModel || "None"})`
+                            },
+                            ...(model && !availableModels.includes(model) ? [{ value: model, label: model }] : []),
+                            ...availableModels.map(m => ({ value: m, label: m }))
+                        ]}
+                        placeholder="Select a model"
+                        searchable
+                        searchPlaceholder="Search or type model..."
+                        icon={<Cpu size={14} />}
+                    />
                 </div>
             ) : (
                 <div className="space-y-1.5">

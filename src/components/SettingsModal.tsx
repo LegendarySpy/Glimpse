@@ -18,7 +18,6 @@ import {
     AlertCircle,
     Info,
     User,
-    ChevronDown,
     Server,
     Key,
     Github,
@@ -38,6 +37,7 @@ import { UpdateChecker } from "./UpdateChecker";
 import DebugSection from "./DebugSection";
 import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../lib/auth";
 import WhatsNewModal from "./WhatsNewModal";
+import { Dropdown } from "./Dropdown";
 
 import { OAuthProvider } from "appwrite";
 
@@ -175,9 +175,6 @@ const SettingsModal = ({
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
     const [availableModels, setAvailableModels] = useState<string[]>([]);
-    const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
-    const [modelsLoading, setModelsLoading] = useState(false);
-    const modelDropdownRef = useRef<HTMLDivElement>(null);
     const [editModeEnabled, setEditModeEnabled] = useState(false);
 
     const [authLoading, setAuthLoading] = useState(false);
@@ -416,7 +413,6 @@ const SettingsModal = ({
     };
 
     const fetchAvailableModels = useCallback(async () => {
-        setModelsLoading(true);
         try {
             const models = await invoke<string[]>("fetch_llm_models", {
                 endpoint: llmEndpoint,
@@ -426,46 +422,9 @@ const SettingsModal = ({
             setAvailableModels(models);
         } catch {
             setAvailableModels([]);
-        } finally {
-            setModelsLoading(false);
         }
     }, [llmEndpoint, llmProvider, llmApiKey]);
 
-    useEffect(() => {
-        if (modelDropdownOpen) {
-            fetchAvailableModels();
-        }
-    }, [modelDropdownOpen, fetchAvailableModels]);
-
-    useEffect(() => {
-        if (!modelDropdownOpen) return;
-
-        const handleClickOutside = (event: MouseEvent) => {
-            if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
-                setModelDropdownOpen(false);
-            }
-        };
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                setModelDropdownOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEscape);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleEscape);
-        };
-    }, [modelDropdownOpen]);
-
-    useEffect(() => {
-        if (!llmCleanupEnabled) {
-            setModelDropdownOpen(false);
-        }
-    }, [llmCleanupEnabled]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -1188,37 +1147,36 @@ const SettingsModal = ({
                                                 {/* Microphone */}
                                                 <div className="space-y-1.5">
                                                     <label className="text-[10px] font-medium text-content-muted">Microphone</label>
-                                                    <div className="relative">
-                                                        <select
+                                                    <div className="relative z-20">
+                                                        <Dropdown
                                                             value={microphoneDevice || ""}
-                                                            onChange={(e) => setMicrophoneDevice(e.target.value || null)}
-                                                            className="w-full appearance-none rounded-lg bg-surface-surface border border-border-primary py-2 pl-2.5 pr-7 text-[11px] text-content-primary hover:border-border-secondary focus:border-border-hover focus:outline-none transition-colors"
-                                                        >
-                                                            <option value="">System Default</option>
-                                                            {inputDevices.map((device) => (
-                                                                <option key={device.id} value={device.id}>
-                                                                    {device.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                        <ChevronDown size={10} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-content-muted" />
+                                                            onChange={(val) => setMicrophoneDevice(val === "" ? null : val)}
+                                                            options={[
+                                                                { value: "", label: "System Default" },
+                                                                ...inputDevices.map((device) => ({
+                                                                    value: device.id,
+                                                                    label: device.name,
+                                                                })),
+                                                            ]}
+                                                            placeholder="Select microphone..."
+                                                        />
                                                     </div>
                                                 </div>
 
                                                 {/* Language */}
                                                 <div className="space-y-1.5">
                                                     <label className="text-[10px] font-medium text-content-muted">Language</label>
-                                                    <div className="relative">
-                                                        <select
+                                                    <div className="relative z-10">
+                                                        <Dropdown
                                                             value={language}
-                                                            onChange={(e) => setLanguage(e.target.value)}
-                                                            className="w-full appearance-none rounded-lg bg-surface-surface border border-border-primary py-2 pl-2.5 pr-7 text-[11px] text-content-primary hover:border-border-secondary focus:border-border-hover focus:outline-none transition-colors"
-                                                        >
-                                                            {languages.map((lang) => (
-                                                                <option key={lang.code} value={lang.code}>{lang.name}</option>
-                                                            ))}
-                                                        </select>
-                                                        <ChevronDown size={10} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-content-muted" />
+                                                            onChange={(val) => setLanguage(val)}
+                                                            options={languages.map(lang => ({
+                                                                value: lang.code,
+                                                                label: lang.name
+                                                            }))}
+                                                            searchable
+                                                            searchPlaceholder="Search language..."
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
@@ -1463,88 +1421,27 @@ const SettingsModal = ({
                                                                         />
                                                                     </div>
 
-                                                                    <div className="space-y-1.5" ref={modelDropdownRef}>
-                                                                        <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
-                                                                            <Cpu size={10} />
-                                                                            Model {<span className="text-content-disabled">(leave empty for default)</span>}
-                                                                        </label>
-                                                                        <div className="relative">
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => {
-                                                                                    if (!modelDropdownOpen) {
-                                                                                        setModelsLoading(true);
-                                                                                    }
-                                                                                    setModelDropdownOpen(!modelDropdownOpen);
-                                                                                }}
-                                                                                className="w-full flex items-center justify-between rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-left hover:border-border-hover focus:border-content-disabled focus:outline-none transition-colors"
-                                                                            >
-                                                                                <span className={llmModel ? "text-content-primary" : "text-content-disabled"}>
-                                                                                    {llmModel || (
-                                                                                        llmProvider === "lmstudio" ? "Uses loaded model" :
-                                                                                            llmProvider === "ollama" ? "llama3.2" :
-                                                                                                llmProvider === "openai" ? "gpt-4o-mini" :
-                                                                                                    "model-name"
-                                                                                    )}
-                                                                                </span>
-                                                                                <ChevronDown
-                                                                                    size={14}
-                                                                                    className={`text-content-muted transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
-                                                                                />
-                                                                            </button>
-                                                                            <AnimatePresence>
-                                                                                {modelDropdownOpen && (
-                                                                                    <motion.div
-                                                                                        initial={{ opacity: 0, y: -4 }}
-                                                                                        animate={{ opacity: 1, y: 0 }}
-                                                                                        exit={{ opacity: 0, y: -4 }}
-                                                                                        transition={{ duration: 0.15 }}
-                                                                                        className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-border-secondary bg-surface-surface shadow-xl shadow-black/40 overflow-hidden"
-                                                                                        style={{ maxHeight: "280px" }}
-                                                                                    >
-                                                                                        <div className="overflow-y-auto" style={{ maxHeight: "220px" }}>
-                                                                                            {modelsLoading ? (
-                                                                                                <div className="flex items-center justify-center gap-2 py-4 text-[11px] text-content-muted">
-                                                                                                    <Loader2 size={12} className="animate-spin" />
-                                                                                                    <span>Loading models...</span>
-                                                                                                </div>
-                                                                                            ) : availableModels.length > 0 ? (
-                                                                                                availableModels.map((model) => (
-                                                                                                    <button
-                                                                                                        key={model}
-                                                                                                        type="button"
-                                                                                                        onClick={() => {
-                                                                                                            setLlmModel(model);
-                                                                                                            setModelDropdownOpen(false);
-                                                                                                        }}
-                                                                                                        className={`w-full text-left px-3 py-2 text-[12px] transition-colors ${llmModel === model
-                                                                                                            ? "bg-cloud/10 text-cloud"
-                                                                                                            : "text-content-secondary hover:bg-surface-elevated hover:text-content-primary"
-                                                                                                            }`}
-                                                                                                    >
-                                                                                                        {model}
-                                                                                                    </button>
-                                                                                                ))
-                                                                                            ) : (
-                                                                                                <div className="px-3 py-4 text-[11px] text-content-muted text-center">
-                                                                                                    No models found. Check endpoint.
-                                                                                                </div>
-                                                                                            )}
-                                                                                        </div>
-                                                                                        <div className="border-t border-border-secondary p-2">
-                                                                                            <input
-                                                                                                type="text"
-                                                                                                value={llmModel}
-                                                                                                onChange={(e) => setLlmModel(e.target.value)}
-                                                                                                placeholder="Or type custom model name..."
-                                                                                                className="w-full rounded-md bg-surface-elevated border border-border-secondary py-1.5 px-2.5 text-[11px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
-                                                                                                onClick={(e) => e.stopPropagation()}
-                                                                                            />
-                                                                                        </div>
-                                                                                    </motion.div>
-                                                                                )}
-                                                                            </AnimatePresence>
-                                                                        </div>
+                                                                    <div className="relative z-0">
+                                                                        <Dropdown
+                                                                            value={llmModel}
+                                                                            onChange={(val) => setLlmModel(val)}
+                                                                            onOpen={fetchAvailableModels}
+                                                                            options={[
+                                                                                {
+                                                                                    value: "",
+                                                                                    label: `Default (${llmProvider === "lmstudio" ? "Uses loaded model" :
+                                                                                        llmProvider === "ollama" ? "llama3.2" :
+                                                                                            llmProvider === "openai" ? "gpt-4o-mini" :
+                                                                                                "None"})`
+                                                                                },
+                                                                                // If llmModel is set but not in availableModels, add it as an option so it displays correctly
+                                                                                ...(llmModel && !availableModels.includes(llmModel) ? [{ value: llmModel, label: llmModel }] : []),
+                                                                                ...availableModels.map(m => ({ value: m, label: m }))
+                                                                            ]}
+                                                                            placeholder="Select model..."
+                                                                            searchable
+                                                                            searchPlaceholder="Search available models..."
+                                                                        />
                                                                     </div>
 
                                                                     <div className="flex items-start gap-2 rounded-lg border border-border-secondary bg-surface-elevated px-3 py-2">
