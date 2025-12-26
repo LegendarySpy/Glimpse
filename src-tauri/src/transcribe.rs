@@ -97,7 +97,7 @@ pub(crate) fn queue_transcription(
             {
                 Ok(cloud_result) => {
                     if is_cancelled() {
-                        crate::hide_overlay(&app_handle);
+                        app_handle.state::<AppState>().pill().reset(&app_handle);
                         app_handle.state::<AppState>().set_pending_path(None);
                         return;
                     }
@@ -112,7 +112,7 @@ pub(crate) fn queue_transcription(
                         dictionary::apply_replacements(&final_transcript, &settings.replacements);
 
                     if is_cancelled() {
-                        crate::hide_overlay(&app_handle);
+                        app_handle.state::<AppState>().pill().reset(&app_handle);
                         app_handle.state::<AppState>().set_pending_path(None);
                         return;
                     }
@@ -196,7 +196,7 @@ pub(crate) fn queue_transcription(
                         );
                     }
 
-                    crate::hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().pill().reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                 }
                 Err(err) => {
@@ -246,7 +246,7 @@ pub(crate) fn queue_transcription(
         match result {
             Ok(result) => {
                 if is_cancelled() {
-                    crate::hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().pill().reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                     return;
                 }
@@ -260,7 +260,7 @@ pub(crate) fn queue_transcription(
                 }
 
                 if is_cancelled() {
-                    crate::hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().pill().reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                     return;
                 }
@@ -322,7 +322,7 @@ pub(crate) fn queue_transcription(
                 }
 
                 if is_cancelled() {
-                    crate::hide_overlay(&app_handle);
+                    app_handle.state::<AppState>().pill().reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                     return;
                 }
@@ -367,7 +367,7 @@ pub(crate) fn queue_transcription(
                     if use_local { "local" } else { "cloud" },
                 );
 
-                crate::hide_overlay(&app_handle);
+                app_handle.state::<AppState>().pill().reset(&app_handle);
                 app_handle.state::<AppState>().set_pending_path(None);
             }
             Err(err) => {
@@ -670,6 +670,8 @@ fn emit_transcription_complete_with_cleanup(
         },
     );
 
+    app.state::<AppState>().pill().reset(app);
+
     if llm_cleaned {
         let _ = app
             .state::<AppState>()
@@ -725,7 +727,7 @@ fn handle_empty_transcription(app: &AppHandle<AppRuntime>, audio_path: &Path) {
         }
     }
 
-    crate::hide_overlay(app);
+    app.state::<AppState>().pill().reset(app);
     app.state::<AppState>().set_pending_path(None);
 }
 

@@ -754,9 +754,7 @@ async fn retry_transcription(
 
     eprintln!(
         "[retry_transcription] Found record: audio_path={} speech_model={} synced={}",
-        record.audio_path,
-        record.speech_model,
-        record.synced
+        record.audio_path, record.speech_model, record.synced
     );
 
     let audio_path = PathBuf::from(&record.audio_path);
@@ -780,10 +778,16 @@ async fn retry_transcription(
     eprintln!("[retry_transcription] Deleting old record: {}", id);
     match state.storage().delete(&id) {
         Ok(deleted_path) => {
-            eprintln!("[retry_transcription] Deleted record, audio_path: {:?}", deleted_path);
+            eprintln!(
+                "[retry_transcription] Deleted record, audio_path: {:?}",
+                deleted_path
+            );
         }
         Err(err) => {
-            eprintln!("[retry_transcription] Failed to delete old record {}: {}", id, err);
+            eprintln!(
+                "[retry_transcription] Failed to delete old record {}: {}",
+                id, err
+            );
         }
     }
 
@@ -886,8 +890,16 @@ pub(crate) fn stop_active_recording(app: &AppHandle<AppRuntime>) {
 
 #[tauri::command]
 fn toast_dismissed(app: AppHandle<AppRuntime>) {
-    stop_active_recording(&app);
-    hide_overlay(&app);
+    let state = app.state::<AppState>();
+    let status = state.pill().status();
+
+    // If we're showing an error(!) or processing animation, clear it when the toast goes away.
+    // Important: DO NOT reset if we are currently 'listening', as that would kill an active recording
+    // if a previous success toast auto-dismisses while we started a new one.
+    if status == pill::PillStatus::Error || status == pill::PillStatus::Processing {
+        state.pill().reset(&app);
+    }
+
     toast::hide(&app);
 }
 
@@ -965,7 +977,7 @@ fn emit_complete(
             eprintln!("Failed to remove rejected recording file: {err}");
         }
 
-        hide_overlay(app);
+        app.state::<AppState>().pill().reset(app);
         return;
     }
 
