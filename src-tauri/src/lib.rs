@@ -165,6 +165,7 @@ pub fn run() {
             cloud::set_cloud_credentials,
             cloud::clear_cloud_credentials,
             cloud::open_sign_in,
+            cloud::open_checkout,
             open_whats_new
         ])
         .build(tauri::generate_context!())

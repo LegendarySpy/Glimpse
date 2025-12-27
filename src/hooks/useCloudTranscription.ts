@@ -18,17 +18,7 @@ export function useCloudTranscription() {
                 return;
             }
 
-            const isSubscriber = user.labels?.includes("subscriber") ?? false;
-            if (!isSubscriber) {
-                await invoke("clear_cloud_credentials");
-                return;
-            }
-
-            const cloudEnabled = localStorage.getItem("glimpse_cloud_sync_enabled") === "true";
-            if (!cloudEnabled) {
-                await invoke("clear_cloud_credentials");
-                return;
-            }
+            const isSubscriber = user.labels?.includes("subscriber") || user.labels?.includes("cloud") || false;
 
             if (!CLOUD_FUNCTION_URL) {
                 await invoke("clear_cloud_credentials");
@@ -39,9 +29,10 @@ export function useCloudTranscription() {
             await invoke("set_cloud_credentials", {
                 jwt: jwt.jwt,
                 functionUrl: CLOUD_FUNCTION_URL,
+                isSubscriber,
             });
         } catch {
-            await invoke("clear_cloud_credentials").catch(() => {});
+            await invoke("clear_cloud_credentials").catch(() => { });
         }
     }, []);
 
@@ -73,7 +64,7 @@ export function useCloudTranscription() {
 
         // Listen for auth errors - clear credentials to force refresh on next attempt
         listen("cloud:auth-error", async () => {
-            await invoke("clear_cloud_credentials").catch(() => {});
+            await invoke("clear_cloud_credentials").catch(() => { });
         }).then((fn) => {
             unlistenAuthError = fn;
         });
