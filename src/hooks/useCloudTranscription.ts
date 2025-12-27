@@ -25,11 +25,14 @@ export function useCloudTranscription() {
                 return;
             }
 
+            const historySyncEnabled = localStorage.getItem("glimpse_cloud_sync_enabled") === "true";
+
             const jwt = await account.createJWT();
             await invoke("set_cloud_credentials", {
                 jwt: jwt.jwt,
                 functionUrl: CLOUD_FUNCTION_URL,
                 isSubscriber,
+                historySyncEnabled,
             });
         } catch {
             await invoke("clear_cloud_credentials").catch(() => { });

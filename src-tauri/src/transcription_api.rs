@@ -48,6 +48,7 @@ pub struct CloudTranscriptionConfig {
     pub user_context: Option<String>,
     pub selected_text: Option<String>,
     pub auto_paste: bool,
+    pub history_sync_enabled: bool,
 }
 
 impl CloudTranscriptionConfig {
@@ -56,6 +57,7 @@ impl CloudTranscriptionConfig {
         jwt: String,
         llm_cleanup: bool,
         user_context: Option<String>,
+        history_sync_enabled: bool,
     ) -> Self {
         Self {
             function_url,
@@ -64,6 +66,7 @@ impl CloudTranscriptionConfig {
             user_context,
             selected_text: None,
             auto_paste: env_flag("GLIMPSE_AUTO_PASTE", true),
+            history_sync_enabled,
         }
     }
 
@@ -253,9 +256,16 @@ pub async fn request_cloud_transcription(
     let mut request = client
         .post(&url)
         .header("Authorization", format!("Bearer {}", &config.jwt))
-        .header("Content-Type", "audio/mpeg");
+        .header("Content-Type", "audio/mpeg")
+        .header(
+            "X-History-Sync-Enabled",
+            if config.history_sync_enabled {
+                "true"
+            } else {
+                "false"
+            },
+        );
 
-    // Add selected text header for edit mode (base64 encoded)
     if let Some(ref selected) = config.selected_text {
         use base64::Engine;
         let encoded = base64::engine::general_purpose::STANDARD.encode(selected.as_bytes());
@@ -281,8 +291,8 @@ pub async fn request_cloud_transcription(
     }
 
     if status.is_success() {
-        let parsed: CloudTranscriptionResponse = serde_json::from_str(&text)
-            .context("Failed to parse cloud transcription response")?;
+        let parsed: CloudTranscriptionResponse =
+            serde_json::from_str(&text).context("Failed to parse cloud transcription response")?;
         return Ok(CloudTranscriptionSuccess {
             transcript: normalize_transcript(&parsed.transcript),
             raw_text: parsed.raw_text.map(|t| normalize_transcript(&t)),

@@ -85,6 +85,7 @@ pub(crate) fn queue_transcription(
                 } else {
                     Some(settings.user_context.clone())
                 },
+                creds.history_sync_enabled,
             )
             .with_selected_text(pending_selected_text.clone());
 
@@ -451,6 +452,7 @@ pub(crate) fn retry_transcription_async(
                 } else {
                     Some(settings.user_context.clone())
                 },
+                creds.history_sync_enabled,
             );
 
             match transcription_api::request_cloud_transcription(

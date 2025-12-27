@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -59,7 +59,7 @@ async function withRetry<T>(
 }
 
 export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
-    const resolvedCloudSyncEnabled = useMemo(() => {
+    const getCloudSyncEnabled = useCallback(() => {
         if (typeof options.cloudSyncEnabled === "boolean") {
             return options.cloudSyncEnabled;
         }
@@ -68,14 +68,36 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
                 return false;
             }
             const stored = localStorage.getItem("glimpse_cloud_sync_enabled");
-            if (stored === null) {
-                return false;
-            }
             return stored === "true";
         } catch {
             return false;
         }
     }, [options.cloudSyncEnabled]);
+
+    const [resolvedCloudSyncEnabled, setResolvedCloudSyncEnabled] = useState(getCloudSyncEnabled);
+
+    useEffect(() => {
+        setResolvedCloudSyncEnabled(getCloudSyncEnabled());
+
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "glimpse_cloud_sync_enabled") {
+                setResolvedCloudSyncEnabled(e.newValue === "true");
+            }
+        };
+        window.addEventListener("storage", handleStorageChange);
+
+        let unlisten: (() => void) | null = null;
+        listen("auth:changed", () => {
+            setResolvedCloudSyncEnabled(getCloudSyncEnabled());
+        }).then(fn => {
+            unlisten = fn;
+        });
+
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+            unlisten?.();
+        };
+    }, [getCloudSyncEnabled]);
 
     const [transcriptions, setTranscriptions] = useState<TranscriptionRecord[]>([]);
     const [totalCount, setTotalCount] = useState(0);

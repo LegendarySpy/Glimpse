@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { listen, emit, type UnlistenFn } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
     checkAccessibilityPermission,
@@ -212,6 +212,7 @@ const SettingsModal = ({
 
     useEffect(() => {
         localStorage.setItem("glimpse_cloud_sync_enabled", String(cloudSyncEnabled));
+        emit("auth:changed").catch(() => { });
     }, [cloudSyncEnabled]);
 
     useEffect(() => {

@@ -12,6 +12,7 @@ pub struct CloudCredentials {
     pub jwt: String,
     pub function_url: String,
     pub is_subscriber: bool,
+    pub history_sync_enabled: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -44,11 +45,18 @@ impl CloudManager {
         }
     }
 
-    pub fn set_credentials(&self, jwt: String, function_url: String, is_subscriber: bool) {
+    pub fn set_credentials(
+        &self,
+        jwt: String,
+        function_url: String,
+        is_subscriber: bool,
+        history_sync_enabled: bool,
+    ) {
         *self.credentials.lock() = Some(CloudCredentials {
             jwt,
             function_url,
             is_subscriber,
+            history_sync_enabled,
         });
     }
 
@@ -160,11 +168,12 @@ pub fn set_cloud_credentials(
     jwt: String,
     function_url: String,
     is_subscriber: bool,
+    history_sync_enabled: bool,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
     state
         .cloud_manager()
-        .set_credentials(jwt, function_url, is_subscriber);
+        .set_credentials(jwt, function_url, is_subscriber, history_sync_enabled);
     Ok(())
 }
 
