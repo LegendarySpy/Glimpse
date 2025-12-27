@@ -13,9 +13,10 @@ interface TranscriptionItemProps {
     showLlmButtons?: boolean;
     searchQuery?: string;
     skipAnimation?: boolean;
+    shiftHeld?: boolean;
 }
 
-const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm, showLlmButtons = false, searchQuery = "", skipAnimation = false }) => {
+const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm, showLlmButtons = false, searchQuery = "", skipAnimation = false, shiftHeld = false }) => {
     const [copied, setCopied] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isRetrying, setIsRetrying] = useState(false);
@@ -24,28 +25,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
     const [isUndoingLlm, setIsUndoingLlm] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [shiftHeld, setShiftHeld] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Shift") {
-                setShiftHeld(true);
-            }
-        };
-        const handleKeyUp = (event: KeyboardEvent) => {
-            if (event.key === "Shift") {
-                setShiftHeld(false);
-            }
-        };
-
-        document.addEventListener("keydown", handleKeyDown);
-        document.addEventListener("keyup", handleKeyUp);
-        return () => {
-            document.removeEventListener("keydown", handleKeyDown);
-            document.removeEventListener("keyup", handleKeyUp);
-        };
-    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -71,16 +51,14 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
         }
     };
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         if (isDeleting) return;
         setIsDeleting(true);
         setMenuOpen(false);
-        try {
-            await onDelete(record.id);
-        } catch (err) {
+        onDelete(record.id).catch(err => {
             console.error("Failed to delete:", err);
             setIsDeleting(false);
-        }
+        });
     };
 
     const handleRetry = async () => {

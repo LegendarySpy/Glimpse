@@ -311,6 +311,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         try {
             await invoke("delete_transcription", { id });
             setTranscriptions(prev => prev.filter(t => t.id !== id));
+            setTotalCount(prev => Math.max(0, prev - 1));
 
             if (resolvedCloudSyncEnabled && userId && isSubscriber) {
                 const cloudDoc = await findByLocalId(userId, id);
@@ -355,6 +356,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
             await invoke("delete_all_transcriptions");
             setTranscriptions([]);
+            setTotalCount(0);
 
             if (resolvedCloudSyncEnabled && userId && isSubscriber && recordsToDelete.length > 0) {
                 await Promise.all(recordsToDelete.map(async (record) => {

@@ -28,9 +28,23 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const [isClearing, setIsClearing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [shiftHeld, setShiftHeld] = useState(false);
     const hasLoadedOnce = useRef(false);
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Shift") setShiftHeld(true);
+        };
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Shift") setShiftHeld(false);
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("keyup", handleKeyUp);
+        };
+    }, []);
 
-    // Track if we've ever loaded data
     useEffect(() => {
         if (transcriptions.length > 0 && !hasLoadedOnce.current) {
             hasLoadedOnce.current = true;
@@ -191,6 +205,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                                         showLlmButtons={showLlmButtons}
                                         searchQuery={debouncedQuery}
                                         skipAnimation={!!debouncedQuery}
+                                        shiftHeld={shiftHeld}
                                     />
                                 </div>
                             );
