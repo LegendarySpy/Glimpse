@@ -97,7 +97,10 @@ pub(crate) fn queue_transcription(
             {
                 Ok(cloud_result) => {
                     if is_cancelled() {
-                        app_handle.state::<AppState>().pill().reset(&app_handle);
+                        app_handle
+                            .state::<AppState>()
+                            .pill()
+                            .safe_reset(&app_handle);
                         app_handle.state::<AppState>().set_pending_path(None);
                         return;
                     }
@@ -112,7 +115,10 @@ pub(crate) fn queue_transcription(
                         dictionary::apply_replacements(&final_transcript, &settings.replacements);
 
                     if is_cancelled() {
-                        app_handle.state::<AppState>().pill().reset(&app_handle);
+                        app_handle
+                            .state::<AppState>()
+                            .pill()
+                            .safe_reset(&app_handle);
                         app_handle.state::<AppState>().set_pending_path(None);
                         return;
                     }
@@ -196,10 +202,17 @@ pub(crate) fn queue_transcription(
                         );
                     }
 
-                    app_handle.state::<AppState>().pill().reset(&app_handle);
+                    app_handle
+                        .state::<AppState>()
+                        .pill()
+                        .safe_reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                 }
                 Err(err) => {
+                    if is_cancelled() {
+                        app_handle.state::<AppState>().set_pending_path(None);
+                        return;
+                    }
                     emit_transcription_error(
                         &app_handle,
                         format!("Transcription failed: {err}"),
@@ -246,7 +259,10 @@ pub(crate) fn queue_transcription(
         match result {
             Ok(result) => {
                 if is_cancelled() {
-                    app_handle.state::<AppState>().pill().reset(&app_handle);
+                    app_handle
+                        .state::<AppState>()
+                        .pill()
+                        .safe_reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                     return;
                 }
@@ -260,7 +276,10 @@ pub(crate) fn queue_transcription(
                 }
 
                 if is_cancelled() {
-                    app_handle.state::<AppState>().pill().reset(&app_handle);
+                    app_handle
+                        .state::<AppState>()
+                        .pill()
+                        .safe_reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                     return;
                 }
@@ -322,7 +341,10 @@ pub(crate) fn queue_transcription(
                 }
 
                 if is_cancelled() {
-                    app_handle.state::<AppState>().pill().reset(&app_handle);
+                    app_handle
+                        .state::<AppState>()
+                        .pill()
+                        .safe_reset(&app_handle);
                     app_handle.state::<AppState>().set_pending_path(None);
                     return;
                 }
@@ -367,10 +389,17 @@ pub(crate) fn queue_transcription(
                     if use_local { "local" } else { "cloud" },
                 );
 
-                app_handle.state::<AppState>().pill().reset(&app_handle);
+                app_handle
+                    .state::<AppState>()
+                    .pill()
+                    .safe_reset(&app_handle);
                 app_handle.state::<AppState>().set_pending_path(None);
             }
             Err(err) => {
+                if is_cancelled() {
+                    app_handle.state::<AppState>().set_pending_path(None);
+                    return;
+                }
                 let stage = if use_local { "local" } else { "api" };
                 emit_transcription_error(
                     &app_handle,
@@ -670,7 +699,7 @@ fn emit_transcription_complete_with_cleanup(
         },
     );
 
-    app.state::<AppState>().pill().reset(app);
+    app.state::<AppState>().pill().safe_reset(app);
 
     if llm_cleaned {
         let _ = app
@@ -727,7 +756,7 @@ fn handle_empty_transcription(app: &AppHandle<AppRuntime>, audio_path: &Path) {
         }
     }
 
-    app.state::<AppState>().pill().reset(app);
+    app.state::<AppState>().pill().safe_reset(app);
     app.state::<AppState>().set_pending_path(None);
 }
 
@@ -797,9 +826,6 @@ fn emit_transcription_error_inner(
     );
 
     let state = app.state::<AppState>();
-    let pill = state.pill();
-    pill.transition_to_error_silent(app);
-
     let settings = state.current_settings();
     let is_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
 
@@ -832,6 +858,10 @@ fn emit_transcription_error_inner(
         None
     };
 
+    if state.pill().status() == crate::pill::PillStatus::Listening {
+        return;
+    }
+
     toast::emit_toast(
         app,
         toast::Payload {
@@ -852,7 +882,7 @@ fn emit_transcription_error_inner(
     );
 
     if reset_state {
-        pill.reset(app);
+        state.pill().reset(app);
     }
 }
 

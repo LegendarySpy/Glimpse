@@ -894,10 +894,7 @@ fn toast_dismissed(app: AppHandle<AppRuntime>) {
     let state = app.state::<AppState>();
     let status = state.pill().status();
 
-    // If we're showing an error(!) or processing animation, clear it when the toast goes away.
-    // Important: DO NOT reset if we are currently 'listening', as that would kill an active recording
-    // if a previous success toast auto-dismisses while we started a new one.
-    if status == pill::PillStatus::Error || status == pill::PillStatus::Processing {
+    if status == pill::PillStatus::Error {
         state.pill().reset(&app);
     }
 
@@ -993,9 +990,13 @@ pub(crate) fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
             message: message.clone(),
         },
     );
-    app.state::<AppState>()
-        .pill()
-        .transition_to_error(app, &message);
+
+    let state = app.state::<AppState>();
+    let status = state.pill().status();
+    if status == pill::PillStatus::Listening || status == pill::PillStatus::Processing {
+        return;
+    }
+    state.pill().transition_to_error(app, &message);
 }
 
 pub(crate) fn emit_event<T: Serialize + Clone>(

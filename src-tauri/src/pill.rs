@@ -123,16 +123,17 @@ impl PillController {
         let simple_msg = simplify_recording_error(message);
         toast::show(app, "error", None, &simple_msg);
     }
-    pub fn transition_to_error_silent(&self, app: &AppHandle<AppRuntime>) {
-        self.reset_recording_state();
-        *self.hold_key_down.lock() = false;
-        self.transition_to(app, PillStatus::Error);
-    }
 
     pub fn reset(&self, app: &AppHandle<AppRuntime>) {
         self.reset_recording_state();
         *self.hold_key_down.lock() = false;
         self.transition_to(app, PillStatus::Idle);
+    }
+
+    pub fn safe_reset(&self, app: &AppHandle<AppRuntime>) {
+        if self.status() != PillStatus::Listening {
+            self.reset(app);
+        }
     }
 
     fn reset_recording_state(&self) {
@@ -198,7 +199,11 @@ impl PillController {
             return false;
         }
 
-        // Ignore if key is already held (prevents repeat-triggered recordings after errors)
+        if self.status() == PillStatus::Error {
+            toast::hide(app);
+            self.reset(app);
+        }
+
         if *self.hold_key_down.lock() {
             return false;
         }
@@ -265,6 +270,11 @@ impl PillController {
                 self.cancel_processing(app);
             }
             return;
+        }
+
+        if self.status() == PillStatus::Error {
+            toast::hide(app);
+            self.reset(app);
         }
 
         if self.active_mode() == Some(RecordingMode::Hold) {
@@ -509,7 +519,9 @@ pub fn register_shortcuts(app: &AppHandle<AppRuntime>) -> anyhow::Result<()> {
             let state = app.state::<AppState>();
             let pill = state.pill();
             match event.state {
-                ShortcutState::Pressed => { let _ = pill.handle_hold_press(app); }
+                ShortcutState::Pressed => {
+                    let _ = pill.handle_hold_press(app);
+                }
                 ShortcutState::Released => pill.handle_hold_release(app),
             }
         })?;
