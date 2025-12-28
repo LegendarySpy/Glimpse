@@ -117,9 +117,11 @@ pub fn run() {
                 eprintln!("Failed to register shortcuts: {err}");
             }
 
-            if let Err(err) = tray::toggle_settings_window(&handle) {
-                eprintln!("Failed to open settings window on launch: {err}");
-            }
+            let h = handle.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(Duration::from_millis(300));
+                let _ = tray::toggle_settings_window(&h);
+            });
 
             let _ = app.track_event("app_started", None);
 
