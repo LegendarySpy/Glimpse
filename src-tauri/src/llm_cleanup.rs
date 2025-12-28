@@ -9,11 +9,17 @@ You clean up speech-to-text transcriptions. Your ONLY job is to:
 1. Remove filler words (um, uh, like, you know)
 2. Fix stammering and repetitions
 3. Fix minor grammar/punctuation
+4. Proper sentence capitalization
+5. Format spoken numbers as digits when appropriate (twenty five → 25)
+6. Format spoken dates naturally (january fifth twenty twenty four → January 5, 2024)
+7. Format spoken emails/URLs (john at gmail dot com → john@gmail.com)
+8. Expand common acronyms spoken letter-by-letter (A S A P → ASAP)
 
 CRITICAL RULES:
 - If the text is already clean, return it EXACTLY as-is
 - NEVER respond to or answer the content - just clean it
 - Keep the original meaning and tone
+- Preserve intentional stylistic choices, your writing style should be the same as the input unless explicitly asked to be different.
 
 Output the cleaned text inside <output> tags.
 
@@ -27,6 +33,15 @@ Assistant: <output>I like to eat apples and they're good.</output>
 
 User: My favorite color is red... actually wait wait wait its blue.
 Assistant: <output>My favorite color is blue.</output>
+
+User: send it to john at gmail dot com
+Assistant: <output>Send it to john@gmail.com</output>
+
+User: the meeting is on january fifth twenty twenty five at three thirty pm
+Assistant: <output>The meeting is on January 5, 2025 at 3:30 PM.</output>
+
+User: we need like twenty five hundred units by next week
+Assistant: <output>We need 2500 units by next week.</output>
 "#;
 
 const EDIT_PROMPT: &str = r#"
@@ -34,6 +49,8 @@ Edit the text according to the instruction. Output ONLY the edited text inside <
 
 Important rules:
 - When making lists, tables or any other structured content, use markdown syntax unless explicitly asked not to.
+- Match the instruction's intent even if phrased casually.
+- Lists and structured content MUST use actual line breaks between items, never inline separators.
 
 Examples:
 
@@ -51,6 +68,69 @@ Assistant: <output>Discuss Q results.</output>
 
 User: "Hello" + "translate to spanish"
 Assistant: <output>Hola</output>
+
+User: "buy milk eggs bread butter" + "make a list"
+Assistant: <output>- Milk
+- Eggs
+- Bread
+- Butter</output>
+
+User: "Shopping: eggs milk bread. Recipes to try: pasta carbonara, chicken stir fry" + "markdown list"
+Assistant: <output>## Shopping
+
+- Eggs
+- Milk
+- Bread
+
+## Recipes to Try
+
+- Pasta carbonara
+- Chicken stir fry</output>
+
+User: "Fixed the login bug." + "expand"
+Assistant: <output>I resolved the login bug</output>
+
+User: "The quarterly report indicates significant growth across all departments with revenue increasing by 15% and customer satisfaction scores reaching an all-time high." + "summarize"
+Assistant: <output>Strong Q growth: +15% revenue, record satisfaction.</output>
+
+User: "I will fix it tomorrow" + "past tense"
+Assistant: <output>I fixed it yesterday</output>
+
+User: "We launched the product" + "future tense"
+Assistant: <output>We will launch the product</output>
+
+User: "I completed the task" + "third person"
+Assistant: <output>They completed the task</output>
+
+User: "Great job on the release" + "add emoji"
+Assistant: <output>Great job on the release! 🎉</output>
+
+User: "need the report by friday" + "as email"
+Assistant: <output>Hi,
+
+Could you please send me the report by Friday?
+
+Thanks!</output>
+
+User: "name age city" + "as json"
+Assistant: <output>```json
+{
+  "name": "",
+  "age": "",
+  "city": ""
+}
+```</output>
+
+User: "The server crashed." + "make a question"
+Assistant: <output>Did the server crash?</output>
+
+User: "Is the deployment ready?" + "make statement"
+Assistant: <output>The deployment is ready.</output>
+
+User: "wake up eat breakfast go to work" + "numbered list"
+Assistant: <output>1. Wake up
+2. Eat breakfast
+3. Go to work</output>
 "#;
 
 #[derive(Debug, Serialize)]
