@@ -164,8 +164,12 @@ struct MessageContent {
 
 fn strip_control_tokens(text: &str) -> String {
     let re = regex::Regex::new(r"<\|[^|]+\|>").unwrap();
-    let result = re.replace_all(text, "").to_string();
-    result.split_whitespace().collect::<Vec<_>>().join(" ")
+    let result = re.replace_all(text, "");
+    result
+        .lines()
+        .map(|line| line.split_whitespace().collect::<Vec<_>>().join(" "))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn parse_output(response: &str) -> Option<String> {

@@ -89,24 +89,28 @@ pub struct TranscriptionSuccess {
 }
 
 pub fn normalize_transcript(input: &str) -> String {
-    let mut normalized = String::with_capacity(input.len());
-    let mut seen_non_space = false;
-    let mut had_space = false;
-
-    for ch in input.chars() {
-        if ch.is_whitespace() {
-            if seen_non_space && !had_space {
-                normalized.push(' ');
+    input
+        .lines()
+        .map(|line| {
+            let mut normalized = String::with_capacity(line.len());
+            let mut had_space = false;
+            for ch in line.chars() {
+                if ch == ' ' || ch == '\t' {
+                    if !normalized.is_empty() && !had_space {
+                        normalized.push(' ');
+                    }
+                    had_space = true;
+                } else {
+                    normalized.push(ch);
+                    had_space = false;
+                }
             }
-            had_space = true;
-        } else {
-            normalized.push(ch);
-            had_space = false;
-            seen_non_space = true;
-        }
-    }
-
-    normalized.trim().to_string()
+            normalized.trim_end().to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+        .trim()
+        .to_string()
 }
 
 #[derive(Debug, Deserialize)]
