@@ -242,6 +242,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
         [WHISPER_KEY]: { status: "idle", percent: 0 },
     });
     const [modelStatus, setModelStatus] = useState<Record<string, ModelStatus>>({});
+    const [modelInfo, setModelInfo] = useState<Record<string, ModelInfo>>({});
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
     const [llmProvider, setLlmProvider] = useState<"lmstudio" | "ollama" | "openai" | "custom" | "none">("none");
     const [llmEndpoint, setLlmEndpoint] = useState("");
@@ -491,7 +492,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                     invoke<StoredSettings>("get_settings"),
                 ]);
                 if (!isMounted) return;
-                models.forEach((model) => refreshModelStatus(model.key));
+                const infoMap: Record<string, ModelInfo> = {};
+                models.forEach((model) => {
+                    infoMap[model.key] = model;
+                    refreshModelStatus(model.key);
+                });
+                setModelInfo(infoMap);
                 if (
                     settings?.local_model &&
                     (settings.local_model === PARAKEET_KEY || settings.local_model === WHISPER_KEY)
@@ -1145,6 +1151,9 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                         <div className="flex items-center gap-2">
                                             <DotMatrix rows={2} cols={2} activeDots={[1, 2]} dotSize={3} gap={2} color="var(--color-local)" />
                                             <span className="text-[11px] font-semibold text-content-primary">Whisper Large V3 Turbo (Q8)</span>
+                                            {modelInfo[WHISPER_KEY]?.size_mb && (
+                                                <span className="text-[9px] text-content-muted tabular-nums">{modelInfo[WHISPER_KEY].size_mb >= 1000 ? `${(modelInfo[WHISPER_KEY].size_mb / 1000).toFixed(1)} GB` : `${Math.round(modelInfo[WHISPER_KEY].size_mb)} MB`}</span>
+                                            )}
                                         </div>
                                         <span
                                             className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${isWhisperActive
@@ -1257,6 +1266,9 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                         <div className="flex items-center gap-2">
                                             <DotMatrix rows={2} cols={2} activeDots={[0]} dotSize={3} gap={2} color="var(--color-cloud)" />
                                             <span className="text-[11px] font-semibold text-content-primary">Parakeet (INT8)</span>
+                                            {modelInfo[PARAKEET_KEY]?.size_mb && (
+                                                <span className="text-[9px] text-content-muted tabular-nums">{modelInfo[PARAKEET_KEY].size_mb >= 1000 ? `${(modelInfo[PARAKEET_KEY].size_mb / 1000).toFixed(1)} GB` : `${Math.round(modelInfo[PARAKEET_KEY].size_mb)} MB`}</span>
+                                            )}
                                         </div>
                                         <span
                                             className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${isParakeetActive
