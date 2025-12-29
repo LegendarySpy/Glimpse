@@ -150,6 +150,7 @@ pub fn run() {
             model_manager::download_model,
             model_manager::delete_model,
             model_manager::cancel_download,
+            unload_local_model,
             audio::list_input_devices,
             toast_dismissed,
             check_microphone_permission,
@@ -223,10 +224,13 @@ impl AppState {
 
         let recorder = Arc::new(RecorderManager::new());
 
+        let local_transcriber = Arc::new(local_transcription::LocalTranscriber::new());
+        local_transcriber.start_idle_monitor();
+
         Self {
             pill: Arc::new(PillController::new(Arc::clone(&recorder))),
             http,
-            local_transcriber: Arc::new(local_transcription::LocalTranscriber::new()),
+            local_transcriber,
             storage: Arc::new(storage),
             settings_store,
             settings: parking_lot::Mutex::new(settings),
@@ -579,6 +583,11 @@ async fn fetch_llm_models(
     llm_cleanup::fetch_available_models(&state.http(), &endpoint, &llm_provider, &api_key)
         .await
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn unload_local_model(state: tauri::State<AppState>) {
+    state.local_transcriber().unload();
 }
 
 #[tauri::command]
