@@ -6,7 +6,6 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 interface WhatsNewModalProps {
     isOpen: boolean;
     onClose: () => void;
-    version?: string;
 }
 
 interface ReleaseInfo {
@@ -16,24 +15,32 @@ interface ReleaseInfo {
     htmlUrl: string;
 }
 
-const GITHUB_API_URL = "https://api.github.com/repos/LegendarySpy/Glimpse/releases/latest";
+const GITHUB_API_URL = "https://api.github.com/repos/LegendarySpy/Glimpse/releases";
+const MAX_RELEASES = 10;
 
-export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) {
-    const [release, setRelease] = useState<ReleaseInfo | null>(null);
+const isFeatureRelease = (version: string): boolean => {
+    const match = version.match(/v?(\d+)\.(\d+)\.(\d+)/);
+    if (!match) return false;
+    const patch = parseInt(match[3], 10);
+    return patch === 0;
+};
+
+export function WhatsNewModal({ isOpen, onClose }: WhatsNewModalProps) {
+    const [releases, setReleases] = useState<ReleaseInfo[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (isOpen && !release) {
-            fetchRelease();
+        if (isOpen && releases.length === 0) {
+            fetchReleases();
         }
     }, [isOpen]);
 
-    const fetchRelease = async () => {
+    const fetchReleases = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(GITHUB_API_URL, {
+            const response = await fetch(`${GITHUB_API_URL}?per_page=${MAX_RELEASES}`, {
                 method: "GET",
                 headers: {
                     "Accept": "application/vnd.github.v3+json",
@@ -43,20 +50,20 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
             if (!response.ok) {
                 throw new Error(`Failed to fetch: ${response.status}`);
             }
-            const data = await response.json() as {
+            const data = await response.json() as Array<{
                 tag_name: string;
                 body: string;
                 published_at: string;
                 html_url: string;
-            };
-            setRelease({
-                version: data.tag_name,
-                body: data.body || "No changelog available.",
-                publishedAt: data.published_at,
-                htmlUrl: data.html_url,
-            });
+            }>;
+            setReleases(data.map(release => ({
+                version: release.tag_name,
+                body: release.body || "No changelog available.",
+                publishedAt: release.published_at,
+                htmlUrl: release.html_url,
+            })));
         } catch (err) {
-            console.error("Failed to fetch release:", err);
+            console.error("Failed to fetch releases:", err);
             setError(err instanceof Error ? err.message : "Failed to load changelog");
         } finally {
             setLoading(false);
@@ -173,11 +180,9 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                         <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-surface-secondary backdrop-blur-sm border-b border-border-primary">
                             <div>
                                 <h2 className="text-[15px] font-semibold text-content-primary">What's New</h2>
-                                {release && (
-                                    <p className="text-[11px] text-content-muted mt-0.5">
-                                        {version || release.version} • {formatDate(release.publishedAt)}
-                                    </p>
-                                )}
+                                <p className="text-[11px] text-content-muted mt-0.5">
+                                    Release history
+                                </p>
                             </div>
                             <button
                                 onClick={onClose}
@@ -188,34 +193,65 @@ export function WhatsNewModal({ isOpen, onClose, version }: WhatsNewModalProps) 
                         </div>
 
                         <div className="px-5 py-5 overflow-y-auto settings-scroll" style={{ maxHeight: 'calc(70vh - 140px)' }}>
-                            {(loading || !release) && !error && (
+                            {(loading || releases.length === 0) && !error && (
                                 <div className="flex items-center justify-center py-8">
                                     <Loader2 size={20} className="animate-spin text-content-muted" />
                                 </div>
                             )}
 
                             {error && (
-                                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                                    <AlertCircle size={14} className="text-red-400 shrink-0" />
-                                    <p className="text-[13px] text-red-400">{error}</p>
+                                <div className="flex flex-col items-center gap-3 py-6">
+                                    <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 w-full">
+                                        <AlertCircle size={14} className="text-red-400 shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[13px] text-red-400 font-medium">Couldn't load releases</p>
+                                            <p className="text-[11px] text-red-400/70 mt-0.5">GitHub may be temporarily unavailable. Check your connection and try again.</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={fetchReleases}
+                                        className="text-[12px] font-medium text-content-secondary hover:text-content-primary transition-colors"
+                                    >
+                                        Retry
+                                    </button>
                                 </div>
                             )}
 
-                            {!loading && !error && release && (
-                                <div className="pb-4">
-                                    {renderMarkdown(release.body)}
+                            {!loading && !error && releases.length > 0 && (
+                                <div className="space-y-6">
+                                    {releases.map((release, index) => {
+                                        const isFeatured = isFeatureRelease(release.version);
+                                        return (
+                                            <div key={release.version} className={isFeatured ? "pl-3 border-l-2 border-amber-400" : ""}>
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h3 className={`font-semibold ${isFeatured ? "text-[15px] text-amber-400" : "text-[14px] text-content-primary"}`}>
+                                                        {release.version}
+                                                    </h3>
+                                                    <span className="text-[11px] text-content-muted">
+                                                        {formatDate(release.publishedAt)}
+                                                    </span>
+                                                </div>
+                                                <div className="pb-2">
+                                                    {renderMarkdown(release.body)}
+                                                </div>
+                                                {index < releases.length - 1 && (
+                                                    <div className={`border-t border-border-primary mt-4 ${isFeatured ? "-ml-3" : ""}`} />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
 
-                        {release && (
+                        {releases.length > 0 && (
                             <div className="sticky bottom-0 px-5 py-3 bg-surface-secondary backdrop-blur-sm border-t border-border-primary">
                                 <button
-                                    onClick={() => openUrl(release.htmlUrl)}
+                                    onClick={() => openUrl("https://github.com/LegendarySpy/Glimpse/releases")}
                                     className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg bg-surface-elevated border border-border-secondary text-[11px] font-medium text-content-secondary hover:text-content-primary hover:border-border-hover transition-colors"
                                 >
                                     <ExternalLink size={12} />
-                                    View on GitHub
+                                    View all releases on GitHub
                                 </button>
                             </div>
                         )}
