@@ -34,7 +34,7 @@ webrtc-vad = "0.2"
 reqwest = { version = "0.12", default-features = false, features = ["json", "multipart", "stream", "rustls-tls"] }
 dotenvy = "0.15"
 dotenvy_macro = "0.15"
-tauri-plugin-aptabase = { git = "https://github.com/aptabase/tauri-plugin-aptabase" }
+tauri-plugin-aptabase = { git = "https://github.com/aptabase/tauri-plugin-aptabase", rev = "7cc36cc" }
 arboard = "3"
 mime_guess = "2"
 transcribe-rs = { version = "0.2.0", features = ["whisper", "parakeet", "moonshine"] }
@@ -58,7 +58,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 tokio-util = "0.7"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2.1" }
+tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", rev = "da9c9a8" }
 tauri-plugin-macos-permissions = "2.3.0"
 core-graphics = "0.23"
 core-foundation = "0.9"

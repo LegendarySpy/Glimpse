@@ -5475,7 +5475,7 @@ dependencies = [
 [[package]]
 name = "tauri-nspanel"
 version = "2.1.0"
-source = "git+https://github.com/ahkohd/tauri-nspanel?branch=v2.1#da9c9a8d4eb7f0524a2508988df1a7d9585b4904"
+source = "git+https://github.com/ahkohd/tauri-nspanel?rev=da9c9a8#da9c9a8d4eb7f0524a2508988df1a7d9585b4904"
 dependencies = [
  "objc2",
  "objc2-app-kit",
@@ -5504,7 +5504,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-aptabase"
 version = "1.0.0"
-source = "git+https://github.com/aptabase/tauri-plugin-aptabase#7cc36ccce0052352bda7272a4acb25a214c4b804"
+source = "git+https://github.com/aptabase/tauri-plugin-aptabase?rev=7cc36cc#7cc36ccce0052352bda7272a4acb25a214c4b804"
 dependencies = [
  "futures",
  "log",
