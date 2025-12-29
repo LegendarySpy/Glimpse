@@ -37,7 +37,7 @@ import {
 import DotMatrix from "./components/DotMatrix";
 import FAQModal from "./components/FAQModal";
 import { OAuthProvider } from "appwrite";
-import { createAccount, login, createOAuth2Session, updateName, updatePreferences } from "./lib/auth";
+import { createAccount, login, createOAuth2Session, updateName, updatePreferences, getCurrentUser } from "./lib/auth";
 
 
 type ModelInfo = {
@@ -250,7 +250,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [llmModel, setLlmModel] = useState("");
     const [showLocalConfirm, setShowLocalConfirm] = useState(false);
 
-    const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+    const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
     const [authEmail, setAuthEmail] = useState("");
     const [authPassword, setAuthPassword] = useState("");
     const [authName, setAuthName] = useState("");
@@ -261,6 +261,8 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
     const [cloudSyncEnabled, setCloudSyncEnabled] = useState(false);
     const [showFAQModal, setShowFAQModal] = useState(false);
+    const [showNewAccountConfirm, setShowNewAccountConfirm] = useState(false);
+    const [pendingAuth, setPendingAuth] = useState<{ email: string; password: string; name: string } | null>(null);
 
     const [smartShortcut, setSmartShortcut] = useState("Control+Space");
     const [captureActive, setCaptureActive] = useState(false);
@@ -854,7 +856,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                         } else {
                                             await login(authEmail, authPassword);
                                         }
-                                        goToNextStep();
+                                        const user = await getCurrentUser();
+                                        if (authName.trim() || user?.name) {
+                                            setStep("cloud-sync");
+                                        } else {
+                                            goToNextStep();
+                                        }
                                     } catch (err) {
                                         setAuthError(err instanceof Error ? err.message : "Authentication failed");
                                     } finally {
@@ -872,7 +879,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                             className="w-full rounded-lg border border-border-primary bg-surface-surface px-4 py-3 pl-11 text-sm text-white placeholder-content-disabled outline-none transition-colors focus:border-border-hover focus:bg-surface-overlay"
                                         />
                                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-content-disabled">
-                                            <Mail size={16} />
+                                            <User size={16} />
                                         </div>
                                     </div>
                                 )}
@@ -1541,29 +1548,17 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                     setAuthError(null);
                                     setAuthLoading(true);
                                     try {
-                                        // Try login first, fallback to signup if account doesn't exist
-                                        try {
-                                            await login(authEmail, authPassword);
-                                        } catch (loginErr) {
-                                            // Check if error indicates user doesn't exist - if so, create account
-                                            const errorMsg = loginErr instanceof Error ? loginErr.message : "";
-                                            if (errorMsg.includes("Invalid credentials") || errorMsg.includes("user") || errorMsg.includes("not found")) {
-                                                // Create account with name if provided
-                                                await createAccount(authEmail, authPassword, authName.trim() || undefined);
-                                                // Save name to preferences for cross-device sync
-                                                if (authName.trim()) {
-                                                    await updatePreferences({ displayName: authName.trim() });
-                                                }
-                                            } else {
-                                                throw loginErr;
-                                            }
-                                        }
-                                        // Both new and existing accounts go directly to microphone
-                                        // (profile step removed since name is collected here)
+                                        await login(authEmail, authPassword);
                                         skippedFrom.current = "local-signin";
                                         setStep("microphone");
-                                    } catch (err) {
-                                        setAuthError(err instanceof Error ? err.message : "Authentication failed");
+                                    } catch (loginErr) {
+                                        const errorMsg = loginErr instanceof Error ? loginErr.message : "";
+                                        if (errorMsg.includes("Invalid credentials") || errorMsg.includes("user") || errorMsg.includes("not found")) {
+                                            setPendingAuth({ email: authEmail, password: authPassword, name: authName.trim() });
+                                            setShowNewAccountConfirm(true);
+                                        } else {
+                                            setAuthError(errorMsg || "Authentication failed");
+                                        }
                                     } finally {
                                         setAuthLoading(false);
                                     }
@@ -1926,6 +1921,70 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                     className="rounded-lg bg-amber-400 px-4 py-2 text-[12px] font-semibold text-black hover:bg-amber-300 transition-colors"
                                 >
                                     Continue anyway
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showNewAccountConfirm && pendingAuth && (
+                    <motion.div
+                        key="new-account-confirm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-6"
+                        onClick={() => setShowNewAccountConfirm(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.96, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.96, opacity: 0 }}
+                            transition={{ duration: 0.18 }}
+                            className="w-full max-w-sm rounded-2xl border border-border-primary bg-surface-tertiary p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center gap-3 mb-3">
+                                <Mail size={20} className="text-local shrink-0" />
+                                <div>
+                                    <p className="text-[14px] font-semibold text-content-primary">Create new account?</p>
+                                    <p className="text-[11px] text-content-disabled">No account found for <span className="text-content-muted">{pendingAuth.email}</span>. Would you like to create a new account?</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => {
+                                        setShowNewAccountConfirm(false);
+                                        setPendingAuth(null);
+                                    }}
+                                    className="rounded-lg border border-border-secondary px-4 py-2 text-[12px] font-medium text-content-secondary hover:border-border-hover transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setShowNewAccountConfirm(false);
+                                        setAuthLoading(true);
+                                        try {
+                                            await createAccount(pendingAuth.email, pendingAuth.password, pendingAuth.name || undefined);
+                                            if (pendingAuth.name) {
+                                                await updatePreferences({ displayName: pendingAuth.name });
+                                            }
+                                            setPendingAuth(null);
+                                            skippedFrom.current = "local-signin";
+                                            setStep("microphone");
+                                        } catch (err) {
+                                            setAuthError(err instanceof Error ? err.message : "Failed to create account");
+                                            setPendingAuth(null);
+                                        } finally {
+                                            setAuthLoading(false);
+                                        }
+                                    }}
+                                    className="rounded-lg bg-local px-4 py-2 text-[12px] font-semibold text-black hover:bg-local-light transition-colors"
+                                >
+                                    Create Account
                                 </button>
                             </div>
                         </motion.div>

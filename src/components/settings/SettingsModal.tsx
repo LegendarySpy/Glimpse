@@ -181,6 +181,8 @@ const SettingsModal = ({
     const [authError, setAuthError] = useState<string | null>(null);
     const [showEmailForm, setShowEmailForm] = useState(false);
     const [showFAQModal, setShowFAQModal] = useState(false);
+    const [showNewAccountConfirm, setShowNewAccountConfirm] = useState(false);
+    const [pendingAuth, setPendingAuth] = useState<{ email: string; password: string } | null>(null);
     const [micPermission, setMicPermission] = useState<boolean | null>(null);
     const [accessibilityPermission, setAccessibilityPermission] = useState<boolean | null>(null);
     const [authEmail, setAuthEmail] = useState("");
@@ -967,20 +969,17 @@ const SettingsModal = ({
                                                                                 setAuthError(null);
                                                                                 setAuthLoading(true);
                                                                                 try {
-                                                                                    try {
-                                                                                        await login(authEmail, authPassword);
-                                                                                    } catch (loginErr) {
-                                                                                        const errorMsg = loginErr instanceof Error ? loginErr.message : "";
-                                                                                        if (errorMsg.includes("Invalid credentials") || errorMsg.includes("user") || errorMsg.includes("not found")) {
-                                                                                            await createAccount(authEmail, authPassword);
-                                                                                        } else {
-                                                                                            throw loginErr;
-                                                                                        }
-                                                                                    }
+                                                                                    await login(authEmail, authPassword);
                                                                                     await onUpdateUser();
                                                                                     setShowEmailForm(false);
-                                                                                } catch (err) {
-                                                                                    setAuthError(err instanceof Error ? err.message : "Authentication failed");
+                                                                                } catch (loginErr) {
+                                                                                    const errorMsg = loginErr instanceof Error ? loginErr.message : "";
+                                                                                    if (errorMsg.includes("Invalid credentials") || errorMsg.includes("user") || errorMsg.includes("not found")) {
+                                                                                        setPendingAuth({ email: authEmail, password: authPassword });
+                                                                                        setShowNewAccountConfirm(true);
+                                                                                    } else {
+                                                                                        setAuthError(errorMsg || "Authentication failed");
+                                                                                    }
                                                                                 } finally {
                                                                                     setAuthLoading(false);
                                                                                 }
@@ -1758,6 +1757,67 @@ const SettingsModal = ({
 
             <FAQModal isOpen={showFAQModal} onClose={() => setShowFAQModal(false)} />
             <WhatsNewModal isOpen={whatsNewOpen} onClose={() => setWhatsNewOpen(false)} />
+
+            <AnimatePresence>
+                {showNewAccountConfirm && pendingAuth && (
+                    <motion.div
+                        key="new-account-confirm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-6"
+                        onClick={() => setShowNewAccountConfirm(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.96, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.96, opacity: 0 }}
+                            transition={{ duration: 0.18 }}
+                            className="w-full max-w-sm rounded-2xl border border-border-primary bg-surface-tertiary p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center gap-3 mb-3">
+                                <Mail size={20} className="text-cloud shrink-0" />
+                                <div>
+                                    <p className="text-[14px] font-semibold text-content-primary">Create new account?</p>
+                                    <p className="text-[11px] text-content-disabled">No account found for <span className="text-content-muted">{pendingAuth.email}</span>. Would you like to create a new account?</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => {
+                                        setShowNewAccountConfirm(false);
+                                        setPendingAuth(null);
+                                    }}
+                                    className="rounded-lg border border-border-secondary px-4 py-2 text-[12px] font-medium text-content-secondary hover:border-border-hover transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setShowNewAccountConfirm(false);
+                                        setAuthLoading(true);
+                                        try {
+                                            await createAccount(pendingAuth.email, pendingAuth.password);
+                                            await onUpdateUser();
+                                            setShowEmailForm(false);
+                                            setPendingAuth(null);
+                                        } catch (err) {
+                                            setAuthError(err instanceof Error ? err.message : "Failed to create account");
+                                            setPendingAuth(null);
+                                        } finally {
+                                            setAuthLoading(false);
+                                        }
+                                    }}
+                                    className="rounded-lg bg-cloud px-4 py-2 text-[12px] font-semibold text-black hover:bg-cloud-light transition-colors"
+                                >
+                                    Create Account
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AnimatePresence>
     );
 
