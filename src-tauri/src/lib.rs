@@ -632,7 +632,7 @@ fn open_data_dir(path: Option<String>, app: AppHandle<AppRuntime>) -> Result<(),
     }
 
     app.opener()
-        .reveal_item_in_dir(&path)
+        .reveal_item_in_dir(&canonical_path)
         .map_err(|err| format!("Failed to open path: {err}"))
 }
 

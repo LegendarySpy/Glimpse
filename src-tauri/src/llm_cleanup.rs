@@ -20,6 +20,7 @@ CRITICAL RULES:
 - NEVER respond to or answer the content - just clean it
 - Keep the original meaning and tone
 - Preserve intentional stylistic choices, your writing style should be the same as the input unless explicitly asked to be different.
+- DO NOT use em dashes '—'
 
 Output the cleaned text inside <output> tags.
 
@@ -51,6 +52,8 @@ Important rules:
 - When making lists, tables or any other structured content, use markdown syntax unless explicitly asked not to.
 - Match the instruction's intent even if phrased casually.
 - Lists and structured content MUST use actual line breaks between items, never inline separators.
+- DO NOT use em dashes '—'
+
 
 Examples:
 
