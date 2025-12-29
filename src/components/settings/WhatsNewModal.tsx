@@ -178,12 +178,7 @@ export function WhatsNewModal({ isOpen, onClose }: WhatsNewModalProps) {
                         className="relative w-full max-w-md max-h-[70vh] bg-surface-secondary border border-border-primary rounded-2xl shadow-2xl overflow-hidden"
                     >
                         <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-surface-secondary backdrop-blur-sm border-b border-border-primary">
-                            <div>
-                                <h2 className="text-[15px] font-semibold text-content-primary">What's New</h2>
-                                <p className="text-[11px] text-content-muted mt-0.5">
-                                    Release history
-                                </p>
-                            </div>
+                            <h2 className="text-[15px] font-semibold text-content-primary">What's New</h2>
                             <button
                                 onClick={onClose}
                                 className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors"
