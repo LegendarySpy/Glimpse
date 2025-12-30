@@ -178,11 +178,6 @@ const Home = () => {
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-surface-tertiary font-sans text-white select-none">
-            <div
-                data-tauri-drag-region
-                className="fixed top-0 left-0 right-0 h-8 z-50"
-            />
-
             <motion.aside
                 initial={false}
                 animate={{ width: sidebarWidth }}
@@ -349,7 +344,7 @@ const Home = () => {
                 </div>
             </motion.aside>
 
-            <main className="flex flex-1 flex-col bg-surface-tertiary overflow-hidden relative">
+            <main className="flex flex-1 flex-col min-w-0 bg-surface-tertiary overflow-hidden relative">
                 <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
                 {currentUser && (
