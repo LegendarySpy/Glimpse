@@ -339,10 +339,25 @@ impl PillController {
             return;
         }
 
+        // Smart mode delegates to `handle_hold_press` to start a hold-recording, but the origin
+        // should still reflect the initiating shortcut (Smart). We pre-set the origin to prevent
+        // `handle_hold_press` from assigning `Hold`, and roll back if recording doesn't start.
+        let should_rollback_origin = {
+            let mut origin = self.shortcut_origin.lock();
+            if origin.is_none() {
+                *origin = Some(ShortcutOrigin::Smart);
+                true
+            } else {
+                false
+            }
+        };
+
         // Only set state if recording actually starts (cloud check, permissions, etc. pass)
         if self.handle_hold_press(app) {
             *self.smart_press_time.lock() = Some(Local::now());
             *self.shortcut_origin.lock() = Some(ShortcutOrigin::Smart);
+        } else if should_rollback_origin {
+            *self.shortcut_origin.lock() = None;
         }
     }
 
