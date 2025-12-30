@@ -1,8 +1,11 @@
 name: 'publish'
 
 on:
+  pull_request:
+    branches: '**'
   push:
     branches:
+      - main
       - release
   workflow_dispatch:
 
