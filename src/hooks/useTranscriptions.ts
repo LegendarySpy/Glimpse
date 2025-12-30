@@ -275,6 +275,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
             }
 
             let importedCount = 0;
+            const normalizeModel = (m: string) => m?.replace(/^cloud-/, '') ?? '';
 
             for (const doc of allCloudDocs) {
                 if (doc.is_deleted) continue;
@@ -289,7 +290,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
 
                 const existsByContent = localRecords.some(r =>
                     r.text === doc.text &&
-                    r.speech_model === doc.speech_model &&
+                    normalizeModel(r.speech_model) === normalizeModel(doc.speech_model) &&
                     Math.abs(r.audio_duration_seconds - doc.audio_duration_seconds) < 0.5
                 );
 

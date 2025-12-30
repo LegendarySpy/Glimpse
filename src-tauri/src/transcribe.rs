@@ -153,12 +153,16 @@ pub(crate) fn queue_transcription(
                         format!("cloud-{}", cloud_result.speech_model)
                     };
 
+                    // If cloud saved the transcription, use its ID and mark as synced
+                    let cloud_saved = cloud_result.transcription_id.is_some();
+                    let id_override = cloud_result.transcription_id.clone();
+
                     let metadata = storage::TranscriptionMetadata {
                         speech_model,
                         llm_model: cloud_result.llm_model.clone(),
                         word_count: count_words(&final_transcript),
                         audio_duration_seconds: compute_audio_duration_seconds(&saved_for_task),
-                        synced: false,
+                        synced: cloud_saved,
                     };
 
                     analytics::track_transcription_completed(
@@ -192,6 +196,7 @@ pub(crate) fn queue_transcription(
                                 final_transcript,
                                 saved_for_task.path.display().to_string(),
                                 metadata,
+                                id_override,
                             );
                     } else {
                         let _ = app_handle.state::<AppState>().storage().save_transcription(
@@ -200,6 +205,7 @@ pub(crate) fn queue_transcription(
                             storage::TranscriptionStatus::Success,
                             None,
                             metadata,
+                            id_override,
                         );
                     }
 
@@ -486,12 +492,16 @@ pub(crate) fn retry_transcription_async(
                         format!("cloud-{}", cloud_result.speech_model)
                     };
 
+                    // If cloud saved the transcription, use its ID and mark as synced
+                    let cloud_saved = cloud_result.transcription_id.is_some();
+                    let id_override = cloud_result.transcription_id.clone();
+
                     let metadata = storage::TranscriptionMetadata {
                         speech_model,
                         llm_model: cloud_result.llm_model.clone(),
                         word_count: count_words(&final_transcript),
                         audio_duration_seconds: compute_audio_duration_seconds(&saved_for_task),
-                        synced: false, // Let frontend sync to establish local_id linkage
+                        synced: cloud_saved,
                     };
 
                     analytics::track_transcription_completed(
@@ -529,6 +539,7 @@ pub(crate) fn retry_transcription_async(
                                 final_transcript,
                                 saved_for_task.path.display().to_string(),
                                 metadata,
+                                id_override,
                             );
                     } else {
                         eprintln!(
@@ -541,6 +552,7 @@ pub(crate) fn retry_transcription_async(
                             storage::TranscriptionStatus::Success,
                             None,
                             metadata,
+                            id_override,
                         );
                     }
                 }
@@ -712,6 +724,7 @@ fn emit_transcription_complete_with_cleanup(
                 final_transcript,
                 audio_path,
                 metadata,
+                None,
             );
     } else {
         let _ = app.state::<AppState>().storage().save_transcription(
@@ -720,6 +733,7 @@ fn emit_transcription_complete_with_cleanup(
             storage::TranscriptionStatus::Success,
             None,
             metadata,
+            None,
         );
     }
 }
@@ -843,6 +857,7 @@ fn emit_transcription_error_inner(
         storage::TranscriptionStatus::Error,
         Some(toast_message.clone()),
         metadata,
+        None,
     );
 
     let retry_id = if !is_local {
