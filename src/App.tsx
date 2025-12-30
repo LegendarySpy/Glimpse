@@ -99,13 +99,19 @@ function App() {
     if (windowLabel === "settings") {
       body.classList.add("settings-body");
       html.classList.add("settings-html");
+      html.style.backgroundColor = "#030303";
+      body.style.backgroundColor = "#030303";
     } else {
       body.classList.remove("settings-body");
       html.classList.remove("settings-html");
+      html.style.backgroundColor = "";
+      body.style.backgroundColor = "";
     }
     return () => {
       body.classList.remove("settings-body");
       html.classList.remove("settings-html");
+      html.style.backgroundColor = "";
+      body.style.backgroundColor = "";
     };
   }, [windowLabel]);
 
