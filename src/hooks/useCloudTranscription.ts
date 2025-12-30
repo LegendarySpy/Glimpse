@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { account } from "../lib/appwrite";
 import { getCurrentUser } from "../lib/auth";
 
@@ -9,6 +9,7 @@ const JWT_REFRESH_INTERVAL = 8 * 60 * 1000; // 8 minutes (JWT expires in 15)
 
 export function useCloudTranscription() {
     const jwtRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+    const hadAuthError = useRef(false);
 
     const setupCloudCredentials = useCallback(async () => {
         try {
@@ -34,6 +35,11 @@ export function useCloudTranscription() {
                 isSubscriber,
                 historySyncEnabled,
             });
+
+            if (hadAuthError.current) {
+                hadAuthError.current = false;
+                emit("auth:changed");
+            }
         } catch {
             await invoke("clear_cloud_credentials").catch(() => { });
         }
@@ -45,12 +51,10 @@ export function useCloudTranscription() {
 
         setupCloudCredentials();
 
-        // Refresh JWT periodically
         jwtRefreshInterval.current = setInterval(() => {
             setupCloudCredentials();
         }, JWT_REFRESH_INTERVAL);
 
-        // Listen for storage changes (cloud sync toggle)
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === "glimpse_cloud_sync_enabled") {
                 setupCloudCredentials();
@@ -65,8 +69,8 @@ export function useCloudTranscription() {
             unlistenAuth = fn;
         });
 
-        // Listen for auth errors - clear credentials to force refresh on next attempt
         listen("cloud:auth-error", async () => {
+            hadAuthError.current = true;
             await invoke("clear_cloud_credentials").catch(() => { });
         }).then((fn) => {
             unlistenAuthError = fn;
