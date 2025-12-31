@@ -557,12 +557,24 @@ pub(crate) fn retry_transcription_async(
                     }
                 }
                 Err(err) => {
-                    emit_transcription_error(
-                        &app_handle,
-                        format!("Transcription failed: {err}"),
-                        "cloud_auth",
-                        saved_for_task.path.display().to_string(),
-                    );
+                    let err_string = err.to_string();
+                    if err_string.contains("QUOTA_EXCEEDED") {
+                        let is_tester = err_string.contains(":tester");
+                        cloud::show_quota_exceeded(&app_handle, is_tester);
+                        analytics::track_transcription_failed(
+                            &app_handle,
+                            "cloud_auth",
+                            "cloud",
+                            "quota_exceeded",
+                        );
+                    } else {
+                        emit_transcription_error(
+                            &app_handle,
+                            format!("Transcription failed: {err}"),
+                            "cloud_auth",
+                            saved_for_task.path.display().to_string(),
+                        );
+                    }
                 }
             }
             return;
@@ -818,6 +830,50 @@ fn emit_transcription_error_inner(
     audio_path: String,
     reset_state: bool,
 ) {
+    // Handle quota errors specially with dedicated toasts
+    if message.contains("QUOTA_EXCEEDED:") {
+        let is_tester = message.contains(":tester");
+        cloud::show_quota_exceeded(app, is_tester);
+        analytics::track_transcription_failed(app, stage, "cloud", "quota_exceeded");
+
+        let state = app.state::<AppState>();
+        let settings = state.current_settings();
+        let metadata = storage::TranscriptionMetadata {
+            speech_model: resolve_speech_model_label(&settings, false, None),
+            ..Default::default()
+        };
+        let error_message = if is_tester {
+            "Beta tester limit reached (1 hr/month). Upgrade for 10 hours.".to_string()
+        } else {
+            "Monthly quota reached (10 hrs). Resets next month.".to_string()
+        };
+        if let Err(err) = state.storage().save_transcription(
+            String::new(),
+            audio_path.clone(),
+            storage::TranscriptionStatus::Error,
+            Some(error_message),
+            metadata,
+            None,
+        ) {
+            eprintln!("Failed to persist quota-exceeded transcription: {err}");
+        }
+
+        if reset_state {
+            app.state::<AppState>().pill().reset(app);
+        }
+        return;
+    }
+
+    if message.contains("QUOTA_CHECK_FAILED") {
+        cloud::show_quota_check_failed(app, Some(audio_path.clone()));
+        analytics::track_transcription_failed(app, stage, "cloud", "quota_check_failed");
+
+        if reset_state {
+            app.state::<AppState>().pill().reset(app);
+        }
+        return;
+    }
+
     let engine = if stage == "local" { "local" } else { "cloud" };
     let reason = if message.contains("No speech") || message.contains("empty") {
         "no_speech"
@@ -983,7 +1039,7 @@ fn resolve_speech_model_label(
     } else if let Some(model) = reported_model {
         model.to_string()
     } else {
-        "Cloud API".to_string()
+        "cloud-api-default".to_string()
     }
 }
 

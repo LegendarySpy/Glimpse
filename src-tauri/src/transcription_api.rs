@@ -123,6 +123,10 @@ struct ApiResponse {
 #[derive(Debug, Deserialize)]
 struct ApiErrorResponse {
     error: String,
+    #[serde(default)]
+    code: Option<String>,
+    #[serde(default)]
+    user_type: Option<String>,
 }
 
 pub async fn request_transcription(
@@ -309,6 +313,19 @@ pub async fn request_cloud_transcription(
     }
 
     if let Ok(parsed) = serde_json::from_str::<ApiErrorResponse>(&text) {
+        // Check for quota-related error codes
+        if let Some(ref code) = parsed.code {
+            match code.as_str() {
+                "QUOTA_EXCEEDED" => {
+                    let user_type = parsed.user_type.as_deref().unwrap_or("subscriber");
+                    return Err(anyhow!("QUOTA_EXCEEDED:{}", user_type));
+                }
+                "QUOTA_CHECK_FAILED" => {
+                    return Err(anyhow!("QUOTA_CHECK_FAILED"));
+                }
+                _ => {}
+            }
+        }
         Err(anyhow!(parsed.error))
     } else if text.is_empty() {
         Err(anyhow!(format!(

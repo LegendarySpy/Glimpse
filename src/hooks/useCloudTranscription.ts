@@ -20,6 +20,7 @@ export function useCloudTranscription() {
             }
 
             const isSubscriber = user.labels?.includes("subscriber") || user.labels?.includes("cloud") || false;
+            const isTester = user.labels?.includes("tester") || false;
 
             if (!CLOUD_FUNCTION_URL) {
                 await invoke("clear_cloud_credentials");
@@ -33,6 +34,7 @@ export function useCloudTranscription() {
                 jwt: jwt.jwt,
                 functionUrl: CLOUD_FUNCTION_URL,
                 isSubscriber,
+                isTester,
                 historySyncEnabled,
             });
 

@@ -12,6 +12,7 @@ pub struct CloudCredentials {
     pub jwt: String,
     pub function_url: String,
     pub is_subscriber: bool,
+    pub is_tester: bool,
     pub history_sync_enabled: bool,
 }
 
@@ -21,6 +22,8 @@ pub enum CloudError {
     NotSubscriber,
     JwtExpired,
     JwtInvalid,
+    QuotaExceeded { is_tester: bool },
+    QuotaCheckFailed,
 }
 
 impl CloudError {
@@ -30,6 +33,13 @@ impl CloudError {
             CloudError::NotSubscriber => "Upgrade to use cloud transcription",
             CloudError::JwtExpired => "Session expired. Please sign in again",
             CloudError::JwtInvalid => "Authentication error. Please sign in again",
+            CloudError::QuotaExceeded { is_tester: true } => {
+                "Beta tester limit reached (1 hr/month). Upgrade for 10 hours."
+            }
+            CloudError::QuotaExceeded { is_tester: false } => {
+                "Monthly quota reached (10 hrs). Resets next month."
+            }
+            CloudError::QuotaCheckFailed => "Unable to verify quota. Please try again.",
         }
     }
 }
@@ -50,12 +60,14 @@ impl CloudManager {
         jwt: String,
         function_url: String,
         is_subscriber: bool,
+        is_tester: bool,
         history_sync_enabled: bool,
     ) {
         *self.credentials.lock() = Some(CloudCredentials {
             jwt,
             function_url,
             is_subscriber,
+            is_tester,
             history_sync_enabled,
         });
     }
@@ -119,7 +131,8 @@ pub fn check_cloud_ready(app: &AppHandle<AppRuntime>) -> Result<(), CloudError> 
         None => Err(CloudError::NoCredentials),
         Some(c) => {
             validate_jwt_expiry(&c.jwt)?;
-            if !c.is_subscriber {
+            // Allow if subscriber OR tester (subscriber takes priority for quota)
+            if !c.is_subscriber && !c.is_tester {
                 return Err(CloudError::NotSubscriber);
             }
             Ok(())
@@ -168,12 +181,13 @@ pub fn set_cloud_credentials(
     jwt: String,
     function_url: String,
     is_subscriber: bool,
+    is_tester: bool,
     history_sync_enabled: bool,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
     state
         .cloud_manager()
-        .set_credentials(jwt, function_url, is_subscriber, history_sync_enabled);
+        .set_credentials(jwt, function_url, is_subscriber, is_tester, history_sync_enabled);
     Ok(())
 }
 
@@ -205,4 +219,56 @@ pub fn open_checkout(app: AppHandle<AppRuntime>) -> Result<(), String> {
         .open_url(&checkout_url, None::<&str>)
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+pub fn show_quota_exceeded(app: &AppHandle<AppRuntime>, is_tester: bool) {
+    if is_tester {
+        toast::emit_toast(
+            app,
+            toast::Payload {
+                toast_type: "warning".to_string(),
+                title: Some("Quota Reached".to_string()),
+                message: "Beta tester limit reached (1 hr/month). Upgrade for 10 hours."
+                    .to_string(),
+                auto_dismiss: Some(true),
+                duration: Some(5_000),
+                retry_id: None,
+                mode: Some("cloud".into()),
+                action: Some("open_checkout".to_string()),
+                action_label: Some("Upgrade".to_string()),
+            },
+        );
+    } else {
+        toast::emit_toast(
+            app,
+            toast::Payload {
+                toast_type: "warning".to_string(),
+                title: Some("Quota Reached".to_string()),
+                message: "Monthly quota reached (10 hrs). Resets next month.".to_string(),
+                auto_dismiss: Some(true),
+                duration: Some(10_000),
+                retry_id: None,
+                mode: Some("cloud".into()),
+                action: Some("switch_to_local_mode".to_string()),
+                action_label: Some("Use Local".to_string()),
+            },
+        );
+    }
+}
+
+pub fn show_quota_check_failed(app: &AppHandle<AppRuntime>, retry_id: Option<String>) {
+    toast::emit_toast(
+        app,
+        toast::Payload {
+            toast_type: "error".to_string(),
+            title: Some("Service Error".to_string()),
+            message: "Unable to verify quota. Please try again.".to_string(),
+            auto_dismiss: None,
+            duration: None,
+            retry_id,
+            mode: Some("cloud".into()),
+            action: None,
+            action_label: None,
+        },
+    );
 }

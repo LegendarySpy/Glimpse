@@ -12,9 +12,9 @@ tauri_panel! {
         config: {
             can_become_key_window: false,
             can_become_main_window: false,
-            becomes_key_only_if_needed: false,
+            becomes_key_only_if_needed: true,
             is_floating_panel: true,
-            hides_on_deactivate: false
+            hides_on_deactivate: true
         }
     })
 }
@@ -37,9 +37,9 @@ pub fn init(app: &AppHandle<AppRuntime>, toast_window: &WebviewWindow<AppRuntime
             .full_screen_auxiliary();
         panel.set_collection_behavior(behavior.into());
 
-        panel.set_becomes_key_only_if_needed(false);
+        panel.set_becomes_key_only_if_needed(true);
         panel.set_floating_panel(true);
-        panel.set_hides_on_deactivate(false);
+        panel.set_hides_on_deactivate(true);
         panel.set_ignores_mouse_events(true);
         panel.hide();
     }

@@ -93,7 +93,8 @@ const ToastOverlay: React.FC = () => {
     setIsRetrying(true);
     try {
       await invoke("retry_transcription", { id: toast.retryId });
-      dismiss();
+      // Don't dismiss - the transcription runs async and will show a new toast
+      // (either success, error, or quota exceeded) which replaces this one
     } catch (err) {
       console.error("Retry failed:", err);
       setIsRetrying(false);
