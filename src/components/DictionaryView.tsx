@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, ArrowRight, BookOpen, Edit3, Loader2, Plus, Replace, Trash2 } from "lucide-react";
 import DotMatrix from "./DotMatrix";
@@ -122,6 +123,24 @@ const DictionaryView = () => {
     useEffect(() => {
         load();
     }, [load]);
+
+    useEffect(() => {
+        let unlistenSettings: UnlistenFn | null = null;
+
+        listen<StoredSettings>("settings:changed", (event) => {
+            const nextSettings = event.payload;
+            if (!nextSettings) return;
+            setSettings(nextSettings);
+        }).then((fn) => {
+            unlistenSettings = fn;
+        });
+
+        return () => {
+            if (unlistenSettings) {
+                unlistenSettings();
+            }
+        };
+    }, []);
 
     const persistEntries = useCallback(async (next: string[]) => {
         setSaving(true);
