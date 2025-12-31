@@ -76,6 +76,7 @@ pub(crate) fn queue_transcription(
                 "[transcription] Using cloud auth: url={} edit_mode={}",
                 creds.function_url, has_selection
             );
+            let cloud_prompt = dictionary::build_dictionary_prompt(&settings.dictionary);
             let cloud_config = transcription_api::CloudTranscriptionConfig::new(
                 creds.function_url,
                 creds.jwt,
@@ -87,7 +88,9 @@ pub(crate) fn queue_transcription(
                 },
                 creds.history_sync_enabled,
             )
-            .with_selected_text(pending_selected_text.clone());
+            .with_selected_text(pending_selected_text.clone())
+            .with_language(Some(settings.language.clone()))
+            .with_prompt(cloud_prompt);
 
             match transcription_api::request_cloud_transcription(
                 &http,
