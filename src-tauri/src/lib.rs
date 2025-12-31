@@ -915,13 +915,8 @@ pub(crate) fn stop_active_recording(app: &AppHandle<AppRuntime>) {
 
 #[tauri::command]
 fn toast_dismissed(app: AppHandle<AppRuntime>) {
-    let state = app.state::<AppState>();
-    let status = state.pill().status();
-
-    if status == pill::PillStatus::Error {
-        state.pill().reset(&app);
-    }
-
+    stop_active_recording(&app);
+    hide_overlay(&app);
     toast::hide(&app);
 }
 

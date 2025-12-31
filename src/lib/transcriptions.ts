@@ -95,6 +95,23 @@ export async function findByLocalId(userId: string, localId: string): Promise<Cl
     return result.documents[0] || null;
 }
 
+export async function findByLocalOrDocumentId(userId: string, id: string): Promise<CloudTranscription | null> {
+    const byLocal = await findByLocalId(userId, id);
+    if (byLocal) return byLocal;
+
+    let doc: CloudTranscription | null = null;
+    try {
+        doc = await getTranscription(id);
+    } catch {
+        return null;
+    }
+
+    if (doc.user_id === userId && !doc.is_deleted) {
+        return doc;
+    }
+    return null;
+}
+
 export async function syncLocalTranscription(
     userId: string,
     localRecord: {

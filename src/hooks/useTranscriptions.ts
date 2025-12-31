@@ -6,7 +6,7 @@ import {
     listTranscriptions,
     getCurrentUser,
     deleteCloudTranscription,
-    findByLocalId
+    findByLocalOrDocumentId
 } from "../lib";
 
 export type TranscriptionRecord = {
@@ -337,7 +337,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
             setTotalCount(prev => Math.max(0, prev - 1));
 
             if (resolvedCloudSyncEnabled && userId && isSubscriber) {
-                const cloudDoc = await findByLocalId(userId, id);
+                const cloudDoc = await findByLocalOrDocumentId(userId, id);
                 if (cloudDoc) {
                     await deleteCloudTranscription(cloudDoc.$id);
                 }
@@ -384,7 +384,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
             if (resolvedCloudSyncEnabled && userId && isSubscriber && recordsToDelete.length > 0) {
                 await Promise.all(recordsToDelete.map(async (record) => {
                     try {
-                        const cloudDoc = await findByLocalId(userId, record.id);
+                        const cloudDoc = await findByLocalOrDocumentId(userId, record.id);
                         if (cloudDoc) {
                             await deleteCloudTranscription(cloudDoc.$id);
                         }
