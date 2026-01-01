@@ -4,10 +4,10 @@ import { listen } from "@tauri-apps/api/event";
 import {
     syncLocalTranscription,
     listTranscriptions,
-    getCurrentUser,
     deleteCloudTranscription,
     findByLocalOrDocumentId
 } from "../lib";
+import { useAuth } from "./useAuth";
 
 export type TranscriptionRecord = {
     id: string;
@@ -99,6 +99,8 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         };
     }, [getCloudSyncEnabled]);
 
+    const { user } = useAuth();
+
     const [transcriptions, setTranscriptions] = useState<TranscriptionRecord[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
@@ -114,18 +116,9 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
     const fetchingOffsets = useRef<Set<number>>(new Set());
 
     useEffect(() => {
-        const checkUser = async () => {
-            try {
-                const user = await getCurrentUser();
-                setUserId(user?.$id ?? null);
-                setIsSubscriber(user?.labels?.includes("subscriber") ?? false);
-            } catch {
-                setUserId(null);
-                setIsSubscriber(false);
-            }
-        };
-        checkUser();
-    }, []);
+        setUserId(user?.$id ?? null);
+        setIsSubscriber(user?.labels?.includes("subscriber") ?? false);
+    }, [user]);
 
     const fetchPage = useCallback(async (offset: number, query: string) => {
         try {

@@ -35,7 +35,7 @@ import AccountView from "./AccountView";
 import FAQModal from "../FAQModal";
 import { UpdateChecker } from "./UpdateChecker";
 import DebugSection from "./DebugSection";
-import { getCurrentUser, logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../../lib/auth";
+import { logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../../lib/auth";
 import WhatsNewModal from "./WhatsNewModal";
 import { Dropdown } from "../Dropdown";
 
@@ -383,19 +383,6 @@ const SettingsModal = ({
         }
     }, [isOpen]);
 
-    useEffect(() => {
-        if (isOpen) {
-            setAuthLoading(true);
-            getCurrentUser()
-                .then(() => {
-                    setAuthError(null);
-                })
-                .catch(() => { })
-                .finally(() => {
-                    setAuthLoading(false);
-                });
-        }
-    }, [isOpen]);
 
     const handleSignOut = async () => {
         setAuthLoading(true);

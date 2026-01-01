@@ -5,6 +5,7 @@ import PillOverlay from "./pill";
 import ToastOverlay from "./ToastOverlay";
 import Home from "./Home";
 import Onboarding from "./Onboarding";
+import { AuthProvider } from "./hooks/useAuth";
 import "./App.css";
 
 type StoredSettings = {
@@ -126,20 +127,18 @@ function App() {
       );
     }
 
-    // Show onboarding if not completed
-    if (showOnboarding) {
-      return (
-        <div className="settings-view h-screen w-screen overflow-hidden">
-          <Onboarding onComplete={handleOnboardingComplete} />
-        </div>
-      );
-    }
+    const settingsContent = showOnboarding ? (
+      <Onboarding onComplete={handleOnboardingComplete} />
+    ) : (
+      <Home />
+    );
 
-    // Show main app
     return (
-      <div className="settings-view h-screen w-screen overflow-hidden">
-        <Home />
-      </div>
+      <AuthProvider>
+        <div className="settings-view h-screen w-screen overflow-hidden">
+          {settingsContent}
+        </div>
+      </AuthProvider>
     );
   }
 

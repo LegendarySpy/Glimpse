@@ -62,6 +62,10 @@ export async function getCurrentSession(): Promise<Models.Session | null> {
     }
 }
 
+export async function createJwt(): Promise<Models.Jwt> {
+    return account.createJWT();
+}
+
 export function getOAuth2Url(
     provider: OAuthProvider,
     redirectUrl: string

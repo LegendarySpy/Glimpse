@@ -1,8 +1,7 @@
 import { useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { account } from "../lib/appwrite";
-import { getCurrentUser } from "../lib/auth";
+import { createJwt, getCurrentUser } from "../lib/auth";
 
 const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_TRANSCRIPTION_URL;
 const JWT_REFRESH_INTERVAL = 8 * 60 * 1000; // 8 minutes (JWT expires in 15)
@@ -29,7 +28,7 @@ export function useCloudTranscription() {
 
             const historySyncEnabled = localStorage.getItem("glimpse_cloud_sync_enabled") === "true";
 
-            const jwt = await account.createJWT();
+            const jwt = await createJwt();
             await invoke("set_cloud_credentials", {
                 jwt: jwt.jwt,
                 functionUrl: CLOUD_FUNCTION_URL,

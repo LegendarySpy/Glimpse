@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings, ChevronLeft, Home as HomeIcon, Book, Brain, User, Info, HelpCircle, Github, X } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
@@ -8,8 +8,8 @@ import FAQModal from "./components/FAQModal";
 import DotMatrix from "./components/DotMatrix";
 import TranscriptionList from "./components/TranscriptionList";
 import DictionaryView from "./components/DictionaryView";
-import { getCurrentUser, type User as AppwriteUser } from "./lib/auth";
 import { useCloudTranscription } from "./hooks/useCloudTranscription";
+import { useAuth } from "./hooks/useAuth";
 
 type TranscriptionMode = "cloud" | "local";
 
@@ -56,7 +56,7 @@ const Home = () => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
     const [activeView, setActiveView] = useState<"home" | "dictionary" | "brain">("home");
     const [transcriptionMode, setTranscriptionMode] = useState<TranscriptionMode>("cloud");
-    const [currentUser, setCurrentUser] = useState<AppwriteUser | null>(null);
+    const { user: currentUser, refresh: refreshUser } = useAuth();
     const [showSupportPopup, setShowSupportPopup] = useState(false);
     const [showFAQ, setShowFAQ] = useState(false);
     const [appVersion, setAppVersion] = useState("-");
@@ -67,16 +67,6 @@ const Home = () => {
     useCloudTranscription();
 
     const sidebarWidth = isSidebarCollapsed ? 68 : 200;
-
-    const loadUser = useCallback(async () => {
-        try {
-            const user = await getCurrentUser();
-            setCurrentUser(user);
-        } catch (err) {
-            console.error("Failed to load user:", err);
-            setCurrentUser(null);
-        }
-    }, []);
 
     useEffect(() => {
         let unlistenSettings: UnlistenFn | null = null;
@@ -93,7 +83,6 @@ const Home = () => {
         };
 
         loadSettings();
-        loadUser();
 
         invoke<{ version: string }>("get_app_info")
             .then((info) => setAppVersion(info.version))
@@ -136,7 +125,6 @@ const Home = () => {
 
         listen("auth:changed", () => {
             setHasAuthIssue(false);
-            loadUser();
         }).then((fn) => {
             unlistenAuthChanged = fn;
         });
@@ -148,7 +136,7 @@ const Home = () => {
             unlistenAuthError?.();
             unlistenAuthChanged?.();
         };
-    }, [loadUser]);
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -437,7 +425,7 @@ const Home = () => {
                 }}
                 initialTab={settingsTab}
                 currentUser={currentUser}
-                onUpdateUser={loadUser}
+                onUpdateUser={refreshUser}
                 transcriptionMode={transcriptionMode}
             />
 
