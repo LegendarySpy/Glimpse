@@ -50,8 +50,8 @@ pub struct RecordingSaved {
     pub duration_override_seconds: Option<f32>,
 }
 
-impl RecorderManager {
-    pub fn new() -> Self {
+impl Default for RecorderManager {
+    fn default() -> Self {
         let (tx, rx) = unbounded();
 
         std::thread::Builder::new()
@@ -72,6 +72,12 @@ impl RecorderManager {
             .expect("failed to spawn recorder thread");
 
         Self { tx }
+    }
+}
+
+impl RecorderManager {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn start(&self, device_id: Option<String>) -> Result<DateTime<Local>> {
@@ -646,16 +652,16 @@ fn trim_silence(samples: &[f32], sample_rate: u32) -> Vec<f32> {
                 run_start.get_or_insert(idx);
             } else if let Some(start) = run_start.take() {
                 if idx - start <= min_gap_frames {
-                    for gap_idx in start..idx {
-                        keep_mask[gap_idx] = true;
+                    for item in keep_mask.iter_mut().take(idx).skip(start) {
+                        *item = true;
                     }
                 }
             }
         }
         if let Some(start) = run_start.take() {
             if keep_mask.len() - start <= min_gap_frames {
-                for gap_idx in start..keep_mask.len() {
-                    keep_mask[gap_idx] = true;
+                for item in keep_mask.iter_mut().skip(start) {
+                    *item = true;
                 }
             }
         }

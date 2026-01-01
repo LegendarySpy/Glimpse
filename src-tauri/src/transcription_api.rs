@@ -1,7 +1,7 @@
 use std::fs;
 
 use anyhow::{anyhow, Context, Result};
-use reqwest::{multipart, Client};
+use reqwest::Client;
 use serde::Deserialize;
 
 use crate::recorder::RecordingSaved;
@@ -9,34 +9,14 @@ use crate::recorder::RecordingSaved;
 /// Maximum audio file size 25MB
 const MAX_AUDIO_SIZE_BYTES: u64 = 25 * 1024 * 1024;
 
-#[derive(Clone, Debug)]
-pub struct TranscriptionConfig {
-    pub endpoint: String,
-    pub api_key: String,
-    pub include_word_timestamps: bool,
-    pub auto_paste: bool,
+#[derive(Debug)]
+pub struct TranscriptionSuccess {
+    pub transcript: String,
+    pub speech_model: Option<String>,
 }
 
-impl TranscriptionConfig {
-    pub fn from_env() -> Self {
-        dotenvy::dotenv().ok();
-        Self {
-            endpoint: std::env::var("GLIMPSE_API_URL")
-                .or_else(|_| std::env::var("GLIMPSE_API_ENDPOINT"))
-                .unwrap_or_else(|_| "http://127.0.0.1:9001".into()),
-            api_key: std::env::var("GLIMPSE_API_KEY").unwrap_or_else(|_| "local-dev-key".into()),
-            include_word_timestamps: env_flag("GLIMPSE_INCLUDE_WORD_TIMESTAMPS", false),
-            auto_paste: env_flag("GLIMPSE_AUTO_PASTE", true),
-        }
-    }
-
-    pub fn from_settings(_settings: &crate::settings::UserSettings) -> Self {
-        Self::from_env()
-    }
-
-    pub fn endpoint_url(&self) -> String {
-        format!("{}/transcribe", self.endpoint.trim_end_matches('/'))
-    }
+pub fn auto_paste_enabled() -> bool {
+    env_flag("GLIMPSE_AUTO_PASTE", true)
 }
 
 #[derive(Clone, Debug)]
@@ -51,6 +31,12 @@ pub struct CloudTranscriptionConfig {
     pub auto_paste: bool,
     pub history_sync_enabled: bool,
     pub prompt: Option<String>,
+}
+
+fn env_flag(key: &str, default: bool) -> bool {
+    std::env::var(key)
+        .map(|value| matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes"))
+        .unwrap_or(default)
 }
 
 impl CloudTranscriptionConfig {
@@ -91,18 +77,6 @@ impl CloudTranscriptionConfig {
     }
 }
 
-fn env_flag(key: &str, default: bool) -> bool {
-    std::env::var(key)
-        .map(|value| matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes"))
-        .unwrap_or(default)
-}
-
-#[derive(Debug, Deserialize)]
-pub struct TranscriptionSuccess {
-    pub transcript: String,
-    pub speech_model: Option<String>,
-}
-
 pub fn normalize_transcript(input: &str) -> String {
     input
         .lines()
@@ -129,87 +103,12 @@ pub fn normalize_transcript(input: &str) -> String {
 }
 
 #[derive(Debug, Deserialize)]
-struct ApiResponse {
-    transcript: String,
-    #[serde(default)]
-    model: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
 struct ApiErrorResponse {
     error: String,
     #[serde(default)]
     code: Option<String>,
     #[serde(default)]
     user_type: Option<String>,
-}
-
-pub async fn request_transcription(
-    client: &Client,
-    saved: &RecordingSaved,
-    config: &TranscriptionConfig,
-) -> Result<TranscriptionSuccess> {
-    let metadata = fs::metadata(&saved.path)
-        .with_context(|| format!("Failed to read file metadata at {}", saved.path.display()))?;
-    if metadata.len() > MAX_AUDIO_SIZE_BYTES {
-        return Err(anyhow!(
-            "Audio file too large ({:.1}MB, max {}MB)",
-            metadata.len() as f64 / 1024.0 / 1024.0,
-            MAX_AUDIO_SIZE_BYTES / 1024 / 1024
-        ));
-    }
-
-    let bytes = fs::read(&saved.path)
-        .with_context(|| format!("Failed to read recording at {}", saved.path.display()))?;
-    let file_name = saved
-        .path
-        .file_name()
-        .map(|v| v.to_string_lossy().to_string())
-        .unwrap_or_else(|| "recording.mp3".to_string());
-    let mime = mime_guess::from_path(&saved.path).first_or_octet_stream();
-
-    let part = multipart::Part::bytes(bytes)
-        .file_name(file_name)
-        .mime_str(mime.as_ref())?;
-
-    let form = multipart::Form::new().part("file", part);
-
-    let request = client
-        .post(config.endpoint_url())
-        .query(&[("include_word_timestamps", config.include_word_timestamps)])
-        .multipart(form);
-
-    let request = if config.api_key.is_empty() {
-        request
-    } else {
-        request.header("x-api-key", &config.api_key)
-    };
-
-    let response = request
-        .send()
-        .await
-        .context("Failed to reach transcription API")?;
-    let status = response.status();
-    let text = response.text().await.unwrap_or_default();
-
-    if status.is_success() {
-        let parsed: ApiResponse = serde_json::from_str(&text)
-            .with_context(|| format!("Unexpected transcription response: {text}"))?;
-        return Ok(TranscriptionSuccess {
-            transcript: normalize_transcript(&parsed.transcript),
-            speech_model: parsed.model,
-        });
-    }
-
-    if let Ok(parsed) = serde_json::from_str::<ApiErrorResponse>(&text) {
-        Err(anyhow!(parsed.error))
-    } else if text.is_empty() {
-        Err(anyhow!(format!(
-            "Transcription API returned status {status}"
-        )))
-    } else {
-        Err(anyhow!(text))
-    }
 }
 
 #[derive(Debug, Deserialize)]

@@ -66,7 +66,7 @@ pub fn run() {
     let aptabase_key = option_env!("APTABASE_KEY").unwrap_or("A-DEV-0000000000");
 
     let builder = tauri::Builder::default()
-        .plugin(tauri_plugin_aptabase::Builder::new(&aptabase_key).build())
+        .plugin(tauri_plugin_aptabase::Builder::new(aptabase_key).build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
@@ -85,7 +85,7 @@ pub fn run() {
             app.set_activation_policy(ActivationPolicy::Accessory);
 
             let handle = app.handle();
-            let settings_store = Arc::new(SettingsStore::new(&handle)?);
+            let settings_store = Arc::new(SettingsStore::new(handle)?);
             let mut settings = settings_store.load().unwrap_or_default();
             if model_manager::definition(&settings.local_model).is_none() {
                 settings.local_model = default_local_model();
@@ -96,24 +96,24 @@ pub fn run() {
             app.manage(AppState::new(
                 Arc::clone(&settings_store),
                 settings,
-                &handle,
+                handle,
             ));
 
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
                 let _ = window.hide();
-                platform::overlay::init(&handle, &window);
+                platform::overlay::init(handle, &window);
             }
 
             if let Some(toast_window) = handle.get_webview_window(toast::WINDOW_LABEL) {
                 let _ = toast_window.hide();
-                platform::toast::init(&handle, &toast_window);
+                platform::toast::init(handle, &toast_window);
             }
 
-            if let Ok(tray) = tray::build_tray(&handle) {
+            if let Ok(tray) = tray::build_tray(handle) {
                 handle.state::<AppState>().store_tray(tray);
             }
 
-            if let Err(err) = pill::register_shortcuts(&handle) {
+            if let Err(err) = pill::register_shortcuts(handle) {
                 eprintln!("Failed to register shortcuts: {err}");
             }
 
@@ -174,12 +174,11 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|handler, event| match event {
-            tauri::RunEvent::Exit { .. } => {
+        .run(|handler, event| {
+            if let tauri::RunEvent::Exit = event {
                 let _ = handler.track_event("app_exited", None);
                 handler.flush_events_blocking();
             }
-            _ => {}
         });
 }
 
@@ -397,7 +396,7 @@ fn reset_onboarding(
 }
 
 #[tauri::command]
-#[allow(non_snake_case)]
+#[allow(non_snake_case, clippy::too_many_arguments)]
 fn update_settings(
     smartShortcut: String,
     smartEnabled: bool,

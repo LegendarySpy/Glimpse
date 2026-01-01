@@ -122,17 +122,12 @@ impl Default for UserSettings {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum TranscriptionMode {
+    #[default]
     Cloud,
     Local,
-}
-
-impl Default for TranscriptionMode {
-    fn default() -> Self {
-        TranscriptionMode::Cloud
-    }
 }
 
 fn default_transcription_mode() -> TranscriptionMode {

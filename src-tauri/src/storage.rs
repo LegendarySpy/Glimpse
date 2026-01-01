@@ -480,7 +480,7 @@ impl StorageManager {
                     speech_model, llm_model, word_count, audio_duration_seconds, synced
              FROM transcriptions WHERE id = ?1",
             params![id],
-            |row| Self::record_from_row(row),
+            Self::record_from_row,
         )
         .optional()
         .map_err(Into::into)
@@ -495,7 +495,7 @@ impl StorageManager {
         )?;
 
         let records = stmt
-            .query_map([], |row| Self::record_from_row(row))?
+            .query_map([], Self::record_from_row)?
             .collect::<rusqlite::Result<Vec<_>>>()?;
         Ok(records)
     }

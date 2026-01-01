@@ -51,7 +51,7 @@ pub(crate) fn queue_transcription(
         let is_cancelled = || app_handle.state::<AppState>().is_cancelled();
 
         let settings = app_handle.state::<AppState>().current_settings();
-        let config = transcription_api::TranscriptionConfig::from_settings(&settings);
+        let auto_paste = transcription_api::auto_paste_enabled();
         let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
 
         let cloud_creds = app_handle
@@ -128,7 +128,7 @@ pub(crate) fn queue_transcription(
                     }
 
                     let mut pasted = false;
-                    if config.auto_paste && !final_transcript.trim().is_empty() {
+                    if auto_paste && !final_transcript.trim().is_empty() {
                         let text = final_transcript.clone();
                         match async_runtime::spawn_blocking(move || assistive::paste_text(&text))
                             .await
@@ -235,7 +235,7 @@ pub(crate) fn queue_transcription(
             return;
         }
 
-        // Local or legacy API path
+        // Local or cloud without credentials path
         let result = if use_local {
             let model_key = settings.local_model.clone();
             match model_manager::ensure_model_ready(&app_handle, &model_key) {
@@ -263,7 +263,15 @@ pub(crate) fn queue_transcription(
                 Err(err) => Err(err),
             }
         } else {
-            transcription_api::request_transcription(&http, &saved_for_task, &config).await
+            // Cloud mode selected but no credentials - user needs to sign in
+            emit_transcription_error(
+                &app_handle,
+                "Sign in required for cloud transcription".to_string(),
+                "cloud_auth",
+                saved_for_task.path.display().to_string(),
+            );
+            app_handle.state::<AppState>().set_pending_path(None);
+            return;
         };
 
         match result {
@@ -360,7 +368,7 @@ pub(crate) fn queue_transcription(
                 }
 
                 let mut pasted = false;
-                if config.auto_paste && !final_transcript.trim().is_empty() {
+                if auto_paste && !final_transcript.trim().is_empty() {
                     let text = final_transcript.clone();
                     match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await
                     {
@@ -583,7 +591,7 @@ pub(crate) fn retry_transcription_async(
             return;
         }
 
-        // Local or legacy API path
+        // Local or cloud without credentials path
         let result = if use_local {
             match load_audio_for_transcription(&saved_for_task.path) {
                 Ok((samples, sample_rate)) => {
@@ -615,8 +623,14 @@ pub(crate) fn retry_transcription_async(
                 Err(err) => Err(err),
             }
         } else {
-            let config = transcription_api::TranscriptionConfig::from_settings(&settings);
-            transcription_api::request_transcription(&http, &saved_for_task, &config).await
+            // Cloud mode selected but no credentials - user needs to sign in
+            emit_transcription_error(
+                &app_handle,
+                "Sign in required for cloud transcription".to_string(),
+                "cloud_auth",
+                saved_for_task.path.display().to_string(),
+            );
+            return;
         };
 
         match result {
@@ -699,6 +713,7 @@ fn emit_transcription_start(app: &AppHandle<AppRuntime>, saved: &RecordingSaved)
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn emit_transcription_complete_with_cleanup(
     app: &AppHandle<AppRuntime>,
     raw_transcript: String,
