@@ -12,8 +12,6 @@ use std::{thread, time::Duration};
 #[derive(Debug, Clone)]
 pub struct AxContext {
     pub value: String,
-    pub caret_position: usize,
-    pub selection_length: usize,
 }
 
 #[cfg(target_os = "macos")]
@@ -31,17 +29,7 @@ pub fn get_ax_context() -> Option<AxContext> {
             attribute: *const c_void,
             value: *mut *mut c_void,
         ) -> i32;
-        fn AXValueGetValue(value: *const c_void, value_type: i32, value_ptr: *mut c_void) -> bool;
         fn CFRelease(cf: *const c_void);
-    }
-
-    const AX_VALUE_CF_RANGE_TYPE: i32 = 4;
-
-    #[repr(C)]
-    #[derive(Default)]
-    struct CFRange {
-        location: i64,
-        length: i64,
     }
 
     unsafe {
@@ -63,7 +51,6 @@ pub fn get_ax_context() -> Option<AxContext> {
             return None;
         }
 
-        // Get AXValue (full text content)
         let value_attr = CFString::new("AXValue");
         let mut value_ref: *mut c_void = ptr::null_mut();
         let value_result = AXUIElementCopyAttributeValue(
@@ -79,39 +66,9 @@ pub fn get_ax_context() -> Option<AxContext> {
             None
         };
 
-        // Get AXSelectedTextRange (caret position + selection length)
-        let range_attr = CFString::new("AXSelectedTextRange");
-        let mut range_ref: *mut c_void = ptr::null_mut();
-        let range_result = AXUIElementCopyAttributeValue(
-            focused_element,
-            range_attr.as_concrete_TypeRef() as *const c_void,
-            &mut range_ref,
-        );
-
-        let (caret_position, selection_length) = if range_result == 0 && !range_ref.is_null() {
-            let mut range = CFRange::default();
-            if AXValueGetValue(
-                range_ref,
-                AX_VALUE_CF_RANGE_TYPE,
-                &mut range as *mut _ as *mut c_void,
-            ) {
-                CFRelease(range_ref);
-                (range.location.max(0) as usize, range.length.max(0) as usize)
-            } else {
-                CFRelease(range_ref);
-                (0, 0)
-            }
-        } else {
-            (0, 0)
-        };
-
         CFRelease(focused_element);
 
-        value.map(|v| AxContext {
-            value: v,
-            caret_position,
-            selection_length,
-        })
+        value.map(|v| AxContext { value: v })
     }
 }
 

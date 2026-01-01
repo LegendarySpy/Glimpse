@@ -1,22 +1,57 @@
 use crate::assistive::get_ax_context;
-use crate::dictionary::add_replacement;
+use crate::dictionary::add_dictionary_word;
 use crate::{toast, AppRuntime, AppState};
 use parking_lot::Mutex;
+use std::collections::HashMap;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tauri::AppHandle;
 
 const POLL_INTERVAL: Duration = Duration::from_millis(200);
 const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(5);
+const CORRECTION_THRESHOLD: u32 = 2;
+const SESSION_TIMEOUT: Duration = Duration::from_secs(2 * 24 * 60 * 60);
 
 pub struct CorrectionDetector {
     handle: Mutex<Option<tokio::task::JoinHandle<()>>>,
+    counter: Arc<Mutex<Counter>>,
+}
+
+struct Counter {
+    counts: HashMap<String, u32>,
+    started: Instant,
+}
+
+impl Counter {
+    fn new() -> Self {
+        Self { counts: HashMap::new(), started: Instant::now() }
+    }
+
+    fn add(&mut self, word: &str, n: u32) -> u32 {
+        if self.started.elapsed() >= SESSION_TIMEOUT {
+            self.counts.clear();
+            self.started = Instant::now();
+        }
+        let count = self.counts.entry(word.to_lowercase()).or_insert(0);
+        *count += n;
+        *count
+    }
+
+    fn remove(&mut self, word: &str) {
+        self.counts.remove(&word.to_lowercase());
+    }
 }
 
 impl CorrectionDetector {
     pub fn new() -> Self {
         Self {
             handle: Mutex::new(None),
+            counter: Arc::new(Mutex::new(Counter::new())),
         }
+    }
+
+    pub fn remove_correction(&self, word: &str) {
+        self.counter.lock().remove(word);
     }
 
     pub fn start_session(&self, app: AppHandle<AppRuntime>, _original: String) {
@@ -24,8 +59,8 @@ impl CorrectionDetector {
             h.abort();
         }
 
+        let counter = Arc::clone(&self.counter);
         let handle = tokio::spawn(async move {
-            // Wait for paste to be processed by target app
             tokio::time::sleep(Duration::from_millis(100)).await;
 
             let Some(ctx) = get_ax_context() else { return };
@@ -35,7 +70,6 @@ impl CorrectionDetector {
 
             loop {
                 tokio::time::sleep(POLL_INTERVAL).await;
-
                 let Some(ctx) = get_ax_context() else { break };
 
                 if ctx.value != last_value {
@@ -45,11 +79,7 @@ impl CorrectionDetector {
 
                 if last_change.elapsed() >= INACTIVITY_TIMEOUT {
                     if last_value != initial {
-                        if let Some((old, new)) = find_edit(&initial, &last_value) {
-                            if is_word_correction(&old, &new) {
-                                show_correction_toast(&app, &old, &new);
-                            }
-                        }
+                        process_corrections(&initial, &last_value, &counter, &app);
                     }
                     break;
                 }
@@ -60,103 +90,78 @@ impl CorrectionDetector {
     }
 }
 
-fn find_edit(old: &str, new: &str) -> Option<(String, String)> {
-    let old_words: Vec<String> = old
-        .split_whitespace()
-        .map(|w| strip_punctuation(w))
-        .filter(|w| !w.is_empty())
-        .collect();
-
-    let new_words: Vec<String> = new
-        .split_whitespace()
-        .map(|w| strip_punctuation(w))
-        .filter(|w| !w.is_empty())
-        .collect();
-
-    let prefix_len = old_words
-        .iter()
-        .zip(new_words.iter())
-        .take_while(|(a, b)| a.to_lowercase() == b.to_lowercase())
-        .count();
-
-    let suffix_len = old_words
-        .iter()
-        .rev()
-        .zip(new_words.iter().rev())
-        .take_while(|(a, b)| a.to_lowercase() == b.to_lowercase())
-        .count();
-
-    let suffix_len = suffix_len
-        .min(old_words.len().saturating_sub(prefix_len))
-        .min(new_words.len().saturating_sub(prefix_len));
-
-    let old_mid: Vec<&String> = old_words[prefix_len..old_words.len() - suffix_len].iter().collect();
-    let new_mid: Vec<&String> = new_words[prefix_len..new_words.len() - suffix_len].iter().collect();
-
-    let old_phrase = old_mid.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(" ");
-    let new_phrase = new_mid.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(" ");
-
-    if old_phrase.is_empty() && new_phrase.is_empty() {
-        None
-    } else if old_phrase.to_lowercase() == new_phrase.to_lowercase() {
-        None
-    } else {
-        Some((old_phrase, new_phrase))
+fn word_freq(text: &str) -> HashMap<String, (i32, String)> {
+    let mut freq: HashMap<String, (i32, String)> = HashMap::new();
+    for word in text.split_whitespace() {
+        let w = word.trim_matches(|c: char| c.is_ascii_punctuation());
+        if !w.is_empty() {
+            let key = w.to_lowercase();
+            let entry = freq.entry(key).or_insert((0, w.to_string()));
+            entry.0 += 1;
+            // Keep the version with most capital letters (likely the intended form)
+            if w.chars().filter(|c| c.is_uppercase()).count()
+                > entry.1.chars().filter(|c| c.is_uppercase()).count()
+            {
+                entry.1 = w.to_string();
+            }
+        }
     }
+    freq
 }
 
-fn strip_punctuation(s: &str) -> String {
-    s.trim_matches(|c: char| c.is_ascii_punctuation()).to_string()
-}
+fn process_corrections(
+    initial: &str,
+    final_text: &str,
+    counter: &Arc<Mutex<Counter>>,
+    app: &AppHandle<AppRuntime>,
+) {
+    let old_freq = word_freq(initial);
+    let new_freq = word_freq(final_text);
 
-fn is_word_correction(old: &str, new: &str) -> bool {
-    if old.is_empty() || new.is_empty() || old == new {
-        return false;
+    let old_word_count: i32 = old_freq.values().map(|(c, _)| *c).sum();
+    let new_word_count: i32 = new_freq.values().map(|(c, _)| *c).sum();
+
+    // Skip if text grew or shrank significantly (likely app output, not user edit)
+    let diff = (new_word_count - old_word_count).abs();
+    if diff > 9 {
+        return;
     }
-    let old_words = old.split_whitespace().count();
-    let new_words = new.split_whitespace().count();
-    old_words <= 5 && new_words <= 5
-}
 
-fn show_correction_toast(app: &AppHandle<AppRuntime>, old: &str, new: &str) {
-    let action = format!("add_to_dictionary:{}:{}", escape(old), escape(new));
-
-    toast::emit_toast(
-        app,
-        toast::Payload {
-            toast_type: "info".to_string(),
-            title: Some("Learned".to_string()),
-            message: format!("{} → {}", old, new),
-            auto_dismiss: Some(true),
-            duration: Some(8000),
-            retry_id: None,
-            mode: None,
-            action: Some(action),
-            action_label: Some("Add".to_string()),
-        },
-    );
-}
-
-fn escape(s: &str) -> String {
-    s.replace(':', "\\:")
-}
-
-fn unescape(s: &str) -> String {
-    s.replace("\\:", ":")
+    for (key, (new_count, original)) in &new_freq {
+        let old_count = old_freq.get(key).map(|(c, _)| *c).unwrap_or(0);
+        let delta = new_count - old_count;
+        if delta > 0 && delta <= 5 {
+            let count = counter.lock().add(key, delta as u32);
+            if count >= CORRECTION_THRESHOLD {
+                let action = format!("add_to_dictionary:{}", original);
+                toast::emit_toast(app, toast::Payload {
+                    toast_type: "info".to_string(),
+                    title: Some("New word learned".to_string()),
+                    message: original.clone(),
+                    auto_dismiss: Some(true),
+                    duration: Some(8000),
+                    retry_id: None,
+                    mode: None,
+                    action: Some(action),
+                    action_label: Some("Add".to_string()),
+                });
+            }
+        }
+    }
 }
 
 #[tauri::command]
 pub fn handle_dictionary_action(
     action: String,
+    app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
-    let parts: Vec<&str> = action.splitn(3, ':').collect();
-    if parts.len() != 3 || parts[0] != "add_to_dictionary" {
-        return Err("Invalid action".to_string());
-    }
+    let word = action
+        .strip_prefix("add_to_dictionary:")
+        .ok_or("Invalid action")?;
 
-    let from = unescape(parts[1]);
-    let to = unescape(parts[2]);
+    add_dictionary_word(word, &app, state.clone())?;
+    state.correction_detector.remove_correction(word);
 
-    add_replacement(&from, &to, state)
+    Ok(())
 }

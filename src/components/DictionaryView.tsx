@@ -11,6 +11,7 @@ type StoredSettings = {
     transcription_mode: TranscriptionMode;
     local_model: string;
     dictionary?: string[];
+    replacements?: Replacement[];
 };
 
 type ModelInfo = {
@@ -131,6 +132,8 @@ const DictionaryView = () => {
             const nextSettings = event.payload;
             if (!nextSettings) return;
             setSettings(nextSettings);
+            setEntries(nextSettings.dictionary ?? []);
+            setReplacements(nextSettings.replacements ?? []);
         }).then((fn) => {
             unlistenSettings = fn;
         });

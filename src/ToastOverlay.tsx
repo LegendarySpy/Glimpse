@@ -3,8 +3,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import DotMatrix from "./components/DotMatrix";
-
-// Types
 export type ToastType = "error" | "info" | "success" | "warning" | "update";
 
 export interface ToastPayload {
@@ -85,7 +83,6 @@ const ToastOverlay: React.FC = () => {
     dismissWithCleanup();
   };
 
-  // Handle retry
   const handleRetry = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -93,8 +90,6 @@ const ToastOverlay: React.FC = () => {
     setIsRetrying(true);
     try {
       await invoke("retry_transcription", { id: toast.retryId });
-      // Don't dismiss - the transcription runs async and will show a new toast
-      // (either success, error, or quota exceeded) which replaces this one
     } catch (err) {
       console.error("Retry failed:", err);
       setIsRetrying(false);
@@ -117,7 +112,6 @@ const ToastOverlay: React.FC = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [toast]);
 
-  // Listen for toast events
   useEffect(() => {
     const unsub1 = listen<ToastPayload>("toast:show", (ev) => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -128,7 +122,6 @@ const ToastOverlay: React.FC = () => {
       setToast({ ...ev.payload, isLeaving: false });
       setIsRetrying(false);
 
-      // Auto-dismiss for non-error toasts
       const durations: Record<ToastType, number> = {
         error: 0,
         info: 3000,
@@ -219,6 +212,9 @@ const ToastOverlay: React.FC = () => {
           <div className="flex-1 min-w-0">
             {toast.type === "update" && (
               <p className="text-[10px] text-violet-400 font-medium mb-0.5">GLIMPSE</p>
+            )}
+            {toast.title && (
+              <p className="text-[11px] text-gray-400 font-medium mb-0.5">{toast.title}</p>
             )}
             <p className="text-[12px] text-gray-200 leading-relaxed">{toast.message}</p>
             {showRetry && (
