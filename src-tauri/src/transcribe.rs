@@ -9,13 +9,8 @@ use crate::{
     recorder::{CompletedRecording, RecordingSaved},
     settings::{TranscriptionMode, UserSettings},
     storage, toast, transcription_api, AppRuntime, AppState, EVENT_TRANSCRIPTION_COMPLETE,
-    EVENT_TRANSCRIPTION_ERROR, EVENT_TRANSCRIPTION_START,
+    EVENT_TRANSCRIPTION_ERROR,
 };
-
-#[derive(Serialize, Clone)]
-struct TranscriptionStartPayload {
-    path: String,
-}
 
 #[derive(Serialize, Clone)]
 struct TranscriptionCompletePayload {
@@ -34,8 +29,6 @@ pub(crate) fn queue_transcription(
     saved: RecordingSaved,
     recording: CompletedRecording,
 ) {
-    emit_transcription_start(app, &saved);
-
     let state = app.state::<AppState>();
     state.clear_cancellation();
     state.set_pending_path(Some(saved.path.clone()));
@@ -701,16 +694,6 @@ pub(crate) fn retry_transcription_async(
             }
         }
     });
-}
-
-fn emit_transcription_start(app: &AppHandle<AppRuntime>, saved: &RecordingSaved) {
-    crate::emit_event(
-        app,
-        EVENT_TRANSCRIPTION_START,
-        TranscriptionStartPayload {
-            path: saved.path.display().to_string(),
-        },
-    );
 }
 
 #[allow(clippy::too_many_arguments)]

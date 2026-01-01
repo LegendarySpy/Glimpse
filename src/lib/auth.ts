@@ -49,19 +49,6 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 }
 
-export async function isLoggedIn(): Promise<boolean> {
-    const user = await getCurrentUser();
-    return user !== null;
-}
-
-export async function getCurrentSession(): Promise<Models.Session | null> {
-    try {
-        return await account.getSession("current");
-    } catch {
-        return null;
-    }
-}
-
 export async function createJwt(): Promise<Models.Jwt> {
     return account.createJWT();
 }
@@ -91,38 +78,11 @@ export async function updateName(name: string): Promise<User> {
     return account.updateName(name);
 }
 
-export async function updateEmail(
-    email: string,
-    password: string
-): Promise<User> {
-    return account.updateEmail(email, password);
-}
-
 export async function updatePassword(
     newPassword: string,
     oldPassword: string
 ): Promise<User> {
     return account.updatePassword(newPassword, oldPassword);
-}
-
-export async function requestPasswordRecovery(
-    email: string,
-    recoveryUrl: string
-): Promise<Models.Token> {
-    return account.createRecovery(email, recoveryUrl);
-}
-
-export async function confirmPasswordRecovery(
-    userId: string,
-    secret: string,
-    password: string
-): Promise<Models.Token> {
-    return account.updateRecovery(userId, secret, password);
-}
-
-export async function getPreferences(): Promise<Models.Preferences> {
-    const user = await account.get();
-    return user.prefs;
 }
 
 export async function updatePreferences(

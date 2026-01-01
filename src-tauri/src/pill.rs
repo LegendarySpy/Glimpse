@@ -392,14 +392,6 @@ impl PillController {
                 *self.recording_mode.lock() = None;
                 self.transition_to(app, PillStatus::Processing);
 
-                emit_event(
-                    app,
-                    crate::EVENT_RECORDING_STOP,
-                    crate::RecordingStopPayload {
-                        ended_at: recording.ended_at.to_rfc3339(),
-                    },
-                );
-
                 self.capture_selected_text_if_enabled(app);
                 crate::persist_recording_async(app.clone(), recording);
             }

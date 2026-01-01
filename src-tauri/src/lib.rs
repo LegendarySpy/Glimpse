@@ -48,10 +48,6 @@ use tauri_plugin_opener::OpenerExt;
 pub(crate) const MAIN_WINDOW_LABEL: &str = "main";
 pub(crate) const SETTINGS_WINDOW_LABEL: &str = "settings";
 pub(crate) const EVENT_RECORDING_START: &str = "recording:start";
-pub(crate) const EVENT_RECORDING_STOP: &str = "recording:stop";
-pub(crate) const EVENT_RECORDING_COMPLETE: &str = "recording:complete";
-pub(crate) const EVENT_RECORDING_ERROR: &str = "recording:error";
-pub(crate) const EVENT_TRANSCRIPTION_START: &str = "transcription:start";
 pub(crate) const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
 pub(crate) const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
 pub(crate) const EVENT_SETTINGS_CHANGED: &str = "settings:changed";
@@ -130,7 +126,6 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_settings,
             update_settings,
-            dictionary::get_dictionary,
             dictionary::set_dictionary,
             dictionary::get_replacements,
             dictionary::set_replacements,
@@ -139,7 +134,6 @@ pub fn run() {
             get_transcriptions,
             list_transcriptions_paginated,
             get_transcription_count,
-            get_usage_stats,
             delete_transcription,
             delete_all_transcriptions,
             retry_transcription,
@@ -150,12 +144,8 @@ pub fn run() {
             model_manager::download_model,
             model_manager::delete_model,
             model_manager::cancel_download,
-            unload_local_model,
             audio::list_input_devices,
             toast_dismissed,
-            check_microphone_permission,
-            request_microphone_permission,
-            check_accessibility_permission,
             open_accessibility_settings,
             open_microphone_settings,
             complete_onboarding,
@@ -340,21 +330,6 @@ impl AppState {
 #[tauri::command]
 fn get_settings(state: tauri::State<AppState>) -> Result<UserSettings, String> {
     Ok(state.current_settings())
-}
-
-#[tauri::command]
-fn check_microphone_permission() -> permissions::PermissionStatus {
-    permissions::check_microphone_permission()
-}
-
-#[tauri::command]
-fn request_microphone_permission() -> permissions::PermissionStatus {
-    permissions::request_microphone_permission()
-}
-
-#[tauri::command]
-fn check_accessibility_permission() -> bool {
-    permissions::check_accessibility_permission()
 }
 
 #[tauri::command]
@@ -586,11 +561,6 @@ async fn fetch_llm_models(
 }
 
 #[tauri::command]
-fn unload_local_model(state: tauri::State<AppState>) {
-    state.local_transcriber().unload();
-}
-
-#[tauri::command]
 fn open_whats_new(app: AppHandle<AppRuntime>) {
     if let Err(err) = tray::toggle_settings_window(&app) {
         eprintln!("Failed to open settings window: {err}");
@@ -720,14 +690,6 @@ fn get_transcription_count(
         .storage()
         .get_count(search_query.as_deref())
         .map_err(|err| format!("Failed to get transcription count: {err}"))
-}
-
-#[tauri::command]
-fn get_usage_stats(state: tauri::State<AppState>) -> Result<storage::UsageStats, String> {
-    state
-        .storage()
-        .get_usage_stats()
-        .map_err(|err| format!("Failed to get usage stats: {err}"))
 }
 
 #[tauri::command]
@@ -960,17 +922,6 @@ fn emit_complete(
     saved: RecordingSaved,
     recording: CompletedRecording,
 ) {
-    emit_event(
-        app,
-        EVENT_RECORDING_COMPLETE,
-        RecordingCompletePayload {
-            path: saved.path.display().to_string(),
-            started_at: saved.started_at.to_rfc3339(),
-            ended_at: saved.ended_at.to_rfc3339(),
-            duration_ms: (saved.ended_at - saved.started_at).num_milliseconds(),
-        },
-    );
-
     if let Err(rejection) = validate_recording(&recording) {
         let reason = match rejection {
             RecordingRejectionReason::TooShort {
@@ -1001,14 +952,6 @@ fn emit_complete(
 }
 
 pub(crate) fn emit_error(app: &AppHandle<AppRuntime>, message: String) {
-    emit_event(
-        app,
-        EVENT_RECORDING_ERROR,
-        RecordingErrorPayload {
-            message: message.clone(),
-        },
-    );
-
     let state = app.state::<AppState>();
     let status = state.pill().status();
     if status == pill::PillStatus::Listening || status == pill::PillStatus::Processing {
@@ -1039,24 +982,6 @@ fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
 #[derive(Serialize, Clone)]
 pub(crate) struct RecordingStartPayload {
     pub(crate) started_at: String,
-}
-
-#[derive(Serialize, Clone)]
-pub(crate) struct RecordingStopPayload {
-    pub(crate) ended_at: String,
-}
-
-#[derive(Serialize, Clone)]
-struct RecordingCompletePayload {
-    path: String,
-    started_at: String,
-    ended_at: String,
-    duration_ms: i64,
-}
-
-#[derive(Serialize, Clone)]
-struct RecordingErrorPayload {
-    message: String,
 }
 
 #[derive(Serialize, Clone)]

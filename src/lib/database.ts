@@ -60,11 +60,4 @@ export async function updateDocument<T extends Document>(
     )) as T;
 }
 
-export async function deleteDocument(
-    databaseId: string,
-    collectionId: string,
-    documentId: string
-): Promise<void> {
-    await databases.deleteDocument(databaseId, collectionId, documentId);
-}
 export { Query };

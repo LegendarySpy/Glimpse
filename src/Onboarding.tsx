@@ -1096,7 +1096,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                                 >
                                     <div className="flex flex-col items-start gap-1">
                                         <span className="text-sm font-medium text-content-primary">History Sync</span>
-                                        <span className="text-[11px] text-content-muted">Encrypted text-only backup</span>
+                                        <span className="text-[11px] text-content-muted">Text-only backup</span>
                                     </div>
                                     <div className={`relative w-11 h-6 rounded-full transition-colors ${cloudSyncEnabled ? "bg-amber-400" : "bg-border-secondary"}`}>
                                         <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform ${cloudSyncEnabled ? "translate-x-5" : "translate-x-0.5"}`} />

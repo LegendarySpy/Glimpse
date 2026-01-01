@@ -132,19 +132,6 @@ fn apply_case_pattern(matched: &str, replacement: &str) -> String {
 // Tauri commands
 
 #[tauri::command]
-pub fn get_dictionary(state: tauri::State<AppState>) -> Result<Vec<String>, String> {
-    let mut settings = state.current_settings();
-    let cleaned = sanitize_dictionary_entries(&settings.dictionary);
-    if cleaned != settings.dictionary {
-        settings.dictionary = cleaned.clone();
-        state
-            .persist_settings(settings)
-            .map_err(|err| err.to_string())?;
-    }
-    Ok(cleaned)
-}
-
-#[tauri::command]
 pub fn set_dictionary(
     entries: Vec<String>,
     state: tauri::State<AppState>,

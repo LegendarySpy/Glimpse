@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
+use chrono::{DateTime, Local, TimeZone};
 use parking_lot::Mutex;
 use rusqlite::{params, types::Type, Connection, OptionalExtension, Row, ToSql};
 use serde::{Deserialize, Serialize};
@@ -292,83 +292,6 @@ impl StorageManager {
         Ok(count)
     }
 
-    /// Get usage statistics for the account view
-    pub fn get_usage_stats(&self) -> Result<UsageStats> {
-        let conn = self.connection.lock();
-
-        // Get the start of the current month as timestamp
-        let now = Local::now();
-        let month_start = now
-            .with_day(1)
-            .and_then(|d| d.with_hour(0))
-            .and_then(|d| d.with_minute(0))
-            .and_then(|d| d.with_second(0))
-            .and_then(|d| d.with_nanosecond(0))
-            .unwrap_or(now);
-        let month_start_ms = month_start.timestamp_millis();
-
-        // Cloud models start with "cloud-"
-        let cloud_filter = "status = 'success' AND speech_model LIKE 'cloud-%'";
-
-        // Query for cloud minutes this month
-        let cloud_minutes_this_month: f64 = conn
-            .query_row(
-                &format!(
-                    "SELECT COALESCE(SUM(audio_duration_seconds), 0) / 60.0
-                 FROM transcriptions
-                 WHERE timestamp >= ?1 AND {}",
-                    cloud_filter
-                ),
-                params![month_start_ms],
-                |row| row.get(0),
-            )
-            .unwrap_or(0.0);
-
-        // Query for lifetime cloud audio hours
-        let cloud_seconds_lifetime: f64 = conn
-            .query_row(
-                &format!(
-                    "SELECT COALESCE(SUM(audio_duration_seconds), 0)
-                 FROM transcriptions
-                 WHERE {}",
-                    cloud_filter
-                ),
-                [],
-                |row| row.get(0),
-            )
-            .unwrap_or(0.0);
-
-        // Query for total cloud transcription count
-        let cloud_transcriptions_count: u32 = conn
-            .query_row(
-                &format!("SELECT COUNT(*) FROM transcriptions WHERE {}", cloud_filter),
-                [],
-                |row| row.get::<_, i64>(0).map(|c| c as u32),
-            )
-            .unwrap_or(0);
-
-        // Query for cloud transcriptions this month
-        let cloud_transcriptions_this_month: u32 = conn
-            .query_row(
-                &format!(
-                    "SELECT COUNT(*)
-                 FROM transcriptions
-                 WHERE timestamp >= ?1 AND {}",
-                    cloud_filter
-                ),
-                params![month_start_ms],
-                |row| row.get::<_, i64>(0).map(|c| c as u32),
-            )
-            .unwrap_or(0);
-
-        Ok(UsageStats {
-            cloud_minutes_this_month: cloud_minutes_this_month as f32,
-            cloud_hours_lifetime: (cloud_seconds_lifetime / 3600.0) as f32,
-            cloud_transcriptions_count,
-            cloud_transcriptions_this_month,
-        })
-    }
-
     fn build_search_query(search_query: Option<&str>) -> (String, Vec<Box<dyn ToSql>>) {
         if let Some(query) = search_query {
             if !query.trim().is_empty() {
@@ -630,12 +553,4 @@ fn count_words(text: &str) -> u32 {
     text.split_whitespace()
         .filter(|word| !word.is_empty())
         .count() as u32
-}
-
-#[derive(Debug, Clone, Serialize, Default)]
-pub struct UsageStats {
-    pub cloud_minutes_this_month: f32,
-    pub cloud_hours_lifetime: f32,
-    pub cloud_transcriptions_count: u32,
-    pub cloud_transcriptions_this_month: u32,
 }
