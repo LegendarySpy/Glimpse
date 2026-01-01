@@ -58,6 +58,7 @@ export {
     updateTranscription,
     deleteCloudTranscription,
     findByLocalId,
+    findByLocalOrDocumentId,
     syncLocalTranscription,
     validateConnection,
     getCloudUsageStats,

@@ -169,7 +169,8 @@ pub fn run() {
             cloud::clear_cloud_credentials,
             cloud::open_sign_in,
             cloud::open_checkout,
-            open_whats_new
+            open_whats_new,
+            switch_to_local_mode
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -611,6 +612,34 @@ fn open_whats_new(app: AppHandle<AppRuntime>) {
 }
 
 #[tauri::command]
+fn switch_to_local_mode(app: AppHandle<AppRuntime>) -> Result<(), String> {
+    let state = app.state::<AppState>();
+    let mut settings = state.current_settings();
+
+    if matches!(settings.transcription_mode, TranscriptionMode::Local) {
+        return Ok(());
+    }
+
+    settings.transcription_mode = TranscriptionMode::Local;
+
+    let settings = state
+        .persist_settings(settings)
+        .map_err(|e| e.to_string())?;
+
+    if let Err(err) = tray::refresh_tray_menu(&app, &settings) {
+        eprintln!("Failed to refresh tray menu: {err}");
+    }
+
+    if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &settings) {
+        eprintln!("Failed to emit settings change: {err}");
+    }
+
+    toast::show(&app, "success", None, "Switched to local mode. Cloud sync still works.");
+
+    Ok(())
+}
+
+#[tauri::command]
 fn open_data_dir(path: Option<String>, app: AppHandle<AppRuntime>) -> Result<(), String> {
     let path = path.ok_or_else(|| "Path is empty".to_string())?;
     let path = PathBuf::from(&path);
@@ -787,22 +816,6 @@ async fn retry_transcription(
         duration_override_seconds: Some(record.audio_duration_seconds),
     };
 
-    eprintln!("[retry_transcription] Deleting old record: {}", id);
-    match state.storage().delete(&id) {
-        Ok(deleted_path) => {
-            eprintln!(
-                "[retry_transcription] Deleted record, audio_path: {:?}",
-                deleted_path
-            );
-        }
-        Err(err) => {
-            eprintln!(
-                "[retry_transcription] Failed to delete old record {}: {}",
-                id, err
-            );
-        }
-    }
-
     let settings = state.current_settings();
     transcribe::retry_transcription_async(&app, saved, settings);
 
@@ -902,13 +915,8 @@ pub(crate) fn stop_active_recording(app: &AppHandle<AppRuntime>) {
 
 #[tauri::command]
 fn toast_dismissed(app: AppHandle<AppRuntime>) {
-    let state = app.state::<AppState>();
-    let status = state.pill().status();
-
-    if status == pill::PillStatus::Error {
-        state.pill().reset(&app);
-    }
-
+    stop_active_recording(&app);
+    hide_overlay(&app);
     toast::hide(&app);
 }
 

@@ -70,8 +70,9 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
             await onRetry(record.id);
         } catch (err) {
             console.error("Failed to retry:", err);
-            setIsRetrying(false);
             setRetryError(typeof err === "string" ? err : "Retry failed");
+        } finally {
+            setIsRetrying(false);
         }
     };
 

@@ -46,9 +46,11 @@ pub struct CloudTranscriptionConfig {
     pub jwt: String,
     pub llm_cleanup: bool,
     pub user_context: Option<String>,
+    pub language: Option<String>,
     pub selected_text: Option<String>,
     pub auto_paste: bool,
     pub history_sync_enabled: bool,
+    pub prompt: Option<String>,
 }
 
 impl CloudTranscriptionConfig {
@@ -64,14 +66,27 @@ impl CloudTranscriptionConfig {
             jwt,
             llm_cleanup,
             user_context,
+            language: None,
             selected_text: None,
             auto_paste: env_flag("GLIMPSE_AUTO_PASTE", true),
             history_sync_enabled,
+            prompt: None,
         }
     }
 
     pub fn with_selected_text(mut self, text: Option<String>) -> Self {
         self.selected_text = text;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_language(mut self, language: Option<String>) -> Self {
+        self.language = language;
+        self
+    }
+
+    pub fn with_prompt(mut self, prompt: Option<String>) -> Self {
+        self.prompt = prompt;
         self
     }
 }
@@ -123,6 +138,10 @@ struct ApiResponse {
 #[derive(Debug, Deserialize)]
 struct ApiErrorResponse {
     error: String,
+    #[serde(default)]
+    code: Option<String>,
+    #[serde(default)]
+    user_type: Option<String>,
 }
 
 pub async fn request_transcription(
@@ -245,6 +264,12 @@ pub async fn request_cloud_transcription(
     if let Some(ref ctx) = config.user_context {
         query_parts.push(format!("user_context={}", urlencoding::encode(ctx)));
     }
+    if let Some(ref language) = config.language {
+        query_parts.push(format!("language={}", urlencoding::encode(language)));
+    }
+    if let Some(ref prompt) = config.prompt {
+        query_parts.push(format!("prompt={}", urlencoding::encode(prompt)));
+    }
 
     if !query_parts.is_empty() {
         url = format!("{}?{}", url, query_parts.join("&"));
@@ -309,6 +334,19 @@ pub async fn request_cloud_transcription(
     }
 
     if let Ok(parsed) = serde_json::from_str::<ApiErrorResponse>(&text) {
+        // Check for quota-related error codes
+        if let Some(ref code) = parsed.code {
+            match code.as_str() {
+                "QUOTA_EXCEEDED" => {
+                    let user_type = parsed.user_type.as_deref().unwrap_or("subscriber");
+                    return Err(anyhow!("QUOTA_EXCEEDED:{}", user_type));
+                }
+                "QUOTA_CHECK_FAILED" => {
+                    return Err(anyhow!("QUOTA_CHECK_FAILED"));
+                }
+                _ => {}
+            }
+        }
         Err(anyhow!(parsed.error))
     } else if text.is_empty() {
         Err(anyhow!(format!(
