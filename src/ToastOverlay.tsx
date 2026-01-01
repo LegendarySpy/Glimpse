@@ -238,7 +238,11 @@ const ToastOverlay: React.FC = () => {
                   e.preventDefault();
                   e.stopPropagation();
                   try {
-                    await invoke(toast.action!);
+                    if (toast.action!.startsWith("add_to_dictionary:")) {
+                      await invoke("handle_dictionary_action", { action: toast.action });
+                    } else {
+                      await invoke(toast.action!);
+                    }
                     dismissWithCleanup();
                   } catch (err) {
                     console.error("Action failed:", err);

@@ -133,7 +133,14 @@ pub(crate) fn queue_transcription(
                         match async_runtime::spawn_blocking(move || assistive::paste_text(&text))
                             .await
                         {
-                            Ok(Ok(())) => pasted = true,
+                            Ok(Ok(())) => {
+                                pasted = true;
+                                maybe_start_correction_detection(
+                                    &app_handle,
+                                    &final_transcript,
+                                    true,
+                                );
+                            }
                             Ok(Err(err)) => {
                                 emit_auto_paste_error(
                                     &app_handle,
@@ -1103,4 +1110,23 @@ pub(crate) fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, 
     }
 
     Ok((samples, sample_rate))
+}
+
+fn maybe_start_correction_detection(
+    app: &AppHandle<AppRuntime>,
+    transcript: &str,
+    is_cloud_mode: bool,
+) {
+    if !is_cloud_mode || transcript.trim().is_empty() {
+        return;
+    }
+
+    let state = app.state::<AppState>();
+    if state.cloud_manager().get_credentials().is_none() {
+        return;
+    }
+
+    state
+        .correction_detector()
+        .start_session(app.clone(), transcript.to_string());
 }

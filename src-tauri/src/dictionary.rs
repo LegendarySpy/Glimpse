@@ -131,6 +131,30 @@ fn apply_case_pattern(matched: &str, replacement: &str) -> String {
 
 // Tauri commands
 
+pub fn add_replacement(from: &str, to: &str, state: tauri::State<AppState>) -> Result<(), String> {
+    let mut settings = state.current_settings();
+    let new_replacement = Replacement {
+        from: from.to_string(),
+        to: to.to_string(),
+    };
+
+    // Check if this replacement already exists
+    let exists = settings
+        .replacements
+        .iter()
+        .any(|r| r.from.to_lowercase() == from.to_lowercase());
+
+    if !exists {
+        settings.replacements.push(new_replacement);
+        settings.replacements = sanitize_replacements(&settings.replacements);
+        state
+            .persist_settings(settings)
+            .map_err(|err| err.to_string())?;
+    }
+
+    Ok(())
+}
+
 #[tauri::command]
 pub fn get_dictionary(state: tauri::State<AppState>) -> Result<Vec<String>, String> {
     let mut settings = state.current_settings();
