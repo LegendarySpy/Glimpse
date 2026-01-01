@@ -132,6 +132,14 @@ pub fn check_cloud_ready(app: &AppHandle<AppRuntime>) -> Result<(), CloudError> 
             if !c.is_subscriber && !c.is_tester {
                 return Err(CloudError::NotSubscriber);
             }
+
+            // Wake up cloud just in case, this is probably not needed once more people use cloud but for now it's good to have
+            let http = state.http();
+            let url = format!("{}/health", c.function_url);
+            tauri::async_runtime::spawn(async move {
+                let _ = http.get(&url).send().await;
+            });
+
             Ok(())
         }
     }
