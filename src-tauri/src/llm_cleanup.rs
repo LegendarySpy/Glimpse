@@ -188,24 +188,27 @@ fn parse_output(response: &str) -> Option<String> {
 fn get_endpoint(settings: &UserSettings) -> Result<String> {
     let base = match settings.llm_provider {
         LlmProvider::None => return Err(anyhow!("LLM cleanup is disabled")),
-        LlmProvider::LmStudio => settings
-            .llm_endpoint
-            .as_str()
-            .is_empty()
-            .then_some("http://localhost:1234")
-            .unwrap_or(&settings.llm_endpoint),
-        LlmProvider::Ollama => settings
-            .llm_endpoint
-            .as_str()
-            .is_empty()
-            .then_some("http://localhost:11434")
-            .unwrap_or(&settings.llm_endpoint),
-        LlmProvider::OpenAI => settings
-            .llm_endpoint
-            .as_str()
-            .is_empty()
-            .then_some("https://api.openai.com")
-            .unwrap_or(&settings.llm_endpoint),
+        LlmProvider::LmStudio => {
+            if settings.llm_endpoint.is_empty() {
+                "http://localhost:1234"
+            } else {
+                &settings.llm_endpoint
+            }
+        }
+        LlmProvider::Ollama => {
+            if settings.llm_endpoint.is_empty() {
+                "http://localhost:11434"
+            } else {
+                &settings.llm_endpoint
+            }
+        }
+        LlmProvider::OpenAI => {
+            if settings.llm_endpoint.is_empty() {
+                "https://api.openai.com"
+            } else {
+                &settings.llm_endpoint
+            }
+        }
         _ => {
             if settings.llm_endpoint.is_empty() {
                 return Err(anyhow!("Endpoint not configured"));

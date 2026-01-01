@@ -35,7 +35,7 @@ struct LoadedEngine {
 enum EngineInstance {
     Parakeet { engine: ParakeetEngine },
     Whisper { engine: WhisperEngine },
-    Moonshine { engine: MoonshineEngine },
+    Moonshine { engine: Box<MoonshineEngine> },
 }
 
 struct PreparedAudio {
@@ -182,7 +182,7 @@ impl LocalTranscriber {
                         MoonshineModelParams::variant(model_variant),
                     )
                     .map_err(|err| anyhow!("Failed to load Moonshine model: {err}"))?;
-                EngineInstance::Moonshine { engine }
+                EngineInstance::Moonshine { engine: Box::new(engine) }
             }
         };
 
@@ -224,7 +224,7 @@ fn prepare_audio(samples: &[i16], sample_rate: u32) -> PreparedAudio {
     const EXTRA_PADDING: usize = 4_000;
 
     let padding_needed = MIN_SAMPLES.saturating_sub(data.len()) + EXTRA_PADDING;
-    data.extend(std::iter::repeat(0.0f32).take(padding_needed));
+    data.extend(std::iter::repeat_n(0.0f32, padding_needed));
 
     PreparedAudio { data }
 }

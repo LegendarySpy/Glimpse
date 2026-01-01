@@ -22,8 +22,6 @@ pub enum CloudError {
     NotSubscriber,
     JwtExpired,
     JwtInvalid,
-    QuotaExceeded { is_tester: bool },
-    QuotaCheckFailed,
 }
 
 impl CloudError {
@@ -33,13 +31,6 @@ impl CloudError {
             CloudError::NotSubscriber => "Upgrade to use cloud transcription",
             CloudError::JwtExpired => "Session expired. Please sign in again",
             CloudError::JwtInvalid => "Authentication error. Please sign in again",
-            CloudError::QuotaExceeded { is_tester: true } => {
-                "Beta tester limit reached (1 hr/month). Upgrade for 10 hours."
-            }
-            CloudError::QuotaExceeded { is_tester: false } => {
-                "Monthly quota reached (10 hrs). Resets next month."
-            }
-            CloudError::QuotaCheckFailed => "Unable to verify quota. Please try again.",
         }
     }
 }
@@ -48,11 +39,17 @@ pub struct CloudManager {
     credentials: Mutex<Option<CloudCredentials>>,
 }
 
-impl CloudManager {
-    pub fn new() -> Self {
+impl Default for CloudManager {
+    fn default() -> Self {
         Self {
             credentials: Mutex::new(None),
         }
+    }
+}
+
+impl CloudManager {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn set_credentials(
