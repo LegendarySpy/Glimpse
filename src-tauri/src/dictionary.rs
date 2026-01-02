@@ -1,9 +1,11 @@
 use std::collections::HashSet;
 
+use tauri::{AppHandle, Emitter};
+
 use crate::{
     model_manager::{LocalModelEngine, ReadyModel},
     settings::{Replacement, UserSettings},
-    AppState,
+    AppRuntime, AppState, EVENT_SETTINGS_CHANGED,
 };
 
 pub fn sanitize_dictionary_entries(entries: &[String]) -> Vec<String> {
@@ -129,7 +131,30 @@ fn apply_case_pattern(matched: &str, replacement: &str) -> String {
     }
 }
 
-// Tauri commands
+pub fn add_dictionary_word(
+    word: &str,
+    app: &AppHandle<AppRuntime>,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    let mut settings = state.current_settings();
+    let normalized = word.trim().to_string();
+
+    let exists = settings
+        .dictionary
+        .iter()
+        .any(|w| w.to_lowercase() == normalized.to_lowercase());
+
+    if !exists && !normalized.is_empty() {
+        settings.dictionary.push(normalized);
+        settings.dictionary = sanitize_dictionary_entries(&settings.dictionary);
+        let settings = state
+            .persist_settings(settings)
+            .map_err(|err| err.to_string())?;
+        let _ = app.emit(EVENT_SETTINGS_CHANGED, &settings);
+    }
+
+    Ok(())
+}
 
 #[tauri::command]
 pub fn set_dictionary(

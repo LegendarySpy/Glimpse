@@ -9,6 +9,74 @@ use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
 #[cfg(target_os = "macos")]
 use std::{thread, time::Duration};
 
+#[derive(Debug, Clone)]
+pub struct AxContext {
+    pub value: String,
+}
+
+#[cfg(target_os = "macos")]
+pub fn get_ax_context() -> Option<AxContext> {
+    use core_foundation::base::{CFType, TCFType};
+    use core_foundation::string::CFString;
+    use std::ffi::c_void;
+    use std::ptr;
+
+    #[link(name = "ApplicationServices", kind = "framework")]
+    extern "C" {
+        fn AXUIElementCreateSystemWide() -> *mut c_void;
+        fn AXUIElementCopyAttributeValue(
+            element: *mut c_void,
+            attribute: *const c_void,
+            value: *mut *mut c_void,
+        ) -> i32;
+        fn CFRelease(cf: *const c_void);
+    }
+
+    unsafe {
+        let system_wide = AXUIElementCreateSystemWide();
+        if system_wide.is_null() {
+            return None;
+        }
+
+        let focused_attr = CFString::new("AXFocusedUIElement");
+        let mut focused_element: *mut c_void = ptr::null_mut();
+        let result = AXUIElementCopyAttributeValue(
+            system_wide,
+            focused_attr.as_concrete_TypeRef() as *const c_void,
+            &mut focused_element,
+        );
+        CFRelease(system_wide);
+
+        if result != 0 || focused_element.is_null() {
+            return None;
+        }
+
+        let value_attr = CFString::new("AXValue");
+        let mut value_ref: *mut c_void = ptr::null_mut();
+        let value_result = AXUIElementCopyAttributeValue(
+            focused_element,
+            value_attr.as_concrete_TypeRef() as *const c_void,
+            &mut value_ref,
+        );
+
+        let value = if value_result == 0 && !value_ref.is_null() {
+            let cf_type: CFType = CFType::wrap_under_create_rule(value_ref as *const _);
+            cf_type.downcast::<CFString>().map(|s| s.to_string())
+        } else {
+            None
+        };
+
+        CFRelease(focused_element);
+
+        value.map(|v| AxContext { value: v })
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn get_ax_context() -> Option<AxContext> {
+    None
+}
+
 #[cfg(target_os = "macos")]
 pub fn get_selected_text_ax() -> Option<String> {
     use core_foundation::base::{CFType, TCFType};

@@ -61,7 +61,6 @@ pub(crate) fn queue_transcription(
             use_cloud_auth
         );
 
-        // Cloud transcription path - handles everything server-side
         if use_cloud_auth {
             let creds = cloud_creds.unwrap();
             let has_selection = pending_selected_text.is_some();
@@ -126,7 +125,13 @@ pub(crate) fn queue_transcription(
                         match async_runtime::spawn_blocking(move || assistive::paste_text(&text))
                             .await
                         {
-                            Ok(Ok(())) => pasted = true,
+                            Ok(Ok(())) => {
+                                pasted = true;
+                                maybe_start_correction_detection(
+                                    &app_handle,
+                                    &final_transcript,
+                                );
+                            }
                             Ok(Err(err)) => {
                                 emit_auto_paste_error(
                                     &app_handle,
@@ -142,14 +147,12 @@ pub(crate) fn queue_transcription(
                         }
                     }
 
-                    // Use cloud response data directly - ensure speech_model has cloud- prefix
                     let speech_model = if cloud_result.speech_model.starts_with("cloud-") {
                         cloud_result.speech_model.clone()
                     } else {
                         format!("cloud-{}", cloud_result.speech_model)
                     };
 
-                    // If cloud saved the transcription, use its ID and mark as synced
                     let cloud_saved = cloud_result.transcription_id.is_some();
                     let id_override = cloud_result.transcription_id.clone();
 
@@ -179,7 +182,6 @@ pub(crate) fn queue_transcription(
                         },
                     );
 
-                    // Save with proper cloud data
                     if cloud_result.llm_cleaned {
                         let raw = cloud_result
                             .raw_text
@@ -228,7 +230,6 @@ pub(crate) fn queue_transcription(
             return;
         }
 
-        // Local or cloud without credentials path
         let result = if use_local {
             let model_key = settings.local_model.clone();
             match model_manager::ensure_model_ready(&app_handle, &model_key) {
@@ -256,7 +257,6 @@ pub(crate) fn queue_transcription(
                 Err(err) => Err(err),
             }
         } else {
-            // Cloud mode selected but no credentials - user needs to sign in
             emit_transcription_error(
                 &app_handle,
                 "Sign in required for cloud transcription".to_string(),
@@ -365,7 +365,10 @@ pub(crate) fn queue_transcription(
                     let text = final_transcript.clone();
                     match async_runtime::spawn_blocking(move || assistive::paste_text(&text)).await
                     {
-                        Ok(Ok(())) => pasted = true,
+                        Ok(Ok(())) => {
+                            pasted = true;
+                            maybe_start_correction_detection(&app_handle, &final_transcript);
+                        }
                         Ok(Err(err)) => {
                             emit_auto_paste_error(&app_handle, format!("Auto paste failed: {err}"));
                         }
@@ -378,6 +381,7 @@ pub(crate) fn queue_transcription(
                     }
                 }
 
+                let synced = false;
                 let metadata = build_transcription_metadata(
                     &saved_for_task,
                     &settings,
@@ -385,7 +389,7 @@ pub(crate) fn queue_transcription(
                     reported_model.as_deref(),
                     &final_transcript,
                     llm_cleaned,
-                    false, // Not synced - local transcriptions need to be synced later
+                    synced,
                 );
 
                 emit_transcription_complete_with_cleanup(
@@ -446,7 +450,6 @@ pub(crate) fn retry_transcription_async(
             use_cloud_auth
         );
 
-        // Cloud transcription path for retry
         if use_cloud_auth {
             let creds = cloud_creds.unwrap();
             eprintln!(
@@ -489,14 +492,12 @@ pub(crate) fn retry_transcription_async(
                     let final_transcript =
                         dictionary::apply_replacements(&final_transcript, &settings.replacements);
 
-                    // Ensure speech_model has cloud- prefix
                     let speech_model = if cloud_result.speech_model.starts_with("cloud-") {
                         cloud_result.speech_model.clone()
                     } else {
                         format!("cloud-{}", cloud_result.speech_model)
                     };
 
-                    // If cloud saved the transcription, use its ID and mark as synced
                     let cloud_saved = cloud_result.transcription_id.is_some();
                     let id_override = cloud_result.transcription_id.clone();
 
@@ -584,7 +585,6 @@ pub(crate) fn retry_transcription_async(
             return;
         }
 
-        // Local or cloud without credentials path
         let result = if use_local {
             match load_audio_for_transcription(&saved_for_task.path) {
                 Ok((samples, sample_rate)) => {
@@ -616,7 +616,6 @@ pub(crate) fn retry_transcription_async(
                 Err(err) => Err(err),
             }
         } else {
-            // Cloud mode selected but no credentials - user needs to sign in
             emit_transcription_error(
                 &app_handle,
                 "Sign in required for cloud transcription".to_string(),
@@ -661,6 +660,7 @@ pub(crate) fn retry_transcription_async(
                     return;
                 }
 
+                let synced = false;
                 let metadata = build_transcription_metadata(
                     &saved_for_task,
                     &settings,
@@ -668,7 +668,7 @@ pub(crate) fn retry_transcription_async(
                     reported_model.as_deref(),
                     &final_transcript,
                     llm_cleaned,
-                    false, // Local retries are not synced
+                    synced,
                 );
 
                 emit_transcription_complete_with_cleanup(
@@ -831,7 +831,6 @@ fn emit_transcription_error_inner(
     audio_path: String,
     reset_state: bool,
 ) {
-    // Handle quota errors specially with dedicated toasts
     if message.contains("QUOTA_EXCEEDED:") {
         let is_tester = message.contains(":tester");
         cloud::show_quota_exceeded(app, is_tester);
@@ -1123,4 +1122,18 @@ fn downmix_interleaved(samples: &[i16], channels: usize) -> Vec<i16> {
         mono.push((acc / channels as i32) as i16);
     }
     mono
+}
+
+fn maybe_start_correction_detection(
+    app: &AppHandle<AppRuntime>,
+    transcript: &str,
+) {
+    if transcript.trim().is_empty() {
+        return;
+    }
+
+    let state = app.state::<AppState>();
+    state
+        .correction_detector()
+        .start_session(app.clone(), transcript.to_string());
 }

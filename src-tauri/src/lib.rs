@@ -2,6 +2,7 @@ mod analytics;
 mod assistive;
 mod audio;
 mod cloud;
+mod correction_detector;
 mod crypto;
 mod dictionary;
 mod downloader;
@@ -160,7 +161,8 @@ pub fn run() {
             cloud::open_sign_in,
             cloud::open_checkout,
             open_whats_new,
-            switch_to_local_mode
+            switch_to_local_mode,
+            correction_detector::handle_dictionary_action
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -190,6 +192,7 @@ pub struct AppState {
     cloud_manager: cloud::CloudManager,
     pending_selected_text: parking_lot::Mutex<Option<String>>,
     download_tokens: parking_lot::Mutex<HashMap<String, CancellationToken>>,
+    correction_detector: correction_detector::CorrectionDetector,
 }
 
 impl AppState {
@@ -231,6 +234,7 @@ impl AppState {
             cloud_manager: cloud::CloudManager::new(),
             pending_selected_text: parking_lot::Mutex::new(None),
             download_tokens: parking_lot::Mutex::new(HashMap::new()),
+            correction_detector: correction_detector::CorrectionDetector::new(),
         }
     }
 
@@ -324,6 +328,10 @@ impl AppState {
 
     pub fn clear_download_token(&self, model: &str) {
         self.download_tokens.lock().remove(model);
+    }
+
+    pub fn correction_detector(&self) -> &correction_detector::CorrectionDetector {
+        &self.correction_detector
     }
 }
 
