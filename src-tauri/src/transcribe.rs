@@ -1059,46 +1059,68 @@ pub(crate) fn count_words(text: &str) -> u32 {
 }
 
 pub(crate) fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
-    use minimp3::{Decoder, Frame};
-    use std::io::Read;
+    let ext = path
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
 
-    let mut file = std::fs::File::open(path)
-        .with_context(|| format!("Failed to open audio file at {}", path.display()))?;
-    let mut mp3_data = Vec::new();
-    file.read_to_end(&mut mp3_data)
-        .context("Failed to read MP3 file")?;
-
-    let mut decoder = Decoder::new(&mp3_data[..]);
-    let mut samples = Vec::new();
-    let mut sample_rate = 16000;
-
-    loop {
-        match decoder.next_frame() {
-            Ok(Frame {
-                data,
-                sample_rate: sr,
-                channels,
-                ..
-            }) => {
-                sample_rate = sr as u32;
-
-                if channels == 1 {
-                    samples.extend_from_slice(&data);
-                } else {
-                    for chunk in data.chunks(channels) {
-                        let mono_sample: i32 = chunk.iter().map(|&s| s as i32).sum();
-                        samples.push((mono_sample / channels as i32) as i16);
-                    }
-                }
-            }
-            Err(minimp3::Error::Eof) => break,
-            Err(e) => return Err(anyhow!("MP3 decoding error: {}", e)),
-        }
+    if ext != "wav" {
+        return Err(anyhow!("Unsupported audio format: {ext}"));
     }
+
+    decode_wav(path)
+}
+
+fn decode_wav(path: &PathBuf) -> Result<(Vec<i16>, u32)> {
+    let file = std::fs::File::open(path)
+        .with_context(|| format!("Failed to open WAV file at {}", path.display()))?;
+    let mut reader =
+        hound::WavReader::new(file).map_err(|err| anyhow!("WAV read error: {err}"))?;
+    let spec = reader.spec();
+    if spec.sample_format != hound::SampleFormat::Int {
+        return Err(anyhow!("Unsupported WAV sample format"));
+    }
+    if spec.bits_per_sample != 16 {
+        return Err(anyhow!(
+            "Unsupported WAV bits per sample: {}",
+            spec.bits_per_sample
+        ));
+    }
+
+    let mut samples = Vec::new();
+    for sample in reader.samples::<i16>() {
+        let sample = sample.map_err(|err| anyhow!("WAV read error: {err}"))?;
+        samples.push(sample);
+    }
+
+    let samples = if spec.channels <= 1 {
+        samples
+    } else {
+        downmix_interleaved(&samples, spec.channels as usize)
+    };
 
     if samples.is_empty() {
-        return Err(anyhow!("No audio data decoded from MP3 file"));
+        return Err(anyhow!("No audio data decoded from WAV file"));
     }
 
-    Ok((samples, sample_rate))
+    Ok((samples, spec.sample_rate))
+}
+
+fn downmix_interleaved(samples: &[i16], channels: usize) -> Vec<i16> {
+    if channels <= 1 {
+        return samples.to_vec();
+    }
+
+    let frames = samples.len() / channels;
+    let mut mono = Vec::with_capacity(frames);
+    for frame in 0..frames {
+        let mut acc = 0i32;
+        for ch in 0..channels {
+            let idx = frame * channels + ch;
+            acc += samples.get(idx).copied().unwrap_or_default() as i32;
+        }
+        mono.push((acc / channels as i32) as i16);
+    }
+    mono
 }

@@ -184,7 +184,7 @@ pub async fn request_cloud_transcription(
     let mut request = client
         .post(&url)
         .header("Authorization", format!("Bearer {}", &config.jwt))
-        .header("Content-Type", "audio/mpeg")
+        .header("Content-Type", "audio/wav")
         .header(
             "X-History-Sync-Enabled",
             if config.history_sync_enabled {

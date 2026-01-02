@@ -27,7 +27,7 @@ serde_json = "1"
 chrono = { version = "0.4", features = ["serde"] }
 cpal = "0.15"
 anyhow = "1"
-mp3lame-encoder = { version = "0.2", features = ["std"] }
+hound = "3.5.1"
 parking_lot = "0.12"
 crossbeam-channel = "0.5"
 webrtc-vad = "0.2"
@@ -39,7 +39,6 @@ arboard = "3"
 mime_guess = "2"
 transcribe-rs = { version = "0.2.0", features = ["whisper", "parakeet", "moonshine"] }
 uuid = { version = "1.18.1", features = ["v4"] }
-minimp3 = "0.5"
 aes-gcm = "0.10"
 pbkdf2 = { version = "0.12", features = ["simple"] }
 sha2 = "0.10"
