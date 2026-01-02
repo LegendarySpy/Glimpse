@@ -17,6 +17,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
         isLoading,
         deleteTranscription,
         retryTranscription,
+        retryingIds,
         retryLlmCleanup,
         undoLlmCleanup,
         clearAllTranscriptions,
@@ -193,11 +194,13 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({ showLlmButtons = 
                                 );
                             }
 
+                            const isRetrying = retryingIds.includes(record.id);
                             return (
                                 <div className="pb-1 pl-1">
                                     <TranscriptionItem
                                         key={record.id}
                                         record={record}
+                                        isRetrying={isRetrying}
                                         onDelete={deleteTranscription}
                                         onRetry={retryTranscription}
                                         onRetryLlm={retryLlmCleanup}

@@ -759,6 +759,19 @@ async fn retry_transcription(
         record.audio_path, record.speech_model, record.synced
     );
 
+    if record.status == storage::TranscriptionStatus::Error {
+        if let Some(message) = record.error_message.as_deref() {
+            let lower = message.to_ascii_lowercase();
+            let is_quota_error =
+                lower.contains("quota reached") || lower.contains("beta tester limit");
+            if is_quota_error {
+                let is_tester = lower.contains("beta tester");
+                cloud::show_quota_exceeded(&app, is_tester);
+                return Err(String::new());
+            }
+        }
+    }
+
     let audio_path = PathBuf::from(&record.audio_path);
     if !audio_path.exists() {
         if record.audio_path.contains("placeholder") || record.audio_path.contains("cloud_synced") {
@@ -778,7 +791,7 @@ async fn retry_transcription(
     };
 
     let settings = state.current_settings();
-    transcribe::retry_transcription_async(&app, saved, settings);
+    transcribe::retry_transcription_async(&app, saved, settings, id);
 
     Ok(())
 }

@@ -10,16 +10,16 @@ interface TranscriptionItemProps {
     onRetry: (id: string) => Promise<void>;
     onRetryLlm?: (id: string) => Promise<void>;
     onUndoLlm?: (id: string) => Promise<void>;
+    isRetrying?: boolean;
     showLlmButtons?: boolean;
     searchQuery?: string;
     skipAnimation?: boolean;
     shiftHeld?: boolean;
 }
 
-const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm, showLlmButtons = false, searchQuery = "", skipAnimation = false, shiftHeld = false }) => {
+const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete, onRetry, onRetryLlm, onUndoLlm, isRetrying = false, showLlmButtons = false, searchQuery = "", skipAnimation = false, shiftHeld = false }) => {
     const [copied, setCopied] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [isRetrying, setIsRetrying] = useState(false);
     const [retryError, setRetryError] = useState<string | null>(null);
     const [isRetryingLlm, setIsRetryingLlm] = useState(false);
     const [isUndoingLlm, setIsUndoingLlm] = useState(false);
@@ -63,16 +63,12 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({ record, onDelete,
 
     const handleRetry = async () => {
         if (isRetrying) return;
-        setIsRetrying(true);
         setRetryError(null);
         setMenuOpen(false);
         try {
             await onRetry(record.id);
-        } catch (err) {
-            console.error("Failed to retry:", err);
-            setRetryError(typeof err === "string" ? err : "Retry failed");
-        } finally {
-            setIsRetrying(false);
+        } catch {
+            // Errors are handled by the hook (quota toast, etc.)
         }
     };
 

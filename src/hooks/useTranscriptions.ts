@@ -107,6 +107,12 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [retryingIds, setRetryingIds] = useState<string[]>([]);
+    const retryingIdsRef = useRef<string[]>([]);
+
+    useEffect(() => {
+        retryingIdsRef.current = retryingIds;
+    }, [retryingIds]);
 
     const [userId, setUserId] = useState<string | null>(null);
     const [isSubscriber, setIsSubscriber] = useState(false);
@@ -344,9 +350,13 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
     const retryTranscription = useCallback(async (id: string) => {
         try {
             await invoke("retry_transcription", { id });
+            setRetryingIds(prev => (prev.includes(id) ? prev : [...prev, id]));
         } catch (err) {
-            console.error("Failed to retry transcription:", err);
-            throw err; // Re-throw so callers can handle the error
+            const errStr = typeof err === "string" ? err : String(err);
+            if (errStr && !errStr.includes("quota")) {
+                console.error("Failed to retry transcription:", err);
+            }
+            throw err;
         }
     }, []);
 
@@ -424,6 +434,9 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         listen<{ id: string }>("transcription:complete", async (event) => {
             if (isCancelled) return;
             await loadTranscriptions();
+            if (retryingIdsRef.current.length > 0) {
+                setRetryingIds([]);
+            }
 
             if (resolvedCloudSyncEnabled && userId && isSubscriber) {
                 const records = await invoke<TranscriptionRecord[]>("get_transcriptions");
@@ -452,6 +465,9 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         listen("transcription:error", () => {
             if (isCancelled) return;
             loadTranscriptions();
+            if (retryingIdsRef.current.length > 0) {
+                setRetryingIds([]);
+            }
         }).then(fn => {
             if (!isCancelled) {
                 unlistenRef2.current = fn;
@@ -481,6 +497,7 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
         isSyncing,
         deleteTranscription,
         retryTranscription,
+        retryingIds,
         retryLlmCleanup,
         undoLlmCleanup,
         clearAllTranscriptions,

@@ -428,11 +428,13 @@ pub(crate) fn retry_transcription_async(
     app: &AppHandle<AppRuntime>,
     saved: RecordingSaved,
     settings: UserSettings,
+    original_id: String,
 ) {
     let http = app.state::<AppState>().http();
     let cloud_creds = app.state::<AppState>().cloud_manager().get_credentials();
     let app_handle = app.clone();
     let saved_for_task = saved.clone();
+    let retry_id = original_id.clone();
 
     async_runtime::spawn(async move {
         let use_local = matches!(settings.transcription_mode, TranscriptionMode::Local);
@@ -463,7 +465,8 @@ pub(crate) fn retry_transcription_async(
                     Some(settings.user_context.clone())
                 },
                 creds.history_sync_enabled,
-            );
+            )
+            .with_local_id(Some(retry_id.clone()));
 
             match transcription_api::request_cloud_transcription(
                 &http,
@@ -496,9 +499,8 @@ pub(crate) fn retry_transcription_async(
                         format!("cloud-{}", cloud_result.speech_model)
                     };
 
-                    // If cloud saved the transcription, use its ID and mark as synced
+                    // If cloud saved the transcription, mark as synced
                     let cloud_saved = cloud_result.transcription_id.is_some();
-                    let id_override = cloud_result.transcription_id.clone();
 
                     let metadata = storage::TranscriptionMetadata {
                         speech_model,
@@ -526,39 +528,30 @@ pub(crate) fn retry_transcription_async(
                         },
                     );
 
-                    if cloud_result.llm_cleaned {
-                        let raw = cloud_result
-                            .raw_text
-                            .unwrap_or_else(|| final_transcript.clone());
-                        eprintln!(
-                            "[retry_transcription] Saving with cleanup: raw_len={} cleaned_len={}",
-                            raw.len(),
-                            final_transcript.len()
-                        );
-                        let _ = app_handle
-                            .state::<AppState>()
-                            .storage()
-                            .save_transcription_with_cleanup(
-                                raw,
-                                final_transcript,
-                                saved_for_task.path.display().to_string(),
-                                metadata,
-                                id_override,
-                            );
+                    let raw_text = if cloud_result.llm_cleaned {
+                        cloud_result.raw_text.clone()
                     } else {
-                        eprintln!(
-                            "[retry_transcription] Saving without cleanup: text_len={}",
-                            final_transcript.len()
-                        );
-                        let _ = app_handle.state::<AppState>().storage().save_transcription(
+                        None
+                    };
+
+                    eprintln!(
+                        "[retry_transcription] Updating record {}: text_len={} llm_cleaned={}",
+                        retry_id,
+                        final_transcript.len(),
+                        cloud_result.llm_cleaned
+                    );
+
+                    let _ = app_handle
+                        .state::<AppState>()
+                        .storage()
+                        .update_transcription_result(
+                            &retry_id,
                             final_transcript,
-                            saved_for_task.path.display().to_string(),
+                            raw_text,
                             storage::TranscriptionStatus::Success,
                             None,
                             metadata,
-                            id_override,
                         );
-                    }
                 }
                 Err(err) => {
                     let err_string = err.to_string();
@@ -570,6 +563,14 @@ pub(crate) fn retry_transcription_async(
                             "cloud_auth",
                             "cloud",
                             "quota_exceeded",
+                        );
+                        crate::emit_event(
+                            &app_handle,
+                            EVENT_TRANSCRIPTION_ERROR,
+                            TranscriptionErrorPayload {
+                                message: "QUOTA_EXCEEDED".to_string(),
+                                stage: "cloud_auth".to_string(),
+                            },
                         );
                     } else {
                         emit_transcription_error(
@@ -671,16 +672,47 @@ pub(crate) fn retry_transcription_async(
                     false, // Local retries are not synced
                 );
 
-                emit_transcription_complete_with_cleanup(
+                let raw_text = if llm_cleaned {
+                    Some(raw_transcript.clone())
+                } else {
+                    None
+                };
+
+                eprintln!(
+                    "[retry_transcription] Updating local record {}: text_len={} llm_cleaned={}",
+                    retry_id,
+                    final_transcript.len(),
+                    llm_cleaned
+                );
+
+                let _ = app_handle
+                    .state::<AppState>()
+                    .storage()
+                    .update_transcription_result(
+                        &retry_id,
+                        final_transcript.clone(),
+                        raw_text,
+                        storage::TranscriptionStatus::Success,
+                        None,
+                        metadata.clone(),
+                    );
+
+                analytics::track_transcription_completed(
                     &app_handle,
-                    raw_transcript,
-                    final_transcript,
-                    false,
-                    saved_for_task.path.display().to_string(),
-                    llm_cleaned,
-                    metadata,
                     "unknown",
                     if use_local { "local" } else { "cloud" },
+                    Some(&metadata.speech_model),
+                    llm_cleaned,
+                    metadata.audio_duration_seconds as f64,
+                );
+
+                crate::emit_event(
+                    &app_handle,
+                    EVENT_TRANSCRIPTION_COMPLETE,
+                    TranscriptionCompletePayload {
+                        transcript: final_transcript,
+                        auto_paste: false,
+                    },
                 );
             }
             Err(err) => {

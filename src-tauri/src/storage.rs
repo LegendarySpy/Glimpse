@@ -203,6 +203,52 @@ impl StorageManager {
         Ok(())
     }
 
+    pub fn update_transcription_result(
+        &self,
+        id: &str,
+        text: String,
+        raw_text: Option<String>,
+        status: TranscriptionStatus,
+        error_message: Option<String>,
+        metadata: TranscriptionMetadata,
+    ) -> Result<Option<TranscriptionRecord>> {
+        let conn = self.connection.lock();
+        let existing = Self::get_record(&conn, id)?;
+        if existing.is_none() {
+            return Ok(None);
+        }
+
+        conn.execute(
+            "UPDATE transcriptions SET 
+                text = ?1,
+                raw_text = ?2,
+                status = ?3,
+                error_message = ?4,
+                llm_cleaned = ?5,
+                speech_model = ?6,
+                llm_model = ?7,
+                word_count = ?8,
+                audio_duration_seconds = ?9,
+                synced = ?10
+             WHERE id = ?11",
+            params![
+                text,
+                raw_text,
+                status.as_str(),
+                error_message,
+                raw_text.is_some(),
+                metadata.speech_model,
+                metadata.llm_model,
+                metadata.word_count,
+                metadata.audio_duration_seconds,
+                metadata.synced,
+                id,
+            ],
+        )?;
+
+        Self::get_record(&conn, id)
+    }
+
     pub fn get_all(&self) -> Vec<TranscriptionRecord> {
         match self.load_all_from_db() {
             Ok(records) => records,

@@ -31,6 +31,7 @@ pub struct CloudTranscriptionConfig {
     pub auto_paste: bool,
     pub history_sync_enabled: bool,
     pub prompt: Option<String>,
+    pub local_id: Option<String>,
 }
 
 fn env_flag(key: &str, default: bool) -> bool {
@@ -57,6 +58,7 @@ impl CloudTranscriptionConfig {
             auto_paste: env_flag("GLIMPSE_AUTO_PASTE", true),
             history_sync_enabled,
             prompt: None,
+            local_id: None,
         }
     }
 
@@ -73,6 +75,11 @@ impl CloudTranscriptionConfig {
 
     pub fn with_prompt(mut self, prompt: Option<String>) -> Self {
         self.prompt = prompt;
+        self
+    }
+
+    pub fn with_local_id(mut self, local_id: Option<String>) -> Self {
+        self.local_id = local_id;
         self
     }
 }
@@ -198,6 +205,10 @@ pub async fn request_cloud_transcription(
         use base64::Engine;
         let encoded = base64::engine::general_purpose::STANDARD.encode(selected.as_bytes());
         request = request.header("X-Selected-Text", encoded);
+    }
+
+    if let Some(ref local_id) = config.local_id {
+        request = request.header("X-Local-Id", local_id);
     }
 
     let response = request
