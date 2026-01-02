@@ -1,11 +1,13 @@
 use crate::{
     assistive, cloud, emit_event, permissions, platform, recorder::RecorderManager, toast,
-    AppRuntime, AppState, MAIN_WINDOW_LABEL,
+    AppRuntime, AppState, AudioSpectrumPayload, EVENT_AUDIO_SPECTRUM, MAIN_WINDOW_LABEL,
 };
 use chrono::{DateTime, Local};
 use parking_lot::Mutex;
+use rustfft::{num_complex::Complex, FftPlanner};
 use serde::Serialize;
-use std::sync::Arc;
+use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
+use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
@@ -53,6 +55,78 @@ pub struct PillStatePayload {
     pub mode: Option<String>,
 }
 
+const SPECTRUM_SIZE: usize = 512;
+const SPECTRUM_BINS: usize = SPECTRUM_SIZE / 2;
+const SPECTRUM_SMOOTHING: f32 = 0.8;
+const SPECTRUM_MIN_DB: f32 = -100.0;
+const SPECTRUM_MAX_DB: f32 = -30.0;
+
+struct AudioSpectrumEmitter {
+    stop: Arc<AtomicBool>,
+    handle: Option<std::thread::JoinHandle<()>>,
+}
+
+impl AudioSpectrumEmitter {
+    fn start(app: AppHandle<AppRuntime>, recorder: Arc<RecorderManager>) -> Self {
+        let stop = Arc::new(AtomicBool::new(false));
+        let stop_signal = Arc::clone(&stop);
+        let handle = std::thread::spawn(move || {
+            let interval = Duration::from_millis(40);
+            let mut planner = FftPlanner::<f32>::new();
+            let fft = planner.plan_fft_forward(SPECTRUM_SIZE);
+            let denom = (SPECTRUM_SIZE - 1) as f32;
+            let window: Vec<f32> = (0..SPECTRUM_SIZE)
+                .map(|i| 0.5 - 0.5 * (2.0 * std::f32::consts::PI * i as f32 / denom).cos())
+                .collect();
+            let mut buffer = vec![Complex { re: 0.0, im: 0.0 }; SPECTRUM_SIZE];
+            let mut smoothed = vec![0.0f32; SPECTRUM_BINS];
+            let mut bins = vec![0u8; SPECTRUM_BINS];
+
+            while !stop_signal.load(Ordering::Relaxed) {
+                if let Some(samples) = recorder.spectrum_snapshot() {
+                    for (idx, sample) in samples.iter().enumerate() {
+                        buffer[idx].re = sample * window[idx];
+                        buffer[idx].im = 0.0;
+                    }
+                    fft.process(&mut buffer);
+
+                    for idx in 0..SPECTRUM_BINS {
+                        let magnitude = buffer[idx].norm() / SPECTRUM_SIZE as f32;
+                        let db = 20.0 * magnitude.max(1e-10).log10();
+                        let normalized =
+                            ((db - SPECTRUM_MIN_DB) / (SPECTRUM_MAX_DB - SPECTRUM_MIN_DB))
+                                .clamp(0.0, 1.0);
+                        smoothed[idx] = smoothed[idx] * SPECTRUM_SMOOTHING
+                            + normalized * (1.0 - SPECTRUM_SMOOTHING);
+                        bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
+                    }
+                } else {
+                    for idx in 0..SPECTRUM_BINS {
+                        smoothed[idx] *= SPECTRUM_SMOOTHING;
+                        bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
+                    }
+                }
+
+                emit_event(
+                    &app,
+                    EVENT_AUDIO_SPECTRUM,
+                    AudioSpectrumPayload { bins: bins.clone() },
+                );
+                std::thread::sleep(interval);
+            }
+        });
+        Self {
+            stop,
+            handle: Some(handle),
+        }
+    }
+
+    fn stop(mut self) {
+        self.stop.store(true, Ordering::Relaxed);
+        let _ = self.handle.take();
+    }
+}
+
 pub struct PillController {
     status: Mutex<PillStatus>,
     recording_mode: Mutex<Option<RecordingMode>>,
@@ -60,6 +134,7 @@ pub struct PillController {
     hold_key_down: Mutex<bool>,
     shortcut_origin: Mutex<Option<ShortcutOrigin>>,
     recorder: Arc<RecorderManager>,
+    audio_spectrum_emitter: Mutex<Option<AudioSpectrumEmitter>>,
 }
 
 impl PillController {
@@ -71,6 +146,7 @@ impl PillController {
             hold_key_down: Mutex::new(false),
             shortcut_origin: Mutex::new(None),
             recorder,
+            audio_spectrum_emitter: Mutex::new(None),
         }
     }
 
@@ -80,6 +156,23 @@ impl PillController {
 
     pub fn recorder(&self) -> &RecorderManager {
         &self.recorder
+    }
+
+    fn start_audio_spectrum_emitter(&self, app: &AppHandle<AppRuntime>) {
+        let mut emitter = self.audio_spectrum_emitter.lock();
+        if emitter.is_some() {
+            return;
+        }
+        *emitter = Some(AudioSpectrumEmitter::start(
+            app.clone(),
+            Arc::clone(&self.recorder),
+        ));
+    }
+
+    fn stop_audio_spectrum_emitter(&self) {
+        if let Some(emitter) = self.audio_spectrum_emitter.lock().take() {
+            emitter.stop();
+        }
     }
 
     fn emit_state(&self, app: &AppHandle<AppRuntime>) {
@@ -137,6 +230,7 @@ impl PillController {
     }
 
     fn reset_recording_state(&self) {
+        self.stop_audio_spectrum_emitter();
         *self.recording_mode.lock() = None;
         *self.smart_press_time.lock() = None;
         // Note: hold_key_down is intentionally NOT cleared here.
@@ -234,6 +328,7 @@ impl PillController {
         match self.recorder.start(settings.microphone_device) {
             Ok(started) => {
                 self.transition_to(app, PillStatus::Listening);
+                self.start_audio_spectrum_emitter(app);
                 emit_event(
                     app,
                     crate::EVENT_RECORDING_START,
@@ -305,6 +400,7 @@ impl PillController {
             match self.recorder.start(settings.microphone_device) {
                 Ok(started) => {
                     self.transition_to(app, PillStatus::Listening);
+                    self.start_audio_spectrum_emitter(app);
                     emit_event(
                         app,
                         crate::EVENT_RECORDING_START,
@@ -380,6 +476,7 @@ impl PillController {
     }
 
     fn stop_and_process(&self, app: &AppHandle<AppRuntime>) {
+        self.stop_audio_spectrum_emitter();
         match self.recorder.stop() {
             Ok(Some(recording)) => {
                 let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
@@ -405,6 +502,7 @@ impl PillController {
     }
 
     pub fn cancel(&self, app: &AppHandle<AppRuntime>) {
+        self.stop_audio_spectrum_emitter();
         if let Err(err) = self.recorder.stop() {
             eprintln!("Failed to stop recorder: {err}");
         }
@@ -416,6 +514,7 @@ impl PillController {
             return;
         }
 
+        self.stop_audio_spectrum_emitter();
         let state = app.state::<AppState>();
         state.request_cancellation();
         let _ = self.recorder.stop();

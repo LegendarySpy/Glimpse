@@ -17,8 +17,52 @@ pub enum RecordingRejectionReason {
     EmptyBuffer,
 }
 
+const SPECTRUM_SIZE: usize = 512;
+
+struct AudioSpectrumState {
+    samples: Vec<f32>,
+    write_index: usize,
+    filled: bool,
+}
+
+impl AudioSpectrumState {
+    fn new() -> Self {
+        Self {
+            samples: vec![0.0; SPECTRUM_SIZE],
+            write_index: 0,
+            filled: false,
+        }
+    }
+
+    fn push_sample(&mut self, sample: f32) {
+        self.samples[self.write_index] = sample;
+        self.write_index += 1;
+        if self.write_index >= SPECTRUM_SIZE {
+            self.write_index = 0;
+            self.filled = true;
+        }
+    }
+
+    fn reset(&mut self) {
+        self.samples.fill(0.0);
+        self.write_index = 0;
+        self.filled = false;
+    }
+
+    fn snapshot(&self) -> Option<Vec<f32>> {
+        if !self.filled {
+            return None;
+        }
+        let mut out = Vec::with_capacity(SPECTRUM_SIZE);
+        out.extend_from_slice(&self.samples[self.write_index..]);
+        out.extend_from_slice(&self.samples[..self.write_index]);
+        Some(out)
+    }
+}
+
 pub struct RecorderManager {
     tx: Sender<RecorderCommand>,
+    spectrum: Arc<Mutex<AudioSpectrumState>>,
 }
 
 struct ActiveRecording {
@@ -50,11 +94,13 @@ pub struct RecordingSaved {
 impl Default for RecorderManager {
     fn default() -> Self {
         let (tx, rx) = unbounded();
+        let spectrum = Arc::new(Mutex::new(AudioSpectrumState::new()));
+        let spectrum_for_thread = Arc::clone(&spectrum);
 
         std::thread::Builder::new()
             .name("glimpse-recorder".into())
             .spawn(move || {
-                let mut core = RecorderCore::default();
+                let mut core = RecorderCore::new(spectrum_for_thread);
                 while let Ok(cmd) = rx.recv() {
                     match cmd {
                         RecorderCommand::Start { device_id, respond } => {
@@ -68,13 +114,21 @@ impl Default for RecorderManager {
             })
             .expect("failed to spawn recorder thread");
 
-        Self { tx }
+        Self { tx, spectrum }
     }
 }
 
 impl RecorderManager {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn spectrum_snapshot(&self) -> Option<Vec<f32>> {
+        if let Some(state) = self.spectrum.try_lock() {
+            state.snapshot()
+        } else {
+            None
+        }
     }
 
     pub fn start(&self, device_id: Option<String>) -> Result<DateTime<Local>> {
@@ -113,12 +167,19 @@ enum RecorderCommand {
     },
 }
 
-#[derive(Default)]
 struct RecorderCore {
     active: Option<ActiveRecording>,
+    spectrum: Arc<Mutex<AudioSpectrumState>>,
 }
 
 impl RecorderCore {
+    fn new(spectrum: Arc<Mutex<AudioSpectrumState>>) -> Self {
+        Self {
+            active: None,
+            spectrum,
+        }
+    }
+
     fn start(&mut self, device_id: Option<String>) -> Result<DateTime<Local>> {
         if self.active.is_some() {
             return Err(anyhow!("Recording is already in progress"));
@@ -147,30 +208,51 @@ impl RecorderCore {
             (sample_rate as usize * channels as usize).max(48_000),
         )));
         let buffer_ref = buffer.clone();
+        let spectrum_ref = Arc::clone(&self.spectrum);
+        let channels_usize = channels as usize;
+        self.spectrum.lock().reset();
 
         let err_fn = |err| {
             eprintln!("Microphone stream error: {err}");
         };
 
         let stream = match format {
-            SampleFormat::F32 => device.build_input_stream(
-                &stream_config,
-                move |data: &[f32], _| push_f32_samples(data, &buffer_ref),
-                err_fn,
-                None,
-            )?,
-            SampleFormat::I16 => device.build_input_stream(
-                &stream_config,
-                move |data: &[i16], _| push_i16_samples(data, &buffer_ref),
-                err_fn,
-                None,
-            )?,
-            SampleFormat::U16 => device.build_input_stream(
-                &stream_config,
-                move |data: &[u16], _| push_u16_samples(data, &buffer_ref),
-                err_fn,
-                None,
-            )?,
+            SampleFormat::F32 => {
+                let spectrum_ref = Arc::clone(&spectrum_ref);
+                let channels = channels_usize;
+                device.build_input_stream(
+                    &stream_config,
+                    move |data: &[f32], _| {
+                        push_f32_samples(data, &buffer_ref, &spectrum_ref, channels)
+                    },
+                    err_fn,
+                    None,
+                )?
+            }
+            SampleFormat::I16 => {
+                let spectrum_ref = Arc::clone(&spectrum_ref);
+                let channels = channels_usize;
+                device.build_input_stream(
+                    &stream_config,
+                    move |data: &[i16], _| {
+                        push_i16_samples(data, &buffer_ref, &spectrum_ref, channels)
+                    },
+                    err_fn,
+                    None,
+                )?
+            }
+            SampleFormat::U16 => {
+                let spectrum_ref = Arc::clone(&spectrum_ref);
+                let channels = channels_usize;
+                device.build_input_stream(
+                    &stream_config,
+                    move |data: &[u16], _| {
+                        push_u16_samples(data, &buffer_ref, &spectrum_ref, channels)
+                    },
+                    err_fn,
+                    None,
+                )?
+            }
             _ => return Err(anyhow!("Unsupported sample format")),
         };
 
@@ -189,6 +271,7 @@ impl RecorderCore {
     }
 
     fn stop(&mut self) -> Result<Option<CompletedRecording>> {
+        self.spectrum.lock().reset();
         if let Some(active) = self.active.take() {
             drop(active.stream);
             let raw_samples = Arc::try_unwrap(active.buffer)
@@ -741,7 +824,28 @@ fn resample_linear(input: &[f32], in_rate: u32, out_rate: u32) -> Vec<f32> {
     output
 }
 
-fn push_f32_samples(data: &[f32], buffer: &Arc<Mutex<Vec<i16>>>) {
+fn push_f32_samples(
+    data: &[f32],
+    buffer: &Arc<Mutex<Vec<i16>>>,
+    spectrum: &Arc<Mutex<AudioSpectrumState>>,
+    channels: usize,
+) {
+    let channels = channels.max(1);
+    if let Some(mut analysis) = spectrum.try_lock() {
+        for frame in data.chunks(channels) {
+            let mut mono = 0f32;
+            let mut count = 0usize;
+            for &sample in frame {
+                let clamped = sample.clamp(-1.0, 1.0);
+                mono += clamped;
+                count += 1;
+            }
+            if count > 0 {
+                analysis.push_sample(mono / count as f32);
+            }
+        }
+    }
+
     let mut writer = buffer.lock();
     for &sample in data {
         let clamped = sample.clamp(-1.0, 1.0);
@@ -749,12 +853,57 @@ fn push_f32_samples(data: &[f32], buffer: &Arc<Mutex<Vec<i16>>>) {
     }
 }
 
-fn push_i16_samples(data: &[i16], buffer: &Arc<Mutex<Vec<i16>>>) {
+fn push_i16_samples(
+    data: &[i16],
+    buffer: &Arc<Mutex<Vec<i16>>>,
+    spectrum: &Arc<Mutex<AudioSpectrumState>>,
+    channels: usize,
+) {
+    let channels = channels.max(1);
+    let scale = 1.0 / i16::MAX as f32;
+    if let Some(mut analysis) = spectrum.try_lock() {
+        for frame in data.chunks(channels) {
+            let mut mono = 0f32;
+            let mut count = 0usize;
+            for &sample in frame {
+                let normalized = (sample as f32 * scale).clamp(-1.0, 1.0);
+                mono += normalized;
+                count += 1;
+            }
+            if count > 0 {
+                analysis.push_sample(mono / count as f32);
+            }
+        }
+    }
+
     let mut writer = buffer.lock();
     writer.extend_from_slice(data);
 }
 
-fn push_u16_samples(data: &[u16], buffer: &Arc<Mutex<Vec<i16>>>) {
+fn push_u16_samples(
+    data: &[u16],
+    buffer: &Arc<Mutex<Vec<i16>>>,
+    spectrum: &Arc<Mutex<AudioSpectrumState>>,
+    channels: usize,
+) {
+    let channels = channels.max(1);
+    let scale = 1.0 / i16::MAX as f32;
+    if let Some(mut analysis) = spectrum.try_lock() {
+        for frame in data.chunks(channels) {
+            let mut mono = 0f32;
+            let mut count = 0usize;
+            for &sample in frame {
+                let centered = sample as i32 - i16::MAX as i32;
+                let normalized = (centered as f32 * scale).clamp(-1.0, 1.0);
+                mono += normalized;
+                count += 1;
+            }
+            if count > 0 {
+                analysis.push_sample(mono / count as f32);
+            }
+        }
+    }
+
     let mut writer = buffer.lock();
     for &sample in data {
         let centered = sample as i32 - i16::MAX as i32;

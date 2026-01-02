@@ -48,6 +48,7 @@ use tauri_plugin_opener::OpenerExt;
 pub(crate) const MAIN_WINDOW_LABEL: &str = "main";
 pub(crate) const SETTINGS_WINDOW_LABEL: &str = "settings";
 pub(crate) const EVENT_RECORDING_START: &str = "recording:start";
+pub(crate) const EVENT_AUDIO_SPECTRUM: &str = "audio:spectrum";
 pub(crate) const EVENT_TRANSCRIPTION_COMPLETE: &str = "transcription:complete";
 pub(crate) const EVENT_TRANSCRIPTION_ERROR: &str = "transcription:error";
 pub(crate) const EVENT_SETTINGS_CHANGED: &str = "settings:changed";
@@ -889,8 +890,10 @@ pub(crate) fn stop_active_recording(app: &AppHandle<AppRuntime>) {
 
 #[tauri::command]
 fn toast_dismissed(app: AppHandle<AppRuntime>) {
-    stop_active_recording(&app);
-    hide_overlay(&app);
+    let state = app.state::<AppState>();
+    if state.pill().status() == pill::PillStatus::Error {
+        state.pill().reset(&app);
+    }
     toast::hide(&app);
 }
 
@@ -995,6 +998,11 @@ fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<PathBuf> {
 #[derive(Serialize, Clone)]
 pub(crate) struct RecordingStartPayload {
     pub(crate) started_at: String,
+}
+
+#[derive(Serialize, Clone)]
+pub(crate) struct AudioSpectrumPayload {
+    pub(crate) bins: Vec<u8>,
 }
 
 #[derive(Serialize, Clone)]

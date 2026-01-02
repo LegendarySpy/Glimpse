@@ -10,6 +10,10 @@ interface PillStatePayload {
   mode?: string;
 }
 
+interface AudioSpectrumPayload {
+  bins: number[];
+}
+
 interface GridInfo {
   spacing: number;
   cols: number;
@@ -63,6 +67,9 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const heightsRef = useRef<number[]>([]);
   const animationRef = useRef<number | null>(null);
   const loaderTimeRef = useRef<number>(0);
+  const audioDataRef = useRef<Uint8Array>(new Uint8Array(256));
+  const emptyAudioDataRef = useRef<Uint8Array>(new Uint8Array(256));
+  const lastAudioDataAtRef = useRef<number>(0);
   const audioReferenceLevelRef = useRef<number>(0);
   const audioFrameCountRef = useRef<number>(0);
 
@@ -70,13 +77,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const [status, setStatus] = useState<PillStatus>("idle");
   const statusRef = useRef<PillStatus>("idle");
   const [isErrorFlashing, setIsErrorFlashing] = useState(false);
-
-  // Web Audio Refs
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const micGenerationRef = useRef(0);
 
   // --- Visual Logic (Dumb) ---
 
@@ -403,14 +403,15 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         case "processing":
           drawProcessingFrame(loaderTimeRef.current);
           break;
-        case "listening":
-          if (analyserRef.current) {
-            const bufferLength = analyserRef.current.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyserRef.current.getByteFrequencyData(dataArray);
-            drawAudioFrame(dataArray);
-          }
+        case "listening": {
+          const now = performance.now();
+          const audioData =
+            now - lastAudioDataAtRef.current > 250
+              ? emptyAudioDataRef.current
+              : audioDataRef.current;
+          drawAudioFrame(audioData);
           break;
+        }
         case "error":
           drawErrorFrame(loaderTimeRef.current);
           break;
@@ -430,7 +431,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     }
 
     if (hasActivity) {
-      drawAudioFrame(new Uint8Array(0));
+      drawAudioFrame(emptyAudioDataRef.current);
       animationRef.current = requestAnimationFrame(fadeOutWave);
     } else {
       heightsRef.current.fill(0);
@@ -439,69 +440,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   }, [drawAudioFrame, drawBaseDots]);
 
   // --- Core Reactive Logic ---
-
-  const startMic = useCallback(async () => {
-    const generation = ++micGenerationRef.current;
-
-    // Reset gain calibration and wave heights for fresh start
-    audioReferenceLevelRef.current = 0;
-    audioFrameCountRef.current = 0;
-    heightsRef.current.fill(0);
-
-    try {
-      if (!audioContextRef.current) {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        audioContextRef.current = new AudioContextClass();
-      }
-
-      if (audioContextRef.current.state === "suspended") {
-        await audioContextRef.current.resume();
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-        }
-      });
-
-      if (generation !== micGenerationRef.current) {
-        stream.getTracks().forEach(t => t.stop());
-        return;
-      }
-
-      streamRef.current = stream;
-
-      const analyser = audioContextRef.current.createAnalyser();
-      analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0.8;
-      analyserRef.current = analyser;
-
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      source.connect(analyser);
-      sourceRef.current = source;
-
-      runAnimation("listening");
-    } catch (err) {
-      console.error("Mic access failed:", err);
-      // Backend handles error state, we just log
-    }
-  }, [runAnimation]);
-
-  const stopMic = useCallback(() => {
-    micGenerationRef.current++;
-    if (sourceRef.current) {
-      sourceRef.current.disconnect();
-      sourceRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
-    analyserRef.current = null;
-    // We keep AudioContext alive for reuse
-  }, []);
 
   const hideWindow = useCallback(async () => {
     try {
@@ -531,19 +469,35 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   }, [status, dismissOverlay]);
 
   // Store callbacks in refs to avoid effect re-running
-  const startMicRef = useRef(startMic);
-  const stopMicRef = useRef(stopMic);
   const runAnimationRef = useRef(runAnimation);
   const stopAllAnimationsRef = useRef(stopAllAnimations);
   const drawBaseDotsRef = useRef(drawBaseDots);
 
   useEffect(() => {
-    startMicRef.current = startMic;
-    stopMicRef.current = stopMic;
     runAnimationRef.current = runAnimation;
     stopAllAnimationsRef.current = stopAllAnimations;
     drawBaseDotsRef.current = drawBaseDots;
-  }, [startMic, stopMic, runAnimation, stopAllAnimations, drawBaseDots]);
+  }, [runAnimation, stopAllAnimations, drawBaseDots]);
+
+  useEffect(() => {
+    const unlistenPromise = listen<AudioSpectrumPayload>("audio:spectrum", (e) => {
+      const bins = e.payload.bins;
+      const current = audioDataRef.current;
+      if (current.length !== bins.length) {
+        audioDataRef.current = new Uint8Array(bins);
+        emptyAudioDataRef.current = new Uint8Array(bins.length);
+      } else {
+        for (let i = 0; i < bins.length; i++) {
+          current[i] = bins[i] ?? 0;
+        }
+      }
+      lastAudioDataAtRef.current = performance.now();
+    });
+
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, []);
 
   // Main Event Listener - Persistent, never recreated
   useEffect(() => {
@@ -553,13 +507,12 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
       // Logic: Backend says X, we do Y
       if (next === "listening" && prev !== "listening") {
-        startMicRef.current();
-      } else if (next !== "listening" && prev === "listening") {
-        stopMicRef.current();
-      } else if (next === "listening" && prev === "listening") {
-        // Ensure animation is running if we're already listening
-        // (e.g. if overlay was hidden but state was somehow preserved?)
-        // Usually not needed, but safe
+        audioDataRef.current = emptyAudioDataRef.current;
+        lastAudioDataAtRef.current = 0;
+        audioReferenceLevelRef.current = 0;
+        audioFrameCountRef.current = 0;
+        heightsRef.current.fill(0);
+        runAnimationRef.current("listening");
       }
 
       statusRef.current = next;
@@ -580,7 +533,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
     return () => {
       unlistenPromise.then(unlisten => unlisten());
-      stopMicRef.current();
       stopAllAnimationsRef.current();
     };
   }, []); // Empty deps - never re-runs
