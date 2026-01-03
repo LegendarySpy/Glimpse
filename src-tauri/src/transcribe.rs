@@ -5,7 +5,8 @@ use serde::Serialize;
 use tauri::{async_runtime, AppHandle, Manager};
 
 use crate::{
-    analytics, assistive, cloud, dictionary, llm_cleanup, model_manager,
+    accessibility_context, analytics, assistive, cloud, dictionary, llm_cleanup, mode_context,
+    model_manager,
     recorder::{CompletedRecording, RecordingSaved},
     settings::{TranscriptionMode, UserSettings},
     storage, toast, transcription_api, AppRuntime, AppState, EVENT_TRANSCRIPTION_COMPLETE,
@@ -60,6 +61,7 @@ pub(crate) fn queue_transcription(
             cloud_creds.is_some(),
             use_cloud_auth
         );
+        accessibility_context::log_active_context();
 
         // Cloud transcription path - handles everything server-side
         if use_cloud_auth {
@@ -70,15 +72,12 @@ pub(crate) fn queue_transcription(
                 creds.function_url, has_selection
             );
             let cloud_prompt = dictionary::build_dictionary_prompt(&settings.dictionary);
+            let cloud_user_context = build_cloud_user_context(&settings);
             let cloud_config = transcription_api::CloudTranscriptionConfig::new(
                 creds.function_url,
                 creds.jwt,
                 true,
-                if settings.user_context.trim().is_empty() {
-                    None
-                } else {
-                    Some(settings.user_context.clone())
-                },
+                cloud_user_context,
                 creds.history_sync_enabled,
             )
             .with_selected_text(pending_selected_text.clone())
@@ -1088,6 +1087,24 @@ pub(crate) fn count_words(text: &str) -> u32 {
     text.split_whitespace()
         .filter(|word| !word.is_empty())
         .count() as u32
+}
+
+fn build_cloud_user_context(settings: &UserSettings) -> Option<String> {
+    let mut parts = Vec::new();
+
+    if !settings.user_context.trim().is_empty() {
+        parts.push(settings.user_context.trim().to_string());
+    }
+
+    if let Some(prompt) = mode_context::build_mode_prompt(settings) {
+        parts.push(prompt);
+    }
+
+    if parts.is_empty() {
+        None
+    } else {
+        Some(parts.join("\n\n"))
+    }
 }
 
 pub(crate) fn load_audio_for_transcription(path: &PathBuf) -> Result<(Vec<i16>, u32)> {

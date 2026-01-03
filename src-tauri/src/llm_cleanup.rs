@@ -2,6 +2,7 @@ use anyhow::{anyhow, Context, Result};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
+use crate::{accessibility_context, mode_context};
 use crate::settings::{LlmProvider, UserSettings};
 
 const SYSTEM_PROMPT: &str = r#"
@@ -185,6 +186,17 @@ fn parse_output(response: &str) -> Option<String> {
     }
 }
 
+fn build_system_prompt(settings: &UserSettings) -> String {
+    accessibility_context::log_active_context();
+
+    if let Some(prompt) = mode_context::build_mode_prompt(settings) {
+        return prompt;
+    }
+
+    SYSTEM_PROMPT.to_string()
+}
+
+
 fn get_endpoint(settings: &UserSettings) -> Result<String> {
     let base = match settings.llm_provider {
         LlmProvider::None => return Err(anyhow!("LLM cleanup is disabled")),
@@ -260,7 +272,7 @@ pub async fn cleanup_transcription(
         messages: vec![
             Message {
                 role: "system".into(),
-                content: SYSTEM_PROMPT.into(),
+                content: build_system_prompt(settings),
             },
             Message {
                 role: "user".into(),

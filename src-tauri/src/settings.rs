@@ -24,14 +24,30 @@ const KEY_LLM_ENDPOINT: &str = "llm_endpoint";
 const KEY_LLM_API_KEY: &str = "llm_api_key";
 const KEY_LLM_MODEL: &str = "llm_model";
 const KEY_USER_CONTEXT: &str = "user_context";
+const KEY_USER_NAME: &str = "user_name";
+const KEY_PERSONALITIES_NOTES_SEEDED: &str = "personalities_notes_seeded";
 const KEY_DICTIONARY: &str = "dictionary";
 const KEY_REPLACEMENTS: &str = "replacements";
+const KEY_PERSONALITIES: &str = "personalities";
 const KEY_EDIT_MODE_ENABLED: &str = "edit_mode_enabled";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Replacement {
     pub from: String,
     pub to: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Personality {
+    pub id: String,
+    pub name: String,
+    pub enabled: bool,
+    #[serde(default)]
+    pub apps: Vec<String>,
+    #[serde(default)]
+    pub websites: Vec<String>,
+    #[serde(default)]
+    pub instructions: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -72,9 +88,15 @@ pub struct UserSettings {
     #[serde(default)]
     pub user_context: String,
     #[serde(default)]
+    pub user_name: String,
+    #[serde(default)]
+    pub personalities_notes_seeded: bool,
+    #[serde(default)]
     pub dictionary: Vec<String>,
     #[serde(default)]
     pub replacements: Vec<Replacement>,
+    #[serde(default = "default_personalities")]
+    pub personalities: Vec<Personality>,
     #[serde(default)]
     pub edit_mode_enabled: bool,
 }
@@ -93,6 +115,106 @@ fn default_toggle_shortcut() -> String {
 
 fn default_true() -> bool {
     true
+}
+
+fn default_personalities() -> Vec<Personality> {
+    vec![
+        Personality {
+            id: "messaging".to_string(),
+            name: "Messaging".to_string(),
+            enabled: true,
+            apps: vec!["Messages".to_string(), "Slack".to_string()],
+            websites: vec!["slack.com".to_string()],
+            instructions: vec!["Keep it concise, friendly, and ready to send.".to_string()],
+        },
+        Personality {
+            id: "email".to_string(),
+            name: "Email".to_string(),
+            enabled: true,
+            apps: vec![
+                "Mail".to_string(),
+                "Outlook".to_string(),
+                "Spark".to_string(),
+            ],
+            websites: vec![
+                "gmail.com".to_string(),
+                "outlook.com".to_string(),
+                "mail.yahoo.com".to_string(),
+            ],
+            instructions: vec![
+                "Format output as a concise, professional email with a greeting and sign-off."
+                    .to_string(),
+                "Keep paragraphs short and action-focused.".to_string(),
+            ],
+        },
+        Personality {
+            id: "notes".to_string(),
+            name: "Notes".to_string(),
+            enabled: true,
+            apps: vec![
+                "Notes".to_string(),
+                "Notion".to_string(),
+                "Obsidian".to_string(),
+                "Craft".to_string(),
+                "Affine".to_string(),
+            ],
+            websites: vec![
+                "notion.so".to_string(),
+                "craft.do".to_string(),
+                "affine.pro".to_string(),
+                "obsidian.md".to_string(),
+            ],
+            instructions: vec!["Use short headings and tidy bullet points in Markdown.".to_string()],
+        },
+        Personality {
+            id: "coding".to_string(),
+            name: "Coding".to_string(),
+            enabled: true,
+            apps: vec![
+                "Cursor".to_string(),
+                "Visual Studio Code".to_string(),
+                "Xcode".to_string(),
+                "WebStorm".to_string(),
+                "IntelliJ IDEA".to_string(),
+            ],
+            websites: vec![
+                "github.com".to_string(),
+                "gitlab.com".to_string(),
+                "bitbucket.org".to_string(),
+            ],
+            instructions: vec![
+                "Prefer precise, structured output with code blocks and explicit steps."
+                    .to_string(),
+            ],
+        },
+    ]
+}
+
+fn seed_personality_notes(personalities: &mut [Personality]) {
+    for personality in personalities.iter_mut() {
+        if !personality.instructions.is_empty() {
+            continue;
+        }
+
+        let defaults = match personality.id.as_str() {
+            "messaging" => vec!["Keep it concise, friendly, and ready to send.".to_string()],
+            "email" => vec![
+                "Format output as a concise, professional email with a greeting and sign-off."
+                    .to_string(),
+                "Keep paragraphs short and action-focused.".to_string(),
+            ],
+            "notes" => vec!["Use short headings and tidy bullet points in Markdown.".to_string()],
+            "coding" => vec![
+                "Prefer precise, structured output with code blocks and explicit steps."
+                    .to_string(),
+            ],
+            _ => Vec::new(),
+        };
+
+        if !defaults.is_empty() {
+            personality.instructions = defaults;
+        }
+    }
 }
 
 impl Default for UserSettings {
@@ -115,8 +237,11 @@ impl Default for UserSettings {
             llm_api_key: String::new(),
             llm_model: String::new(),
             user_context: String::new(),
+            user_name: String::new(),
+            personalities_notes_seeded: false,
             dictionary: Vec::new(),
             replacements: Vec::new(),
+            personalities: default_personalities(),
             edit_mode_enabled: false,
         }
     }
@@ -206,73 +331,92 @@ impl SettingsStore {
 
     /// Load settings from DB, falling back to defaults if empty.
     pub fn load(&self) -> Result<UserSettings> {
-        let conn = self.conn.lock();
         let mut settings = UserSettings::default();
+        {
+            let conn = self.conn.lock();
 
-        settings.onboarding_completed = self.read_value(
-            &conn,
-            KEY_ONBOARDING_COMPLETED,
-            settings.onboarding_completed,
-        )?;
-        settings.smart_shortcut =
-            self.read_value(&conn, KEY_SMART_SHORTCUT, settings.smart_shortcut.clone())?;
-        settings.smart_enabled =
-            self.read_value(&conn, KEY_SMART_ENABLED, settings.smart_enabled)?;
-        settings.hold_shortcut =
-            self.read_value(&conn, KEY_HOLD_SHORTCUT, settings.hold_shortcut.clone())?;
-        settings.hold_enabled = self.read_value(&conn, KEY_HOLD_ENABLED, settings.hold_enabled)?;
-        settings.toggle_shortcut =
-            self.read_value(&conn, KEY_TOGGLE_SHORTCUT, settings.toggle_shortcut.clone())?;
-        settings.toggle_enabled =
-            self.read_value(&conn, KEY_TOGGLE_ENABLED, settings.toggle_enabled)?;
-        settings.transcription_mode = self.read_value(
-            &conn,
-            KEY_TRANSCRIPTION_MODE,
-            settings.transcription_mode.clone(),
-        )?;
-        settings.local_model =
-            self.read_value(&conn, KEY_LOCAL_MODEL, settings.local_model.clone())?;
-        settings.microphone_device = self.read_value(
-            &conn,
-            KEY_MICROPHONE_DEVICE,
-            settings.microphone_device.clone(),
-        )?;
-        settings.language = self.read_value(&conn, KEY_LANGUAGE, settings.language.clone())?;
-        settings.llm_cleanup_enabled =
-            self.read_value(&conn, KEY_LLM_CLEANUP_ENABLED, settings.llm_cleanup_enabled)?;
-        settings.llm_provider =
-            self.read_value(&conn, KEY_LLM_PROVIDER, settings.llm_provider.clone())?;
-        settings.llm_endpoint =
-            self.read_value(&conn, KEY_LLM_ENDPOINT, settings.llm_endpoint.clone())?;
+            settings.onboarding_completed = self.read_value(
+                &conn,
+                KEY_ONBOARDING_COMPLETED,
+                settings.onboarding_completed,
+            )?;
+            settings.smart_shortcut =
+                self.read_value(&conn, KEY_SMART_SHORTCUT, settings.smart_shortcut.clone())?;
+            settings.smart_enabled =
+                self.read_value(&conn, KEY_SMART_ENABLED, settings.smart_enabled)?;
+            settings.hold_shortcut =
+                self.read_value(&conn, KEY_HOLD_SHORTCUT, settings.hold_shortcut.clone())?;
+            settings.hold_enabled =
+                self.read_value(&conn, KEY_HOLD_ENABLED, settings.hold_enabled)?;
+            settings.toggle_shortcut =
+                self.read_value(&conn, KEY_TOGGLE_SHORTCUT, settings.toggle_shortcut.clone())?;
+            settings.toggle_enabled =
+                self.read_value(&conn, KEY_TOGGLE_ENABLED, settings.toggle_enabled)?;
+            settings.transcription_mode = self.read_value(
+                &conn,
+                KEY_TRANSCRIPTION_MODE,
+                settings.transcription_mode.clone(),
+            )?;
+            settings.local_model =
+                self.read_value(&conn, KEY_LOCAL_MODEL, settings.local_model.clone())?;
+            settings.microphone_device = self.read_value(
+                &conn,
+                KEY_MICROPHONE_DEVICE,
+                settings.microphone_device.clone(),
+            )?;
+            settings.language = self.read_value(&conn, KEY_LANGUAGE, settings.language.clone())?;
+            settings.llm_cleanup_enabled =
+                self.read_value(&conn, KEY_LLM_CLEANUP_ENABLED, settings.llm_cleanup_enabled)?;
+            settings.llm_provider =
+                self.read_value(&conn, KEY_LLM_PROVIDER, settings.llm_provider.clone())?;
+            settings.llm_endpoint =
+                self.read_value(&conn, KEY_LLM_ENDPOINT, settings.llm_endpoint.clone())?;
 
-        let encrypted_key: String = self.read_value(&conn, KEY_LLM_API_KEY, String::new())?;
-        if !encrypted_key.is_empty() {
-            if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
-                match crate::crypto::decrypt(&encrypted_key, &hardware_uuid) {
-                    Ok(decrypted) => settings.llm_api_key = decrypted,
-                    Err(e) => {
-                        if !crate::crypto::looks_encrypted(&encrypted_key) {
-                            settings.llm_api_key = encrypted_key;
-                        } else {
-                            eprintln!("Error: Failed to decrypt API key: {}. Key will need to be re-entered.", e);
+            let encrypted_key: String = self.read_value(&conn, KEY_LLM_API_KEY, String::new())?;
+            if !encrypted_key.is_empty() {
+                if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
+                    match crate::crypto::decrypt(&encrypted_key, &hardware_uuid) {
+                        Ok(decrypted) => settings.llm_api_key = decrypted,
+                        Err(e) => {
+                            if !crate::crypto::looks_encrypted(&encrypted_key) {
+                                settings.llm_api_key = encrypted_key;
+                            } else {
+                                eprintln!("Error: Failed to decrypt API key: {}. Key will need to be re-entered.", e);
+                            }
                         }
                     }
+                } else {
+                    eprintln!("Warning: Could not get hardware UUID, API key won't be encrypted");
+                    settings.llm_api_key = encrypted_key;
                 }
-            } else {
-                eprintln!("Warning: Could not get hardware UUID, API key won't be encrypted");
-                settings.llm_api_key = encrypted_key;
             }
+
+            settings.llm_model =
+                self.read_value(&conn, KEY_LLM_MODEL, settings.llm_model.clone())?;
+            settings.user_context =
+                self.read_value(&conn, KEY_USER_CONTEXT, settings.user_context.clone())?;
+            settings.user_name =
+                self.read_value(&conn, KEY_USER_NAME, settings.user_name.clone())?;
+            settings.personalities_notes_seeded = self.read_value(
+                &conn,
+                KEY_PERSONALITIES_NOTES_SEEDED,
+                settings.personalities_notes_seeded,
+            )?;
+            settings.dictionary =
+                self.read_value(&conn, KEY_DICTIONARY, settings.dictionary.clone())?;
+            settings.replacements =
+                self.read_value(&conn, KEY_REPLACEMENTS, settings.replacements.clone())?;
+            settings.personalities =
+                self.read_value(&conn, KEY_PERSONALITIES, settings.personalities.clone())?;
+            settings.edit_mode_enabled =
+                self.read_value(&conn, KEY_EDIT_MODE_ENABLED, settings.edit_mode_enabled)?;
         }
 
-        settings.llm_model = self.read_value(&conn, KEY_LLM_MODEL, settings.llm_model.clone())?;
-        settings.user_context =
-            self.read_value(&conn, KEY_USER_CONTEXT, settings.user_context.clone())?;
-        settings.dictionary =
-            self.read_value(&conn, KEY_DICTIONARY, settings.dictionary.clone())?;
-        settings.replacements =
-            self.read_value(&conn, KEY_REPLACEMENTS, settings.replacements.clone())?;
-        settings.edit_mode_enabled =
-            self.read_value(&conn, KEY_EDIT_MODE_ENABLED, settings.edit_mode_enabled)?;
+        if !settings.personalities_notes_seeded {
+            seed_personality_notes(&mut settings.personalities);
+            settings.personalities_notes_seeded = true;
+            self.save(&settings)?;
+        }
 
         Ok(settings)
     }
@@ -316,8 +460,15 @@ impl SettingsStore {
 
         self.write_value(&conn, KEY_LLM_MODEL, &settings.llm_model)?;
         self.write_value(&conn, KEY_USER_CONTEXT, &settings.user_context)?;
+        self.write_value(&conn, KEY_USER_NAME, &settings.user_name)?;
+        self.write_value(
+            &conn,
+            KEY_PERSONALITIES_NOTES_SEEDED,
+            &settings.personalities_notes_seeded,
+        )?;
         self.write_value(&conn, KEY_DICTIONARY, &settings.dictionary)?;
         self.write_value(&conn, KEY_REPLACEMENTS, &settings.replacements)?;
+        self.write_value(&conn, KEY_PERSONALITIES, &settings.personalities)?;
         self.write_value(&conn, KEY_EDIT_MODE_ENABLED, &settings.edit_mode_enabled)?;
         Ok(())
     }

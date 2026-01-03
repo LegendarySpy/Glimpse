@@ -8,6 +8,7 @@ import FAQModal from "./components/FAQModal";
 import DotMatrix from "./components/DotMatrix";
 import TranscriptionList from "./components/TranscriptionList";
 import DictionaryView from "./components/DictionaryView";
+import PersonalizationView from "./components/PersonalizationView";
 import { useCloudTranscription } from "./hooks/useCloudTranscription";
 import { useAuth } from "./hooks/useAuth";
 
@@ -400,17 +401,13 @@ const Home = () => {
                         {activeView === "brain" && (
                             <motion.div
                                 key="brain"
-                                className="flex flex-col items-center justify-start pt-12 text-content-disabled"
+                                className="w-full max-w-5xl mx-auto pt-8"
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 8 }}
                                 transition={{ duration: 0.25, ease: "easeOut" }}
                             >
-                                <Brain size={48} strokeWidth={1} className="mb-4 opacity-50" />
-                                <p className="mb-2">Personalization</p>
-                                <span className="px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[10px] font-medium">
-                                    Work in Progress
-                                </span>
+                                <PersonalizationView />
                             </motion.div>
                         )}
                     </AnimatePresence>

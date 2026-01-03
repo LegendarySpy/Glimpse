@@ -4,6 +4,9 @@ mod audio;
 mod cloud;
 mod crypto;
 mod dictionary;
+mod personalization;
+mod accessibility_context;
+mod mode_context;
 mod downloader;
 mod llm_cleanup;
 mod local_transcription;
@@ -127,9 +130,13 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_settings,
             update_settings,
+            set_user_name,
             dictionary::set_dictionary,
             dictionary::get_replacements,
             dictionary::set_replacements,
+            personalization::get_personalities,
+            personalization::set_personalities,
+            personalization::list_installed_apps,
             get_app_info,
             open_data_dir,
             get_transcriptions,
@@ -481,6 +488,25 @@ fn update_settings(
             eprintln!("Failed to refresh tray menu: {err}");
         }
     }
+
+    if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &next) {
+        eprintln!("Failed to emit settings change: {err}");
+    }
+
+    Ok(next)
+}
+
+#[tauri::command]
+fn set_user_name(
+    name: String,
+    app: AppHandle<AppRuntime>,
+    state: tauri::State<AppState>,
+) -> Result<UserSettings, String> {
+    let mut settings = state.current_settings();
+    settings.user_name = name.trim().to_string();
+    let next = state
+        .persist_settings(settings)
+        .map_err(|err| err.to_string())?;
 
     if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &next) {
         eprintln!("Failed to emit settings change: {err}");

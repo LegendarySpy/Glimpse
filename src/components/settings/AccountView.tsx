@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { invoke } from "@tauri-apps/api/core";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Lock,
@@ -121,6 +122,11 @@ const AccountView = ({
 
     useEffect(() => {
         setEditName(currentUser?.name || "");
+        if (currentUser?.name?.trim()) {
+            invoke("set_user_name", { name: currentUser.name.trim() }).catch((err) => {
+                console.error("Failed to persist name:", err);
+            });
+        }
     }, [currentUser?.name]);
 
     const loadUsageStats = async (showLoading = true) => {
@@ -155,7 +161,13 @@ const AccountView = ({
         }
         setNameLoading(true);
         try {
-            await updateName(editName.trim());
+            const trimmedName = editName.trim();
+            await updateName(trimmedName);
+            try {
+                await invoke("set_user_name", { name: trimmedName });
+            } catch (err) {
+                console.error("Failed to persist name:", err);
+            }
             onUserUpdate();
             setIsEditingName(false);
         } catch (err) {

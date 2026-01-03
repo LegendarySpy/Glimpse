@@ -20,6 +20,7 @@ interface DropdownProps<T extends string | number> {
     searchable?: boolean;
     searchPlaceholder?: string;
     className?: string; // For the container
+    menuClassName?: string;
     onOpen?: () => void;
 }
 
@@ -33,6 +34,7 @@ export function Dropdown<T extends string | number>({
     searchable = false,
     searchPlaceholder = "Search...",
     className = "",
+    menuClassName = "",
     onOpen,
 }: DropdownProps<T>) {
     const [isOpen, setIsOpen] = useState(false);
@@ -106,7 +108,7 @@ export function Dropdown<T extends string | number>({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-border-secondary bg-surface-surface shadow-xl shadow-black/40 overflow-hidden flex flex-col max-h-[280px]"
+                        className={`absolute left-0 right-0 top-full mt-1 z-[9999] rounded-lg border border-border-secondary bg-surface-surface shadow-xl shadow-black/40 overflow-hidden flex flex-col max-h-[280px] ${menuClassName}`}
                     >
                         {searchable && (
                             <div className="p-2 border-b border-border-secondary shrink-0">
