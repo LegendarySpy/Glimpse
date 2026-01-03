@@ -6,6 +6,7 @@ import ToastOverlay from "./ToastOverlay";
 import Home from "./Home";
 import Onboarding from "./Onboarding";
 import { AuthProvider } from "./hooks/useAuth";
+import { useCloudTranscription } from "./hooks/useCloudTranscription";
 import "./App.css";
 
 type StoredSettings = {
@@ -39,6 +40,8 @@ function App() {
   const [windowLabel, setWindowLabel] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useCloudTranscription();
 
   useEffect(() => {
     const win = getCurrentWindow();

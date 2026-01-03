@@ -1,5 +1,5 @@
 use crate::{settings::TranscriptionMode, toast, AppRuntime, AppState};
-use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use parking_lot::Mutex;
 use serde::Deserialize;
 use tauri::{AppHandle, Emitter, Manager};
@@ -94,7 +94,7 @@ fn decode_jwt_payload(jwt: &str) -> Option<JwtPayload> {
     }
 
     let payload_b64 = parts[1];
-    let decoded = STANDARD_NO_PAD.decode(payload_b64).ok()?;
+    let decoded = URL_SAFE_NO_PAD.decode(payload_b64).ok()?;
     serde_json::from_slice(&decoded).ok()
 }
 

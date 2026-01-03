@@ -8,7 +8,6 @@ import FAQModal from "./components/FAQModal";
 import DotMatrix from "./components/DotMatrix";
 import TranscriptionList from "./components/TranscriptionList";
 import DictionaryView from "./components/DictionaryView";
-import { useCloudTranscription } from "./hooks/useCloudTranscription";
 import { useAuth } from "./hooks/useAuth";
 
 type TranscriptionMode = "cloud" | "local";
@@ -64,7 +63,6 @@ const Home = () => {
     const [hasAuthIssue, setHasAuthIssue] = useState(false);
 
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
-    useCloudTranscription();
 
     const sidebarWidth = isSidebarCollapsed ? 68 : 200;
 
