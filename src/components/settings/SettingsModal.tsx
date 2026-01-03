@@ -38,12 +38,12 @@ import DebugSection from "./DebugSection";
 import { logout, getOAuth2Url, login, createAccount, type User as AppwriteUser } from "../../lib/auth";
 import WhatsNewModal from "./WhatsNewModal";
 import { Dropdown } from "../Dropdown";
+import { type LlmProvider, LOCAL_PROVIDERS, CLOUD_PROVIDERS, getProviderPreset } from "../../lib/llmProviders";
 
 import { OAuthProvider } from "appwrite";
 
 
 type TranscriptionMode = "cloud" | "local";
-type LlmProvider = "none" | "lmstudio" | "ollama" | "openai" | "custom";
 
 type StoredSettings = {
     smart_shortcut: string;
@@ -170,7 +170,7 @@ const SettingsModal = ({
     const [activeTab, setActiveTab] = useState<"general" | "models" | "about" | "account" | "advanced" | "developer">("general");
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
     const [llmCleanupEnabled, setLlmCleanupEnabled] = useState(false);
-    const [llmProvider, setLlmProvider] = useState<LlmProvider>("none");
+    const [llmProvider, setLlmProvider] = useState<LlmProvider>("custom");
     const [llmEndpoint, setLlmEndpoint] = useState("");
     const [llmApiKey, setLlmApiKey] = useState("");
     const [llmModel, setLlmModel] = useState("");
@@ -1351,85 +1351,81 @@ const SettingsModal = ({
                                                                 <div className="pt-3 border-t border-border-primary space-y-3">
                                                                     <div className="space-y-1.5">
                                                                         <label className="text-[11px] font-medium text-content-muted ml-1">Provider</label>
-                                                                        <div className="grid grid-cols-4 gap-2">
-                                                                            <LlmProviderButton
-                                                                                label="LM Studio"
-                                                                                active={llmProvider === "lmstudio"}
-                                                                                onClick={() => setLlmProvider("lmstudio")}
-                                                                            />
-                                                                            <LlmProviderButton
-                                                                                label="Ollama"
-                                                                                active={llmProvider === "ollama"}
-                                                                                onClick={() => setLlmProvider("ollama")}
-                                                                            />
-                                                                            <LlmProviderButton
-                                                                                label="OpenAI"
-                                                                                active={llmProvider === "openai"}
-                                                                                onClick={() => setLlmProvider("openai")}
-                                                                            />
-                                                                            <LlmProviderButton
-                                                                                label="Custom"
-                                                                                active={llmProvider === "custom"}
-                                                                                onClick={() => setLlmProvider("custom")}
-                                                                            />
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
-                                                                            <Server size={10} />
-                                                                            Endpoint {llmProvider !== "custom" && <span className="text-content-disabled">(optional override)</span>}
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={llmEndpoint}
-                                                                            onChange={(e) => setLlmEndpoint(e.target.value)}
-                                                                            placeholder={
-                                                                                llmProvider === "lmstudio" ? "http://localhost:1234" :
-                                                                                    llmProvider === "ollama" ? "http://localhost:11434" :
-                                                                                        llmProvider === "openai" ? "https://api.openai.com" :
-                                                                                            "https://your-llm-endpoint.com"
-                                                                            }
-                                                                            className="w-full rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
-                                                                        />
-                                                                    </div>
-
-                                                                    <div className="space-y-1.5">
-                                                                        <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
-                                                                            <Key size={10} />
-                                                                            API Key {llmProvider !== "openai" && <span className="text-content-disabled">(if required)</span>}
-                                                                        </label>
-                                                                        <input
-                                                                            type="password"
-                                                                            value={llmApiKey}
-                                                                            onChange={(e) => setLlmApiKey(e.target.value)}
-                                                                            placeholder={llmProvider === "openai" ? "sk-..." : "Optional"}
-                                                                            className="w-full rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
-                                                                        />
-                                                                    </div>
-
-                                                                    <div className="relative z-0">
                                                                         <Dropdown
-                                                                            value={llmModel}
-                                                                            onChange={(val) => setLlmModel(val)}
-                                                                            onOpen={fetchAvailableModels}
+                                                                            value={llmProvider}
+                                                                            onChange={(val) => {
+                                                                                setLlmProvider(val);
+                                                                                const preset = getProviderPreset(val);
+                                                                                if (preset) {
+                                                                                    setLlmEndpoint(preset.endpoint);
+                                                                                    setLlmModel(preset.defaultModel);
+                                                                                }
+                                                                            }}
                                                                             options={[
-                                                                                {
-                                                                                    value: "",
-                                                                                    label: `Default (${llmProvider === "lmstudio" ? "Uses loaded model" :
-                                                                                        llmProvider === "ollama" ? "llama3.2" :
-                                                                                            llmProvider === "openai" ? "gpt-4o-mini" :
-                                                                                                "None"})`
-                                                                                },
-                                                                                // If llmModel is set but not in availableModels, add it as an option so it displays correctly
-                                                                                ...(llmModel && !availableModels.includes(llmModel) ? [{ value: llmModel, label: llmModel }] : []),
-                                                                                ...availableModels.map(m => ({ value: m, label: m }))
+                                                                                { value: "custom" as LlmProvider, label: "Custom" },
+                                                                                { value: "_local_header" as LlmProvider, label: "Local", isHeader: true },
+                                                                                ...LOCAL_PROVIDERS.filter(p => p.id !== "custom").map(p => ({
+                                                                                    value: p.id,
+                                                                                    label: p.label
+                                                                                })),
+                                                                                { value: "_cloud_header" as LlmProvider, label: "Cloud (API Key)", isHeader: true },
+                                                                                ...CLOUD_PROVIDERS.map(p => ({
+                                                                                    value: p.id,
+                                                                                    label: p.label
+                                                                                }))
                                                                             ]}
-                                                                            placeholder="Select model..."
+                                                                            placeholder="Select provider..."
                                                                             searchable
-                                                                            searchPlaceholder="Search available models..."
+                                                                            searchPlaceholder="Search providers..."
                                                                         />
                                                                     </div>
+
+                                                                    {llmProvider && (
+                                                                        <>
+                                                                            <div className="space-y-1.5">
+                                                                                <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
+                                                                                    <Server size={10} />
+                                                                                    Endpoint {llmProvider !== "custom" && <span className="text-content-disabled">(auto-filled)</span>}
+                                                                                </label>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    value={llmEndpoint}
+                                                                                    onChange={(e) => setLlmEndpoint(e.target.value)}
+                                                                                    placeholder={getProviderPreset(llmProvider)?.endpoint ?? "https://your-llm-endpoint.com"}
+                                                                                    className="w-full rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
+                                                                                />
+                                                                            </div>
+
+                                                                            <div className="space-y-1.5">
+                                                                                <label className="text-[11px] font-medium text-content-muted ml-1 flex items-center gap-1.5">
+                                                                                    <Key size={10} />
+                                                                                    API Key {!getProviderPreset(llmProvider)?.apiKeyRequired && <span className="text-content-disabled">(if required)</span>}
+                                                                                </label>
+                                                                                <input
+                                                                                    type="password"
+                                                                                    value={llmApiKey}
+                                                                                    onChange={(e) => setLlmApiKey(e.target.value)}
+                                                                                    placeholder={getProviderPreset(llmProvider)?.apiKeyRequired ? "Required" : "Optional"}
+                                                                                    className="w-full rounded-lg bg-surface-elevated border border-border-secondary py-2 px-3 text-[12px] text-content-primary placeholder-content-disabled focus:border-content-disabled focus:outline-none transition-colors"
+                                                                                />
+                                                                            </div>
+
+                                                                            <div className="relative z-0">
+                                                                                <Dropdown
+                                                                                    value={llmModel}
+                                                                                    onChange={(val) => setLlmModel(val)}
+                                                                                    onOpen={fetchAvailableModels}
+                                                                                    options={[
+                                                                                        ...availableModels.map(m => ({ value: m, label: m })),
+                                                                                        ...(llmModel && !availableModels.includes(llmModel) ? [{ value: llmModel, label: llmModel }] : [])
+                                                                                    ]}
+                                                                                    placeholder={`Model (default: ${getProviderPreset(llmProvider)?.defaultModel || "none"})`}
+                                                                                    searchable
+                                                                                    searchPlaceholder="Search available models..."
+                                                                                />
+                                                                            </div>
+                                                                        </>
+                                                                    )}
 
                                                                     <div className="flex items-start gap-2 rounded-lg border border-border-secondary bg-surface-elevated px-3 py-2">
                                                                         <Info size={12} className="text-content-muted shrink-0 mt-0.5" />
@@ -1904,21 +1900,6 @@ const ShortcutRow = ({ label, description, shortcut, enabled, isCapturing, captu
             </div>
         </div>
     </div>
-);
-
-const LlmProviderButton = ({ label, active, onClick }: {
-    label: string; active: boolean; onClick: () => void;
-}) => (
-    <motion.button
-        onClick={onClick}
-        className={`rounded-lg border py-2 px-3 text-[11px] font-medium transition-all ${active
-            ? "border-cloud-30 bg-cloud-10 text-cloud"
-            : "border-border-secondary bg-surface-elevated text-content-secondary hover:border-border-hover hover:text-content-primary"
-            }`}
-        whileTap={{ scale: 0.97 }}
-    >
-        {label}
-    </motion.button>
 );
 
 const ModelProgress = ({ percent, status }: { percent: number; status: string }) => {

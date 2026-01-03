@@ -8,6 +8,7 @@ export interface DropdownOption<T extends string | number> {
     label: string;
     description?: string;
     icon?: React.ReactNode;
+    isHeader?: boolean;
 }
 
 interface DropdownProps<T extends string | number> {
@@ -72,11 +73,20 @@ export function Dropdown<T extends string | number>({
         };
     }, [isOpen]);
 
+    const matchesSearch = (opt: DropdownOption<T>) =>
+        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        opt.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
     const filteredOptions = searchable
-        ? options.filter((opt) =>
-            opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        ? options.filter((opt, idx) => {
+            if (!opt.isHeader) return matchesSearch(opt);
+            // Only show header if there are options after it that match the search
+            for (let i = idx + 1; i < options.length; i++) {
+                if (options[i].isHeader) break;
+                if (matchesSearch(options[i])) return true;
+            }
+            return false;
+        })
         : options;
 
     return (
@@ -127,35 +137,44 @@ export function Dropdown<T extends string | number>({
 
                         <div className="overflow-y-auto min-h-[40px]">
                             {filteredOptions.length > 0 ? (
-                                filteredOptions.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={() => {
-                                            onChange(option.value);
-                                            setIsOpen(false);
-                                            setSearchQuery("");
-                                        }}
-                                        className={`w-full text-left px-3 py-2 transition-colors flex items-center justify-between group ${value === option.value
-                                            ? "bg-cloud/10 text-cloud"
-                                            : "text-content-secondary hover:bg-surface-elevated hover:text-content-primary"
-                                            }`}
-                                    >
-                                        <div className="flex flex-col gap-0.5 min-w-0">
-                                            <span className="text-[12px] font-medium truncate flex items-center gap-2">
-                                                {option.icon && <span>{option.icon}</span>}
-                                                {option.label}
-                                            </span>
-                                            {option.description && (
-                                                <span className={`text-[10px] truncate ${value === option.value ? "text-cloud/70" : "text-content-disabled group-hover:text-content-muted"
-                                                    }`}>
-                                                    {option.description}
-                                                </span>
-                                            )}
+                                filteredOptions.map((option) => 
+                                    option.isHeader ? (
+                                        <div
+                                            key={option.value}
+                                            className="px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider text-content-disabled border-t border-border-secondary first:border-t-0 mt-1 first:mt-0"
+                                        >
+                                            {option.label}
                                         </div>
-                                        {value === option.value && <Check size={12} className="shrink-0 ml-2" />}
-                                    </button>
-                                ))
+                                    ) : (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() => {
+                                                onChange(option.value);
+                                                setIsOpen(false);
+                                                setSearchQuery("");
+                                            }}
+                                            className={`w-full text-left px-3 py-2 transition-colors flex items-center justify-between group ${value === option.value
+                                                ? "bg-cloud/10 text-cloud"
+                                                : "text-content-secondary hover:bg-surface-elevated hover:text-content-primary"
+                                                }`}
+                                        >
+                                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                                <span className="text-[12px] font-medium truncate flex items-center gap-2">
+                                                    {option.icon && <span>{option.icon}</span>}
+                                                    {option.label}
+                                                </span>
+                                                {option.description && (
+                                                    <span className={`text-[10px] truncate ${value === option.value ? "text-cloud/70" : "text-content-disabled group-hover:text-content-muted"
+                                                        }`}>
+                                                        {option.description}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {value === option.value && <Check size={12} className="shrink-0 ml-2" />}
+                                        </button>
+                                    )
+                                )
                             ) : (
                                 <div className="px-3 py-4 text-[11px] text-content-muted text-center">
                                     No options found
