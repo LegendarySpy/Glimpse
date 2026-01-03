@@ -155,6 +155,9 @@ const ToastOverlay: React.FC = () => {
       }
       if (toastRef.current) {
         setToast(null);
+        try {
+          await invoke("toast_dismissed");
+        } catch { /* ignore */ }
         await getCurrentWindow().hide();
       }
     });

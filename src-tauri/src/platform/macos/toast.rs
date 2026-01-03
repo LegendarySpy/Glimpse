@@ -62,8 +62,8 @@ pub fn hide(app: &AppHandle<AppRuntime>, _toast_window: &WebviewWindow<AppRuntim
     let app_clone = app.clone();
     let _ = app.run_on_main_thread(move || {
         if let Ok(panel) = app_clone.get_webview_panel(toast::WINDOW_LABEL) {
-            panel.hide();
             panel.set_ignores_mouse_events(true);
+            panel.hide();
         }
     });
     Ok(())
