@@ -4,17 +4,25 @@ import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { createJwt, getCurrentUser } from "../lib/auth";
 
 const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_TRANSCRIPTION_URL;
-const JWT_REFRESH_INTERVAL = 8 * 60 * 1000; // 8 minutes (JWT expires in 15)
+const JWT_REFRESH_INTERVAL = 13 * 60 * 1000; // 13 minutes (JWT expires in 15)
 
 export function useCloudTranscription() {
     const jwtRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
     const hadAuthError = useRef(false);
     const refreshInFlight = useRef<Promise<void> | null>(null);
+    const lastRefreshTime = useRef<number>(0);
 
-    const setupCloudCredentials = useCallback(async () => {
+    const setupCloudCredentials = useCallback(async (force = false) => {
         if (refreshInFlight.current) {
             return refreshInFlight.current;
         }
+
+        const now = Date.now();
+        const DEBOUNCE_MS = 5000;
+        if (!force && now - lastRefreshTime.current < DEBOUNCE_MS) {
+            return;
+        }
+        lastRefreshTime.current = now;
 
         const refreshPromise = (async () => {
             try {
@@ -73,7 +81,7 @@ export function useCloudTranscription() {
 
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === "glimpse_cloud_sync_enabled") {
-                setupCloudCredentials();
+                setupCloudCredentials(true);
             }
         };
         const handleVisibilityChange = () => {
@@ -89,16 +97,15 @@ export function useCloudTranscription() {
         window.addEventListener("focus", handleWindowFocus);
         document.addEventListener("visibilitychange", handleVisibilityChange);
 
-        // Listen for auth state changes (login/logout)
         listen("auth:changed", () => {
-            setupCloudCredentials();
+            setupCloudCredentials(true);
         }).then((fn) => {
             unlistenAuth = fn;
         });
 
         listen("cloud:auth-error", async () => {
             hadAuthError.current = true;
-            await setupCloudCredentials();
+            await setupCloudCredentials(true);
         }).then((fn) => {
             unlistenAuthError = fn;
         });

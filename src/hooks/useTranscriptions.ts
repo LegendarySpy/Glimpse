@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
     syncLocalTranscription,
+    batchSyncTranscriptions,
     listTranscriptions,
     deleteCloudTranscription,
     findByLocalOrDocumentId
@@ -231,18 +232,22 @@ export function useTranscriptions(options: UseTranscriptionsOptions = {}) {
                 return;
             }
 
-            console.log(`Syncing ${unsyncedRecords.length} records to cloud...`);
+            console.log(`Batch syncing ${unsyncedRecords.length} records to cloud...`);
 
-            for (const record of unsyncedRecords) {
-                try {
-                    await withRetry(() => syncLocalTranscription(userId, record));
-                    await invoke("mark_transcription_synced", { id: record.id });
-                    setTranscriptions(prev => prev.map(t =>
-                        t.id === record.id ? { ...t, synced: true } : t
-                    ));
-                } catch (err) {
-                    console.error(`Failed to sync record ${record.id} after retries:`, err);
-                }
+            const { synced, failed } = await batchSyncTranscriptions(userId, unsyncedRecords);
+
+            for (const id of synced) {
+                await invoke("mark_transcription_synced", { id });
+            }
+
+            if (synced.length > 0) {
+                setTranscriptions(prev => prev.map(t =>
+                    synced.includes(t.id) ? { ...t, synced: true } : t
+                ));
+            }
+
+            if (failed.length > 0) {
+                console.warn(`Failed to sync ${failed.length} records`);
             }
         } catch (err) {
             console.error("Failed to sync all to cloud:", err);

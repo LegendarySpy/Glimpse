@@ -153,6 +153,92 @@ export async function syncLocalTranscription(
     return createTranscription(userId, cloudData);
 }
 
+type LocalRecordInput = {
+    id: string;
+    timestamp: string;
+    text: string;
+    raw_text?: string | null;
+    status: "success" | "error";
+    error_message?: string;
+    llm_cleaned: boolean;
+    speech_model: string;
+    llm_model?: string | null;
+    word_count: number;
+    audio_duration_seconds: number;
+};
+
+export async function batchSyncTranscriptions(
+    userId: string,
+    localRecords: LocalRecordInput[]
+): Promise<{ synced: string[]; failed: string[] }> {
+    if (localRecords.length === 0) {
+        return { synced: [], failed: [] };
+    }
+
+    const localIds = localRecords.map(r => r.id);
+
+    const existingByLocalId = new Map<string, CloudTranscription>();
+
+    const QUERY_BATCH_SIZE = 100;
+    for (let i = 0; i < localIds.length; i += QUERY_BATCH_SIZE) {
+        const idBatch = localIds.slice(i, i + QUERY_BATCH_SIZE);
+        const existingDocs = await listDocuments<CloudTranscription>(DATABASE_ID, COLLECTION_ID, [
+            Query.equal("user_id", userId),
+            Query.equal("local_id", idBatch),
+            Query.equal("is_deleted", false),
+            Query.limit(idBatch.length),
+        ]);
+        for (const doc of existingDocs.documents) {
+            if (doc.local_id) {
+                existingByLocalId.set(doc.local_id, doc);
+            }
+        }
+    }
+
+    const synced: string[] = [];
+    const failed: string[] = [];
+
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < localRecords.length; i += BATCH_SIZE) {
+        const batch = localRecords.slice(i, i + BATCH_SIZE);
+        const promises = batch.map(async (localRecord) => {
+            try {
+                const existing = existingByLocalId.get(localRecord.id);
+                const cloudData: TranscriptionInput = {
+                    text: localRecord.text,
+                    raw_text: localRecord.raw_text || null,
+                    audio_file_id: null,
+                    status: localRecord.status === "success" ? "success" : "error",
+                    error_message: localRecord.error_message || null,
+                    llm_cleaned: localRecord.llm_cleaned,
+                    speech_model: localRecord.speech_model,
+                    llm_model: localRecord.llm_model || null,
+                    word_count: localRecord.word_count,
+                    audio_duration_seconds: localRecord.audio_duration_seconds,
+                    local_id: localRecord.id,
+                    is_deleted: false,
+                    timestamp: localRecord.timestamp,
+                    user_id: userId,
+                };
+
+                if (existing) {
+                    await updateTranscription(existing.$id, cloudData);
+                } else {
+                    await createTranscription(userId, cloudData);
+                }
+                synced.push(localRecord.id);
+            } catch (err) {
+                console.error(`Failed to sync record ${localRecord.id}:`, err);
+                failed.push(localRecord.id);
+            }
+        });
+
+        await Promise.all(promises);
+    }
+
+    return { synced, failed };
+}
+
 export async function validateConnection(): Promise<boolean> {
     await listDocuments<CloudTranscription>(DATABASE_ID, COLLECTION_ID, [Query.limit(1)]);
     return true;

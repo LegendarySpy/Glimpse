@@ -6,6 +6,7 @@ export {
     deleteCloudTranscription,
     findByLocalOrDocumentId,
     syncLocalTranscription,
+    batchSyncTranscriptions,
     getCloudUsageStats,
     getCachedUsageStats,
 } from "./transcriptions";
