@@ -190,16 +190,21 @@ fn seed_personality_notes(personalities: &mut [Personality]) {
         }
 
         let defaults = match personality.id.as_str() {
-            "messaging" => vec!["Keep it concise, friendly, and ready to send.".to_string()],
-            "email" => vec![
-                "Format output as a concise, professional email with a greeting and sign-off."
-                    .to_string(),
-                "Keep paragraphs short and action-focused.".to_string(),
+            "messaging" => vec![
+                "- Clean up into natural, conversational text—casual and concise like you'd type.".to_string(),
+                "- Remove filler words but keep the friendly, informal tone.".to_string(),
             ],
-            "notes" => vec!["Use short headings and tidy bullet points in Markdown.".to_string()],
+            "email" => vec![
+                "- Format as a proper email with greeting and sign-off.".to_string(),
+                "- Polish into professional, clear language with short paragraphs.".to_string(),
+            ],
+            "notes" => vec![
+                "- Organize into structured notes with Markdown headings and bullet points.".to_string(),
+                "- Remove filler but keep all content scannable and easy to reference.".to_string(),
+            ],
             "coding" => vec![
-                "Prefer precise, structured output with code blocks and explicit steps."
-                    .to_string(),
+                "- Format code into proper blocks with clear syntax.".to_string(),
+                "- Structure technical explanations logically, keeping all details precise.".to_string(),
             ],
             _ => Vec::new(),
         };

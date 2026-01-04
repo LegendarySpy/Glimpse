@@ -291,7 +291,7 @@ const PersonalityModal = ({ personality, installedApps, onClose, onUpdate, onUpd
                                     value={instructionsText}
                                     onChange={(event) => handleInstructionsChange(event.target.value)}
                                     placeholder="Add custom instructions"
-                                    className="w-full h-12 resize-none bg-transparent text-[11px] font-mono text-content-primary placeholder-content-disabled outline-none custom-scrollbar"
+                                    className="w-full h-20 resize-none bg-transparent text-[11px] leading-[20px] font-mono text-content-primary placeholder-content-disabled outline-none custom-scrollbar"
                                 />
                             </div>
                         </section>
@@ -353,7 +353,7 @@ const PersonalityModal = ({ personality, installedApps, onClose, onUpdate, onUpd
                                     <p className="text-[11px] font-semibold uppercase tracking-wider text-content-muted">Websites</p>
                                     <span className="text-[10px] text-content-disabled">{personality.websites.length} sites</span>
                                 </div>
-                                <div className="flex items-center gap-2 rounded-lg border border-border-primary bg-surface-surface px-3 py-2 focus-within:border-border-hover transition-colors">
+                                <div className="flex items-center gap-2 rounded-lg border border-border-primary bg-surface-surface px-3 py-1.5 min-h-[40px] focus-within:border-border-hover transition-colors">
                                     <input
                                         value={websiteInput}
                                         onChange={(event) => {
@@ -373,7 +373,7 @@ const PersonalityModal = ({ personality, installedApps, onClose, onUpdate, onUpd
                                     />
                                     <button
                                         onClick={addWebsite}
-                                        className="flex items-center gap-1 rounded-md bg-surface-elevated px-2 py-1 text-[11px] text-content-primary hover:bg-surface-elevated-hover transition-colors"
+                                        className="flex items-center gap-1 rounded-md bg-surface-elevated px-2 py-0.5 text-[11px] text-content-primary hover:bg-surface-elevated-hover transition-colors"
                                     >
                                         <Plus size={12} />
                                         Add
