@@ -12,11 +12,14 @@ mod macos {
     use core_foundation::base::{CFType, TCFType};
     use core_foundation::string::CFString;
     use std::ffi::c_void;
-    use std::ptr;
+    use std::process::Command;
+
+    #[allow(non_camel_case_types)]
+    type pid_t = i32;
 
     #[link(name = "ApplicationServices", kind = "framework")]
     extern "C" {
-        fn AXUIElementCreateSystemWide() -> *mut c_void;
+        fn AXUIElementCreateApplication(pid: pid_t) -> *mut c_void;
         fn AXUIElementCopyAttributeValue(
             element: *mut c_void,
             attribute: *const c_void,
@@ -27,14 +30,14 @@ mod macos {
 
     unsafe fn copy_attribute(element: *mut c_void, attribute: &str) -> *mut c_void {
         let attribute = CFString::new(attribute);
-        let mut value: *mut c_void = ptr::null_mut();
+        let mut value: *mut c_void = std::ptr::null_mut();
         let result = AXUIElementCopyAttributeValue(
             element,
             attribute.as_concrete_TypeRef() as *const c_void,
             &mut value,
         );
         if result != 0 {
-            ptr::null_mut()
+            std::ptr::null_mut()
         } else {
             value
         }
@@ -51,54 +54,81 @@ mod macos {
         Some(cf_string.to_string())
     }
 
-    pub fn get_active_context() -> Option<ActiveContext> {
-        unsafe {
-            let system_wide = AXUIElementCreateSystemWide();
-            if system_wide.is_null() {
-                return None;
-            }
+    fn get_frontmost_app() -> Option<(String, pid_t)> {
+        let script = r#"
+tell application "System Events"
+    set frontProcess to first application process whose frontmost is true
+    set appName to name of frontProcess
+    set appPID to unix id of frontProcess
+    return appName & "|" & appPID
+end tell
+"#;
+        let output = Command::new("osascript")
+            .args(["-e", script])
+            .output()
+            .ok()?;
 
-            let app_element = copy_attribute(system_wide, "AXFocusedApplication");
-            CFRelease(system_wide);
-            if app_element.is_null() {
-                return None;
-            }
-
-            let app_name = read_string_attribute(app_element, "AXTitle")
-                .or_else(|| read_string_attribute(app_element, "AXRoleDescription"))
-                .unwrap_or_else(|| "Unknown App".to_string())
-                .trim()
-                .to_string();
-
-            let window_element = copy_attribute(app_element, "AXFocusedWindow");
-            let window_title = if window_element.is_null() {
-                String::new()
-            } else {
-                read_string_attribute(window_element, "AXTitle")
-                    .unwrap_or_default()
-                    .trim()
-                    .to_string()
-            };
-
-            let url = if window_element.is_null() {
-                None
-            } else {
-                read_string_attribute(window_element, "AXDocument")
-                    .map(|value| value.trim().to_string())
-                    .filter(|value| !value.is_empty())
-            };
-
-            if !window_element.is_null() {
-                CFRelease(window_element);
-            }
-            CFRelease(app_element);
-
-            Some(ActiveContext {
-                app_name,
-                window_title,
-                url,
-            })
+        if !output.status.success() {
+            return None;
         }
+
+        let stdout = String::from_utf8(output.stdout).ok()?;
+        let trimmed = stdout.trim();
+        let parts: Vec<&str> = trimmed.splitn(2, '|').collect();
+        if parts.len() != 2 {
+            return None;
+        }
+
+        let name = parts[0].trim().to_string();
+        let pid: pid_t = parts[1].trim().parse().ok()?;
+
+        if name.is_empty() {
+            return None;
+        }
+
+        Some((name, pid))
+    }
+
+    pub fn get_active_context() -> Option<ActiveContext> {
+        let (app_name, pid) = get_frontmost_app()?;
+
+        let (window_title, url) = unsafe {
+            let app_element = AXUIElementCreateApplication(pid);
+            if app_element.is_null() {
+                (String::new(), None)
+            } else {
+                let window_element = copy_attribute(app_element, "AXFocusedWindow");
+                let title = if window_element.is_null() {
+                    String::new()
+                } else {
+                    read_string_attribute(window_element, "AXTitle")
+                        .unwrap_or_default()
+                        .trim()
+                        .to_string()
+                };
+
+                let doc = if window_element.is_null() {
+                    None
+                } else {
+                    read_string_attribute(window_element, "AXDocument")
+                        .map(|v| v.trim().to_string())
+                        .filter(|v| !v.is_empty())
+                };
+
+                if !window_element.is_null() {
+                    CFRelease(window_element);
+                }
+                CFRelease(app_element);
+
+                (title, doc)
+            }
+        };
+
+        Some(ActiveContext {
+            app_name,
+            window_title,
+            url,
+        })
     }
 }
 

@@ -125,7 +125,7 @@ fn default_personalities() -> Vec<Personality> {
             enabled: true,
             apps: vec!["Messages".to_string(), "Slack".to_string()],
             websites: vec!["slack.com".to_string()],
-            instructions: vec!["Keep it concise, friendly, and ready to send.".to_string()],
+            instructions: vec![],
         },
         Personality {
             id: "email".to_string(),
@@ -141,11 +141,7 @@ fn default_personalities() -> Vec<Personality> {
                 "outlook.com".to_string(),
                 "mail.yahoo.com".to_string(),
             ],
-            instructions: vec![
-                "Format output as a concise, professional email with a greeting and sign-off."
-                    .to_string(),
-                "Keep paragraphs short and action-focused.".to_string(),
-            ],
+            instructions: vec![],
         },
         Personality {
             id: "notes".to_string(),
@@ -164,7 +160,7 @@ fn default_personalities() -> Vec<Personality> {
                 "affine.pro".to_string(),
                 "obsidian.md".to_string(),
             ],
-            instructions: vec!["Use short headings and tidy bullet points in Markdown.".to_string()],
+            instructions: vec![],
         },
         Personality {
             id: "coding".to_string(),
@@ -182,10 +178,7 @@ fn default_personalities() -> Vec<Personality> {
                 "gitlab.com".to_string(),
                 "bitbucket.org".to_string(),
             ],
-            instructions: vec![
-                "Prefer precise, structured output with code blocks and explicit steps."
-                    .to_string(),
-            ],
+            instructions: vec![],
         },
     ]
 }
