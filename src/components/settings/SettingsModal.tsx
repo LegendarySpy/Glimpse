@@ -115,6 +115,7 @@ type DownloadEvent =
 const modifierOrder = ["Control", "Shift", "Alt", "Command"];
 
 const languages = [
+    { code: "", name: "Auto" },
     { code: "en", name: "English" },
     { code: "es", name: "Spanish" },
     { code: "fr", name: "French" },
@@ -1152,7 +1153,7 @@ const SettingsModal = ({
 
                                                 {/* Language */}
                                                 <div className="space-y-1.5">
-                                                    <label className="text-[10px] font-medium text-content-muted">Language</label>
+                                                    <label className="text-[10px] font-medium text-content-muted"> Transcription Language</label>
                                                     <div className="relative z-10">
                                                         <Dropdown
                                                             value={language}
