@@ -2,17 +2,17 @@ use std::collections::HashSet;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
-use anyhow::{anyhow, Result};
-use crossbeam_channel::{select, unbounded, Receiver, Sender};
+use anyhow::{Result, anyhow};
+use crossbeam_channel::{Receiver, Sender, select, unbounded};
 use parking_lot::Mutex;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter};
 
 pub(crate) use super::keyboard::Hotkey;
 use super::keyboard::{
-    blocking_hotkeys, empty_blocking_hotkeys, Key, KeyEvent, KeyboardListener, Modifiers,
+    Key, KeyEvent, KeyboardListener, Modifiers, blocking_hotkeys, empty_blocking_hotkeys,
 };
-use crate::{pill, AppRuntime};
+use crate::{AppRuntime, pill};
 
 pub(crate) const SHORTCUT_CAPTURE_EVENT: &str = "shortcut:capture";
 

@@ -1,20 +1,20 @@
 #[cfg(target_os = "macos")]
 use crate::permissions;
 use crate::{
-    assistive,
+    AppRuntime, AppState, AudioSpectrumPayload, EVENT_AUDIO_SPECTRUM, MAIN_WINDOW_LABEL, assistive,
     core::hotkeys::{self, HotkeyState},
     emit_event, model_manager, music, platform,
     recorder::RecorderManager,
     settings::{MediaAction, UserSettings},
-    toast, AppRuntime, AppState, AudioSpectrumPayload, EVENT_AUDIO_SPECTRUM, MAIN_WINDOW_LABEL,
+    toast,
 };
 use chrono::{DateTime, Local};
 use parking_lot::Mutex;
-use rustfft::{num_complex::Complex, FftPlanner};
+use rustfft::{FftPlanner, num_complex::Complex};
 use serde::Serialize;
 use std::sync::{
-    atomic::{AtomicBool, AtomicU64, Ordering},
     Arc,
+    atomic::{AtomicBool, AtomicU64, Ordering},
 };
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
@@ -155,11 +155,11 @@ impl PillHoverEmitter {
             let interval = Duration::from_millis(50);
             let mut last_emitted: Option<bool> = None;
             while !stop_signal.load(Ordering::Relaxed) {
-                if let Some(hovering) = cursor_over_pill_window(&app) {
-                    if last_emitted != Some(hovering) {
-                        last_emitted = Some(hovering);
-                        emit_event(&app, EVENT_PILL_HOVER, PillHoverPayload { hovering });
-                    }
+                if let Some(hovering) = cursor_over_pill_window(&app)
+                    && last_emitted != Some(hovering)
+                {
+                    last_emitted = Some(hovering);
+                    emit_event(&app, EVENT_PILL_HOVER, PillHoverPayload { hovering });
                 }
                 std::thread::sleep(interval);
             }
@@ -1129,16 +1129,16 @@ pub fn hide_overlay(app: &AppHandle<AppRuntime>) {
 }
 
 fn position_overlay(window: &WebviewWindow<AppRuntime>) {
-    if let Ok(Some(monitor)) = window.current_monitor() {
-        if let Ok(size) = window.outer_size() {
-            let scale_factor = monitor.scale_factor();
-            let screen = monitor.size();
-            let mon_pos = monitor.position();
-            let x = mon_pos.x + (screen.width.saturating_sub(size.width) / 2) as i32;
-            let bottom_padding_physical = (85.0 * scale_factor) as i32;
-            let y = mon_pos.y + screen.height as i32 - size.height as i32 - bottom_padding_physical;
-            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
-        }
+    if let Ok(Some(monitor)) = window.current_monitor()
+        && let Ok(size) = window.outer_size()
+    {
+        let scale_factor = monitor.scale_factor();
+        let screen = monitor.size();
+        let mon_pos = monitor.position();
+        let x = mon_pos.x + (screen.width.saturating_sub(size.width) / 2) as i32;
+        let bottom_padding_physical = (85.0 * scale_factor) as i32;
+        let y = mon_pos.y + screen.height as i32 - size.height as i32 - bottom_padding_physical;
+        let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
     }
 }
 

@@ -2,8 +2,9 @@ use glimpse_speech::models::{InstallSpec, ModelLayout, ModelStorage, RemoteFile}
 use serde::Serialize;
 use tauri::AppHandle;
 
+use crate::AppRuntime;
 use crate::model_language_table::{
-    english_supported_languages, whisper_supported_languages, SupportedLanguageInfo,
+    SupportedLanguageInfo, english_supported_languages, whisper_supported_languages,
 };
 #[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 use crate::model_language_table::{
@@ -11,7 +12,6 @@ use crate::model_language_table::{
 };
 use crate::settings::UserSettings;
 use crate::speech::{install, remote};
-use crate::AppRuntime;
 
 pub const MODEL_CAPABILITY_DICTIONARY: &str = "dictionary";
 pub const MODEL_CAPABILITY_TIMESTAMPS: &str = "timestamps";
@@ -193,7 +193,7 @@ const NEMOTRON_35_STREAMING_FILES: &[CatalogFile] = &[
 ];
 
 macro_rules! whisper_files {
-    ($path:literal, $size_bytes:literal, $sha256:expr) => {
+    ($path:literal, $size_bytes:literal, $sha256:expr_2021) => {
         &[CatalogFile {
             url: concat!(
                 "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/",
@@ -207,7 +207,7 @@ macro_rules! whisper_files {
 }
 
 macro_rules! distil_whisper_files {
-    ($repo:literal, $path:literal, $size_bytes:literal, $sha256:expr) => {
+    ($repo:literal, $path:literal, $size_bytes:literal, $sha256:expr_2021) => {
         &[CatalogFile {
             url: concat!("https://huggingface.co/", $repo, "/resolve/main/", $path),
             path: $path,
@@ -303,8 +303,7 @@ const MODEL_MANIFESTS: &[LocalModelManifest] = &[
         id: "whisper_large_v3_turbo_q8",
         family: "whisper-large-v3-turbo",
         label: "Whisper Large V3 Turbo",
-        description:
-            "Great quality local Whisper model with multilingual support and dictionary support.",
+        description: "Great quality local Whisper model with multilingual support and dictionary support.",
         tags: &["Dictionary", "Multilingual"],
         category: "standard",
         engine: LocalModelEngine::Whisper,
@@ -321,8 +320,7 @@ const MODEL_MANIFESTS: &[LocalModelManifest] = &[
         id: "parakeet_tdt_int8",
         family: "parakeet-tdt",
         label: "Parakeet TDT V3",
-        description:
-            "Fast, multilingual and accurate. Based on ONNX for everyday local transcription.",
+        description: "Fast, multilingual and accurate. Based on ONNX for everyday local transcription.",
         tags: &["Multilingual", "Fast"],
         category: "experimental",
         engine: LocalModelEngine::Parakeet,
@@ -705,19 +703,17 @@ pub fn install_spec(model: &str, ane: bool) -> Option<InstallSpec> {
             extract: false,
         })
         .collect();
-    if ane {
-        if let Some(encoder) = ane_encoder(manifest) {
-            let dir_name = encoder.dir_name();
-            files.push(RemoteFile {
-                url: format!(
-                    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{dir_name}.zip"
-                ),
-                path: dir_name,
-                size_bytes: Some(encoder.size_bytes),
-                sha256: Some(encoder.sha256.to_string()),
-                extract: true,
-            });
-        }
+    if ane && let Some(encoder) = ane_encoder(manifest) {
+        let dir_name = encoder.dir_name();
+        files.push(RemoteFile {
+            url: format!(
+                "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{dir_name}.zip"
+            ),
+            path: dir_name,
+            size_bytes: Some(encoder.size_bytes),
+            sha256: Some(encoder.sha256.to_string()),
+            extract: true,
+        });
     }
     Some(InstallSpec {
         id: manifest.id.to_string(),

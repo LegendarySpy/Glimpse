@@ -18,8 +18,8 @@ use super::queue::{release_library_slot, schedule_library_job};
 #[cfg(target_os = "macos")]
 use super::types::EVENT_LIBRARY_OPEN_IMPORT;
 use super::types::{
-    ExportFormat, LibraryErrorPayload, LibraryFilter, LibraryImportOptions, LibraryItem,
-    LibraryItemPatch, LibraryItemStatus, LibraryItemsPage, EVENT_LIBRARY_ERROR,
+    EVENT_LIBRARY_ERROR, ExportFormat, LibraryErrorPayload, LibraryFilter, LibraryImportOptions,
+    LibraryItem, LibraryItemPatch, LibraryItemStatus, LibraryItemsPage,
 };
 
 #[cfg(target_os = "macos")]

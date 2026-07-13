@@ -1,12 +1,12 @@
 use std::path::PathBuf;
 
-use tauri::{async_runtime, AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, async_runtime};
 use tracing::{debug, warn};
 
 use crate::recorder::RecordingSaved;
 use crate::{
-    llm_cleanup, storage, transcribe, AppRuntime, AppState, TranscriptionCompletePayload,
-    TranscriptionErrorPayload, EVENT_TRANSCRIPTION_COMPLETE, EVENT_TRANSCRIPTION_ERROR,
+    AppRuntime, AppState, EVENT_TRANSCRIPTION_COMPLETE, EVENT_TRANSCRIPTION_ERROR,
+    TranscriptionCompletePayload, TranscriptionErrorPayload, llm_cleanup, storage, transcribe,
 };
 
 pub(crate) fn retry_transcription(

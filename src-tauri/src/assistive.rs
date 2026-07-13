@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 #[cfg(not(target_os = "macos"))]
 use arboard::Clipboard;
@@ -16,7 +16,7 @@ use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
 use std::{thread, time::Duration};
 #[cfg(target_os = "windows")]
 use windows::Win32::UI::Input::KeyboardAndMouse::{
-    SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYBD_EVENT_FLAGS, KEYEVENTF_KEYUP,
+    INPUT, INPUT_0, INPUT_KEYBOARD, KEYBD_EVENT_FLAGS, KEYBDINPUT, KEYEVENTF_KEYUP, SendInput,
     VIRTUAL_KEY, VK_C, VK_CONTROL, VK_V,
 };
 
@@ -113,7 +113,7 @@ mod macos_ax {
     }
 
     #[link(name = "ApplicationServices", kind = "framework")]
-    extern "C" {
+    unsafe extern "C" {
         fn AXUIElementCreateSystemWide() -> AXUIElementRef;
         fn AXUIElementCopyAttributeValue(
             element: *mut c_void,
@@ -213,93 +213,105 @@ mod macos_ax {
     }
 
     unsafe fn probe_focused(focused: AXUIElementRef) -> SelectionProbe {
-        if let Some(text) = read_string_attribute(focused, "AXSelectedText") {
-            if !text.is_empty() {
+        unsafe {
+            if let Some(text) = read_string_attribute(focused, "AXSelectedText")
+                && !text.is_empty()
+            {
                 return SelectionProbe::Text(text);
             }
-        }
 
-        if matches!(
-            read_selected_text_range(focused),
-            Some(CFRange { length: 0, .. })
-        ) {
-            return SelectionProbe::Empty;
-        }
+            if matches!(
+                read_selected_text_range(focused),
+                Some(CFRange { length: 0, .. })
+            ) {
+                return SelectionProbe::Empty;
+            }
 
-        SelectionProbe::Unknown
+            SelectionProbe::Unknown
+        }
     }
 
     unsafe fn read_string_attribute(element: AXUIElementRef, attribute: &str) -> Option<String> {
-        let value = copy_attribute(element, attribute)?;
-        let cf_type: CFType = CFType::wrap_under_create_rule(value as *const _);
-        let cf_string = cf_type.downcast::<CFString>()?;
-        Some(cf_string.to_string())
+        unsafe {
+            let value = copy_attribute(element, attribute)?;
+            let cf_type: CFType = CFType::wrap_under_create_rule(value as *const _);
+            let cf_string = cf_type.downcast::<CFString>()?;
+            Some(cf_string.to_string())
+        }
     }
 
     unsafe fn read_selected_text_range(element: AXUIElementRef) -> Option<CFRange> {
-        let value = copy_attribute(element, "AXSelectedTextRange")?;
-        let mut range = CFRange {
-            location: 0,
-            length: 0,
-        };
-        let ok = AXValueGetValue(
-            value,
-            AX_VALUE_TYPE_CF_RANGE,
-            &mut range as *mut CFRange as *mut c_void,
-        );
-        CFRelease(value as CFTypeRef);
+        unsafe {
+            let value = copy_attribute(element, "AXSelectedTextRange")?;
+            let mut range = CFRange {
+                location: 0,
+                length: 0,
+            };
+            let ok = AXValueGetValue(
+                value,
+                AX_VALUE_TYPE_CF_RANGE,
+                &mut range as *mut CFRange as *mut c_void,
+            );
+            CFRelease(value as CFTypeRef);
 
-        ok.then_some(range)
+            ok.then_some(range)
+        }
     }
 
     unsafe fn read_pid(element: AXUIElementRef) -> Option<i32> {
-        let mut pid = 0;
-        let err = AXUIElementGetPid(element, &mut pid);
-        (err == AX_ERROR_SUCCESS).then_some(pid)
+        unsafe {
+            let mut pid = 0;
+            let err = AXUIElementGetPid(element, &mut pid);
+            (err == AX_ERROR_SUCCESS).then_some(pid)
+        }
     }
 
     unsafe fn read_frame(element: AXUIElementRef) -> Option<(f64, f64, f64, f64)> {
-        let position_value = copy_attribute(element, "AXPosition")?;
-        let Some(size_value) = copy_attribute(element, "AXSize") else {
+        unsafe {
+            let position_value = copy_attribute(element, "AXPosition")?;
+            let Some(size_value) = copy_attribute(element, "AXSize") else {
+                CFRelease(position_value as CFTypeRef);
+                return None;
+            };
+
+            let mut point = CGPoint { x: 0.0, y: 0.0 };
+            let mut size = CGSize {
+                width: 0.0,
+                height: 0.0,
+            };
+            let point_ok = AXValueGetValue(
+                position_value,
+                AX_VALUE_TYPE_CG_POINT,
+                &mut point as *mut CGPoint as *mut c_void,
+            );
+            let size_ok = AXValueGetValue(
+                size_value,
+                AX_VALUE_TYPE_CG_SIZE,
+                &mut size as *mut CGSize as *mut c_void,
+            );
             CFRelease(position_value as CFTypeRef);
-            return None;
-        };
+            CFRelease(size_value as CFTypeRef);
 
-        let mut point = CGPoint { x: 0.0, y: 0.0 };
-        let mut size = CGSize {
-            width: 0.0,
-            height: 0.0,
-        };
-        let point_ok = AXValueGetValue(
-            position_value,
-            AX_VALUE_TYPE_CG_POINT,
-            &mut point as *mut CGPoint as *mut c_void,
-        );
-        let size_ok = AXValueGetValue(
-            size_value,
-            AX_VALUE_TYPE_CG_SIZE,
-            &mut size as *mut CGSize as *mut c_void,
-        );
-        CFRelease(position_value as CFTypeRef);
-        CFRelease(size_value as CFTypeRef);
-
-        (point_ok && size_ok).then_some((point.x, point.y, size.width, size.height))
+            (point_ok && size_ok).then_some((point.x, point.y, size.width, size.height))
+        }
     }
 
     unsafe fn copy_attribute(element: AXUIElementRef, attribute: &str) -> Option<*mut c_void> {
-        let attribute = CFString::new(attribute);
-        let mut value: *mut c_void = ptr::null_mut();
-        let err = AXUIElementCopyAttributeValue(
-            element,
-            attribute.as_concrete_TypeRef() as *const c_void,
-            &mut value,
-        );
+        unsafe {
+            let attribute = CFString::new(attribute);
+            let mut value: *mut c_void = ptr::null_mut();
+            let err = AXUIElementCopyAttributeValue(
+                element,
+                attribute.as_concrete_TypeRef() as *const c_void,
+                &mut value,
+            );
 
-        if err == AX_ERROR_SUCCESS && !value.is_null() {
-            return Some(value);
+            if err == AX_ERROR_SUCCESS && !value.is_null() {
+                return Some(value);
+            }
+
+            None
         }
-
-        None
     }
 }
 
@@ -309,8 +321,8 @@ mod windows_uia {
     use windows::Win32::{
         Foundation::RPC_E_CHANGED_MODE,
         System::Com::{
-            CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
-            COINIT_APARTMENTTHREADED,
+            CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx,
+            CoUninitialize,
         },
         UI::Accessibility::{
             CUIAutomation, IUIAutomation, IUIAutomationElement, IUIAutomationTextPattern,
@@ -497,10 +509,10 @@ pub fn paste_text(text: &str) -> Result<()> {
 
     thread::spawn(move || {
         thread::sleep(Duration::from_millis(300));
-        if let Ok(mut clipboard) = Clipboard::new() {
-            if should_restore_after_paste(&mut clipboard, &inserted_text) {
-                backup.restore(&mut clipboard);
-            }
+        if let Ok(mut clipboard) = Clipboard::new()
+            && should_restore_after_paste(&mut clipboard, &inserted_text)
+        {
+            backup.restore(&mut clipboard);
         }
     });
 

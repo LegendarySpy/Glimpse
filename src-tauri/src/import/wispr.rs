@@ -4,7 +4,7 @@ use crate::settings::Replacement;
 use crate::storage::ImportedTranscription;
 
 use super::shared::{
-    app_support_dir, open_sqlite_readonly, parse_datetime_millis, sqlite_table_exists, ImportBundle,
+    ImportBundle, app_support_dir, open_sqlite_readonly, parse_datetime_millis, sqlite_table_exists,
 };
 
 pub const ID: &str = "wispr";
@@ -22,24 +22,23 @@ pub fn parse(home: &Path) -> Result<ImportBundle, String> {
     let (conn, _guard) = open_sqlite_readonly(&db_path(home))?;
     let mut bundle = ImportBundle::default();
 
-    if sqlite_table_exists(&conn, "Dictionary") {
-        if let Ok(mut stmt) = conn.prepare(
+    if sqlite_table_exists(&conn, "Dictionary")
+        && let Ok(mut stmt) = conn.prepare(
             "SELECT phrase, replacement FROM Dictionary \
              WHERE COALESCE(isDeleted, 0) = 0 AND phrase IS NOT NULL AND TRIM(phrase) <> ''",
-        ) {
-            if let Ok(rows) = stmt.query_map([], |row| {
-                let phrase: String = row.get(0)?;
-                let replacement: Option<String> = row.get(1).ok();
-                Ok((phrase, replacement))
-            }) {
-                for (phrase, replacement) in rows.flatten() {
-                    match replacement {
-                        Some(to) if !to.trim().is_empty() => {
-                            bundle.replacements.push(Replacement { from: phrase, to });
-                        }
-                        _ => bundle.dictionary.push(phrase),
-                    }
+        )
+        && let Ok(rows) = stmt.query_map([], |row| {
+            let phrase: String = row.get(0)?;
+            let replacement: Option<String> = row.get(1).ok();
+            Ok((phrase, replacement))
+        })
+    {
+        for (phrase, replacement) in rows.flatten() {
+            match replacement {
+                Some(to) if !to.trim().is_empty() => {
+                    bundle.replacements.push(Replacement { from: phrase, to });
                 }
+                _ => bundle.dictionary.push(phrase),
             }
         }
     }

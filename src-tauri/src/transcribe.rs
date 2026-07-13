@@ -1,21 +1,20 @@
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use anyhow::{anyhow, Context, Result};
-use tauri::{async_runtime, AppHandle, Emitter, Manager};
+use anyhow::{Context, Result, anyhow};
+use tauri::{AppHandle, Emitter, Manager, async_runtime};
 use tokio_util::sync::CancellationToken;
 use webrtc_vad::VadMode;
 
 use crate::{
-    accessibility_context, analytics, assistive, auto_dictionary, dictionary, llm_cleanup,
-    mode_context, model_manager,
-    model_manager::{model_supports_capability, MODEL_CAPABILITY_DICTIONARY},
-    recorder::{speech_percentage_i16_with_mode, CompletedRecording, RecordingSaved},
+    AppRuntime, AppState, EVENT_TRANSCRIPTION_COMPLETE, EVENT_TRANSCRIPTION_ERROR,
+    TranscriptionCompletePayload, TranscriptionErrorPayload, accessibility_context, analytics,
+    assistive, auto_dictionary, dictionary, llm_cleanup, mode_context, model_manager,
+    model_manager::{MODEL_CAPABILITY_DICTIONARY, model_supports_capability},
+    recorder::{CompletedRecording, RecordingSaved, speech_percentage_i16_with_mode},
     remote_speech,
     settings::{Personality, UserSettings},
-    speech, storage, toast, transcription_api, update_checker, AppRuntime, AppState,
-    TranscriptionCompletePayload, TranscriptionErrorPayload, EVENT_TRANSCRIPTION_COMPLETE,
-    EVENT_TRANSCRIPTION_ERROR,
+    speech, storage, toast, transcription_api, update_checker,
 };
 
 pub(crate) fn run_transcription_prune_for_settings(
@@ -1162,13 +1161,13 @@ fn handle_empty_transcription(
         },
     );
 
-    if audio_path.exists() {
-        if let Err(err) = std::fs::remove_file(audio_path) {
-            tracing::error!(
-                "Failed to remove empty transcription audio {}: {err}",
-                audio_path.display()
-            );
-        }
+    if audio_path.exists()
+        && let Err(err) = std::fs::remove_file(audio_path)
+    {
+        tracing::error!(
+            "Failed to remove empty transcription audio {}: {err}",
+            audio_path.display()
+        );
     }
     discard_pending_recording(pending_path);
 
@@ -1569,10 +1568,10 @@ fn transcribe_local_chunked(
     let mut model_label = None;
 
     while start < samples.len() {
-        if let Some(token) = cancel_token {
-            if token.is_cancelled() {
-                return Err(anyhow!("Transcription cancelled"));
-            }
+        if let Some(token) = cancel_token
+            && token.is_cancelled()
+        {
+            return Err(anyhow!("Transcription cancelled"));
         }
         let nominal_end = (start + chunk_samples).min(samples.len());
         let end = if nominal_end == samples.len() {

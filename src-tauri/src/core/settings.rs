@@ -3,12 +3,12 @@ use tauri::AppHandle;
 
 use super::hotkeys;
 use crate::settings::{
-    canonicalize_app_locale, canonicalize_app_locale_or_default, AutoDeleteTarget, MediaAction,
-    RecordingPrunePolicy, ShortcutBinding, ShortcutBindings, ThemeMode, TranscriptionMode,
-    UserSettings,
+    AutoDeleteTarget, MediaAction, RecordingPrunePolicy, ShortcutBinding, ShortcutBindings,
+    ThemeMode, TranscriptionMode, UserSettings, canonicalize_app_locale,
+    canonicalize_app_locale_or_default,
 };
 
-use crate::{analytics, auto_dictionary, model_manager, pill, tray, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, analytics, auto_dictionary, model_manager, pill, tray};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -387,18 +387,17 @@ pub(crate) fn update_settings(
     let (prev, next) = match result {
         Ok(pair) => pair,
         Err(err) => {
-            if launch_changed {
-                if let Err(rollback_err) =
+            if launch_changed
+                && let Err(rollback_err) =
                     crate::sync_launch_at_login(app, !requested_auto_launch_enabled)
-                {
-                    return Err(format!(
-                        "{} (also failed to roll back launch at login from {} back to {}: {})",
-                        err,
-                        requested_auto_launch_enabled,
-                        !requested_auto_launch_enabled,
-                        rollback_err
-                    ));
-                }
+            {
+                return Err(format!(
+                    "{} (also failed to roll back launch at login from {} back to {}: {})",
+                    err,
+                    requested_auto_launch_enabled,
+                    !requested_auto_launch_enabled,
+                    rollback_err
+                ));
             }
             return Err(err.to_string());
         }

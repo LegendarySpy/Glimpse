@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Result;
-use rusqlite::{params, Connection, OptionalExtension, Row, ToSql};
+use rusqlite::{Connection, OptionalExtension, Row, ToSql, params};
 
 use crate::library::{
     LibraryFilter, LibraryItem, LibraryItemPatch, LibraryItemStatus, Speaker, TranscriptSegment,
@@ -414,21 +414,21 @@ fn build_library_filter(filter: &LibraryFilter) -> (String, Vec<Box<dyn ToSql>>)
     let mut clauses: Vec<String> = Vec::new();
     let mut params: Vec<Box<dyn ToSql>> = Vec::new();
 
-    if let Some(search) = filter.search.as_ref() {
-        if !search.trim().is_empty() {
-            let (text_search, tag_terms) = extract_search_terms(search.trim());
+    if let Some(search) = filter.search.as_ref()
+        && !search.trim().is_empty()
+    {
+        let (text_search, tag_terms) = extract_search_terms(search.trim());
 
-            if !text_search.is_empty() {
-                let like = format!("%{}%", text_search);
-                clauses.push("(name LIKE ? OR transcript LIKE ?)".to_string());
-                params.push(Box::new(like.clone()));
-                params.push(Box::new(like));
-            }
+        if !text_search.is_empty() {
+            let like = format!("%{}%", text_search);
+            clauses.push("(name LIKE ? OR transcript LIKE ?)".to_string());
+            params.push(Box::new(like.clone()));
+            params.push(Box::new(like));
+        }
 
-            for tag in tag_terms {
-                clauses.push("tags LIKE ?".to_string());
-                params.push(Box::new(format!("%\"{}\"%", tag)));
-            }
+        for tag in tag_terms {
+            clauses.push("tags LIKE ?".to_string());
+            params.push(Box::new(format!("%\"{}\"%", tag)));
         }
     }
 
@@ -444,11 +444,11 @@ fn build_library_filter(filter: &LibraryFilter) -> (String, Vec<Box<dyn ToSql>>)
         }
     }
 
-    if let Some(tag) = filter.tag.as_ref() {
-        if !tag.trim().is_empty() {
-            clauses.push("tags LIKE ?".to_string());
-            params.push(Box::new(format!("%\"{}\"%", tag.trim())));
-        }
+    if let Some(tag) = filter.tag.as_ref()
+        && !tag.trim().is_empty()
+    {
+        clauses.push("tags LIKE ?".to_string());
+        params.push(Box::new(format!("%\"{}\"%", tag.trim())));
     }
 
     if let Some(days) = filter.since_days {

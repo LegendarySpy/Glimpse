@@ -4,10 +4,10 @@ use std::path::{Path, PathBuf};
 
 use tauri::AppHandle;
 
-use crate::personalization::icons::{
-    app_icon_cache_dir, icon_cache_file_path, should_refresh_icon, InstalledApp,
-};
 use crate::AppRuntime;
+use crate::personalization::icons::{
+    InstalledApp, app_icon_cache_dir, icon_cache_file_path, should_refresh_icon,
+};
 
 const WINDOWS_ICON_SIZE: i32 = 64;
 
@@ -150,13 +150,13 @@ fn wide_buffer_to_string(buffer: &[u16]) -> Option<String> {
 }
 
 fn resolve_shortcut_icon_source(shortcut_path: &Path) -> Option<(PathBuf, i32)> {
-    use windows::core::{Interface, PCWSTR};
     use windows::Win32::Foundation::S_OK;
     use windows::Win32::System::Com::{
-        CoCreateInstance, CoInitializeEx, CoUninitialize, IPersistFile, CLSCTX_INPROC_SERVER,
-        COINIT_APARTMENTTHREADED, STGM_READ,
+        CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx,
+        CoUninitialize, IPersistFile, STGM_READ,
     };
     use windows::Win32::UI::Shell::{IShellLinkW, ShellLink};
+    use windows::core::{Interface, PCWSTR};
 
     let hr = unsafe { CoInitializeEx(None, COINIT_APARTMENTTHREADED) };
     let should_uninitialize = hr == S_OK;
@@ -271,10 +271,10 @@ fn write_hicon_to_png(
 ) -> Option<()> {
     use std::ffi::c_void;
     use windows::Win32::Graphics::Gdi::{
-        CreateCompatibleDC, CreateDIBSection, DeleteDC, DeleteObject, SelectObject, BITMAPINFO,
-        BITMAPINFOHEADER, BI_RGB, DIB_RGB_COLORS,
+        BI_RGB, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleDC, CreateDIBSection, DIB_RGB_COLORS,
+        DeleteDC, DeleteObject, SelectObject,
     };
-    use windows::Win32::UI::WindowsAndMessaging::{DrawIconEx, DI_NORMAL};
+    use windows::Win32::UI::WindowsAndMessaging::{DI_NORMAL, DrawIconEx};
 
     let mut pixels = Vec::new();
     let mut bits: *mut c_void = std::ptr::null_mut();
@@ -354,13 +354,13 @@ fn extract_icon_handle(
     source_path: &Path,
     icon_index: i32,
 ) -> Option<windows::Win32::UI::WindowsAndMessaging::HICON> {
-    use windows::core::PCWSTR;
     use windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES;
     use windows::Win32::UI::Controls::{IImageList, ILD_TRANSPARENT};
     use windows::Win32::UI::Shell::{
-        ExtractIconExW, SHGetFileInfoW, SHGetImageList, SHFILEINFOW, SHGFI_ICON, SHGFI_LARGEICON,
-        SHGFI_SYSICONINDEX, SHIL_EXTRALARGE, SHIL_JUMBO,
+        ExtractIconExW, SHFILEINFOW, SHGFI_ICON, SHGFI_LARGEICON, SHGFI_SYSICONINDEX,
+        SHGetFileInfoW, SHGetImageList, SHIL_EXTRALARGE, SHIL_JUMBO,
     };
+    use windows::core::PCWSTR;
 
     let wide_path = path_to_wide_null(source_path);
     let mut large_icon = windows::Win32::UI::WindowsAndMessaging::HICON::default();

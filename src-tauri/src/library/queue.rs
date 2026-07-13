@@ -2,29 +2,29 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Instant;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use chrono::Utc;
-use tauri::{async_runtime, AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter, Manager, async_runtime};
 use tokio_util::sync::CancellationToken;
 use webrtc_vad::VadMode;
 
 use crate::transcribe::count_words;
 use crate::{
-    dictionary, model_manager, recorder::speech_percentage_i16_with_mode, remote_speech,
-    settings::UserSettings, storage::StorageManager, toast, transcribe, transcription_api,
-    AppRuntime, AppState, LibraryJob, LibraryJobKind,
+    AppRuntime, AppState, LibraryJob, LibraryJobKind, dictionary, model_manager,
+    recorder::speech_percentage_i16_with_mode, remote_speech, settings::UserSettings,
+    storage::StorageManager, toast, transcribe, transcription_api,
 };
 
 use super::processing::{
-    compute_total_chunks, convert_library_item, convert_segments_to_ms, diarize_segments,
-    read_wav_info, stream_wav_chunks, WavInfo,
+    WavInfo, compute_total_chunks, convert_library_item, convert_segments_to_ms, diarize_segments,
+    read_wav_info, stream_wav_chunks,
 };
 use super::types::{
-    cancelled_error, is_cancelled_error, is_ffmpeg_error_message, LibraryCompletePayload,
-    LibraryErrorPayload, LibraryItem, LibraryItemPatch, LibraryItemStatus, LibraryProgressPayload,
-    LibraryProgressUpdate, LibraryTranscriptionResult, TranscriptSegment, CHUNK_OVERLAP_SECONDS,
-    DIRECT_TRANSCRIBE_MINUTES, EVENT_LIBRARY_COMPLETE, EVENT_LIBRARY_ERROR, EVENT_LIBRARY_PROGRESS,
-    MAX_CHUNK_MINUTES,
+    CHUNK_OVERLAP_SECONDS, DIRECT_TRANSCRIBE_MINUTES, EVENT_LIBRARY_COMPLETE, EVENT_LIBRARY_ERROR,
+    EVENT_LIBRARY_PROGRESS, LibraryCompletePayload, LibraryErrorPayload, LibraryItem,
+    LibraryItemPatch, LibraryItemStatus, LibraryProgressPayload, LibraryProgressUpdate,
+    LibraryTranscriptionResult, MAX_CHUNK_MINUTES, TranscriptSegment, cancelled_error,
+    is_cancelled_error, is_ffmpeg_error_message,
 };
 use crate::speech::{
     VAD_MIN_SPEECH_PERCENT_CHUNK, VAD_MIN_SPEECH_PERCENT_FILE, WHISPER_CHUNK_OVERLAP_SECONDS,
@@ -1003,13 +1003,13 @@ fn append_library_chunk(existing: &mut String, next: &str) -> String {
 }
 
 fn lowercase_first_alpha(text: &mut String) {
-    if let Some((idx, ch)) = text.char_indices().find(|(_, ch)| ch.is_alphabetic()) {
-        if ch.is_uppercase() {
-            let mut lowered = String::with_capacity(text.len());
-            lowered.push_str(&text[..idx]);
-            lowered.extend(ch.to_lowercase());
-            lowered.push_str(&text[idx + ch.len_utf8()..]);
-            *text = lowered;
-        }
+    if let Some((idx, ch)) = text.char_indices().find(|(_, ch)| ch.is_alphabetic())
+        && ch.is_uppercase()
+    {
+        let mut lowered = String::with_capacity(text.len());
+        lowered.push_str(&text[..idx]);
+        lowered.extend(ch.to_lowercase());
+        lowered.push_str(&text[idx + ch.len_utf8()..]);
+        *text = lowered;
     }
 }

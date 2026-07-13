@@ -4,11 +4,11 @@
 use std::io::{BufRead, BufReader, Write};
 use std::time::Duration;
 
-use interprocess::local_socket::{prelude::*, ListenerOptions, Stream};
+use interprocess::local_socket::{ListenerOptions, Stream, prelude::*};
 use tauri::AppHandle;
 
 use super::handlers;
-use super::ipc::{socket_name, Request, Response};
+use super::ipc::{Request, Response, socket_name};
 use crate::AppRuntime;
 
 /// Start the control-socket server on a dedicated thread. Never blocks the

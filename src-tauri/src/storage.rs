@@ -7,7 +7,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result};
 use chrono::{DateTime, Local, TimeZone};
 use parking_lot::Mutex;
-use rusqlite::{params, types::Type, Connection, OptionalExtension, Row};
+use rusqlite::{Connection, OptionalExtension, Row, params, types::Type};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -351,10 +351,9 @@ impl StorageManager {
                  FROM transcriptions
                  ORDER BY timestamp DESC",
             )?;
-            let records = stmt
-                .query_map([], Self::record_from_row)?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
+
+            stmt.query_map([], Self::record_from_row)?
+                .collect::<rusqlite::Result<Vec<_>>>()?
         };
 
         Self::resolve_audio_availability(&mut records);
@@ -377,13 +376,11 @@ impl StorageManager {
                  LIMIT ?2",
             )?;
 
-            let records = stmt
-                .query_map(
-                    params![TranscriptionStatus::Success.as_str(), limit as i64],
-                    Self::record_from_row,
-                )?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
+            stmt.query_map(
+                params![TranscriptionStatus::Success.as_str(), limit as i64],
+                Self::record_from_row,
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?
         };
 
         Self::resolve_audio_availability(&mut records);
@@ -410,17 +407,15 @@ impl StorageManager {
                  LIMIT ?2 OFFSET ?3",
             )?;
 
-            let records = stmt
-                .query_map(
-                    params![
-                        TranscriptionStatus::Success.as_str(),
-                        limit as i64,
-                        offset as i64
-                    ],
-                    Self::record_from_row,
-                )?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
+            stmt.query_map(
+                params![
+                    TranscriptionStatus::Success.as_str(),
+                    limit as i64,
+                    offset as i64
+                ],
+                Self::record_from_row,
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?
         };
 
         Self::resolve_audio_availability(&mut records);
@@ -453,13 +448,11 @@ impl StorageManager {
                  LIMIT ?3",
             )?;
 
-            let records = stmt
-                .query_map(
-                    params![TranscriptionStatus::Success.as_str(), pattern, limit as i64],
-                    Self::record_from_row,
-                )?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
+            stmt.query_map(
+                params![TranscriptionStatus::Success.as_str(), pattern, limit as i64],
+                Self::record_from_row,
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?
         };
 
         Self::resolve_audio_availability(&mut records);
@@ -635,21 +628,21 @@ impl StorageManager {
     }
 
     fn revert_to_raw_internal(conn: &Connection, id: &str) -> Result<Option<TranscriptionRecord>> {
-        if let Some(mut record) = Self::get_record(conn, id)? {
-            if let Some(raw) = record.raw_text.take() {
-                record.text = raw;
-                record.llm_cleaned = false;
-                record.word_count = count_words(&record.text);
-                record.llm_model = None;
-                record.synced = false;
-                conn.execute(
+        if let Some(mut record) = Self::get_record(conn, id)?
+            && let Some(raw) = record.raw_text.take()
+        {
+            record.text = raw;
+            record.llm_cleaned = false;
+            record.word_count = count_words(&record.text);
+            record.llm_model = None;
+            record.synced = false;
+            conn.execute(
                     "UPDATE transcriptions
                      SET text = ?1, raw_text = NULL, llm_cleaned = 0, llm_model = NULL, word_count = ?2, synced = 0
                      WHERE id = ?3",
                     params![record.text, record.word_count as i64, id],
                 )?;
-                return Ok(Some(record));
-            }
+            return Ok(Some(record));
         }
         Ok(None)
     }

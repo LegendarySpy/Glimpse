@@ -1,10 +1,10 @@
-use crate::toast;
 use crate::AppRuntime;
-use anyhow::{anyhow, Context, Result};
+use crate::toast;
+use anyhow::{Context, Result, anyhow};
 use tauri::Manager;
 use tauri::{AppHandle, WebviewWindow};
 use tauri_nspanel::{
-    tauri_panel, CollectionBehavior, ManagerExt, PanelLevel, StyleMask, WebviewWindowExt,
+    CollectionBehavior, ManagerExt, PanelLevel, StyleMask, WebviewWindowExt, tauri_panel,
 };
 
 tauri_panel! {

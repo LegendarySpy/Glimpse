@@ -3,10 +3,10 @@ use std::path::PathBuf;
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
-use crate::{model_manager, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, model_manager};
 
-use super::apply::{apply_import as run_apply, ImportResult, ImportSelections};
-use super::detect::{detect_apps, display_name, parse_app, DetectedApp};
+use super::apply::{ImportResult, ImportSelections, apply_import as run_apply};
+use super::detect::{DetectedApp, detect_apps, display_name, parse_app};
 use super::shared::resolve_glimpse_model;
 
 fn home_dir(app: &AppHandle<AppRuntime>) -> Result<PathBuf, String> {

@@ -4,8 +4,8 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::thread::JoinHandle;
 
-use anyhow::{anyhow, Result};
-use crossbeam_channel::{unbounded, Receiver};
+use anyhow::{Result, anyhow};
+use crossbeam_channel::{Receiver, unbounded};
 
 #[cfg(target_os = "macos")]
 mod macos;
@@ -760,9 +760,11 @@ mod tests {
     fn modifier_only_hotkeys_parse_and_match() {
         let hotkey: Hotkey = "Ctrl+Shift".parse().unwrap();
         assert_eq!(hotkey.to_string(), "Ctrl+Shift");
-        assert!(hotkey
-            .modifiers
-            .matches(Modifiers::CTRL_LEFT | Modifiers::SHIFT_RIGHT));
+        assert!(
+            hotkey
+                .modifiers
+                .matches(Modifiers::CTRL_LEFT | Modifiers::SHIFT_RIGHT)
+        );
     }
 
     #[test]

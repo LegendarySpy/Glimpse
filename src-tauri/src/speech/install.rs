@@ -1,14 +1,14 @@
 use std::path::{Path, PathBuf};
 
 use crate::AppRuntime;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use glimpse_speech::models as speech_models;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager, Runtime};
 
 pub use super::catalog::{
+    LocalModelEngine, MODEL_CAPABILITY_DICTIONARY, MODEL_CAPABILITY_TIMESTAMPS, ModelInfo,
     api_model_infos, definition, is_streaming_model, model_label, model_supports_capability,
-    LocalModelEngine, ModelInfo, MODEL_CAPABILITY_DICTIONARY, MODEL_CAPABILITY_TIMESTAMPS,
 };
 
 #[derive(Debug, Clone)]

@@ -1,9 +1,9 @@
 use std::collections::HashSet;
 
 use crate::{
-    model_manager::{model_supports_capability, ReadyModel, MODEL_CAPABILITY_DICTIONARY},
-    settings::{Replacement, UserSettings},
     AppState,
+    model_manager::{MODEL_CAPABILITY_DICTIONARY, ReadyModel, model_supports_capability},
+    settings::{Replacement, UserSettings},
 };
 
 pub fn sanitize_dictionary_entries(entries: &[String]) -> Vec<String> {

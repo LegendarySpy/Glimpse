@@ -4,8 +4,8 @@
 
 use std::path::PathBuf;
 
-use anyhow::{bail, Result};
-use serde_json::{json, Value};
+use anyhow::{Result, bail};
+use serde_json::{Value, json};
 
 use super::{client, coded, has_flag, output, positionals, str_flag, wants_help};
 

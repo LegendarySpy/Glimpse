@@ -6,7 +6,7 @@ use crate::settings::{Personality, Replacement};
 use crate::storage::ImportedTranscription;
 
 use super::shared::{
-    app_support_dir, parse_datetime_millis, read_json, translate_accelerator, ImportBundle,
+    ImportBundle, app_support_dir, parse_datetime_millis, read_json, translate_accelerator,
 };
 
 pub const ID: &str = "aqua";

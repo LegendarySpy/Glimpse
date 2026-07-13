@@ -19,7 +19,7 @@ mod macos {
     /// Native check using AXIsProcessTrusted
     fn check_accessibility_native() -> Option<bool> {
         #[link(name = "ApplicationServices", kind = "framework")]
-        extern "C" {
+        unsafe extern "C" {
             fn AXIsProcessTrusted() -> u8;
         }
 

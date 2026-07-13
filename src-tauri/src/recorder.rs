@@ -4,20 +4,20 @@ use std::{
     io::Cursor,
     path::{Path, PathBuf},
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
     thread::JoinHandle,
     time::Duration,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use chrono::{DateTime, Local, TimeZone};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample, Stream};
-use crossbeam_channel::{bounded, unbounded, Sender};
+use crossbeam_channel::{Sender, bounded, unbounded};
 use parking_lot::Mutex;
-use rubato::{audioadapter_buffers::direct::InterleavedSlice, Fft, FixedSync, Resampler};
+use rubato::{Fft, FixedSync, Resampler, audioadapter_buffers::direct::InterleavedSlice};
 use uuid::Uuid;
 use webrtc_vad::{SampleRate as VadSampleRate, Vad, VadMode};
 
@@ -265,10 +265,9 @@ impl RecorderManager {
     }
 
     pub fn spectrum_snapshot(&self) -> Option<Vec<f32>> {
-        if let Some(state) = self.spectrum.try_lock() {
-            state.snapshot()
-        } else {
-            None
+        match self.spectrum.try_lock() {
+            Some(state) => state.snapshot(),
+            _ => None,
         }
     }
 
@@ -510,38 +509,43 @@ impl RecorderCore {
     ) -> Result<Option<CompletedRecording>> {
         *self.live_buffer.lock() = None;
         self.spectrum.lock().reset();
-        if let Some(mut active) = self.active.take() {
-            drop(active.stream);
-            let pending_path = if let Some(pending) = active.pending.take() {
-                if discard_pending {
-                    pending.finish_and_discard();
-                    None
-                } else {
-                    Some(pending.finish())
-                }
-            } else {
-                None
-            };
-            let ended_at = Local::now();
-            after_capture();
-            let raw_samples = Arc::try_unwrap(active.buffer)
-                .map(|mutex| mutex.into_inner())
-                .unwrap_or_else(|arc| arc.lock().clone());
+        match self.active.take() {
+            Some(mut active) => {
+                drop(active.stream);
+                let pending_path = match active.pending.take() {
+                    Some(pending) => {
+                        if discard_pending {
+                            pending.finish_and_discard();
+                            None
+                        } else {
+                            Some(pending.finish())
+                        }
+                    }
+                    _ => None,
+                };
+                let ended_at = Local::now();
+                after_capture();
+                let raw_samples = Arc::try_unwrap(active.buffer)
+                    .map(|mutex| mutex.into_inner())
+                    .unwrap_or_else(|arc| arc.lock().clone());
 
-            let processed = process_raw_samples(&raw_samples, active.sample_rate, active.channels);
+                let processed =
+                    process_raw_samples(&raw_samples, active.sample_rate, active.channels);
 
-            Ok(Some(CompletedRecording {
-                samples: processed.samples,
-                sample_rate: processed.sample_rate,
-                channels: processed.channels,
-                started_at: active.started_at,
-                ended_at,
-                pending_path,
-                speech_percentage: processed.speech_percentage,
-            }))
-        } else {
-            after_capture();
-            Ok(None)
+                Ok(Some(CompletedRecording {
+                    samples: processed.samples,
+                    sample_rate: processed.sample_rate,
+                    channels: processed.channels,
+                    started_at: active.started_at,
+                    ended_at,
+                    pending_path,
+                    speech_percentage: processed.speech_percentage,
+                }))
+            }
+            _ => {
+                after_capture();
+                Ok(None)
+            }
         }
     }
 }
@@ -1272,19 +1276,19 @@ fn trim_silence(samples: &[f32], sample_rate: u32) -> (Vec<f32>, Option<f32>) {
         for idx in 0..keep_mask.len() {
             if !keep_mask[idx] {
                 run_start.get_or_insert(idx);
-            } else if let Some(start) = run_start.take() {
-                if idx - start <= min_gap_frames {
-                    for item in keep_mask.iter_mut().take(idx).skip(start) {
-                        *item = true;
-                    }
+            } else if let Some(start) = run_start.take()
+                && idx - start <= min_gap_frames
+            {
+                for item in keep_mask.iter_mut().take(idx).skip(start) {
+                    *item = true;
                 }
             }
         }
-        if let Some(start) = run_start.take() {
-            if keep_mask.len() - start <= min_gap_frames {
-                for item in keep_mask.iter_mut().skip(start) {
-                    *item = true;
-                }
+        if let Some(start) = run_start.take()
+            && keep_mask.len() - start <= min_gap_frames
+        {
+            for item in keep_mask.iter_mut().skip(start) {
+                *item = true;
             }
         }
     }
@@ -1368,7 +1372,6 @@ fn resample_with_rubato(input: &[f32], in_rate: u32, out_rate: u32) -> Option<Ve
         in_rate as usize,
         out_rate as usize,
         1024,
-        1,
         1,
         FixedSync::Both,
     )

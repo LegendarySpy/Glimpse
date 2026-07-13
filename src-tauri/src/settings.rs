@@ -3,8 +3,8 @@ use std::{collections::HashSet, env, fs, path::PathBuf, sync::OnceLock};
 use anyhow::{Context, Result};
 use chrono::{DateTime, Days, Local, Months};
 use parking_lot::Mutex;
-use rusqlite::{params, Connection, OptionalExtension};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use rusqlite::{Connection, OptionalExtension, params};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use tauri::{AppHandle, Manager};
 
 const SETTINGS_DB_FILE_NAME: &str = "settings.db";

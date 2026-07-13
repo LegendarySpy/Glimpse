@@ -1,7 +1,7 @@
 use crate::settings::{Personality, UserSettings};
 use crate::{
     accessibility_context, permissions,
-    personalization_snippets::{expand_personalization_snippets, SnippetContext},
+    personalization_snippets::{SnippetContext, expand_personalization_snippets},
 };
 
 #[derive(Debug, Clone)]

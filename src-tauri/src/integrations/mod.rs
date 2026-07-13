@@ -20,7 +20,7 @@ mod transcribe;
 
 pub(crate) use server::start as start_control_server;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 
 struct CliCommand {
     name: &'static str,

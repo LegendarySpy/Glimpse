@@ -1,8 +1,8 @@
 use glimpse_speech::remote::{self as remote_lib, RemoteError, RemoteErrorKind};
 use parking_lot::Mutex;
-use reqwest::header::RETRY_AFTER;
 use reqwest::Client;
 use reqwest::StatusCode;
+use reqwest::header::RETRY_AFTER;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::OnceLock;
@@ -673,10 +673,10 @@ fn preflight_state() -> &'static Mutex<PreflightState> {
 
 pub fn cached_preflight_available() -> Option<bool> {
     let state = preflight_state().lock();
-    if let Some(last) = state.last_checked_at {
-        if last.elapsed() >= PREFLIGHT_TTL {
-            return None;
-        }
+    if let Some(last) = state.last_checked_at
+        && last.elapsed() >= PREFLIGHT_TTL
+    {
+        return None;
     }
     state.available
 }
@@ -684,10 +684,10 @@ pub fn cached_preflight_available() -> Option<bool> {
 pub fn should_show_unavailable_notice() -> bool {
     let mut state = preflight_state().lock();
     let now = Instant::now();
-    if let Some(last) = state.last_notice_at {
-        if now.duration_since(last) < PREFLIGHT_NOTICE_COOLDOWN {
-            return false;
-        }
+    if let Some(last) = state.last_notice_at
+        && now.duration_since(last) < PREFLIGHT_NOTICE_COOLDOWN
+    {
+        return false;
     }
     state.last_notice_at = Some(now);
     true
@@ -706,11 +706,7 @@ pub fn clear_preflight_cache() {
 }
 
 fn preflight_availability_from_models(models: &[String]) -> Option<bool> {
-    if models.is_empty() {
-        None
-    } else {
-        Some(true)
-    }
+    if models.is_empty() { None } else { Some(true) }
 }
 
 pub async fn run_preflight(client: Client, settings: UserSettings) {

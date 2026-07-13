@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use crate::storage::ImportedTranscription;
 
 use super::shared::{
-    app_support_dir, map_model_family, open_sqlite_readonly, read_json, sqlite_table_exists,
-    translate_accelerator, ImportBundle, ModelHint,
+    ImportBundle, ModelHint, app_support_dir, map_model_family, open_sqlite_readonly, read_json,
+    sqlite_table_exists, translate_accelerator,
 };
 
 pub const ID: &str = "handy";
@@ -74,35 +74,32 @@ pub fn parse(home: &Path) -> Result<ImportBundle, String> {
     }
 
     let db = db_path(home);
-    if db.exists() {
-        if let Ok((conn, _guard)) = open_sqlite_readonly(&db) {
-            if sqlite_table_exists(&conn, "transcription_history") {
-                if let Ok(mut stmt) = conn.prepare(
-                    "SELECT COALESCE(NULLIF(TRIM(post_processed_text), ''), transcription_text) \
+    if db.exists()
+        && let Ok((conn, _guard)) = open_sqlite_readonly(&db)
+        && sqlite_table_exists(&conn, "transcription_history")
+        && let Ok(mut stmt) = conn.prepare(
+            "SELECT COALESCE(NULLIF(TRIM(post_processed_text), ''), transcription_text) \
                             AS text, timestamp \
                      FROM transcription_history ORDER BY timestamp DESC",
-                ) {
-                    if let Ok(rows) = stmt.query_map([], |row| {
-                        let text: Option<String> = row.get(0)?;
-                        let timestamp: i64 = row.get(1)?;
-                        Ok((text, timestamp))
-                    }) {
-                        for (text, timestamp) in rows.flatten() {
-                            let Some(text) = text.filter(|t| !t.trim().is_empty()) else {
-                                continue;
-                            };
-                            let timestamp_ms = if timestamp < 100_000_000_000 {
-                                timestamp * 1000
-                            } else {
-                                timestamp
-                            };
-                            bundle
-                                .transcripts
-                                .push(ImportedTranscription { text, timestamp_ms });
-                        }
-                    }
-                }
-            }
+        )
+        && let Ok(rows) = stmt.query_map([], |row| {
+            let text: Option<String> = row.get(0)?;
+            let timestamp: i64 = row.get(1)?;
+            Ok((text, timestamp))
+        })
+    {
+        for (text, timestamp) in rows.flatten() {
+            let Some(text) = text.filter(|t| !t.trim().is_empty()) else {
+                continue;
+            };
+            let timestamp_ms = if timestamp < 100_000_000_000 {
+                timestamp * 1000
+            } else {
+                timestamp
+            };
+            bundle
+                .transcripts
+                .push(ImportedTranscription { text, timestamp_ms });
         }
     }
     bundle.transcript_count = bundle.transcripts.len() as u32;

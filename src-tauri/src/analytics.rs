@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use serde_json::json;
 use tauri::Manager;
 
-use crate::{settings::UserSettings, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, settings::UserSettings};
 
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const POSTHOG_API_KEY: Option<&str> = option_env!("POSTHOG_API_KEY");
@@ -48,11 +48,9 @@ pub fn set_crash_phase(phase: &'static str) {
 }
 
 pub(crate) fn crash_phase() -> &'static str {
-    CRASH_PHASE
-        .load(Ordering::Relaxed)
-        .try_into()
-        .ok()
-        .and_then(|index: usize| CRASH_PHASES.get(index).copied())
+    CRASH_PHASES
+        .get(usize::from(CRASH_PHASE.load(Ordering::Relaxed)))
+        .copied()
         .unwrap_or("unknown")
 }
 
