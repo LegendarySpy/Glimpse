@@ -1,3 +1,18 @@
+1.0.2
+
+### Improvements
+
+- History now loads much faster and stays smooth with thousands of transcripts.
+- History search, sorting, and scrolling no longer need to load your entire transcript library at once.
+- Reduced unnecessary background work and frontend overhead to make Glimpse feel lighter.
+- Settings now save more reliably.
+
+### Fixes
+
+- Fixed numbered lists being cut off in formatted transcripts.
+
+---
+
 1.0.1
 
 ### Improvements

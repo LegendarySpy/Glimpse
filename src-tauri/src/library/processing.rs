@@ -7,24 +7,24 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use chrono::Utc;
 use symphonia::core::{
-    codecs::audio::AudioDecoderOptions, errors::Error as SymphoniaError, formats::probe::Hint,
-    formats::FormatOptions, formats::TrackType, io::MediaSourceStream, meta::MetadataOptions,
+    codecs::audio::AudioDecoderOptions, errors::Error as SymphoniaError, formats::FormatOptions,
+    formats::TrackType, formats::probe::Hint, io::MediaSourceStream, meta::MetadataOptions,
     units::Timestamp,
 };
 use tauri::{AppHandle, Emitter, Manager};
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
-use crate::{model_manager, storage::StorageManager, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, model_manager, storage::StorageManager};
 
 use super::types::{
-    cancelled_error, is_cancelled_error, ExportFormat, LibraryImportOptions,
-    LibraryImportProgressPayload, LibraryItem, LibraryItemPatch, LibraryItemStatus, Speaker,
-    TranscriptSegment, EVENT_LIBRARY_IMPORT_PROGRESS, SUPPORTED_AUDIO_FORMATS,
-    SUPPORTED_VIDEO_FORMATS, TARGET_SAMPLE_RATE,
+    EVENT_LIBRARY_IMPORT_PROGRESS, ExportFormat, LibraryImportOptions,
+    LibraryImportProgressPayload, LibraryItem, LibraryItemPatch, LibraryItemStatus,
+    SUPPORTED_AUDIO_FORMATS, SUPPORTED_VIDEO_FORMATS, Speaker, TARGET_SAMPLE_RATE,
+    TranscriptSegment, cancelled_error, is_cancelled_error,
 };
 
 pub(crate) fn create_item_from_path(
@@ -631,10 +631,10 @@ fn decode_audio_to_wav(
     let mut last_reported = 0.0f32;
 
     loop {
-        if let Some(token) = token {
-            if token.is_cancelled() {
-                return Err(cancelled_error());
-            }
+        if let Some(token) = token
+            && token.is_cancelled()
+        {
+            return Err(cancelled_error());
         }
 
         let packet = match format.next_packet() {
@@ -665,11 +665,11 @@ fn decode_audio_to_wav(
                 None
             };
 
-            if let Some(progress) = progress {
-                if progress >= 1.0 || (progress - last_reported) >= 0.01 {
-                    cb(progress);
-                    last_reported = progress;
-                }
+            if let Some(progress) = progress
+                && (progress >= 1.0 || (progress - last_reported) >= 0.01)
+            {
+                cb(progress);
+                last_reported = progress;
             }
         }
 
@@ -713,10 +713,10 @@ fn decode_audio_to_wav(
         .finalize()
         .map_err(|err| anyhow!("WAV finalize error: {err}"))?;
 
-    if total_frames.is_some() || (duration_ms.is_some() && time_base.is_some()) {
-        if let Some(cb) = progress_cb.as_mut() {
-            cb(1.0);
-        }
+    if (total_frames.is_some() || (duration_ms.is_some() && time_base.is_some()))
+        && let Some(cb) = progress_cb.as_mut()
+    {
+        cb(1.0);
     }
 
     if !wrote_any {
@@ -858,10 +858,10 @@ fn convert_with_ffmpeg(
     duration_ms: Option<u64>,
     mut progress_cb: Option<&mut dyn FnMut(f32)>,
 ) -> Result<()> {
-    if let Some(token) = token {
-        if token.is_cancelled() {
-            return Err(cancelled_error());
-        }
+    if let Some(token) = token
+        && token.is_cancelled()
+    {
+        return Err(cancelled_error());
     }
 
     if duration_ms.is_some() && progress_cb.is_some() {
@@ -902,13 +902,13 @@ fn convert_with_ffmpeg(
         let mut line = String::new();
 
         loop {
-            if let Some(token) = token {
-                if token.is_cancelled() {
-                    let _ = child.kill();
-                    let _ = child.wait();
-                    let _ = fs::remove_file(output);
-                    return Err(cancelled_error());
-                }
+            if let Some(token) = token
+                && token.is_cancelled()
+            {
+                let _ = child.kill();
+                let _ = child.wait();
+                let _ = fs::remove_file(output);
+                return Err(cancelled_error());
             }
 
             line.clear();
@@ -919,13 +919,13 @@ fn convert_with_ffmpeg(
                 break;
             }
 
-            if let Some(out_time_ms) = parse_ffmpeg_progress_ms(line.trim()) {
-                if let Some(cb) = progress_cb.as_mut() {
-                    let progress = (out_time_ms as f64 / total_ms as f64).min(1.0) as f32;
-                    if progress >= 1.0 || (progress - last_reported) >= 0.01 {
-                        cb(progress);
-                        last_reported = progress;
-                    }
+            if let Some(out_time_ms) = parse_ffmpeg_progress_ms(line.trim())
+                && let Some(cb) = progress_cb.as_mut()
+            {
+                let progress = (out_time_ms as f64 / total_ms as f64).min(1.0) as f32;
+                if progress >= 1.0 || (progress - last_reported) >= 0.01 {
+                    cb(progress);
+                    last_reported = progress;
                 }
             }
         }
@@ -933,11 +933,11 @@ fn convert_with_ffmpeg(
         let status = child
             .wait()
             .map_err(|err| anyhow!("Failed to run ffmpeg: {err}"))?;
-        if let Some(token) = token {
-            if token.is_cancelled() {
-                let _ = fs::remove_file(output);
-                return Err(cancelled_error());
-            }
+        if let Some(token) = token
+            && token.is_cancelled()
+        {
+            let _ = fs::remove_file(output);
+            return Err(cancelled_error());
         }
         if !status.success() {
             let _ = fs::remove_file(output);
@@ -970,13 +970,13 @@ fn convert_with_ffmpeg(
             _ => anyhow!("Failed to run ffmpeg: {err}"),
         })?;
     let status = loop {
-        if let Some(token) = token {
-            if token.is_cancelled() {
-                let _ = child.kill();
-                let _ = child.wait();
-                let _ = fs::remove_file(output);
-                return Err(cancelled_error());
-            }
+        if let Some(token) = token
+            && token.is_cancelled()
+        {
+            let _ = child.kill();
+            let _ = child.wait();
+            let _ = fs::remove_file(output);
+            return Err(cancelled_error());
         }
 
         match child.try_wait() {
@@ -1108,11 +1108,7 @@ fn probe_media_duration_ms_symphonia(path: &Path) -> Option<u64> {
     let num_frames = track.num_frames?;
     let time = time_base.calc_time(Timestamp::new(num_frames as i64))?;
     let ms = time.as_millis();
-    if ms > 0 {
-        Some(ms as u64)
-    } else {
-        None
-    }
+    if ms > 0 { Some(ms as u64) } else { None }
 }
 
 fn parse_ffmpeg_progress_ms(line: &str) -> Option<u64> {
@@ -1175,10 +1171,11 @@ pub(crate) fn diarize_segments(
 ) -> (Vec<TranscriptSegment>, Option<Vec<Speaker>>) {
     let mut labels: Vec<String> = Vec::new();
     for segment in segments {
-        if let Some(label) = segment.speaker.as_deref().map(str::trim) {
-            if !label.is_empty() && !labels.iter().any(|seen| seen == label) {
-                labels.push(label.to_string());
-            }
+        if let Some(label) = segment.speaker.as_deref().map(str::trim)
+            && !label.is_empty()
+            && !labels.iter().any(|seen| seen == label)
+        {
+            labels.push(label.to_string());
         }
     }
 

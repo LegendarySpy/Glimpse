@@ -7,7 +7,7 @@ use crate::core::hotkeys;
 use crate::dictionary::{sanitize_dictionary_entries, sanitize_replacements};
 use crate::personalization::sanitize_personalities;
 use crate::settings::ShortcutBinding;
-use crate::{model_manager, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, model_manager};
 
 use super::detect::parse_app;
 use super::shared::resolve_glimpse_model;
@@ -105,64 +105,62 @@ pub fn apply_import(
         result.personalities_added = settings.personalities.len().saturating_sub(before);
     }
 
-    if selections.shortcut {
-        if let Some(raw) = bundle.smart_shortcut.as_deref() {
-            if let Ok(hotkey) = hotkeys::parse_shortcut(raw) {
-                if hotkeys::validate_recording_shortcut(&hotkey).is_ok() {
-                    let canonical = hotkey.to_string();
-                    settings.smart_shortcut = canonical.clone();
-                    settings.smart_enabled = true;
-                    result.shortcut = Some(canonical.clone());
-                    settings.shortcut_bindings.smart = vec![ShortcutBinding {
-                        shortcut: canonical,
-                        temporary: false,
-                        cleanup_enabled: settings
-                            .shortcut_bindings
-                            .smart
-                            .first()
-                            .map(|b| b.cleanup_enabled)
-                            .unwrap_or(false),
-                    }];
-                    result.shortcut_applied = true;
+    if selections.shortcut
+        && let Some(raw) = bundle.smart_shortcut.as_deref()
+        && let Ok(hotkey) = hotkeys::parse_shortcut(raw)
+        && hotkeys::validate_recording_shortcut(&hotkey).is_ok()
+    {
+        let canonical = hotkey.to_string();
+        settings.smart_shortcut = canonical.clone();
+        settings.smart_enabled = true;
+        result.shortcut = Some(canonical.clone());
+        settings.shortcut_bindings.smart = vec![ShortcutBinding {
+            shortcut: canonical,
+            temporary: false,
+            cleanup_enabled: settings
+                .shortcut_bindings
+                .smart
+                .first()
+                .map(|b| b.cleanup_enabled)
+                .unwrap_or(false),
+        }];
+        result.shortcut_applied = true;
+    }
+
+    if selections.language
+        && let Some(lang) = bundle.language.as_deref().filter(|s| !s.is_empty())
+    {
+        settings.language = lang.to_string();
+        result.language_applied = true;
+    }
+
+    if selections.auto_launch
+        && let Some(auto_launch) = bundle.auto_launch
+    {
+        settings.auto_launch_enabled = auto_launch;
+        settings.start_in_background = auto_launch && settings.start_in_background;
+        result.auto_launch_applied = true;
+        result.auto_launch = Some(auto_launch);
+    }
+
+    if selections.model
+        && let Some(hint) = bundle.model_hint.as_ref()
+    {
+        match hint.family {
+            Some(family) => {
+                let keys: Vec<String> = model_manager::list_models()
+                    .into_iter()
+                    .map(|m| m.key)
+                    .collect();
+                if let Some(key) = resolve_glimpse_model(family, &keys) {
+                    settings.local_model = key.clone();
+                    settings.transcription_mode = crate::settings::TranscriptionMode::Local;
+                    result.model_key = Some(key);
+                } else {
+                    result.model_unrecognized = true;
                 }
             }
-        }
-    }
-
-    if selections.language {
-        if let Some(lang) = bundle.language.as_deref().filter(|s| !s.is_empty()) {
-            settings.language = lang.to_string();
-            result.language_applied = true;
-        }
-    }
-
-    if selections.auto_launch {
-        if let Some(auto_launch) = bundle.auto_launch {
-            settings.auto_launch_enabled = auto_launch;
-            settings.start_in_background = auto_launch && settings.start_in_background;
-            result.auto_launch_applied = true;
-            result.auto_launch = Some(auto_launch);
-        }
-    }
-
-    if selections.model {
-        if let Some(hint) = bundle.model_hint.as_ref() {
-            match hint.family {
-                Some(family) => {
-                    let keys: Vec<String> = model_manager::list_models()
-                        .into_iter()
-                        .map(|m| m.key)
-                        .collect();
-                    if let Some(key) = resolve_glimpse_model(family, &keys) {
-                        settings.local_model = key.clone();
-                        settings.transcription_mode = crate::settings::TranscriptionMode::Local;
-                        result.model_key = Some(key);
-                    } else {
-                        result.model_unrecognized = true;
-                    }
-                }
-                None => result.model_unrecognized = true,
-            }
+            None => result.model_unrecognized = true,
         }
     }
 

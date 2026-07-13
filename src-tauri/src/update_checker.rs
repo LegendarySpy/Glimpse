@@ -9,7 +9,7 @@ use tauri_plugin_updater::UpdaterExt;
 use tracing::{debug, error, info, warn};
 
 use crate::pill::PillStatus;
-use crate::{toast, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, toast};
 
 const CHECK_INTERVAL_HOURS: u64 = 6;
 const INITIAL_DELAY_SECS: u64 = 30;
@@ -78,14 +78,14 @@ fn write_marker(app: &AppHandle<AppRuntime>) -> bool {
         return false;
     };
 
-    if let Some(parent) = path.parent() {
-        if let Err(err) = std::fs::create_dir_all(parent) {
-            warn!(
-                path = %parent.display(),
-                error = %err,
-                "auto-update: failed to create marker directory"
-            );
-        }
+    if let Some(parent) = path.parent()
+        && let Err(err) = std::fs::create_dir_all(parent)
+    {
+        warn!(
+            path = %parent.display(),
+            error = %err,
+            "auto-update: failed to create marker directory"
+        );
     }
 
     if let Err(err) = std::fs::write(&path, "auto_update_completed\n") {
@@ -103,22 +103,22 @@ fn write_marker(app: &AppHandle<AppRuntime>) -> bool {
 /// Called on startup: if a marker file exists, the app was just auto-updated.
 /// Sets a flag on AppState so a toast can be shown when the user opens the settings window.
 pub fn check_post_auto_update(app: &AppHandle<AppRuntime>) {
-    if let Some(path) = marker_path(app) {
-        if path.is_file() {
-            match std::fs::remove_file(&path) {
-                Ok(()) => {
-                    app.state::<AppState>().set_auto_update_completed();
-                    info!(
-                        "auto-update: detected post-restart marker, will show toast on next settings open"
-                    );
-                }
-                Err(err) => {
-                    warn!(
-                        path = %path.display(),
-                        error = %err,
-                        "auto-update: failed to clear post-restart marker"
-                    );
-                }
+    if let Some(path) = marker_path(app)
+        && path.is_file()
+    {
+        match std::fs::remove_file(&path) {
+            Ok(()) => {
+                app.state::<AppState>().set_auto_update_completed();
+                info!(
+                    "auto-update: detected post-restart marker, will show toast on next settings open"
+                );
+            }
+            Err(err) => {
+                warn!(
+                    path = %path.display(),
+                    error = %err,
+                    "auto-update: failed to clear post-restart marker"
+                );
             }
         }
     }

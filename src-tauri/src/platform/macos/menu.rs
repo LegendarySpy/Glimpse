@@ -1,13 +1,13 @@
+use crate::AppRuntime;
 use crate::audio;
 use crate::recent_transcriptions::build_recent_transcriptions_menu;
 use crate::settings::UserSettings;
 use crate::speech::menu::{build_model_status_items, build_models_submenu};
-use crate::AppRuntime;
+use tauri::AppHandle;
 use tauri::menu::{
     CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, MenuItemBuilder, PredefinedMenuItem,
     SubmenuBuilder,
 };
-use tauri::AppHandle;
 
 // Shared menu IDs - also used by lib.rs event handler
 pub const MENU_ID_CHECK_UPDATES: &str = "menu_check_updates";

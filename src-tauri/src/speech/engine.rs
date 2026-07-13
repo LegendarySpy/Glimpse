@@ -2,13 +2,13 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
-use glimpse_speech::service::{AudioInput, SpeechConfig, SpeechService, TranscribeRequest};
 use glimpse_speech::TimestampGranularity;
+use glimpse_speech::service::{AudioInput, SpeechConfig, SpeechService, TranscribeRequest};
 use parking_lot::{Condvar, Mutex};
 
 use crate::{
     model_manager::{self, ReadyModel},
-    transcription_api::{normalize_transcript, TranscriptionSuccess},
+    transcription_api::{TranscriptionSuccess, normalize_transcript},
 };
 
 const IDLE_TIMEOUT: Duration = Duration::from_secs(5 * 60);

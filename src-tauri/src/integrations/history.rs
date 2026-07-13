@@ -1,6 +1,6 @@
 //! `glimpse history …` - read-only dictation history. Headless, no app needed.
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use serde::Serialize;
 use serde_json::json;
 

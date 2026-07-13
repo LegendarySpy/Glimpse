@@ -18,8 +18,6 @@ import ReactMarkdown, { type Components, type Options } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkGithub from "remark-github";
 import remarkBreaks from "remark-breaks";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 
 interface WhatsNewModalProps {
   isOpen: boolean;
@@ -55,14 +53,12 @@ const isSafeHttpUrl = (value: string): boolean => {
 
 const markdownPlugins: {
   remark: Options["remarkPlugins"];
-  rehype: Options["rehypePlugins"];
 } = {
   remark: [
     remarkGfm,
     [remarkGithub, { repository: GITHUB_REPO, mentionStrong: false }],
     remarkBreaks,
   ],
-  rehype: [rehypeRaw, rehypeSanitize],
 };
 
 const OrderedListContext = createContext(false);
@@ -391,7 +387,6 @@ function WhatsNewModal({ isOpen, onClose }: WhatsNewModalProps) {
                           <div className="mt-3">
                             <ReactMarkdown
                               remarkPlugins={markdownPlugins.remark}
-                              rehypePlugins={markdownPlugins.rehype}
                               components={markdownComponents}
                             >
                               {release.body}

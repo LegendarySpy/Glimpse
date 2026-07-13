@@ -1,14 +1,14 @@
 use std::cell::RefCell;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{self, RecvTimeoutError};
-use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use core_foundation::base::TCFType;
 use core_foundation::runloop::{
-    kCFRunLoopDefaultMode, CFRunLoop, CFRunLoopRunResult, CFRunLoopWakeUp,
+    CFRunLoop, CFRunLoopRunResult, CFRunLoopWakeUp, kCFRunLoopDefaultMode,
 };
 use core_graphics::event::{
     CGEvent, CGEventFlags, CGEventTap, CGEventTapLocation, CGEventTapOptions, CGEventTapPlacement,
@@ -17,8 +17,8 @@ use core_graphics::event::{
 use crossbeam_channel::Sender;
 
 use super::{
-    should_block_event, should_forward_event, BlockingHotkeys, Key, KeyEvent, Modifiers,
-    PlatformShutdown,
+    BlockingHotkeys, Key, KeyEvent, Modifiers, PlatformShutdown, should_block_event,
+    should_forward_event,
 };
 use crate::permissions;
 

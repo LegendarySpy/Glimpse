@@ -9,7 +9,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter};
 
-use crate::{settings::SettingsStore, tray, AppRuntime, EVENT_LICENSE_CHECKOUT_RETURNED};
+use crate::{AppRuntime, EVENT_LICENSE_CHECKOUT_RETURNED, settings::SettingsStore, tray};
 
 const KEY_LICENSE_KEY: &str = "license_key";
 const KEY_LICENSE_ACTIVATION_ID: &str = "license_activation_id";
@@ -182,10 +182,10 @@ pub fn license_gate_active(store: &SettingsStore) -> bool {
     }
 
     let now = Utc::now();
-    if let Some((gate, valid_until)) = *GATE_CACHE.lock() {
-        if now < valid_until {
-            return gate;
-        }
+    if let Some((gate, valid_until)) = *GATE_CACHE.lock()
+        && now < valid_until
+    {
+        return gate;
     }
 
     let gate = get_license_state(store)
@@ -487,10 +487,10 @@ fn validate_polar_license(
     expected_activation_id: Option<&str>,
 ) -> Result<(), String> {
     // Only reject a present mismatch; activate responses may omit organization_id.
-    if let Some(org) = license.organization_id.as_deref() {
-        if org != polar_organization_id() {
-            return Err("Polar returned a license for a different organization.".to_string());
-        }
+    if let Some(org) = license.organization_id.as_deref()
+        && org != polar_organization_id()
+    {
+        return Err("Polar returned a license for a different organization.".to_string());
     }
 
     if license.status != "granted" {
@@ -507,7 +507,7 @@ fn validate_polar_license(
             Some(_) => {
                 return Err(
                     "Polar returned a license for a different device activation.".to_string(),
-                )
+                );
             }
             None => {
                 return Err("Polar did not confirm this device activation.".to_string());
@@ -519,10 +519,10 @@ fn validate_polar_license(
         return Err("That activation code is expired.".to_string());
     }
 
-    if let Some(limit_usage) = license.limit_usage {
-        if license.usage.unwrap_or_default() > limit_usage {
-            return Err("That activation code has reached its usage limit.".to_string());
-        }
+    if let Some(limit_usage) = license.limit_usage
+        && license.usage.unwrap_or_default() > limit_usage
+    {
+        return Err("That activation code has reached its usage limit.".to_string());
     }
 
     Ok(())
@@ -720,13 +720,13 @@ fn load_trial_started_at(store: &SettingsStore) -> Result<DateTime<Utc>, String>
         );
     }
 
-    if let Some(raw) = read_optional_string(store, KEY_LICENSE_TRIAL_STARTED_AT)? {
-        if let Ok(parsed) = DateTime::parse_from_rfc3339(&raw) {
-            let started_at = parsed.with_timezone(&Utc);
-            write_trial_started_at(store, started_at, &install_id)?;
-            write_string(store, KEY_LICENSE_TRIAL_STARTED_AT, "")?;
-            return Ok(started_at);
-        }
+    if let Some(raw) = read_optional_string(store, KEY_LICENSE_TRIAL_STARTED_AT)?
+        && let Ok(parsed) = DateTime::parse_from_rfc3339(&raw)
+    {
+        let started_at = parsed.with_timezone(&Utc);
+        write_trial_started_at(store, started_at, &install_id)?;
+        write_string(store, KEY_LICENSE_TRIAL_STARTED_AT, "")?;
+        return Ok(started_at);
     }
 
     let now = Utc::now();

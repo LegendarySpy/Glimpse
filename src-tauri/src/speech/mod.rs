@@ -6,7 +6,7 @@ pub mod remote;
 
 use std::path::Path;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use reqwest::Client;
 use tauri::{AppHandle, Manager};
 
@@ -14,7 +14,7 @@ use crate::settings::UserSettings;
 use crate::transcription_api::TranscriptionSuccess;
 use crate::{AppRuntime, AppState};
 
-pub use catalog::{list_models, SpeechModel};
+pub use catalog::{SpeechModel, list_models};
 
 pub const WHISPER_CHUNK_SECONDS: u32 = 28;
 pub const WHISPER_CHUNK_OVERLAP_SECONDS: u32 = 2;

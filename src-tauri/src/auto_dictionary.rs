@@ -9,8 +9,9 @@ use parking_lot::Mutex;
 use tauri::{AppHandle, Emitter};
 
 use crate::{
+    AppRuntime, AppState, EVENT_SETTINGS_CHANGED,
     assistive::{self, FocusedTextSnapshot},
-    dictionary, toast, AppRuntime, AppState, EVENT_SETTINGS_CHANGED,
+    dictionary, toast,
 };
 
 const START_GRACE: Duration = Duration::from_millis(500);

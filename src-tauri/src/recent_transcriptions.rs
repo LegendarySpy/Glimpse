@@ -1,4 +1,4 @@
-use crate::{assistive, toast, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, assistive, toast};
 use tauri::menu::{MenuItem, SubmenuBuilder};
 use tauri::{AppHandle, Manager};
 

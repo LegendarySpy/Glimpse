@@ -6,8 +6,8 @@ use crate::settings::{Personality, Replacement};
 use crate::storage::ImportedTranscription;
 
 use super::shared::{
-    app_support_dir, dedup_transcripts, map_model_family, open_sqlite_readonly,
-    parse_datetime_millis, read_json, sqlite_table_exists, ImportBundle, ModelHint,
+    ImportBundle, ModelHint, app_support_dir, dedup_transcripts, map_model_family,
+    open_sqlite_readonly, parse_datetime_millis, read_json, sqlite_table_exists,
 };
 
 pub const ID: &str = "superwhisper";
@@ -93,22 +93,20 @@ pub fn parse(home: &Path) -> Result<ImportBundle, String> {
             };
             bundle.personalities.push(personality);
 
-            if bundle.language.is_none() {
-                if let Some(lang) = mode.get("language").and_then(|v| v.as_str()) {
-                    if !lang.is_empty() {
-                        bundle.language = Some(lang.to_string());
-                    }
-                }
+            if bundle.language.is_none()
+                && let Some(lang) = mode.get("language").and_then(|v| v.as_str())
+                && !lang.is_empty()
+            {
+                bundle.language = Some(lang.to_string());
             }
-            if bundle.model_hint.is_none() {
-                if let Some(model) = mode.get("voiceModelID").and_then(|v| v.as_str()) {
-                    if !model.is_empty() {
-                        bundle.model_hint = Some(ModelHint {
-                            source_id: model.to_string(),
-                            family: map_model_family(model),
-                        });
-                    }
-                }
+            if bundle.model_hint.is_none()
+                && let Some(model) = mode.get("voiceModelID").and_then(|v| v.as_str())
+                && !model.is_empty()
+            {
+                bundle.model_hint = Some(ModelHint {
+                    source_id: model.to_string(),
+                    family: map_model_family(model),
+                });
             }
         }
     }

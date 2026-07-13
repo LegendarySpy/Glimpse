@@ -1,7 +1,7 @@
 //! `glimpse dictionary …`. Only `list` is headless; `add`/`remove` mutate live
 //! app state and are routed to the running app (not yet implemented).
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use serde_json::json;
 
 use super::{client, output, positionals, wants_help};

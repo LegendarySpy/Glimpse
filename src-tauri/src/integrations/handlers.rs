@@ -1,7 +1,7 @@
 //! In-app handlers for control-socket commands. Each handler reuses the app's
 //! existing command logic so tray/menu/in-memory state stay consistent.
 
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tauri::{AppHandle, Manager};
 
 use super::ipc::{Request, Response};

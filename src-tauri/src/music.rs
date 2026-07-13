@@ -468,7 +468,6 @@ function run(argv) {
 mod imp {
     use super::coord::{CancelFn, Coordinator};
     use std::sync::atomic::{AtomicU8, Ordering};
-    use windows::core::GUID;
     use windows::Media::Control::{
         GlobalSystemMediaTransportControlsSession,
         GlobalSystemMediaTransportControlsSessionManager,
@@ -476,11 +475,12 @@ mod imp {
     };
     use windows::Win32::Media::Audio::Endpoints::IAudioEndpointVolume;
     use windows::Win32::Media::Audio::{
-        eMultimedia, eRender, IMMDeviceEnumerator, MMDeviceEnumerator,
+        IMMDeviceEnumerator, MMDeviceEnumerator, eMultimedia, eRender,
     };
     use windows::Win32::System::Com::{
-        CoCreateInstance, CoDecrementMTAUsage, CoIncrementMTAUsage, CLSCTX_ALL, CO_MTA_USAGE_COOKIE,
+        CLSCTX_ALL, CO_MTA_USAGE_COOKIE, CoCreateInstance, CoDecrementMTAUsage, CoIncrementMTAUsage,
     };
+    use windows::core::GUID;
 
     static COORD: Coordinator<String> = Coordinator::new(pause_now_playing, resume_target);
     static DUCK_COORD: Coordinator<SavedVolume> = Coordinator::new(duck_now, restore_volume);

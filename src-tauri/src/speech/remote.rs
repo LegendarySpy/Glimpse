@@ -1,17 +1,16 @@
 use std::path::Path;
 
+use glimpse_speech::TimestampGranularity;
 use glimpse_speech::provider::remote_config;
 use glimpse_speech::remote::{RemoteEngine, RemoteError, RemoteErrorKind, RemoteRequestParams};
-use glimpse_speech::TimestampGranularity;
 use reqwest::Client;
 use tauri::AppHandle;
 
 use crate::{
-    model_manager,
+    AppRuntime, model_manager,
     settings::UserSettings,
     toast,
-    transcription_api::{normalize_transcript, TranscriptionSuccess},
-    AppRuntime,
+    transcription_api::{TranscriptionSuccess, normalize_transcript},
 };
 
 pub(crate) fn has_valid_config(settings: &UserSettings) -> bool {
@@ -308,37 +307,6 @@ fn emit_fallback_unavailable_toast_message(app: &AppHandle<AppRuntime>, message:
     );
 }
 
-#[cfg(test)]
-mod tests {
-    use super::resolve_model;
-
-    #[test]
-    fn concrete_model_is_passed_through() {
-        assert_eq!(
-            resolve_model("openai", "whisper-1").as_deref(),
-            Some("whisper-1")
-        );
-    }
-
-    #[test]
-    fn auto_resolves_to_provider_default() {
-        assert_eq!(
-            resolve_model("groq", "auto").as_deref(),
-            Some("whisper-large-v3-turbo")
-        );
-        assert_eq!(
-            resolve_model("mistral", "  ").as_deref(),
-            Some("voxtral-mini-latest")
-        );
-        assert_eq!(resolve_model("custom", "auto"), None);
-    }
-
-    #[test]
-    fn unknown_provider_without_model_is_unresolved() {
-        assert_eq!(resolve_model("nope", "auto"), None);
-    }
-}
-
 fn remote_issue_message(error: &RemoteError) -> String {
     match error.kind {
         RemoteErrorKind::RateLimited => {
@@ -373,5 +341,36 @@ fn remote_issue_message(error: &RemoteError) -> String {
         RemoteErrorKind::UpstreamUnavailable | RemoteErrorKind::Other => {
             "Speech provider unreachable.".to_string()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolve_model;
+
+    #[test]
+    fn concrete_model_is_passed_through() {
+        assert_eq!(
+            resolve_model("openai", "whisper-1").as_deref(),
+            Some("whisper-1")
+        );
+    }
+
+    #[test]
+    fn auto_resolves_to_provider_default() {
+        assert_eq!(
+            resolve_model("groq", "auto").as_deref(),
+            Some("whisper-large-v3-turbo")
+        );
+        assert_eq!(
+            resolve_model("mistral", "  ").as_deref(),
+            Some("voxtral-mini-latest")
+        );
+        assert_eq!(resolve_model("custom", "auto"), None);
+    }
+
+    #[test]
+    fn unknown_provider_without_model_is_unresolved() {
+        assert_eq!(resolve_model("nope", "auto"), None);
     }
 }

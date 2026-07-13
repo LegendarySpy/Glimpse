@@ -2,19 +2,19 @@ use std::os::windows::io::AsRawHandle;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
-use windows::core::PCWSTR;
 use windows::Win32::Foundation::{HANDLE, HMODULE};
 use windows::Win32::System::Diagnostics::Debug::{
-    MiniDumpWithThreadInfo, MiniDumpWriteDump, SetUnhandledExceptionFilter, EXCEPTION_POINTERS,
-    MINIDUMP_EXCEPTION_INFORMATION, MINIDUMP_TYPE,
+    EXCEPTION_POINTERS, MINIDUMP_EXCEPTION_INFORMATION, MINIDUMP_TYPE, MiniDumpWithThreadInfo,
+    MiniDumpWriteDump, SetUnhandledExceptionFilter,
 };
 use windows::Win32::System::LibraryLoader::{
-    GetModuleFileNameW, GetModuleHandleExW, GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
-    GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+    GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+    GetModuleFileNameW, GetModuleHandleExW,
 };
 use windows::Win32::System::Threading::{
     GetCurrentProcess, GetCurrentProcessId, GetCurrentThreadId,
 };
+use windows::core::PCWSTR;
 
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const EXCEPTION_CONTINUE_SEARCH: i32 = 0;

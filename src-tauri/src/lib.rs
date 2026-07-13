@@ -40,8 +40,8 @@ pub(crate) use speech::remote as remote_speech;
 use std::collections::{HashMap, VecDeque};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
@@ -49,16 +49,16 @@ use tokio_util::sync::CancellationToken;
 use anyhow::{Context, Result};
 use chrono::{DateTime, Local};
 use pill::PillController;
-use recorder::{validate_recording, CompletedRecording, RecorderManager, RecordingRejectionReason};
+use recorder::{CompletedRecording, RecorderManager, RecordingRejectionReason, validate_recording};
 use reqwest::Client;
 use serde::Serialize;
 use settings::{
-    default_local_model, RecordingPrunePolicy, SettingsStore, TranscriptionMode, UserSettings,
+    RecordingPrunePolicy, SettingsStore, TranscriptionMode, UserSettings, default_local_model,
 };
-use tauri::async_runtime;
-use tauri::tray::TrayIcon;
 use tauri::Emitter;
 use tauri::Listener;
+use tauri::async_runtime;
+use tauri::tray::TrayIcon;
 use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_deep_link::DeepLinkExt;
 
@@ -200,7 +200,7 @@ pub(crate) fn sync_launch_at_login(
 #[cfg(target_os = "macos")]
 fn handle_app_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
     use crate::recent_transcriptions::{
-        copy_transcription_to_clipboard, MENU_ID_RECENT_TRANSCRIPTION_PREFIX,
+        MENU_ID_RECENT_TRANSCRIPTION_PREFIX, copy_transcription_to_clipboard,
     };
     use crate::speech::menu::handle_speech_menu_event;
     use platform::macos::menu::{
@@ -305,14 +305,13 @@ pub fn run_cli() -> Result<()> {
     if license::secure_grant_refresh_needed(&settings_store).map_err(anyhow::Error::msg)? {
         let runtime = tokio::runtime::Runtime::new()?;
         if let Err(err) = runtime.block_on(license::refresh_license(Client::new(), &settings_store))
+            && !cache_active_before_refresh
         {
-            if !cache_active_before_refresh {
-                anyhow::bail!(
-                    "An active Glimpse license is required to use the CLI.\n\
+            anyhow::bail!(
+                "An active Glimpse license is required to use the CLI.\n\
                      The saved license could not be refreshed: {err}\n\
                      Open Glimpse > Settings > Account to check or activate your license."
-                );
-            }
+            );
         }
     }
     if !license::active_license_gate(&settings_store) {
@@ -611,7 +610,8 @@ pub fn run() {
             import::commands::apply_import,
             get_app_info,
             open_data_dir,
-            get_transcriptions,
+            get_transcriptions_page,
+            get_today_dictation_stats,
             delete_transcription,
             retry_transcription,
             retry_llm_cleanup,
@@ -1075,11 +1075,12 @@ impl AppState {
     }
 
     pub fn cancel_download(&self, model: &str) -> bool {
-        if let Some(token) = self.download_tokens.lock().remove(model) {
-            token.cancel();
-            true
-        } else {
-            false
+        match self.download_tokens.lock().remove(model) {
+            Some(token) => {
+                token.cancel();
+                true
+            }
+            _ => false,
         }
     }
 
@@ -1154,11 +1155,12 @@ impl AppState {
     }
 
     pub fn cancel_retry_transcription(&self, id: &str) -> bool {
-        if let Some(token) = self.retry_tokens.lock().remove(id) {
-            token.cancel();
-            true
-        } else {
-            false
+        match self.retry_tokens.lock().remove(id) {
+            Some(token) => {
+                token.cancel();
+                true
+            }
+            _ => false,
         }
     }
 
@@ -1588,13 +1590,38 @@ fn calculate_dir_size(path: &std::path::Path) -> Result<u64> {
 }
 
 #[tauri::command]
-fn get_transcriptions(
+fn get_transcriptions_page(
+    search: Option<String>,
+    after_ms: Option<i64>,
+    before_ms: Option<i64>,
+    sort: storage::TranscriptionSort,
+    limit: usize,
+    offset: usize,
     state: tauri::State<AppState>,
-) -> Result<Vec<storage::TranscriptionRecord>, String> {
+) -> Result<storage::TranscriptionPage, String> {
     state
         .storage()
-        .get_all()
+        .get_transcriptions_page(
+            search.as_deref(),
+            after_ms,
+            before_ms,
+            sort,
+            limit.clamp(1, 200),
+            offset,
+        )
         .map_err(|err| format!("Failed to get transcriptions: {err}"))
+}
+
+#[tauri::command]
+fn get_today_dictation_stats(
+    start_ms: i64,
+    end_ms: i64,
+    state: tauri::State<AppState>,
+) -> Result<storage::TodayDictationStats, String> {
+    state
+        .storage()
+        .today_dictation_stats(start_ms, end_ms)
+        .map_err(|err| format!("Failed to get today's dictation stats: {err}"))
 }
 
 #[tauri::command]

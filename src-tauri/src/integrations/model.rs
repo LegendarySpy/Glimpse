@@ -1,7 +1,7 @@
 //! `glimpse model …`. `list` is headless; `set` mutates live app state and is
 //! routed to the running app (not yet implemented).
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use serde::Serialize;
 use serde_json::json;
 

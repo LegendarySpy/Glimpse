@@ -1,8 +1,8 @@
 use aes_gcm::{
-    aead::{Aead, KeyInit},
     Aes256Gcm, Nonce,
+    aead::{Aead, KeyInit},
 };
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use pbkdf2::pbkdf2_hmac_array;
 use rand::Rng;
 use sha2::Sha256;
@@ -43,10 +43,10 @@ pub fn get_hardware_uuid() -> Option<String> {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     for line in stdout.lines() {
-        if line.contains("IOPlatformUUID") {
-            if let Some(uuid) = line.split('"').nth(3) {
-                return Some(uuid.to_string());
-            }
+        if line.contains("IOPlatformUUID")
+            && let Some(uuid) = line.split('"').nth(3)
+        {
+            return Some(uuid.to_string());
         }
     }
     None

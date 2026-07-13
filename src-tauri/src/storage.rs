@@ -3,11 +3,15 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, Local, TimeZone};
 use parking_lot::Mutex;
-use rusqlite::{params, types::Type, Connection, OptionalExtension, Row};
+use rusqlite::{
+    Connection, OptionalExtension, Row, params, params_from_iter,
+    types::{Type, Value},
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -51,6 +55,34 @@ pub struct LifetimeStats {
     pub words: u64,
     pub duration_ms: u64,
     pub dictations: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TodayDictationStats {
+    pub count: u64,
+    pub words: u64,
+    pub audio_seconds: f64,
+    pub longest_words: u64,
+    pub longest_audio_seconds: f64,
+    pub llm_cleaned_count: u64,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum TranscriptionSort {
+    Recent,
+    Oldest,
+    Longest,
+    Shortest,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TranscriptionPage {
+    pub items: Vec<TranscriptionRecord>,
+    pub total_count: Option<usize>,
+    pub previous_timestamp: Option<DateTime<Local>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
@@ -342,23 +374,93 @@ impl StorageManager {
         Self::get_record(&conn, id)
     }
 
-    pub fn get_all(&self) -> Result<Vec<TranscriptionRecord>> {
-        let mut records = {
-            let conn = self.connection.lock();
-            let mut stmt = conn.prepare(
-                "SELECT id, timestamp, text, raw_text, audio_path, status, error_message, llm_cleaned,
-                        speech_model, llm_model, word_count, audio_duration_seconds, synced, mode_id, mode_name
-                 FROM transcriptions
-                 ORDER BY timestamp DESC",
-            )?;
-            let records = stmt
-                .query_map([], Self::record_from_row)?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
-        };
+    pub fn get_transcriptions_page(
+        &self,
+        search: Option<&str>,
+        after_ms: Option<i64>,
+        before_ms: Option<i64>,
+        sort: TranscriptionSort,
+        limit: usize,
+        offset: usize,
+    ) -> Result<TranscriptionPage> {
+        let search = search.map(str::trim).filter(|value| !value.is_empty());
+        let mut conditions = Vec::new();
+        let mut values = Vec::new();
 
+        if let Some(search) = search {
+            let escaped = search
+                .replace('\\', "\\\\")
+                .replace('%', "\\%")
+                .replace('_', "\\_");
+            conditions.push("(text LIKE ? ESCAPE '\\' OR raw_text LIKE ? ESCAPE '\\')");
+            let pattern = Value::Text(format!("%{escaped}%"));
+            values.push(pattern.clone());
+            values.push(pattern);
+        }
+        if let Some(after_ms) = after_ms {
+            conditions.push("timestamp >= ?");
+            values.push(Value::Integer(after_ms));
+        }
+        if let Some(before_ms) = before_ms {
+            conditions.push("timestamp < ?");
+            values.push(Value::Integer(before_ms));
+        }
+
+        let where_clause = if conditions.is_empty() {
+            String::new()
+        } else {
+            format!(" WHERE {}", conditions.join(" AND "))
+        };
+        let order_clause = match sort {
+            TranscriptionSort::Recent => "timestamp DESC, id DESC",
+            TranscriptionSort::Oldest => "timestamp ASC, id ASC",
+            TranscriptionSort::Longest => "word_count DESC, timestamp DESC, id DESC",
+            TranscriptionSort::Shortest => "word_count ASC, timestamp DESC, id DESC",
+        };
+        let query_offset = offset.saturating_sub(1);
+        let includes_previous = offset > 0;
+        let fetch_limit = limit.saturating_add(usize::from(includes_previous));
+
+        let query = format!(
+            "SELECT id, timestamp, text, raw_text, audio_path, status, error_message, llm_cleaned,
+                    speech_model, llm_model, word_count, audio_duration_seconds, synced, mode_id, mode_name
+             FROM transcriptions{where_clause}
+             ORDER BY {order_clause}
+             LIMIT ? OFFSET ?"
+        );
+        let conn = self.connection.lock();
+        let total_count = if offset == 0 {
+            let count_query = format!("SELECT COUNT(*) FROM transcriptions{where_clause}");
+            Some(
+                conn.query_row(&count_query, params_from_iter(values.clone()), |row| {
+                    row.get::<_, i64>(0).map(|count| count.max(0) as usize)
+                })?,
+            )
+        } else {
+            None
+        };
+        values.push(Value::Integer(fetch_limit as i64));
+        values.push(Value::Integer(query_offset as i64));
+        let mut records = {
+            let mut stmt = conn.prepare(&query)?;
+            stmt.query_map(params_from_iter(values), Self::record_from_row)?
+                .collect::<rusqlite::Result<Vec<_>>>()?
+        };
+        let previous_timestamp = if includes_previous {
+            records.first().map(|record| record.timestamp)
+        } else {
+            None
+        };
+        if includes_previous && !records.is_empty() {
+            records.remove(0);
+        }
         Self::resolve_audio_availability(&mut records);
-        Ok(records)
+
+        Ok(TranscriptionPage {
+            items: records,
+            total_count,
+            previous_timestamp,
+        })
     }
 
     pub fn get_recent_transcriptions(&self, limit: usize) -> Result<Vec<TranscriptionRecord>> {
@@ -377,13 +479,11 @@ impl StorageManager {
                  LIMIT ?2",
             )?;
 
-            let records = stmt
-                .query_map(
-                    params![TranscriptionStatus::Success.as_str(), limit as i64],
-                    Self::record_from_row,
-                )?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
+            stmt.query_map(
+                params![TranscriptionStatus::Success.as_str(), limit as i64],
+                Self::record_from_row,
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?
         };
 
         Self::resolve_audio_availability(&mut records);
@@ -410,17 +510,15 @@ impl StorageManager {
                  LIMIT ?2 OFFSET ?3",
             )?;
 
-            let records = stmt
-                .query_map(
-                    params![
-                        TranscriptionStatus::Success.as_str(),
-                        limit as i64,
-                        offset as i64
-                    ],
-                    Self::record_from_row,
-                )?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
+            stmt.query_map(
+                params![
+                    TranscriptionStatus::Success.as_str(),
+                    limit as i64,
+                    offset as i64
+                ],
+                Self::record_from_row,
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?
         };
 
         Self::resolve_audio_availability(&mut records);
@@ -453,13 +551,11 @@ impl StorageManager {
                  LIMIT ?3",
             )?;
 
-            let records = stmt
-                .query_map(
-                    params![TranscriptionStatus::Success.as_str(), pattern, limit as i64],
-                    Self::record_from_row,
-                )?
-                .collect::<rusqlite::Result<Vec<_>>>()?;
-            records
+            stmt.query_map(
+                params![TranscriptionStatus::Success.as_str(), pattern, limit as i64],
+                Self::record_from_row,
+            )?
+            .collect::<rusqlite::Result<Vec<_>>>()?
         };
 
         Self::resolve_audio_availability(&mut records);
@@ -482,6 +578,32 @@ impl StorageManager {
             )
             .optional()?;
         Ok(stats.unwrap_or_default())
+    }
+
+    pub fn today_dictation_stats(&self, start_ms: i64, end_ms: i64) -> Result<TodayDictationStats> {
+        let conn = self.connection.lock();
+        conn.query_row(
+            "SELECT COUNT(*),
+                    COALESCE(SUM(word_count), 0),
+                    COALESCE(SUM(audio_duration_seconds), 0),
+                    COALESCE(MAX(word_count), 0),
+                    COALESCE(MAX(audio_duration_seconds), 0),
+                    COALESCE(SUM(llm_cleaned), 0)
+             FROM transcriptions
+             WHERE status = 'success' AND timestamp >= ?1 AND timestamp < ?2",
+            params![start_ms, end_ms],
+            |row| {
+                Ok(TodayDictationStats {
+                    count: row.get::<_, i64>(0)?.max(0) as u64,
+                    words: row.get::<_, i64>(1)?.max(0) as u64,
+                    audio_seconds: row.get::<_, f64>(2)?.max(0.0),
+                    longest_words: row.get::<_, i64>(3)?.max(0) as u64,
+                    longest_audio_seconds: row.get::<_, f64>(4)?.max(0.0),
+                    llm_cleaned_count: row.get::<_, i64>(5)?.max(0) as u64,
+                })
+            },
+        )
+        .map_err(Into::into)
     }
 
     fn record_dictation(
@@ -635,21 +757,21 @@ impl StorageManager {
     }
 
     fn revert_to_raw_internal(conn: &Connection, id: &str) -> Result<Option<TranscriptionRecord>> {
-        if let Some(mut record) = Self::get_record(conn, id)? {
-            if let Some(raw) = record.raw_text.take() {
-                record.text = raw;
-                record.llm_cleaned = false;
-                record.word_count = count_words(&record.text);
-                record.llm_model = None;
-                record.synced = false;
-                conn.execute(
+        if let Some(mut record) = Self::get_record(conn, id)?
+            && let Some(raw) = record.raw_text.take()
+        {
+            record.text = raw;
+            record.llm_cleaned = false;
+            record.word_count = count_words(&record.text);
+            record.llm_model = None;
+            record.synced = false;
+            conn.execute(
                     "UPDATE transcriptions
                      SET text = ?1, raw_text = NULL, llm_cleaned = 0, llm_model = NULL, word_count = ?2, synced = 0
                      WHERE id = ?3",
                     params![record.text, record.word_count as i64, id],
                 )?;
-                return Ok(Some(record));
-            }
+            return Ok(Some(record));
         }
         Ok(None)
     }
@@ -747,6 +869,7 @@ impl StorageManager {
     }
 
     fn configure_connection(conn: &Connection) -> Result<()> {
+        conn.busy_timeout(Duration::from_secs(2))?;
         conn.execute_batch(
             "PRAGMA journal_mode = WAL;\nPRAGMA synchronous = NORMAL;\nPRAGMA foreign_keys = ON;",
         )?;
@@ -993,4 +1116,85 @@ impl StorageManager {
 
 fn count_words(text: &str) -> u32 {
     crate::transcribe::count_words(text)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn transcription_pages_filter_sort_and_aggregate() {
+        let root = std::env::temp_dir().join(format!("glimpse-storage-test-{}", Uuid::new_v4()));
+        let storage = StorageManager::new(root.join("transcriptions.db")).unwrap();
+        let first = Local.with_ymd_and_hms(2026, 7, 13, 9, 0, 0).unwrap();
+        let second = Local.with_ymd_and_hms(2026, 7, 13, 10, 0, 0).unwrap();
+        let third = Local.with_ymd_and_hms(2026, 7, 14, 9, 0, 0).unwrap();
+
+        for (text, timestamp, word_count, status) in [
+            ("short note", first, 2, TranscriptionStatus::Success),
+            (
+                "a much longer searchable note",
+                second,
+                5,
+                TranscriptionStatus::Success,
+            ),
+            ("failed note", third, 0, TranscriptionStatus::Error),
+        ] {
+            storage
+                .save_transcription(
+                    text.to_string(),
+                    String::new(),
+                    status,
+                    None,
+                    TranscriptionMetadata {
+                        word_count,
+                        ..Default::default()
+                    },
+                    None,
+                    Some(timestamp),
+                )
+                .unwrap();
+        }
+
+        let recent = storage
+            .get_transcriptions_page(None, None, None, TranscriptionSort::Recent, 2, 0)
+            .unwrap();
+        assert_eq!(recent.total_count, Some(3));
+        assert_eq!(recent.previous_timestamp, None);
+        assert_eq!(recent.items[0].text, "failed note");
+
+        let next = storage
+            .get_transcriptions_page(None, None, None, TranscriptionSort::Recent, 1, 1)
+            .unwrap();
+        assert_eq!(next.total_count, None);
+        assert_eq!(next.previous_timestamp, Some(third));
+        assert_eq!(next.items[0].text, "a much longer searchable note");
+
+        let longest = storage
+            .get_transcriptions_page(None, None, None, TranscriptionSort::Longest, 3, 0)
+            .unwrap();
+        assert_eq!(longest.items[0].text, "a much longer searchable note");
+
+        let search = storage
+            .get_transcriptions_page(
+                Some("searchable"),
+                None,
+                None,
+                TranscriptionSort::Recent,
+                10,
+                0,
+            )
+            .unwrap();
+        assert_eq!(search.items.len(), 1);
+
+        let stats = storage
+            .today_dictation_stats(first.timestamp_millis(), third.timestamp_millis())
+            .unwrap();
+        assert_eq!(stats.count, 2);
+        assert_eq!(stats.words, 7);
+        assert_eq!(stats.longest_words, 5);
+
+        drop(storage);
+        fs::remove_dir_all(root).unwrap();
+    }
 }

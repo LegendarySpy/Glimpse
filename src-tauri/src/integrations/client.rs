@@ -4,12 +4,12 @@
 use std::io::{BufRead, BufReader, Write};
 use std::time::{Duration, Instant};
 
-use anyhow::{bail, Context, Result};
-use interprocess::local_socket::{prelude::*, Stream};
+use anyhow::{Context, Result, bail};
+use interprocess::local_socket::{Stream, prelude::*};
 use serde_json::Value;
 
 use super::coded;
-use super::ipc::{socket_name, Request, Response};
+use super::ipc::{Request, Response, socket_name};
 
 /// How long to wait for a freshly launched app to start serving the socket.
 const LAUNCH_TIMEOUT: Duration = Duration::from_secs(20);

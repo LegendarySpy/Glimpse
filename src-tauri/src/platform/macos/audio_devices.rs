@@ -3,14 +3,14 @@ use std::ptr::NonNull;
 
 use crossbeam_channel::Sender;
 use objc2_core_audio::{
-    kAudioHardwareNoError, kAudioHardwarePropertyDefaultInputDevice, kAudioHardwarePropertyDevices,
-    kAudioObjectPropertyElementMain, kAudioObjectPropertyScopeGlobal, kAudioObjectSystemObject,
     AudioObjectAddPropertyListener, AudioObjectID, AudioObjectPropertyAddress,
-    AudioObjectPropertySelector, AudioObjectRemovePropertyListener,
+    AudioObjectPropertySelector, AudioObjectRemovePropertyListener, kAudioHardwareNoError,
+    kAudioHardwarePropertyDefaultInputDevice, kAudioHardwarePropertyDevices,
+    kAudioObjectPropertyElementMain, kAudioObjectPropertyScopeGlobal, kAudioObjectSystemObject,
 };
 use tauri::{AppHandle, Emitter, Manager};
 
-use crate::{set_app_menu, tray, AppRuntime, AppState, SETTINGS_WINDOW_LABEL};
+use crate::{AppRuntime, AppState, SETTINGS_WINDOW_LABEL, set_app_menu, tray};
 
 pub const EVENT_INPUT_DEVICES_CHANGED: &str = "audio:input-devices-changed";
 
@@ -105,9 +105,11 @@ unsafe extern "C-unwind" fn audio_property_listener(
     _: NonNull<AudioObjectPropertyAddress>,
     client_data: *mut c_void,
 ) -> i32 {
-    let Some(state) = (client_data as *mut ListenerState).as_ref() else {
-        return 0;
-    };
-    let _ = state.sender.try_send(());
-    0
+    unsafe {
+        let Some(state) = (client_data as *mut ListenerState).as_ref() else {
+            return 0;
+        };
+        let _ = state.sender.try_send(());
+        0
+    }
 }

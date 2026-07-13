@@ -1,8 +1,8 @@
 use std::{
     collections::VecDeque,
     sync::{
-        atomic::{AtomicU64, Ordering},
         Arc,
+        atomic::{AtomicU64, Ordering},
     },
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -176,10 +176,11 @@ impl LocalApiController {
             if let Some(model_id) = event.model_id.as_deref() {
                 controller.set_loaded_model(&sink_app, model_id);
             }
-            if event.level == "info" && event.message.starts_with(LOCAL_API_READY_PREFIX) {
-                if let Some(sender) = ready_from_event.lock().take() {
-                    let _ = sender.send(Ok(()));
-                }
+            if event.level == "info"
+                && event.message.starts_with(LOCAL_API_READY_PREFIX)
+                && let Some(sender) = ready_from_event.lock().take()
+            {
+                let _ = sender.send(Ok(()));
             }
             if event.message.starts_with(TRANSCRIBE_REQUEST_LOG) {
                 controller.note_request(&sink_app);

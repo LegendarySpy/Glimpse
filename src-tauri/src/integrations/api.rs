@@ -1,7 +1,7 @@
 //! `glimpse api start|stop|status` - control the local OpenAI-compatible API.
 
-use anyhow::{bail, Result};
-use serde_json::{json, Map, Value};
+use anyhow::{Result, bail};
+use serde_json::{Map, Value, json};
 
 use super::{client, coded, has_flag, output, str_flag, wants_help};
 

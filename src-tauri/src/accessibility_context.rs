@@ -23,7 +23,7 @@ mod macos {
     const OSASCRIPT_TIMEOUT: Duration = Duration::from_secs(2);
 
     #[link(name = "ApplicationServices", kind = "framework")]
-    extern "C" {
+    unsafe extern "C" {
         fn AXUIElementCreateApplication(pid: pid_t) -> *mut c_void;
         fn AXUIElementCopyAttributeValue(
             element: *mut c_void,
@@ -65,29 +65,33 @@ mod macos {
     }
 
     unsafe fn copy_attribute(element: *mut c_void, attribute: &str) -> *mut c_void {
-        let attribute = CFString::new(attribute);
-        let mut value: *mut c_void = std::ptr::null_mut();
-        let result = AXUIElementCopyAttributeValue(
-            element,
-            attribute.as_concrete_TypeRef() as *const c_void,
-            &mut value,
-        );
-        if result != 0 {
-            std::ptr::null_mut()
-        } else {
-            value
+        unsafe {
+            let attribute = CFString::new(attribute);
+            let mut value: *mut c_void = std::ptr::null_mut();
+            let result = AXUIElementCopyAttributeValue(
+                element,
+                attribute.as_concrete_TypeRef() as *const c_void,
+                &mut value,
+            );
+            if result != 0 {
+                std::ptr::null_mut()
+            } else {
+                value
+            }
         }
     }
 
     unsafe fn read_string_attribute(element: *mut c_void, attribute: &str) -> Option<String> {
-        let value = copy_attribute(element, attribute);
-        if value.is_null() {
-            return None;
-        }
+        unsafe {
+            let value = copy_attribute(element, attribute);
+            if value.is_null() {
+                return None;
+            }
 
-        let cf_type: CFType = CFType::wrap_under_create_rule(value as *const _);
-        let cf_string = cf_type.downcast::<CFString>()?;
-        Some(cf_string.to_string())
+            let cf_type: CFType = CFType::wrap_under_create_rule(value as *const _);
+            let cf_string = cf_type.downcast::<CFString>()?;
+            Some(cf_string.to_string())
+        }
     }
 
     fn get_frontmost_app() -> Option<(String, pid_t)> {
@@ -174,23 +178,19 @@ pub use macos::get_active_context;
 mod windows_context {
     use super::ActiveContext;
     use std::path::Path;
-    use windows::core::PWSTR;
     use windows::Win32::Foundation::{CloseHandle, HWND};
     use windows::Win32::System::Threading::{
-        OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_FORMAT,
-        PROCESS_QUERY_LIMITED_INFORMATION,
+        OpenProcess, PROCESS_NAME_FORMAT, PROCESS_QUERY_LIMITED_INFORMATION,
+        QueryFullProcessImageNameW,
     };
     use windows::Win32::UI::WindowsAndMessaging::{
         GetForegroundWindow, GetWindowTextLengthW, GetWindowTextW, GetWindowThreadProcessId,
     };
+    use windows::core::PWSTR;
 
     fn foreground_window() -> Option<HWND> {
         let hwnd = unsafe { GetForegroundWindow() };
-        if hwnd.is_invalid() {
-            None
-        } else {
-            Some(hwnd)
-        }
+        if hwnd.is_invalid() { None } else { Some(hwnd) }
     }
 
     fn window_title(hwnd: HWND) -> String {

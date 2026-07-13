@@ -29,7 +29,6 @@ import { useClickOutside } from "../../../shared/hooks/useClickOutside";
 import type { TranscriptionRecord } from "../../../types";
 import {
   parseTranscriptionSearch,
-  matchesDateRange,
   withSortToken,
   withTimePreset,
   currentTimePreset,
@@ -42,12 +41,20 @@ interface TranscriptionListProps {
   isActive?: boolean;
 }
 
-type ListEntry =
-  | { type: "header"; id: string; label: string }
-  | { type: "item"; record: TranscriptionRecord };
-
 const startOfDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const areSameDay = (left: Date, right: Date) =>
+  left.getFullYear() === right.getFullYear() &&
+  left.getMonth() === right.getMonth() &&
+  left.getDate() === right.getDate();
+
+const VirtualListHeader = () => <div className="h-3" />;
+const VirtualListFooter = () => <div className="h-3" />;
+const virtuosoComponents = {
+  Header: VirtualListHeader,
+  Footer: VirtualListFooter,
+};
 
 const TranscriptionList: React.FC<TranscriptionListProps> = ({
   showLlmButtons = false,
@@ -88,13 +95,25 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
     () => parseTranscriptionSearch(debouncedSearchQuery).text,
     [debouncedSearchQuery],
   );
+  const filter = useMemo(
+    () => ({
+      search: debouncedText.trim() || undefined,
+      afterMs: parsed.after?.getTime(),
+      beforeMs: parsed.before?.getTime(),
+      sort: parsed.sort,
+    }),
+    [debouncedText, parsed.after, parsed.before, parsed.sort],
+  );
 
   const {
-    data: transcriptions = [],
+    records,
+    totalCount,
+    recordAt,
+    previousTimestampAt,
+    requestRange,
     isLoading,
     isFetched,
-  } = useTranscriptionList(isActive);
-  const totalCount = transcriptions.length;
+  } = useTranscriptionList(filter, isActive);
   const deleteMutation = useDeleteTranscription();
   const {
     retry: retryMutation,
@@ -104,6 +123,10 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
   const retryLlmMutation = useRetryLlmCleanup();
   const undoLlmMutation = useUndoLlmCleanup();
   const retryingIdSet = useMemo(() => new Set(retryingIds), [retryingIds]);
+  const overflowByIdRef = useRef(new Map<string, boolean>());
+  const rememberOverflow = useCallback((id: string, overflowing: boolean) => {
+    overflowByIdRef.current.set(id, overflowing);
+  }, []);
 
   const freshIdsRef = useRef<{
     data: TranscriptionRecord[] | null;
@@ -113,57 +136,23 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
   const freshIds = useMemo(() => {
     if (!isFetched) return new Set<string>();
     const cache = freshIdsRef.current;
-    if (cache.data === transcriptions) return new Set<string>();
+    if (cache.data === records) return new Set<string>();
     const fresh = new Set<string>();
-    for (const record of transcriptions) {
+    for (const record of records) {
       if (cache.data !== null && !cache.seen.has(record.id)) {
         fresh.add(record.id);
       }
       cache.seen.add(record.id);
     }
-    cache.data = transcriptions;
+    cache.data = records;
     return fresh;
-  }, [transcriptions, isFetched]);
+  }, [records, isFetched]);
 
   useEffect(() => {
     if (freshIds.size === 0) return;
     const timer = setTimeout(() => freshIds.clear(), 600);
     return () => clearTimeout(timer);
   }, [freshIds]);
-
-  const sortedTranscriptions = useMemo(() => {
-    let filtered = transcriptions;
-    const text = debouncedText.trim().toLowerCase();
-    if (text) {
-      filtered = filtered.filter(
-        (r) =>
-          r.text.toLowerCase().includes(text) ||
-          (r.raw_text ?? "").toLowerCase().includes(text),
-      );
-    }
-    if (parsed.after || parsed.before) {
-      filtered = filtered.filter((r) =>
-        matchesDateRange(r.timestamp, parsed.after, parsed.before),
-      );
-    }
-    if (parsed.sort === "recent") return filtered;
-    const copy = [...filtered];
-    switch (parsed.sort) {
-      case "oldest":
-        copy.sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-        );
-        break;
-      case "longest":
-        copy.sort((a, b) => (b.word_count ?? 0) - (a.word_count ?? 0));
-        break;
-      case "shortest":
-        copy.sort((a, b) => (a.word_count ?? 0) - (b.word_count ?? 0));
-        break;
-    }
-    return copy;
-  }, [transcriptions, debouncedText, parsed.sort, parsed.after, parsed.before]);
 
   const isTimeSorted = parsed.sort === "recent" || parsed.sort === "oldest";
 
@@ -199,30 +188,6 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
     },
     [t],
   );
-
-  const entries: ListEntry[] = useMemo(() => {
-    if (!isTimeSorted) {
-      return sortedTranscriptions.map((record) => ({
-        type: "item" as const,
-        record,
-      }));
-    }
-    const result: ListEntry[] = [];
-    let currentLabel: string | null = null;
-    for (const record of sortedTranscriptions) {
-      const label = formatGroupLabel(new Date(record.timestamp));
-      if (label !== currentLabel) {
-        result.push({
-          type: "header",
-          id: `h-${label}-${record.id}`,
-          label,
-        });
-        currentLabel = label;
-      }
-      result.push({ type: "item", record });
-    }
-    return result;
-  }, [sortedTranscriptions, isTimeSorted, formatGroupLabel]);
 
   const deleteTranscription = useCallback(
     async (id: string) => {
@@ -308,19 +273,18 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
   const activeTimePreset = currentTimePreset(parsed.after, parsed.before);
 
   const renderEntry = useCallback(
-    (_index: number, entry: ListEntry) => {
-      if (entry.type === "header") {
-        return (
-          <div className="transcription-entry flex items-center gap-3 pt-6 pb-2 px-1 first:pt-1">
-            <span className="ui-text-body-sm-strong ui-color-secondary shrink-0">
-              {entry.label}
-            </span>
-            <div className="ui-divider-trailing flex-1" aria-hidden="true" />
-          </div>
-        );
+    (index: number) => {
+      const record = recordAt(index);
+      if (!record) {
+        return <div className="h-[124px]" aria-hidden="true" />;
       }
+      const timestamp = new Date(record.timestamp);
+      const previousTimestamp = previousTimestampAt(index);
+      const startsGroup =
+        isTimeSorted &&
+        (!previousTimestamp ||
+          !areSameDay(timestamp, new Date(previousTimestamp)));
 
-      const record = entry.record;
       return (
         <div
           className={
@@ -329,8 +293,20 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
               : "transcription-entry"
           }
         >
+          {startsGroup && (
+            <div
+              className={`flex items-center gap-3 pb-2 px-1 ${index === 0 ? "pt-1" : "pt-6"}`}
+            >
+              <span className="ui-text-body-sm-strong ui-color-secondary shrink-0">
+                {formatGroupLabel(timestamp)}
+              </span>
+              <div className="ui-divider-trailing flex-1" aria-hidden="true" />
+            </div>
+          )}
           <TranscriptionItem
             record={record}
+            initialOverflowing={overflowByIdRef.current.get(record.id)}
+            onOverflowChange={rememberOverflow}
             isRetrying={retryingIdSet.has(record.id)}
             onDelete={deleteTranscription}
             onRetry={retryTranscription}
@@ -346,7 +322,12 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
     },
     [
       freshIds,
+      formatGroupLabel,
+      isTimeSorted,
+      previousTimestampAt,
+      recordAt,
       retryingIdSet,
+      rememberOverflow,
       deleteTranscription,
       retryTranscription,
       cancelRetryTranscription,
@@ -354,25 +335,15 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
       undoLlmCleanup,
       showLlmButtons,
       shiftHeld,
-      isTimeSorted,
     ],
-  );
-
-  const virtuosoComponents = useMemo(
-    () => ({
-      Header: () => <div className="h-3" />,
-      Footer: () => <div className="h-3" />,
-    }),
-    [],
   );
 
   const hasQuery = searchQuery.trim().length > 0;
   const resultSearchText = parsed.text.trim();
   const showInitialLoading = isLoading && !isFetched;
-  const hasAnyResults = sortedTranscriptions.length > 0;
+  const hasAnyResults = totalCount > 0;
   const showEmptyState = isFetched && totalCount === 0 && !hasQuery;
   const showNoResults = isFetched && !hasAnyResults && hasQuery;
-  const listEntries = showInitialLoading ? [] : entries;
 
   return (
     <motion.div
@@ -624,15 +595,16 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
             )}
             <Virtuoso
               style={{ height: "100%" }}
-              data={listEntries}
+              totalCount={showInitialLoading ? 0 : totalCount}
               defaultItemHeight={124}
               overscan={400}
-              increaseViewportBy={200}
-              computeItemKey={(_index, entry) =>
-                entry.type === "header" ? entry.id : entry.record.id
+              increaseViewportBy={400}
+              computeItemKey={(index) =>
+                recordAt(index)?.id ?? `loading-${index}`
               }
               components={virtuosoComponents}
               itemContent={renderEntry}
+              rangeChanged={requestRange}
               className="custom-scrollbar scrollbar-gutter"
             />
           </>

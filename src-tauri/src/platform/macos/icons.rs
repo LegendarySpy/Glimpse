@@ -4,10 +4,10 @@ use std::process::Command;
 
 use tauri::AppHandle;
 
-use crate::personalization::icons::{
-    app_icon_cache_dir, icon_cache_file_path, should_refresh_icon, InstalledApp,
-};
 use crate::AppRuntime;
+use crate::personalization::icons::{
+    InstalledApp, app_icon_cache_dir, icon_cache_file_path, should_refresh_icon,
+};
 
 fn is_blacklisted_app(name: &str) -> bool {
     let lowered = name.to_lowercase();

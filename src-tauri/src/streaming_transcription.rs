@@ -1,6 +1,6 @@
 use std::sync::{
-    atomic::{AtomicBool, Ordering},
     Arc, Mutex,
+    atomic::{AtomicBool, Ordering},
 };
 use std::thread::JoinHandle;
 use std::time::Duration;
@@ -9,7 +9,7 @@ use tauri::{AppHandle, Manager};
 
 #[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 use crate::pill;
-use crate::{model_manager::ReadyModel, AppRuntime, AppState};
+use crate::{AppRuntime, AppState, model_manager::ReadyModel};
 
 const POLL_INTERVAL: Duration = Duration::from_millis(100);
 
@@ -135,19 +135,19 @@ fn streaming_thread(
             transcribe_ready_chunks(&mut pending, &mut last_text);
         }
 
-        if let Some((new_samples, sample_rate, _)) = recorder.read_live_samples(buffer_offset) {
-            if !new_samples.is_empty() {
-                append_samples(&new_samples, sample_rate, &mut resampler, &mut pending);
-                transcribe_ready_chunks(&mut pending, &mut last_text);
-            }
+        if let Some((new_samples, sample_rate, _)) = recorder.read_live_samples(buffer_offset)
+            && !new_samples.is_empty()
+        {
+            append_samples(&new_samples, sample_rate, &mut resampler, &mut pending);
+            transcribe_ready_chunks(&mut pending, &mut last_text);
         }
 
         if !pending.is_empty() {
             pending.resize(CHUNK_SAMPLES_16K, 0.0);
-            if let Ok(transcript) = session.transcribe_chunk(&model, &pending) {
-                if transcript != last_text {
-                    pill::emit_pill_mode(&app, true, &transcript);
-                }
+            if let Ok(transcript) = session.transcribe_chunk(&model, &pending)
+                && transcript != last_text
+            {
+                pill::emit_pill_mode(&app, true, &transcript);
             }
         }
 
@@ -200,11 +200,7 @@ impl StreamResampler {
             let frac = (self.pos - base) as f32;
             let idx = base as isize;
             let current = if idx < 0 {
-                if self.has_prev {
-                    self.prev
-                } else {
-                    input[0]
-                }
+                if self.has_prev { self.prev } else { input[0] }
             } else {
                 input[idx as usize]
             };

@@ -1,14 +1,14 @@
 {
   "name": "glimpse",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "packageManager": "bun@1.3.14",
   "scripts": {
     "dev": "bun ./node_modules/vite/bin/vite.js",
-    "build": "bun ./node_modules/typescript/lib/tsc.js && bun ./node_modules/vite/bin/vite.js build",
+    "build": "tsc && bun ./node_modules/vite/bin/vite.js build",
     "test:frontend": "bun --no-install test tests/frontend",
-    "typecheck:native": "bun ./node_modules/@typescript/native-preview/bin/tsgo.js --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json",
     "lingui:extract": "lingui extract",
     "lingui:compile": "lingui compile",
     "preview": "bun ./node_modules/vite/bin/vite.js preview",
@@ -19,8 +19,8 @@
     "format:check": "prettier --check . && cargo fmt --manifest-path src-tauri/Cargo.toml -- --check"
   },
   "dependencies": {
-    "@lingui/core": "^6.4.0",
-    "@lingui/react": "^6.4.0",
+    "@lingui/core": "^6.5.0",
+    "@lingui/react": "^6.5.0",
     "@phosphor-icons/react": "^2.1.10",
     "@tanstack/react-query": "^5.101.2",
     "@tauri-apps/api": "2.11.1",
@@ -28,8 +28,7 @@
     "@tauri-apps/plugin-opener": "^2.5.4",
     "@tauri-apps/plugin-process": "^2.3.1",
     "@xstate/react": "^6.1.0",
-    "framer-motion": "^12.42.0",
-    "howler": "^2.2.4",
+    "framer-motion": "^12.42.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-markdown": "^10.1.0",
@@ -40,28 +39,31 @@
     "remark-gfm": "^4.0.1",
     "remark-github": "^12.0.0",
     "tauri-plugin-macos-permissions-api": "^2.3.0",
-    "xstate": "^5.32.2"
+    "xstate": "^5.32.4"
+  },
+  "overrides": {
+    "@tauri-apps/api": "2.11.1"
   },
   "devDependencies": {
     "@babel/core": "8.0.1",
     "@eslint/js": "^10.0.1",
-    "@lingui/babel-plugin-lingui-macro": "^6.4.0",
-    "@lingui/cli": "^6.4.0",
-    "@lingui/format-po": "^6.4.0",
-    "@lingui/vite-plugin": "^6.4.0",
+    "@lingui/babel-plugin-lingui-macro": "^6.5.0",
+    "@lingui/cli": "^6.5.0",
+    "@lingui/format-po": "^6.5.0",
+    "@lingui/vite-plugin": "^6.5.0",
     "@rolldown/plugin-babel": "^0.2.3",
     "@tailwindcss/vite": "^4.3.2",
     "@tauri-apps/cli": "^2.11.4",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "7.0.0-dev.20260629.1",
     "@vitejs/plugin-react": "^6.0.3",
-    "eslint": "^10.6.0",
-    "eslint-plugin-boundaries": "^6.0.2",
-    "prettier": "3.9.3",
+    "eslint": "^10.7.0",
+    "eslint-plugin-boundaries": "^7.0.2",
+    "prettier": "3.9.5",
     "tailwindcss": "^4.3.2",
+    "@typescript/native": "npm:typescript@~7.0.2",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.62.1",
-    "vite": "^8.1.0"
+    "typescript-eslint": "^8.64.0",
+    "vite": "^8.1.4"
   }
 }

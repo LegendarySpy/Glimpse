@@ -1,14 +1,14 @@
 use crate::recent_transcriptions::{
-    build_recent_transcriptions_menu, copy_transcription_to_clipboard,
-    MENU_ID_RECENT_TRANSCRIPTION_PREFIX,
+    MENU_ID_RECENT_TRANSCRIPTION_PREFIX, build_recent_transcriptions_menu,
+    copy_transcription_to_clipboard,
 };
 use crate::settings::UserSettings;
 use crate::speech::menu::{
     build_model_status_items, build_models_submenu, handle_speech_menu_event,
 };
-use crate::{audio, AppRuntime, AppState, FEEDBACK_URL, SETTINGS_WINDOW_LABEL};
+use crate::{AppRuntime, AppState, FEEDBACK_URL, SETTINGS_WINDOW_LABEL, audio};
 use parking_lot::Mutex;
-use std::sync::{atomic::Ordering, OnceLock};
+use std::sync::{OnceLock, atomic::Ordering};
 use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
@@ -323,24 +323,26 @@ pub fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> 
     let state = app.state::<AppState>();
     let mut reset_close_flag = false;
 
-    let window = if let Some(existing) = app.get_webview_window(SETTINGS_WINDOW_LABEL) {
-        existing
-    } else {
-        reset_close_flag = true;
-        let builder = WebviewWindowBuilder::new(app, SETTINGS_WINDOW_LABEL, WebviewUrl::default())
-            .title("Glimpse")
-            .inner_size(900.0, 750.0)
-            .min_inner_size(900.0, 750.0)
-            .resizable(true)
-            .visible(false);
+    let window = match app.get_webview_window(SETTINGS_WINDOW_LABEL) {
+        Some(existing) => existing,
+        _ => {
+            reset_close_flag = true;
+            let builder =
+                WebviewWindowBuilder::new(app, SETTINGS_WINDOW_LABEL, WebviewUrl::default())
+                    .title("Glimpse")
+                    .inner_size(900.0, 750.0)
+                    .min_inner_size(900.0, 750.0)
+                    .resizable(true)
+                    .visible(false);
 
-        #[cfg(target_os = "macos")]
-        let builder = builder.hidden_title(true);
+            #[cfg(target_os = "macos")]
+            let builder = builder.hidden_title(true);
 
-        #[cfg(target_os = "windows")]
-        let builder = builder.decorations(false);
+            #[cfg(target_os = "windows")]
+            let builder = builder.decorations(false);
 
-        builder.build()?
+            builder.build()?
+        }
     };
 
     if reset_close_flag {

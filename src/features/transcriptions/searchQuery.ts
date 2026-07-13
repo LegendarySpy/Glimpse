@@ -1,4 +1,6 @@
-export type TranscriptionSort = "recent" | "oldest" | "longest" | "shortest";
+import type { TranscriptionSort } from "../../types";
+
+export type { TranscriptionSort } from "../../types";
 
 export type TimePreset = "any" | "today" | "7d" | "custom";
 
