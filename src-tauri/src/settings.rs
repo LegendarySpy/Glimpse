@@ -1,4 +1,4 @@
-use std::{collections::HashSet, env, fs, path::PathBuf, sync::OnceLock};
+use std::{collections::HashSet, env, fs, path::PathBuf, sync::OnceLock, time::Duration};
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, Days, Local, Months};
@@ -749,6 +749,8 @@ impl SettingsStore {
 
         let conn = Connection::open(&path)
             .with_context(|| format!("Failed to open settings DB at {}", path.display()))?;
+        conn.busy_timeout(Duration::from_secs(2))?;
+        conn.execute_batch("PRAGMA journal_mode = WAL;\nPRAGMA synchronous = NORMAL;")?;
 
         let store = Self {
             conn: Mutex::new(conn),
@@ -1205,7 +1207,10 @@ impl SettingsStore {
             }
         };
 
-        let conn = self.conn.lock();
+        let mut connection = self.conn.lock();
+        let conn = connection
+            .transaction()
+            .context("Failed to start settings transaction")?;
         self.write_value(
             &conn,
             KEY_ONBOARDING_COMPLETED,
@@ -1314,6 +1319,8 @@ impl SettingsStore {
             &settings.local_api_start_on_launch,
         )?;
         self.write_value(&conn, KEY_LOCAL_API_CORS, &settings.local_api_cors)?;
+        conn.commit()
+            .context("Failed to commit settings transaction")?;
         Ok(())
     }
 

@@ -3,6 +3,7 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, Local, TimeZone};
@@ -868,6 +869,7 @@ impl StorageManager {
     }
 
     fn configure_connection(conn: &Connection) -> Result<()> {
+        conn.busy_timeout(Duration::from_secs(2))?;
         conn.execute_batch(
             "PRAGMA journal_mode = WAL;\nPRAGMA synchronous = NORMAL;\nPRAGMA foreign_keys = ON;",
         )?;
