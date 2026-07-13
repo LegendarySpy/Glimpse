@@ -80,7 +80,8 @@ pub enum TranscriptionSort {
 #[serde(rename_all = "camelCase")]
 pub struct TranscriptionPage {
     pub items: Vec<TranscriptionRecord>,
-    pub has_more: bool,
+    pub total_count: Option<usize>,
+    pub previous_timestamp: Option<DateTime<Local>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
@@ -415,9 +416,9 @@ impl StorageManager {
             TranscriptionSort::Longest => "word_count DESC, timestamp DESC, id DESC",
             TranscriptionSort::Shortest => "word_count ASC, timestamp DESC, id DESC",
         };
-        let fetch_limit = limit.saturating_add(1);
-        values.push(Value::Integer(fetch_limit as i64));
-        values.push(Value::Integer(offset as i64));
+        let query_offset = offset.saturating_sub(1);
+        let includes_previous = offset > 0;
+        let fetch_limit = limit.saturating_add(usize::from(includes_previous));
 
         let query = format!(
             "SELECT id, timestamp, text, raw_text, audio_path, status, error_message, llm_cleaned,
@@ -426,19 +427,38 @@ impl StorageManager {
              ORDER BY {order_clause}
              LIMIT ? OFFSET ?"
         );
+        let conn = self.connection.lock();
+        let total_count = if offset == 0 {
+            let count_query = format!("SELECT COUNT(*) FROM transcriptions{where_clause}");
+            Some(
+                conn.query_row(&count_query, params_from_iter(values.clone()), |row| {
+                    row.get::<_, i64>(0).map(|count| count.max(0) as usize)
+                })?,
+            )
+        } else {
+            None
+        };
+        values.push(Value::Integer(fetch_limit as i64));
+        values.push(Value::Integer(query_offset as i64));
         let mut records = {
-            let conn = self.connection.lock();
             let mut stmt = conn.prepare(&query)?;
             stmt.query_map(params_from_iter(values), Self::record_from_row)?
                 .collect::<rusqlite::Result<Vec<_>>>()?
         };
-        let has_more = records.len() > limit;
-        records.truncate(limit);
+        let previous_timestamp = if includes_previous {
+            records.first().map(|record| record.timestamp)
+        } else {
+            None
+        };
+        if includes_previous && !records.is_empty() {
+            records.remove(0);
+        }
         Self::resolve_audio_availability(&mut records);
 
         Ok(TranscriptionPage {
             items: records,
-            has_more,
+            total_count,
+            previous_timestamp,
         })
     }
 
@@ -1137,8 +1157,16 @@ mod tests {
         let recent = storage
             .get_transcriptions_page(None, None, None, TranscriptionSort::Recent, 2, 0)
             .unwrap();
-        assert!(recent.has_more);
+        assert_eq!(recent.total_count, Some(3));
+        assert_eq!(recent.previous_timestamp, None);
         assert_eq!(recent.items[0].text, "failed note");
+
+        let next = storage
+            .get_transcriptions_page(None, None, None, TranscriptionSort::Recent, 1, 1)
+            .unwrap();
+        assert_eq!(next.total_count, None);
+        assert_eq!(next.previous_timestamp, Some(third));
+        assert_eq!(next.items[0].text, "a much longer searchable note");
 
         let longest = storage
             .get_transcriptions_page(None, None, None, TranscriptionSort::Longest, 3, 0)

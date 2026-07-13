@@ -37,5 +37,6 @@ export type TranscriptionFilter = {
 
 export type TranscriptionPage = {
   items: TranscriptionRecord[];
-  hasMore: boolean;
+  totalCount: number | null;
+  previousTimestamp: string | null;
 };
