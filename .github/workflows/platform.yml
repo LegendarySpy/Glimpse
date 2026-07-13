@@ -3,6 +3,8 @@ name: Platform
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 concurrency:
   group: platform-${{ github.workflow }}-${{ github.ref }}
