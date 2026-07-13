@@ -20,9 +20,6 @@ export default tseslint.config(
         { type: "legacy", pattern: "src/**", partialMatch: false },
       ],
       "boundaries/ignore": ["**/*.test.*", "**/*.spec.*"],
-      "import/resolver": {
-        typescript: { alwaysTryTypes: true },
-      },
     },
     rules: {
       // Feature isolation: features cannot import from other features
