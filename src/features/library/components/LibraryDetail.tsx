@@ -12,7 +12,6 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
-import { Howl } from "howler";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import {
   Warning as AlertTriangle,
@@ -60,10 +59,6 @@ import type {
   SpeechModel,
   TranscriptSegment,
 } from "../../../types";
-
-const getMediaNode = (sound: Howl): HTMLAudioElement | null =>
-  (sound as unknown as { _sounds?: Array<{ _node?: HTMLAudioElement }> })
-    ._sounds?.[0]?._node ?? null;
 
 const SPEAKER_COLORS = [
   "#7aa2f7",
@@ -198,7 +193,7 @@ const LibraryDetail = ({
   const [speakerFilter, setSpeakerFilter] = useState<string | null>(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const transcriptTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const howlRef = useRef<Howl | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const tagMenuRef = useRef<HTMLDivElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
@@ -289,25 +284,39 @@ const LibraryDetail = ({
   const setPlaybackRateValue = useCallback((value: number) => {
     playbackRateRef.current = value;
     setPlaybackRate(value);
-    howlRef.current?.rate(value);
+    if (audioRef.current) audioRef.current.playbackRate = value;
   }, []);
+
+  const playAudio = useCallback(
+    (audio: HTMLAudioElement) => {
+      void audio.play().catch((err) => {
+        console.error("Audio play error:", err);
+        setAudioError(
+          t({
+            id: "library.modal.audio_unavailable",
+            message: "Audio unavailable",
+          }),
+        );
+        setAudioReady(false);
+        updateIsPlaying(false);
+        stopSeekLoop();
+      });
+    },
+    [stopSeekLoop, t, updateIsPlaying],
+  );
 
   const startSeekLoop = useCallback(() => {
     stopSeekLoop();
     const tick = () => {
-      const sound = howlRef.current;
-      if (sound) {
-        const node = getMediaNode(sound);
-        const playing = node ? !node.paused && !node.ended : sound.playing();
+      const audio = audioRef.current;
+      if (audio) {
+        const playing = !audio.paused && !audio.ended;
         if (playing !== isPlayingRef.current) {
           isPlayingRef.current = playing;
           setIsPlaying(playing);
         }
         if (playing && !isScrubbingRef.current) {
-          const pos = sound.seek();
-          if (typeof pos === "number") {
-            setAudioCurrentTime(pos);
-          }
+          setAudioCurrentTime(audio.currentTime);
         }
       }
       rafRef.current = requestAnimationFrame(tick);
@@ -327,9 +336,9 @@ const LibraryDetail = ({
 
   useEffect(() => {
     stopSeekLoop();
-    if (howlRef.current) {
-      howlRef.current.unload();
-      howlRef.current = null;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
     updateIsPlaying(false);
     updateIsScrubbing(false);
@@ -340,72 +349,68 @@ const LibraryDetail = ({
     scrubWasPlayingRef.current = false;
     scrubValueRef.current = null;
 
-    const sound = new Howl({
-      src: [audioUrl],
-      html5: true,
-      preload: true,
-      onload: () => {
-        const duration = sound.duration();
-        setAudioDuration(Number.isFinite(duration) ? duration : 0);
-        setAudioReady(true);
-      },
-      onloaderror: (_id: number | string, err: unknown) => {
-        console.error("Audio load error:", err);
-        setAudioError(
-          t({
-            id: "library.modal.audio_unavailable",
-            message: "Audio unavailable",
-          }),
-        );
-        setAudioReady(false);
-      },
-      onplayerror: (_id: number | string, err: unknown) => {
-        console.error("Audio play error:", err);
-        setAudioError(
-          t({
-            id: "library.modal.audio_unavailable",
-            message: "Audio unavailable",
-          }),
-        );
-        setAudioReady(false);
-        updateIsPlaying(false);
-        stopSeekLoop();
-      },
-      onplay: () => {
-        updateIsPlaying(true);
-        startSeekLoop();
-      },
-      onpause: () => {
-        updateIsPlaying(false);
-        stopSeekLoop();
-      },
-      onstop: () => {
-        updateIsPlaying(false);
-        stopSeekLoop();
-      },
-      onend: () => {
-        updateIsPlaying(false);
-        stopSeekLoop();
-        const duration = sound.duration();
-        if (Number.isFinite(duration)) {
-          setAudioCurrentTime(duration);
-        }
-      },
-      onseek: () => {
-        if (isScrubbingRef.current) return;
-        const pos = sound.seek();
-        if (typeof pos === "number") {
-          setAudioCurrentTime(pos);
-        }
-      },
-    });
+    const audio = new Audio(audioUrl);
+    audio.preload = "auto";
+    audio.playbackRate = playbackRateRef.current;
 
-    sound.rate(playbackRateRef.current);
-    howlRef.current = sound;
+    const handleReady = () => {
+      setAudioDuration(
+        Number.isFinite(audio.duration)
+          ? audio.duration
+          : item.duration_seconds || 0,
+      );
+      setAudioReady(true);
+    };
+    const handleLoadError = () => {
+      console.error("Audio load error:", audio.error);
+      setAudioError(
+        t({
+          id: "library.modal.audio_unavailable",
+          message: "Audio unavailable",
+        }),
+      );
+      setAudioReady(false);
+    };
+    const handlePlay = () => {
+      updateIsPlaying(true);
+      startSeekLoop();
+    };
+    const handlePause = () => {
+      updateIsPlaying(false);
+      stopSeekLoop();
+    };
+    const handleEnded = () => {
+      updateIsPlaying(false);
+      stopSeekLoop();
+      if (Number.isFinite(audio.duration)) {
+        setAudioCurrentTime(audio.duration);
+      }
+    };
+    const handleSeeked = () => {
+      if (!isScrubbingRef.current) setAudioCurrentTime(audio.currentTime);
+    };
+
+    audio.addEventListener("canplay", handleReady);
+    audio.addEventListener("error", handleLoadError);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("seeked", handleSeeked);
+    audioRef.current = audio;
+    audio.load();
 
     return () => {
       stopSeekLoop();
-      sound.unload();
+      audio.removeEventListener("canplay", handleReady);
+      audio.removeEventListener("error", handleLoadError);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("seeked", handleSeeked);
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      if (audioRef.current === audio) audioRef.current = null;
     };
   }, [
     audioUrl,
@@ -712,84 +717,64 @@ const LibraryDetail = ({
   };
 
   const handleTogglePlayback = useCallback(() => {
-    const sound = howlRef.current;
-    if (!sound || audioError || !audioReady) return;
-    if (sound.playing()) {
-      sound.pause();
+    const audio = audioRef.current;
+    if (!audio || audioError || !audioReady) return;
+    if (!audio.paused) {
+      audio.pause();
     } else {
-      sound.play();
+      playAudio(audio);
     }
-  }, [audioError, audioReady]);
+  }, [audioError, audioReady, playAudio]);
 
   const handleScrubChange = (nextValue: string) => {
-    const sound = howlRef.current;
-    if (!sound || audioError || !audioReady) return;
+    const audio = audioRef.current;
+    if (!audio || audioError || !audioReady) return;
     const nextTime = Number(nextValue);
     if (!Number.isFinite(nextTime)) return;
     scrubValueRef.current = nextTime;
     if (isScrubbing) {
       setAudioCurrentTime(nextTime);
-      sound.seek(nextTime);
+      audio.currentTime = nextTime;
       return;
     }
-    sound.seek(nextTime);
+    audio.currentTime = nextTime;
     setAudioCurrentTime(nextTime);
   };
 
   const handleScrubStart = () => {
-    const sound = howlRef.current;
-    if (!sound || audioError || !audioReady) return;
-    scrubWasPlayingRef.current = sound.playing();
+    const audio = audioRef.current;
+    if (!audio || audioError || !audioReady) return;
+    scrubWasPlayingRef.current = !audio.paused;
     updateIsScrubbing(true);
-    sound.pause();
+    audio.pause();
   };
 
   const handleScrubEnd = () => {
-    const sound = howlRef.current;
-    if (!sound || audioError || !audioReady) return;
+    const audio = audioRef.current;
+    if (!audio || audioError || !audioReady) return;
     updateIsScrubbing(false);
     if (
       typeof scrubValueRef.current === "number" &&
       Number.isFinite(scrubValueRef.current)
     ) {
-      sound.seek(scrubValueRef.current);
+      audio.currentTime = scrubValueRef.current;
       setAudioCurrentTime(scrubValueRef.current);
     }
     scrubValueRef.current = null;
     if (scrubWasPlayingRef.current) {
-      try {
-        sound.play();
-      } catch (err) {
-        console.error("Failed to resume audio:", err);
-        setAudioError(
-          t({
-            id: "library.modal.audio_unavailable",
-            message: "Audio unavailable",
-          }),
-        );
-      }
+      playAudio(audio);
     }
     scrubWasPlayingRef.current = false;
   };
 
   const handleTimestampClick = (startMs: number) => {
-    const sound = howlRef.current;
-    if (!sound || audioError || !audioReady) return;
+    const audio = audioRef.current;
+    if (!audio || audioError || !audioReady) return;
     const nextTime = Math.max(0, startMs / 1000);
-    sound.seek(nextTime);
+    audio.currentTime = nextTime;
     setAudioCurrentTime(nextTime);
-    if (!sound.playing()) {
-      try {
-        sound.play();
-      } catch (err) {
-        console.error("Failed to play audio:", err);
-        setAudioError(
-          t({
-            id: "library.modal.audio_unavailable",
-            message: "Audio unavailable",
-          }),
-        );
-      }
+    if (audio.paused) {
+      playAudio(audio);
     }
   };
   const scrubberMax = audioDuration > 0 ? audioDuration : 1;
