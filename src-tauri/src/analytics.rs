@@ -66,22 +66,9 @@ pub async fn init(app: &tauri::AppHandle<AppRuntime>) {
         return;
     }
 
-    let error_tracking = match posthog_rs::ErrorTrackingOptionsBuilder::default()
-        .capture_panics(false)
-        .capture_stacktrace(false)
-        .build()
-    {
-        Ok(options) => options,
-        Err(err) => {
-            tracing::error!("Failed to build PostHog error tracking options: {err}");
-            return;
-        }
-    };
-
     let options = match posthog_rs::ClientOptionsBuilder::default()
         .api_key(api_key.to_string())
         .host(host)
-        .error_tracking(error_tracking)
         .build()
     {
         Ok(opts) => opts,
