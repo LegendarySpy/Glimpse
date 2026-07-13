@@ -15,11 +15,14 @@ export default tseslint.config(
     settings: {
       "boundaries/elements": [
         { type: "app", pattern: "src/app/**" },
-        { type: "feature", pattern: "src/features/**" },
+        { type: "feature", pattern: "src/features/*" },
         { type: "shared", pattern: "src/shared/**" },
-        { type: "legacy", pattern: "src/**", mode: "file" },
+        { type: "legacy", pattern: "src/**", partialMatch: false },
       ],
       "boundaries/ignore": ["**/*.test.*", "**/*.spec.*"],
+      "import/resolver": {
+        typescript: { alwaysTryTypes: true },
+      },
     },
     rules: {
       // Feature isolation: features cannot import from other features
@@ -27,22 +30,34 @@ export default tseslint.config(
         "warn",
         {
           default: "disallow",
-          rules: [
+          policies: [
             {
-              from: { type: "app" },
-              allow: { to: { type: ["app", "feature", "shared", "legacy"] } },
+              from: { element: { type: "app" } },
+              allow: [
+                {
+                  to: {
+                    element: { type: ["app", "feature", "shared", "legacy"] },
+                  },
+                },
+              ],
             },
             {
-              from: { type: "feature" },
-              allow: { to: { type: ["shared", "legacy"] } },
+              from: { element: { type: "feature" } },
+              allow: [{ to: { element: { type: ["shared", "legacy"] } } }],
             },
             {
-              from: { type: "shared" },
-              allow: { to: { type: ["shared", "legacy"] } },
+              from: { element: { type: "shared" } },
+              allow: [{ to: { element: { type: ["shared", "legacy"] } } }],
             },
             {
-              from: { type: "legacy" },
-              allow: { to: { type: ["app", "feature", "shared", "legacy"] } },
+              from: { element: { type: "legacy" } },
+              allow: [
+                {
+                  to: {
+                    element: { type: ["app", "feature", "shared", "legacy"] },
+                  },
+                },
+              ],
             },
           ],
         },
@@ -95,18 +110,25 @@ export default tseslint.config(
       "no-restricted-imports": "off",
     },
   },
-  // Override: allow cross-feature imports for settings (cross-cutting)
+
   {
-    files: ["src/features/*/queries.ts", "src/features/*/components/**/*.tsx"],
+    files: [
+      "src/features/*/queries.ts",
+      "src/features/*/components/**/*.tsx",
+      "src/features/settings/useSettingsForm.ts",
+      "src/features/onboarding/**",
+    ],
     rules: {
       "boundaries/dependencies": [
         "warn",
         {
           default: "disallow",
-          rules: [
+          policies: [
             {
-              from: { type: "feature" },
-              allow: { to: { type: ["feature", "shared", "legacy"] } },
+              from: { element: { type: "feature" } },
+              allow: [
+                { to: { element: { type: ["feature", "shared", "legacy"] } } },
+              ],
             },
           ],
         },

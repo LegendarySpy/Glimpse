@@ -192,7 +192,7 @@ jobs:
 
       - name: build and publish macOS
         if: matrix.os == 'macos'
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -227,12 +227,12 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: ${{ needs.create-release.outputs.prerelease == 'true' }}
-          includeUpdaterJson: false
+          uploadUpdaterJson: false
           args: ${{ matrix.tauri-args }}
 
       - name: build and publish Windows
         if: matrix.os == 'windows'
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           # Build whisper.cpp/ggml for a portable AVX2 baseline, not the build host
           GGML_NATIVE: "OFF"
@@ -257,7 +257,7 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: ${{ needs.create-release.outputs.prerelease == 'true' }}
-          includeUpdaterJson: false
+          uploadUpdaterJson: false
           args: ${{ matrix.tauri-args }}
 
   publish-updater-json:
