@@ -36,6 +36,8 @@ interface TranscriptionItemProps {
   showLlmButtons?: boolean;
   shiftHeld?: boolean;
   showDate?: boolean;
+  initialOverflowing?: boolean;
+  onOverflowChange?: (id: string, overflowing: boolean) => void;
 }
 
 const TranscriptionItem: React.FC<TranscriptionItemProps> = ({
@@ -49,6 +51,8 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({
   showLlmButtons = false,
   shiftHeld = false,
   showDate = false,
+  initialOverflowing = false,
+  onOverflowChange,
 }) => {
   const { t } = useLingui();
   const { data: speechModels } = useSpeechModels();
@@ -58,7 +62,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({
   const [isRetryingLlm, setIsRetryingLlm] = useState(false);
   const [isUndoingLlm, setIsUndoingLlm] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isOverflowing, setIsOverflowing] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(initialOverflowing);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectionText, setSelectionText] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
@@ -83,7 +87,10 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({
     if (!element) return;
 
     const updateOverflow = () => {
-      setIsOverflowing(element.scrollHeight > element.clientHeight);
+      if (element.clientHeight === 0) return;
+      const overflowing = element.scrollHeight > element.clientHeight;
+      setIsOverflowing(overflowing);
+      onOverflowChange?.(record.id, overflowing);
     };
 
     updateOverflow();
@@ -94,7 +101,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({
     return () => {
       observer.disconnect();
     };
-  }, [record.text, isExpanded]);
+  }, [record.id, record.text, isExpanded, onOverflowChange]);
 
   const handleCopy = async () => {
     if (await copy(record.text)) {

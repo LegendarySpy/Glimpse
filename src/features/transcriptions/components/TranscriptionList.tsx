@@ -123,6 +123,10 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
   const retryLlmMutation = useRetryLlmCleanup();
   const undoLlmMutation = useUndoLlmCleanup();
   const retryingIdSet = useMemo(() => new Set(retryingIds), [retryingIds]);
+  const overflowByIdRef = useRef(new Map<string, boolean>());
+  const rememberOverflow = useCallback((id: string, overflowing: boolean) => {
+    overflowByIdRef.current.set(id, overflowing);
+  }, []);
 
   const freshIdsRef = useRef<{
     data: TranscriptionRecord[] | null;
@@ -301,6 +305,8 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
           )}
           <TranscriptionItem
             record={record}
+            initialOverflowing={overflowByIdRef.current.get(record.id)}
+            onOverflowChange={rememberOverflow}
             isRetrying={retryingIdSet.has(record.id)}
             onDelete={deleteTranscription}
             onRetry={retryTranscription}
@@ -321,6 +327,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
       previousTimestampAt,
       recordAt,
       retryingIdSet,
+      rememberOverflow,
       deleteTranscription,
       retryTranscription,
       cancelRetryTranscription,

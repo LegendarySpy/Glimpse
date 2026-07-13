@@ -33,6 +33,9 @@ import TranscriptionList from "./features/transcriptions/components/Transcriptio
 import { useTodayDictationStats } from "./features/transcriptions/queries";
 import { EMPTY_TODAY_DICTATION_STATS } from "./features/transcriptions/todayStats";
 import { useTimeOfDayPeriodTick } from "./features/transcriptions/homeGreeting";
+import DictionaryView from "./features/dictionary/components/DictionaryView";
+import PersonalizationView from "./features/personalization/components/PersonalizationView";
+import LibraryView from "./features/library/components/LibraryView";
 import LocalApiSidebarStatus from "./features/settings/components/LocalApiSidebarStatus";
 import { getLocalApiStatus } from "./features/settings/models-api";
 import type { LocalApiStatus } from "./types";
@@ -45,15 +48,6 @@ const SettingsModal = lazy(
   () => import("./features/settings/components/SettingsModal"),
 );
 const FAQModal = lazy(() => import("./shared/ui/FAQModal"));
-const DictionaryView = lazy(
-  () => import("./features/dictionary/components/DictionaryView"),
-);
-const PersonalizationView = lazy(
-  () => import("./features/personalization/components/PersonalizationView"),
-);
-const LibraryView = lazy(
-  () => import("./features/library/components/LibraryView"),
-);
 
 type ActiveView = "home" | "dictionary" | "brain" | "library";
 
@@ -170,9 +164,6 @@ const Home = () => {
   >("general");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeView, setActiveView] = useState<ActiveView>("home");
-  const [visitedViews, setVisitedViews] = useState<Set<ActiveView>>(
-    () => new Set(["home"]),
-  );
   const licenseGateActive = useLicenseGate();
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const {
@@ -211,15 +202,6 @@ const Home = () => {
   useEffect(() => {
     if (showFAQ) setFaqOpened(true);
   }, [showFAQ]);
-
-  useEffect(() => {
-    setVisitedViews((current) => {
-      if (current.has(activeView)) return current;
-      const next = new Set(current);
-      next.add(activeView);
-      return next;
-    });
-  }, [activeView]);
 
   useEffect(() => {
     licenseGateActiveRef.current = licenseGateActive;
@@ -813,37 +795,29 @@ const Home = () => {
             />
           </div>
 
-          <Suspense fallback={null}>
-            {visitedViews.has("dictionary") && (
-              <div
-                className={`w-full max-w-6xl mx-auto min-w-0 pt-8 ${activeView === "dictionary" ? "" : "hidden"}`}
-              >
-                <DictionaryView isActive={activeView === "dictionary"} />
-              </div>
-            )}
+          <div
+            className={`w-full max-w-6xl mx-auto min-w-0 pt-8 ${activeView === "dictionary" ? "" : "hidden"}`}
+          >
+            <DictionaryView isActive={activeView === "dictionary"} />
+          </div>
 
-            {visitedViews.has("brain") && (
-              <div
-                className={`w-full max-w-5xl mx-auto pt-8 ${activeView === "brain" ? "" : "hidden"}`}
-              >
-                <PersonalizationView
-                  isActive={activeView === "brain" && licenseGateActive}
-                />
-              </div>
-            )}
+          <div
+            className={`w-full max-w-5xl mx-auto pt-8 ${activeView === "brain" ? "" : "hidden"}`}
+          >
+            <PersonalizationView
+              isActive={activeView === "brain" && licenseGateActive}
+            />
+          </div>
 
-            {visitedViews.has("library") && (
-              <div
-                className={`w-full min-w-0 flex-1 min-h-0 ${activeView === "library" ? "" : "hidden"}`}
-              >
-                <LibraryView
-                  pendingImportPaths={pendingImportPaths}
-                  onSetImportPaths={setPendingImportPaths}
-                  isActive={activeView === "library" && licenseGateActive}
-                />
-              </div>
-            )}
-          </Suspense>
+          <div
+            className={`w-full min-w-0 flex-1 min-h-0 ${activeView === "library" ? "" : "hidden"}`}
+          >
+            <LibraryView
+              pendingImportPaths={pendingImportPaths}
+              onSetImportPaths={setPendingImportPaths}
+              isActive={activeView === "library" && licenseGateActive}
+            />
+          </div>
         </div>
       </main>
 
