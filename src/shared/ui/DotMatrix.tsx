@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { motion } from "framer-motion";
 
 interface DotMatrixProps extends React.HTMLAttributes<HTMLDivElement> {
   rows?: number;
@@ -36,14 +35,12 @@ const DotMatrix: React.FC<DotMatrixProps> = ({
       : "border-radius 0.4s ease-out, opacity 0.3s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
     return Array.from({ length: total }).map((_, i) => {
       const isActive = activeDots.includes(i);
-      const DotComponent = animated ? motion.div : "div";
-
       const isMorphed = isActive && morphOnActive;
       const borderRadius = isMorphed ? `${dotSize * 0.25}px` : "50%";
       const scale = isActive ? activeScale : 1;
 
       return (
-        <DotComponent
+        <div
           key={i}
           style={{
             width: dotSize,
@@ -53,14 +50,11 @@ const DotMatrix: React.FC<DotMatrixProps> = ({
             borderRadius: borderRadius,
             transform: `scale(${scale})`,
             transition: dotTransition,
+            animation:
+              animated && isActive && !morphOnActive
+                ? `dot-matrix-enter 0.2s ease-out ${i * 0.002}s both`
+                : undefined,
           }}
-          {...(animated && isActive && !morphOnActive
-            ? {
-                initial: { scale: 0.8, opacity: 0 },
-                animate: { scale: 1, opacity: 1 },
-                transition: { delay: i * 0.002, duration: 0.2 },
-              }
-            : {})}
         />
       );
     });

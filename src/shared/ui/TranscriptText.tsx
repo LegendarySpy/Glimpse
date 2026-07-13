@@ -1,7 +1,5 @@
 import { memo } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 import remarkBreaks from "remark-breaks";
 
 interface TranscriptTextProps {
@@ -60,7 +58,6 @@ function TranscriptText({ text }: TranscriptTextProps) {
     <ReactMarkdown
       allowedElements={allowedElements}
       components={components}
-      rehypePlugins={[rehypeRaw, rehypeSanitize]}
       remarkPlugins={[remarkBreaks]}
     >
       {text}
