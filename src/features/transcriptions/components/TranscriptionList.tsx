@@ -29,7 +29,6 @@ import { useClickOutside } from "../../../shared/hooks/useClickOutside";
 import type { TranscriptionRecord } from "../../../types";
 import {
   parseTranscriptionSearch,
-  matchesDateRange,
   withSortToken,
   withTimePreset,
   currentTimePreset,
@@ -88,12 +87,24 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
     () => parseTranscriptionSearch(debouncedSearchQuery).text,
     [debouncedSearchQuery],
   );
+  const filter = useMemo(
+    () => ({
+      search: debouncedText.trim() || undefined,
+      afterMs: parsed.after?.getTime(),
+      beforeMs: parsed.before?.getTime(),
+      sort: parsed.sort,
+    }),
+    [debouncedText, parsed.after, parsed.before, parsed.sort],
+  );
 
   const {
     data: transcriptions = [],
     isLoading,
     isFetched,
-  } = useTranscriptionList(isActive);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useTranscriptionList(filter, isActive);
   const totalCount = transcriptions.length;
   const deleteMutation = useDeleteTranscription();
   const {
@@ -131,39 +142,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
     return () => clearTimeout(timer);
   }, [freshIds]);
 
-  const sortedTranscriptions = useMemo(() => {
-    let filtered = transcriptions;
-    const text = debouncedText.trim().toLowerCase();
-    if (text) {
-      filtered = filtered.filter(
-        (r) =>
-          r.text.toLowerCase().includes(text) ||
-          (r.raw_text ?? "").toLowerCase().includes(text),
-      );
-    }
-    if (parsed.after || parsed.before) {
-      filtered = filtered.filter((r) =>
-        matchesDateRange(r.timestamp, parsed.after, parsed.before),
-      );
-    }
-    if (parsed.sort === "recent") return filtered;
-    const copy = [...filtered];
-    switch (parsed.sort) {
-      case "oldest":
-        copy.sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-        );
-        break;
-      case "longest":
-        copy.sort((a, b) => (b.word_count ?? 0) - (a.word_count ?? 0));
-        break;
-      case "shortest":
-        copy.sort((a, b) => (a.word_count ?? 0) - (b.word_count ?? 0));
-        break;
-    }
-    return copy;
-  }, [transcriptions, debouncedText, parsed.sort, parsed.after, parsed.before]);
+  const sortedTranscriptions = transcriptions;
 
   const isTimeSorted = parsed.sort === "recent" || parsed.sort === "oldest";
 
@@ -633,6 +612,9 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
               }
               components={virtuosoComponents}
               itemContent={renderEntry}
+              endReached={() => {
+                if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+              }}
               className="custom-scrollbar scrollbar-gutter"
             />
           </>

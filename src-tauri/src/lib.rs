@@ -610,7 +610,8 @@ pub fn run() {
             import::commands::apply_import,
             get_app_info,
             open_data_dir,
-            get_transcriptions,
+            get_transcriptions_page,
+            get_today_dictation_stats,
             delete_transcription,
             retry_transcription,
             retry_llm_cleanup,
@@ -1589,13 +1590,38 @@ fn calculate_dir_size(path: &std::path::Path) -> Result<u64> {
 }
 
 #[tauri::command]
-fn get_transcriptions(
+fn get_transcriptions_page(
+    search: Option<String>,
+    after_ms: Option<i64>,
+    before_ms: Option<i64>,
+    sort: storage::TranscriptionSort,
+    limit: usize,
+    offset: usize,
     state: tauri::State<AppState>,
-) -> Result<Vec<storage::TranscriptionRecord>, String> {
+) -> Result<storage::TranscriptionPage, String> {
     state
         .storage()
-        .get_all()
+        .get_transcriptions_page(
+            search.as_deref(),
+            after_ms,
+            before_ms,
+            sort,
+            limit.clamp(1, 200),
+            offset,
+        )
         .map_err(|err| format!("Failed to get transcriptions: {err}"))
+}
+
+#[tauri::command]
+fn get_today_dictation_stats(
+    start_ms: i64,
+    end_ms: i64,
+    state: tauri::State<AppState>,
+) -> Result<storage::TodayDictationStats, String> {
+    state
+        .storage()
+        .today_dictation_stats(start_ms, end_ms)
+        .map_err(|err| format!("Failed to get today's dictation stats: {err}"))
 }
 
 #[tauri::command]

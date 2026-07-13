@@ -1,8 +1,33 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { TranscriptionRecord } from "../../types";
+import type {
+  TodayDictationStats,
+  TranscriptionFilter,
+  TranscriptionPage,
+} from "../../types";
 
-export async function getTranscriptions(): Promise<TranscriptionRecord[]> {
-  return invoke<TranscriptionRecord[]>("get_transcriptions");
+export async function getTranscriptionsPage(
+  filter: TranscriptionFilter,
+  limit: number,
+  offset: number,
+): Promise<TranscriptionPage> {
+  return invoke<TranscriptionPage>("get_transcriptions_page", {
+    search: filter.search,
+    afterMs: filter.afterMs,
+    beforeMs: filter.beforeMs,
+    sort: filter.sort,
+    limit,
+    offset,
+  });
+}
+
+export async function getTodayDictationStats(
+  startMs: number,
+  endMs: number,
+): Promise<TodayDictationStats> {
+  return invoke<TodayDictationStats>("get_today_dictation_stats", {
+    startMs,
+    endMs,
+  });
 }
 
 export async function deleteTranscription(id: string): Promise<void> {

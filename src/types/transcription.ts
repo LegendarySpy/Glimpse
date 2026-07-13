@@ -25,3 +25,17 @@ export type TodayDictationStats = {
   longestAudioSeconds: number;
   llmCleanedCount: number;
 };
+
+export type TranscriptionSort = "recent" | "oldest" | "longest" | "shortest";
+
+export type TranscriptionFilter = {
+  search?: string;
+  afterMs?: number;
+  beforeMs?: number;
+  sort: TranscriptionSort;
+};
+
+export type TranscriptionPage = {
+  items: TranscriptionRecord[];
+  hasMore: boolean;
+};
