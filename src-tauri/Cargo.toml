@@ -43,7 +43,7 @@ crossbeam-channel = "0.5"
 webrtc-vad = "0.4"
 rustfft = "6"
 reqwest = { version = "0.13", default-features = false, features = ["json", "multipart", "stream", "rustls", "blocking"] }
-posthog-rs = { version = "0.19", default-features = false, features = ["async-client"] }
+posthog-rs = { version = "0.20", default-features = false, features = ["async-client"] }
 arboard = "3"
 glimpse-speech = { git = "https://github.com/glimpse-hq/Glimpse-Speech.git", tag = "1.5.1", features = ["whisper", "nvidia", "api", "cli", "remote"] }
 uuid = { version = "1.23.4", features = ["v4"] }
