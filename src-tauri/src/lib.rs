@@ -658,6 +658,7 @@ pub fn run() {
             analytics::report_frontend_crash,
             analytics::track_onboarding_step_viewed,
             fetch_llm_models,
+            apple_llm_availability,
             fetch_remote_speech_models,
             open_about_page,
             reveal_logs,
@@ -688,6 +689,9 @@ pub fn run() {
                 }
             }
             tauri::RunEvent::Exit => {
+                // Quit-time panics (e.g. tao's Windows event-loop teardown)
+                // should not report as crashes while running.
+                analytics::set_crash_phase("shutdown");
                 let state = handler.state::<AppState>();
                 state.local_transcriber.unload();
                 state.stop_preflight_loop();
@@ -1483,6 +1487,18 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
             total_bytes,
         },
     })
+}
+
+#[tauri::command]
+fn apple_llm_availability() -> String {
+    use glimpse_speech::cleanup::AppleAvailability;
+    match glimpse_speech::cleanup::CleanupProvider::apple_availability() {
+        AppleAvailability::Available => "available",
+        AppleAvailability::NotEnabled => "not_enabled",
+        AppleAvailability::NotReady => "not_ready",
+        AppleAvailability::Unsupported => "unsupported",
+    }
+    .to_string()
 }
 
 #[tauri::command]

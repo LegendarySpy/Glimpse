@@ -1941,6 +1941,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "fm-rs"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ad69482ea5749f91a39d48c7dc4c473931b0f96586c5747f6b9deb61a27f189"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2353,7 +2363,7 @@ dependencies = [
 [[package]]
 name = "glimpse-speech"
 version = "1.5.1"
-source = "git+https://github.com/glimpse-hq/Glimpse-Speech.git?rev=fd0ae9fba086f3a78a78c84a9d29b6a5e3008770#fd0ae9fba086f3a78a78c84a9d29b6a5e3008770"
+source = "git+https://github.com/glimpse-hq/Glimpse-Speech.git?rev=c1a211e4d3802670c06a76a7ecc560b6095fbcc3#c1a211e4d3802670c06a76a7ecc560b6095fbcc3"
 dependencies = [
  "anyhow",
  "axum",
@@ -2361,6 +2371,7 @@ dependencies = [
  "clap",
  "directories",
  "flacenc",
+ "fm-rs",
  "hound",
  "httpdate",
  "libc",

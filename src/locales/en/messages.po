@@ -2449,6 +2449,11 @@ msgid "library.retranscribe.timestamps_unsupported"
 msgstr "Not supported by this model"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.unsupported"
+msgstr "Not supported on this Mac."
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.notes"
 msgstr "Notes:"
@@ -2482,6 +2487,11 @@ msgstr "Oldest first"
 #: src/features/import/components/ImportStep.tsx
 msgid "import.cat.auto_launch.on"
 msgstr "On"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.on_device"
+msgstr "On-device"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3016,6 +3026,11 @@ msgid "settings.general.local.description"
 msgstr "Runs entirely on your device"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.ready"
+msgstr "Built into this Mac."
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.ane.info"
 msgstr "Adds a Core ML encoder that runs on the Apple Neural Engine for faster, more power-efficient transcription. The first load takes longer while macOS optimizes it for your chip."
@@ -3486,6 +3501,11 @@ msgid "settings.general.microphone_test.busy_error"
 msgstr "That microphone is already in use."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.not_ready"
+msgstr "The Apple Intelligence model is still downloading."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.cli.externally_managed_info"
 msgstr "The glimpse command is installed at {cliInstallPath} and managed outside Glimpse. Use its package manager to update or remove it."
@@ -3668,6 +3688,11 @@ msgstr "Trial · {trialDaysRemaining} of {TRIAL_TOTAL_DAYS} days left"
 #: src/features/settings/components/AccountView.tsx
 msgid "settings.account.trial.text_one"
 msgstr "Trial · 1 day left"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.not_enabled"
+msgstr "Turn on Apple Intelligence in System Settings to use this."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx

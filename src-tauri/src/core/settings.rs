@@ -216,7 +216,7 @@ fn validate_update_settings_args(args: &UpdateSettingsArgs) -> Result<(), String
         return Err("AI Cleanup cannot be enabled without an active language model".into());
     }
 
-    if args.llm_enabled {
+    if args.llm_enabled && args.llm_provider != crate::llm_cleanup::APPLE_PROVIDER {
         if args.llm_endpoint.trim().is_empty() {
             return Err("Language model endpoint cannot be empty".into());
         }

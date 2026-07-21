@@ -641,9 +641,10 @@ export function useSettingsForm({
   );
   const llmConfigReady = Boolean(
     llmProviderPreset &&
-    resolvedLlmEndpoint(llmProvider, llmEndpoint) &&
-    (!llmProviderPreset.apiKeyRequired || llmApiKey.trim()) &&
-    llmModel.trim(),
+    (llmProviderPreset.onDevice ||
+      (resolvedLlmEndpoint(llmProvider, llmEndpoint) &&
+        (!llmProviderPreset.apiKeyRequired || llmApiKey.trim()) &&
+        llmModel.trim())),
   );
   const remoteSpeechConfigReady = Boolean(
     remoteSpeechProviderPreset &&

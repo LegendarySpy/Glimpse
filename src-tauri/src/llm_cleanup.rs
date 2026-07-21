@@ -139,9 +139,27 @@ pub async fn edit_transcription(
     Ok(result)
 }
 
+pub const APPLE_PROVIDER: &str = "apple";
+
+pub fn uses_apple_provider(settings: &UserSettings) -> bool {
+    settings.llm_provider.trim() == APPLE_PROVIDER
+}
+
+pub fn apple_llm_ready() -> bool {
+    matches!(
+        glimpse_speech::cleanup::CleanupProvider::apple_availability(),
+        glimpse_speech::cleanup::AppleAvailability::Available
+    )
+}
+
 pub fn is_llm_available(settings: &UserSettings) -> bool {
-    settings.llm_enabled
-        && settings.llm_provider != "none"
+    if !settings.llm_enabled {
+        return false;
+    }
+    if uses_apple_provider(settings) {
+        return apple_llm_ready();
+    }
+    settings.llm_provider != "none"
         && !settings.llm_endpoint.trim().is_empty()
         && configured_model(settings).is_some()
 }
@@ -153,6 +171,8 @@ pub fn should_refine_transcript(settings: &UserSettings, mode: Option<&Personali
 pub fn resolved_model_label(settings: &UserSettings) -> Option<String> {
     if !is_llm_available(settings) {
         None
+    } else if uses_apple_provider(settings) {
+        Some(APPLE_PROVIDER.to_string())
     } else {
         configured_model(settings).map(|model| format!("{}:{model}", settings.llm_provider.trim()))
     }
@@ -322,6 +342,11 @@ async fn run_text_task(
     user_content: String,
     fallback_text: &str,
 ) -> Result<String, RemoteError> {
+    if uses_apple_provider(settings) {
+        let raw = run_apple_text_task(task, system_prompt, user_content).await?;
+        return Ok(extract_plain_text(&raw).unwrap_or_else(|| fallback_text.to_string()));
+    }
+
     let model = configured_model(settings)
         .ok_or_else(|| remote_lib::config_error("Choose a language model in Settings -> Models"))?;
 
@@ -344,6 +369,31 @@ async fn run_text_task(
     let raw = send_chat_request(client, settings, &body).await?;
 
     Ok(extract_plain_text(&raw).unwrap_or_else(|| fallback_text.to_string()))
+}
+
+async fn run_apple_text_task(
+    task: TextTaskKind,
+    system_prompt: String,
+    user_content: String,
+) -> Result<String, RemoteError> {
+    let started = Instant::now();
+    let result = tokio::task::spawn_blocking(move || {
+        glimpse_speech::cleanup::apple_generate(
+            &system_prompt,
+            &user_content,
+            task.temperature(),
+            Some(task.max_tokens()),
+        )
+    })
+    .await
+    .map_err(|err| remote_lib::transport_error(format!("On-device model task failed: {err}")))?
+    .map_err(|err| remote_lib::transport_error(format!("On-device model failed: {err}")))?;
+    tracing::info!(
+        "[Apple LLM] responded in {} ms ({} chars)",
+        started.elapsed().as_millis(),
+        result.len()
+    );
+    Ok(result)
 }
 
 async fn send_chat_request(
@@ -722,6 +772,14 @@ pub async fn run_preflight(client: Client, settings: UserSettings) {
         || !llm_is_needed
     {
         clear_preflight_cache();
+        return;
+    }
+
+    if uses_apple_provider(&settings) {
+        // is_llm_available already probed on-device availability; no endpoint to ping.
+        let mut state = preflight_state().lock();
+        state.last_checked_at = Some(Instant::now());
+        state.available = Some(true);
         return;
     }
 

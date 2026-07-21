@@ -45,7 +45,7 @@ rustfft = "6"
 reqwest = { version = "0.13", default-features = false, features = ["json", "multipart", "stream", "rustls", "blocking"] }
 posthog-rs = { version = "0.21", default-features = false, features = ["async-client"] }
 arboard = "3"
-glimpse-speech = { git = "https://github.com/glimpse-hq/Glimpse-Speech.git", rev = "fd0ae9fba086f3a78a78c84a9d29b6a5e3008770", features = ["whisper", "nvidia", "api", "cli", "remote"] }
+glimpse-speech = { git = "https://github.com/glimpse-hq/Glimpse-Speech.git", rev = "c1a211e4d3802670c06a76a7ecc560b6095fbcc3", features = ["whisper", "nvidia", "api", "cli", "remote", "cleanup-apple"] }
 uuid = { version = "1.23.4", features = ["v4"] }
 aes-gcm = "0.11"
 pbkdf2 = "0.13"
