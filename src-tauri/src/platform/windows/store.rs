@@ -25,7 +25,7 @@ pub fn is_msix_packaged() -> bool {
 
 fn startup_task() -> Result<StartupTask, String> {
     StartupTask::GetAsync(&HSTRING::from(STARTUP_TASK_ID))
-        .and_then(|op| op.get())
+        .and_then(|op| op.join())
         .map_err(|err| format!("Failed to open startup task: {err}"))
 }
 
@@ -44,7 +44,7 @@ pub fn set_startup_task_enabled(enabled: bool) -> Result<(), String> {
     if enabled {
         let state = task
             .RequestEnableAsync()
-            .and_then(|op| op.get())
+            .and_then(|op| op.join())
             .map_err(|err| format!("Failed to enable launch at login: {err}"))?;
         if !matches!(
             state,
