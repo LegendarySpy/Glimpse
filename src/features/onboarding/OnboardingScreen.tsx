@@ -12,6 +12,7 @@ import { CaretLeft as ChevronLeft } from "@phosphor-icons/react";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useModelDownloadEvents } from "../../shared/hooks/useModelDownloadEvents";
+import { isBuiltInModel } from "../../shared/lib/modelStats";
 import { requestMacAccessibilityPermission } from "../../shared/lib/macosPermissions";
 import { checkoutUrlFor, type PurchaseTier } from "../license/purchaseConfig";
 import { useSettings } from "../settings/queries";
@@ -94,7 +95,10 @@ const pickDefaultOnboardingModel = (
   return available[0]?.key ?? persistedModel;
 };
 
-const ONBOARDING_MODEL: Record<OnboardingModelPriority, string> = {
+const ONBOARDING_MODEL: Record<
+  Exclude<OnboardingModelPriority, "builtin">,
+  string
+> = {
   compact: "whisper_small_q5",
   balanced: "whisper_large_v3_turbo_q5",
   quality: "whisper_large_v3_turbo_q8",
@@ -107,6 +111,9 @@ const pickRecommendedOnboardingModel = (
   const available = downloadableModels(models);
   if (!priority) {
     return available.find(hasRecommendedTag) ?? available[0] ?? null;
+  }
+  if (priority === "builtin") {
+    return available.find(isBuiltInModel) ?? null;
   }
   return (
     available.find((model) => model.key === ONBOARDING_MODEL[priority]) ?? null

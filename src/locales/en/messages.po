@@ -575,6 +575,11 @@ msgid "onboarding.model.browse"
 msgstr "Browse all models"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.builtin"
+msgstr "Built in"
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.built_in"
 msgstr "Built in"
@@ -2312,6 +2317,11 @@ msgstr "No audio track found."
 #: src/features/updates/components/WhatsNewModal.tsx
 msgid "updates.whats_new.no_changelog"
 msgstr "No changelog available."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.builtin.helper"
+msgstr "No download"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx

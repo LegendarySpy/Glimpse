@@ -43,7 +43,7 @@ const ModelStatCard = ({
       : formatModelSize(model.size_mb),
   );
   const quant = formatQuantLabel(model.variant);
-  if (quant && !compact) facts.push(quant);
+  if (quant && !compact && !builtIn) facts.push(quant);
 
   const installed = status?.installed;
   const isDownloading = progress?.status === "downloading";
@@ -99,7 +99,8 @@ const ModelStatCard = ({
           {model.label}
         </h3>
 
-        <div className="mt-2 flex items-center justify-between gap-2">
+        {/* min-h-7 reserves the action-button height so cards without one match. */}
+        <div className="mt-2 flex min-h-7 items-center justify-between gap-2">
           <p
             className="ui-color-muted min-w-0 truncate font-mono tabular-nums"
             style={{ fontSize: "11.5px" }}
