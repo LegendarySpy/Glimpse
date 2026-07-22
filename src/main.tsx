@@ -39,6 +39,41 @@ const describeReason = (reason: unknown): string => {
   return String(reason).slice(0, MAX_REASON_CHARS);
 };
 
+// Bounded categories only; the message itself never leaves the device.
+// Must stay in sync with the allowlist in report_frontend_crash.
+const REASON_RULES: ReadonlyArray<readonly [string, readonly string[]]> = [
+  [
+    "undefined_access",
+    [
+      "undefined is not",
+      "null is not",
+      "cannot read",
+      "is not a function",
+      "is not an object",
+    ],
+  ],
+  ["timeout", ["timeout", "timed out"]],
+  ["cancelled", ["cancel", "abort"]],
+  ["permission", ["permission", "not allowed", "access denied"]],
+  ["network", ["network", "fetch", "connect", "load failed"]],
+  ["not_found", ["not found", "no such file"]],
+];
+
+const reasonCode = (reason: unknown): string => {
+  // Error.message can be a non-string at runtime; never call methods on it.
+  const message =
+    reason instanceof Error && typeof reason.message === "string"
+      ? reason.message
+      : typeof reason === "string"
+        ? reason
+        : "";
+  const lowered = message.toLowerCase();
+  const match = REASON_RULES.find(([, needles]) =>
+    needles.some((needle) => lowered.includes(needle)),
+  );
+  return match ? match[0] : "unknown";
+};
+
 const crashFingerprint = (error: unknown, componentStack = ""): string => {
   const input =
     error instanceof Error
@@ -66,6 +101,7 @@ const reportFrontendCrash = (
     source,
     errorKind: errorKind(error),
     fingerprint,
+    reasonCode: reasonCode(error),
   }).catch(() => {});
 };
 

@@ -244,7 +244,10 @@ const AboutTab = ({
               message: "Updates",
             })}
           </SectionLabel>
-          <UpdateChecker onOpenWhatsNew={onOpenWhatsNew} />
+          <UpdateChecker
+            onOpenWhatsNew={onOpenWhatsNew}
+            storeBuild={appInfo ? appInfo.store_build : undefined}
+          />
         </div>
         <div className="space-y-2">
           <SectionLabel>

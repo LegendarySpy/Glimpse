@@ -43,5 +43,14 @@ fn main() {
         }
     }
 
+    // Swift rpath for glimpse-speech's Apple shim. FoundationModels must stay
+    // weak-linked: a hard link aborts launch below macOS 26 (app supports 14+).
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos")
+        && std::env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("aarch64")
+    {
+        println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/lib/swift");
+        println!("cargo:rustc-link-arg=-Wl,-weak_framework,FoundationModels");
+    }
+
     tauri_build::build()
 }

@@ -64,16 +64,15 @@ jobs:
               prerelease: ${{ steps.release-type.outputs.prerelease }},
             };
 
-            try {
-              const { data } = await github.rest.repos.getReleaseByTag({
-                owner: release.owner,
-                repo: release.repo,
-                tag,
-              });
-              return data.id;
-            } catch (error) {
-              if (error.status !== 404) throw error;
-            }
+            // getReleaseByTag can't see drafts (no tag ref yet), so list
+            // releases to avoid minting a duplicate draft per run.
+            const { data: releases } = await github.rest.repos.listReleases({
+              owner: release.owner,
+              repo: release.repo,
+              per_page: 100,
+            });
+            const existing = releases.find((r) => r.tag_name === tag);
+            if (existing) return existing.id;
 
             const { data } = await github.rest.repos.createRelease(release);
             return data.id;
@@ -103,11 +102,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: verify Xcode
+      # FoundationModels / SpeechAnalyzer need the macOS 26 SDK; pick the
+      # newest Xcode 26 on the runner instead of pinning a point release.
+      - name: select Xcode
         if: matrix.os == 'macos'
-        env:
-          DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
-        run: xcodebuild -version
+        run: |
+          DEVELOPER_DIR="$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)/Contents/Developer"
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+          DEVELOPER_DIR="$DEVELOPER_DIR" xcodebuild -version
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -205,7 +207,6 @@ jobs:
           APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
           MACOSX_DEPLOYMENT_TARGET: "14.0"
           CMAKE_OSX_DEPLOYMENT_TARGET: "14.0"
-          DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
           # Apple Clang still defines __ARM_FEATURE_MATMUL_INT8 for ggml's +noi8mm build,
           # which makes whisper-rs-sys compile the wrong ARM path on GitHub's arm64 runner.
           CFLAGS_aarch64_apple_darwin: "-U__ARM_FEATURE_MATMUL_INT8"
@@ -259,6 +260,54 @@ jobs:
           prerelease: ${{ needs.create-release.outputs.prerelease == 'true' }}
           uploadUpdaterJson: false
           args: ${{ matrix.tauri-args }}
+
+      # Wraps the already-built exe into an unsigned MSIX for Partner Center
+      # (the Store signs it on publish). Identity values come from the
+      # Partner Center "Product identity" page. Skipped on rc releases:
+      # MSIX versions must be 4-part numeric.
+      - name: package MSIX
+        if: matrix.os == 'windows' && needs.create-release.outputs.prerelease == 'false'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MSIX_IDENTITY_NAME: ${{ secrets.GLIMPSE_MSIX_IDENTITY_NAME }}
+          MSIX_PUBLISHER: ${{ secrets.GLIMPSE_MSIX_PUBLISHER }}
+          MSIX_PUBLISHER_DISPLAY_NAME: ${{ secrets.GLIMPSE_MSIX_PUBLISHER_DISPLAY_NAME }}
+          VERSION: ${{ needs.create-release.outputs.version }}
+        run: |
+          if (-not $env:MSIX_IDENTITY_NAME -or -not $env:MSIX_PUBLISHER) {
+            Write-Warning "GLIMPSE_MSIX_IDENTITY_NAME / GLIMPSE_MSIX_PUBLISHER secrets not set, skipping MSIX packaging"
+            exit 0
+          }
+
+          $staging = Join-Path $env:RUNNER_TEMP "msix-staging"
+          New-Item -ItemType Directory -Force (Join-Path $staging "Assets") | Out-Null
+
+          Copy-Item (Join-Path $env:CARGO_TARGET_DIR "release\Glimpse.exe") $staging
+          foreach ($logo in "StoreLogo.png", "Square150x150Logo.png", "Square44x44Logo.png") {
+            Copy-Item (Join-Path "src-tauri\icons" $logo) (Join-Path $staging "Assets")
+          }
+
+          $manifest = Get-Content "src-tauri\msix\AppxManifest.xml" -Raw
+          $manifest = $manifest.Replace("GLIMPSE_MSIX_IDENTITY_NAME", $env:MSIX_IDENTITY_NAME)
+          $publisherDisplayName = if ($env:MSIX_PUBLISHER_DISPLAY_NAME) { $env:MSIX_PUBLISHER_DISPLAY_NAME } else { "Glimpse" }
+          $manifest = $manifest.Replace("GLIMPSE_MSIX_PUBLISHER_DISPLAY_NAME", $publisherDisplayName)
+          $manifest = $manifest.Replace("GLIMPSE_MSIX_PUBLISHER", $env:MSIX_PUBLISHER)
+          $manifest = $manifest.Replace("GLIMPSE_MSIX_VERSION", "$env:VERSION.0")
+          Set-Content -Path (Join-Path $staging "AppxManifest.xml") -Value $manifest -Encoding utf8
+
+          $makeappx = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.*\x64\makeappx.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $makeappx) {
+            Write-Error "makeappx.exe not found in Windows SDK"
+            exit 1
+          }
+
+          $msix = "Glimpse_${env:VERSION}_x64.msix"
+          & $makeappx.FullName pack /d $staging /p $msix /o
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+          gh release upload "v$env:VERSION" $msix --clobber
 
   publish-updater-json:
     permissions:

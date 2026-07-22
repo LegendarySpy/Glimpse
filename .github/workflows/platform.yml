@@ -31,11 +31,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: verify Xcode
+      # FoundationModels / SpeechAnalyzer need the macOS 26 SDK; pick the
+      # newest Xcode 26 on the runner instead of pinning a point release.
+      - name: select Xcode
         if: matrix.os == 'macos'
-        env:
-          DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
-        run: xcodebuild -version
+        run: |
+          DEVELOPER_DIR="$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)/Contents/Developer"
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+          DEVELOPER_DIR="$DEVELOPER_DIR" xcodebuild -version
 
       - name: install LLVM
         if: matrix.os == 'windows'
@@ -74,7 +77,6 @@ jobs:
 
       - name: check Rust
         env:
-          DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
           # Disable i8mm matmul intrinsics; they fail to build with the CI Xcode toolchain.
           CFLAGS_aarch64_apple_darwin: "-U__ARM_FEATURE_MATMUL_INT8"
           CXXFLAGS_aarch64_apple_darwin: "-U__ARM_FEATURE_MATMUL_INT8"
@@ -89,7 +91,6 @@ jobs:
 
       - name: test Rust
         env:
-          DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
           CFLAGS_aarch64_apple_darwin: "-U__ARM_FEATURE_MATMUL_INT8"
           CXXFLAGS_aarch64_apple_darwin: "-U__ARM_FEATURE_MATMUL_INT8"
         run: cargo test --manifest-path src-tauri/Cargo.toml

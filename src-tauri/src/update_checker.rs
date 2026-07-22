@@ -435,6 +435,9 @@ pub fn get_update_status(app: AppHandle<AppRuntime>) -> UpdateStatus {
 
 #[tauri::command]
 pub async fn check_for_updates(app: AppHandle<AppRuntime>) -> Result<UpdateStatus, String> {
+    if crate::platform::is_store_build() {
+        return Err("Updates are managed by the Microsoft Store.".to_string());
+    }
     let update_state = app.state::<AppState>().update_state().clone();
     check_for_update(&app, &update_state)
         .await
@@ -449,6 +452,9 @@ pub async fn check_for_updates(app: AppHandle<AppRuntime>) -> Result<UpdateStatu
 
 #[tauri::command]
 pub async fn download_and_install_update(app: AppHandle<AppRuntime>) -> Result<(), String> {
+    if crate::platform::is_store_build() {
+        return Err("Updates are managed by the Microsoft Store.".to_string());
+    }
     let update = match resolve_available_update(&app).await {
         Ok(Some(update)) => update,
         Ok(None) => {

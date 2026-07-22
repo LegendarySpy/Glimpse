@@ -575,6 +575,31 @@ msgid "onboarding.model.browse"
 msgstr "Browse all models"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.builtin"
+msgstr "Built in"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.built_in"
+msgstr "Built in"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.built_in"
+msgstr "Built in"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.built_in"
+msgstr "Built into Mac"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.ready"
+msgstr "Built into this Mac."
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.cancel"
 msgstr "Cancel"
@@ -2294,6 +2319,11 @@ msgid "updates.whats_new.no_changelog"
 msgstr "No changelog available."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.builtin.helper"
+msgstr "No download"
+
+#. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.no_entries"
 msgstr "No entries yet"
@@ -2449,6 +2479,11 @@ msgid "library.retranscribe.timestamps_unsupported"
 msgstr "Not supported by this model"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.unsupported"
+msgstr "Not supported on this Mac."
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.notes"
 msgstr "Notes:"
@@ -2482,6 +2517,11 @@ msgstr "Oldest first"
 #: src/features/import/components/ImportStep.tsx
 msgid "import.cat.auto_launch.on"
 msgstr "On"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.on_device"
+msgstr "On-device"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3486,6 +3526,11 @@ msgid "settings.general.microphone_test.busy_error"
 msgstr "That microphone is already in use."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.not_ready"
+msgstr "The Apple Intelligence model is still downloading."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.cli.externally_managed_info"
 msgstr "The glimpse command is installed at {cliInstallPath} and managed outside Glimpse. Use its package manager to update or remove it."
@@ -3670,6 +3715,11 @@ msgid "settings.account.trial.text_one"
 msgstr "Trial · 1 day left"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.not_enabled"
+msgstr "Turn on Apple Intelligence in System Settings to use this."
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
 msgid "onboarding.accessibility.subtitle"
 msgstr "Types text into any app."
@@ -3743,6 +3793,11 @@ msgstr "Update installed"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.updates"
 msgstr "Updates"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.store_managed"
+msgstr "Updates come from the Microsoft Store"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx

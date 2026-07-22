@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Template for the Microsoft Store package. CI replaces the GLIMPSE_MSIX_*
+  placeholders from Partner Center identity secrets (Product identity page)
+  and packs with makeappx; the Store signs the package on publish.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop rescap">
+
+  <Identity
+    Name="GLIMPSE_MSIX_IDENTITY_NAME"
+    Publisher="GLIMPSE_MSIX_PUBLISHER"
+    Version="GLIMPSE_MSIX_VERSION"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <!-- Must match a reserved name on the Partner Center product -->
+    <DisplayName>Glimpse Dictation</DisplayName>
+    <PublisherDisplayName>GLIMPSE_MSIX_PUBLISHER_DISPLAY_NAME</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="Glimpse" Executable="Glimpse.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Glimpse Dictation"
+        Description="Voice dictation that types anywhere"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png" />
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="glimpse" />
+        </uap:Extension>
+        <!-- TaskId must match STARTUP_TASK_ID in src/platform/windows/store.rs -->
+        <desktop:Extension Category="windows.startupTask" Executable="Glimpse.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="GlimpseStartup" Enabled="false" DisplayName="Glimpse" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

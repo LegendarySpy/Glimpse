@@ -17,6 +17,7 @@ import { useMemo, useRef, useState } from "react";
 import {
   deriveModelStats,
   formatModelSize,
+  isBuiltInModel,
   variantLabel,
 } from "../lib/modelStats";
 import {
@@ -528,7 +529,9 @@ function ModelRow({
               ? t({ id: "model_picker.english", message: "English" })
               : t({ id: "model_picker.multilingual", message: "Multilingual" })}
             {"  ·  "}
-            {formatModelSize(displaySize)}
+            {isBuiltInModel(selected)
+              ? t({ id: "model_picker.built_in", message: "Built in" })
+              : formatModelSize(displaySize)}
           </span>
         </span>
       </button>

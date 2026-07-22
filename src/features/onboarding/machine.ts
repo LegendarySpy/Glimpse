@@ -6,7 +6,8 @@ import {
   type OnboardingStep,
 } from "./platform";
 
-export type OnboardingModelPriority = "quality" | "balanced" | "compact";
+export type OnboardingModelPriority =
+  "quality" | "balanced" | "compact" | "builtin";
 
 export type OnboardingContext = {
   platform: OnboardingPlatform;

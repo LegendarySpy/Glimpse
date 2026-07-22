@@ -1,6 +1,6 @@
 [package]
 name = "Glimpse"
-version = "1.0.2"
+version = "1.0.3"
 description = "Open-source voice-to-text productivity app built with Tauri"
 authors = ["Glimpse HQ"]
 edition = "2024"
@@ -43,9 +43,9 @@ crossbeam-channel = "0.5"
 webrtc-vad = "0.4"
 rustfft = "6"
 reqwest = { version = "0.13", default-features = false, features = ["json", "multipart", "stream", "rustls", "blocking"] }
-posthog-rs = { version = "0.19", default-features = false, features = ["async-client"] }
+posthog-rs = { version = "0.21", default-features = false, features = ["async-client"] }
 arboard = "3"
-glimpse-speech = { git = "https://github.com/glimpse-hq/Glimpse-Speech.git", tag = "1.5.1", features = ["whisper", "nvidia", "api", "cli", "remote"] }
+glimpse-speech = { git = "https://github.com/glimpse-hq/Glimpse-Speech.git", rev = "6a7b7e6dc916b0b79362310a03b381f8503a304d", features = ["whisper", "nvidia", "api", "cli", "remote", "cleanup-apple", "apple-speech"] }
 uuid = { version = "1.23.4", features = ["v4"] }
 aes-gcm = "0.11"
 pbkdf2 = "0.13"
@@ -69,7 +69,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 tokio-util = "0.7"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-windows = { version = "0.62.2", features = ["Foundation", "Media_Control", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Media_Audio", "Win32_Media_Audio_Endpoints", "Win32_Storage_FileSystem", "Win32_System_Com", "Win32_System_Diagnostics_Debug", "Win32_System_Kernel", "Win32_System_LibraryLoader", "Win32_System_Memory", "Win32_System_Threading", "Win32_UI_Accessibility", "Win32_UI_Controls", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Shell", "Win32_UI_Shell_Common", "Win32_UI_WindowsAndMessaging"] }
+windows = { version = "0.62.2", features = ["ApplicationModel", "ApplicationModel_Activation", "Foundation", "Media_Control", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Media_Audio", "Win32_Media_Audio_Endpoints", "Win32_Storage_FileSystem", "Win32_Storage_Packaging_Appx", "Win32_System_Com", "Win32_System_Diagnostics_Debug", "Win32_System_Kernel", "Win32_System_LibraryLoader", "Win32_System_Memory", "Win32_System_Threading", "Win32_UI_Accessibility", "Win32_UI_Controls", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Shell", "Win32_UI_Shell_Common", "Win32_UI_WindowsAndMessaging"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", rev = "a3122e8" }

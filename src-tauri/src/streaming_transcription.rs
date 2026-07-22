@@ -3,6 +3,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
 };
 use std::thread::JoinHandle;
+#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 use std::time::Duration;
 
 use tauri::{AppHandle, Manager};
@@ -11,8 +12,10 @@ use tauri::{AppHandle, Manager};
 use crate::pill;
 use crate::{AppRuntime, AppState, model_manager::ReadyModel};
 
+#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 const POLL_INTERVAL: Duration = Duration::from_millis(100);
 
+#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 const CHUNK_SAMPLES_16K: usize = 8960;
 
 pub struct StreamingSession {
@@ -87,6 +90,9 @@ fn streaming_thread(
             return;
         }
         session.reset();
+        let settings = state.current_settings();
+        let language = (!settings.language.trim().is_empty()).then(|| settings.language.clone());
+        session.configure(&model, language, settings.dictionary.clone());
 
         let recorder = state.pill().recorder();
         let mut buffer_offset: usize = 0;
@@ -155,6 +161,7 @@ fn streaming_thread(
     }
 }
 
+#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 fn append_samples(
     new_samples: &[f32],
     sample_rate: u32,
@@ -171,6 +178,7 @@ fn append_samples(
     }
 }
 
+#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 struct StreamResampler {
     in_rate: u32,
     step: f64,
@@ -179,6 +187,7 @@ struct StreamResampler {
     has_prev: bool,
 }
 
+#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 impl StreamResampler {
     fn new(in_rate: u32, out_rate: u32) -> Self {
         Self {

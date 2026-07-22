@@ -126,7 +126,15 @@ pub(crate) const FFMPEG_HELP_URL: &str =
 pub(crate) const FFMPEG_HELP_URL: &str = "https://github.com/glimpse-hq/Glimpse/wiki/ffmpeg-mac";
 
 fn launched_via_autostart() -> bool {
-    std::env::args_os().any(|arg| arg == "--autostart")
+    if std::env::args_os().any(|arg| arg == "--autostart") {
+        return true;
+    }
+    // Store builds start via the MSIX StartupTask, which passes no args.
+    #[cfg(target_os = "windows")]
+    if platform::windows::store::is_msix_packaged() {
+        return platform::windows::store::launched_via_startup_task();
+    }
+    false
 }
 
 fn should_start_in_background(launched_via_autostart: bool, start_in_background: bool) -> bool {
@@ -167,6 +175,16 @@ pub(crate) fn sync_launch_at_login(
     app: &AppHandle<AppRuntime>,
     enabled: bool,
 ) -> Result<(), String> {
+    // MSIX virtualizes the Run registry key, so store builds go through
+    // the StartupTask declared in the package manifest instead.
+    #[cfg(target_os = "windows")]
+    if platform::windows::store::is_msix_packaged() {
+        if platform::windows::store::startup_task_enabled()? == enabled {
+            return Ok(());
+        }
+        return platform::windows::store::set_startup_task_enabled(enabled);
+    }
+
     let autostart = app.autolaunch();
     let currently_enabled = autostart
         .is_enabled()
@@ -555,9 +573,13 @@ pub fn run() {
             update_checker::check_post_auto_update(handle);
 
             analytics::set_crash_phase("background_tasks");
-            let update_handle = handle.clone();
-            let update_state = handle.state::<AppState>().update_state().clone();
-            update_checker::start_background_checker(update_handle, update_state);
+            if platform::is_store_build() {
+                tracing::info!("store build: built-in updater disabled");
+            } else {
+                let update_handle = handle.clone();
+                let update_state = handle.state::<AppState>().update_state().clone();
+                update_checker::start_background_checker(update_handle, update_state);
+            }
 
             handle
                 .state::<AppState>()
@@ -658,6 +680,7 @@ pub fn run() {
             analytics::report_frontend_crash,
             analytics::track_onboarding_step_viewed,
             fetch_llm_models,
+            apple_llm_availability,
             fetch_remote_speech_models,
             open_about_page,
             reveal_logs,
@@ -688,6 +711,9 @@ pub fn run() {
                 }
             }
             tauri::RunEvent::Exit => {
+                // Quit-time panics (e.g. tao's Windows event-loop teardown)
+                // should not report as crashes while running.
+                analytics::set_crash_phase("shutdown");
                 let state = handler.state::<AppState>();
                 state.local_transcriber.unload();
                 state.stop_preflight_loop();
@@ -1435,6 +1461,27 @@ struct AppInfo {
     data_dir_size_bytes: u64,
     data_dir_path: String,
     storage_breakdown: StorageBreakdown,
+    store_build: bool,
+    os_major: u32,
+}
+
+#[cfg(target_os = "macos")]
+fn macos_major_version() -> u32 {
+    static MAJOR: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    *MAJOR.get_or_init(|| {
+        std::process::Command::new("sw_vers")
+            .arg("-productVersion")
+            .output()
+            .ok()
+            .and_then(|out| String::from_utf8(out.stdout).ok())
+            .and_then(|version| version.trim().split('.').next()?.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
+#[cfg(not(target_os = "macos"))]
+fn macos_major_version() -> u32 {
+    0
 }
 
 #[tauri::command]
@@ -1482,7 +1529,21 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
             models_bytes,
             total_bytes,
         },
+        store_build: platform::is_store_build(),
+        os_major: macos_major_version(),
     })
+}
+
+#[tauri::command]
+fn apple_llm_availability() -> String {
+    use glimpse_speech::cleanup::AppleAvailability;
+    match glimpse_speech::cleanup::CleanupProvider::apple_availability() {
+        AppleAvailability::Available => "available",
+        AppleAvailability::NotEnabled => "not_enabled",
+        AppleAvailability::NotReady => "not_ready",
+        AppleAvailability::Unsupported => "unsupported",
+    }
+    .to_string()
 }
 
 #[tauri::command]

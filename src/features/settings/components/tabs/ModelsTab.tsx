@@ -16,6 +16,7 @@ import { ModelPickerPanel } from "../../../../shared/ui/ModelPickerModal";
 import {
   deriveModelStats,
   formatModelSize,
+  isBuiltInModel,
   formatQuantLabel,
   sortInstalledModels,
 } from "../../../../shared/lib/modelStats";
@@ -102,6 +103,7 @@ const InstalledModelRow = ({
   const isStreaming = hasModelCapability(model, MODEL_CAPABILITY_STREAMING);
   const hasTimestamps = hasModelCapability(model, MODEL_CAPABILITY_TIMESTAMPS);
 
+  const builtIn = isBuiltInModel(model);
   const facts = [
     stats.englishOnly
       ? t({ id: "settings.models.installed.english", message: "English" })
@@ -111,9 +113,11 @@ const InstalledModelRow = ({
         }),
   ];
   facts.push(
-    formatModelSize(
-      model.size_mb + (aneInstalled ? (model.ane_size_mb ?? 0) : 0),
-    ),
+    builtIn
+      ? t({ id: "settings.models.installed.built_in", message: "Built in" })
+      : formatModelSize(
+          model.size_mb + (aneInstalled ? (model.ane_size_mb ?? 0) : 0),
+        ),
   );
   const quant = formatQuantLabel(model.variant);
   if (quant) facts.push(quant);
@@ -178,25 +182,27 @@ const InstalledModelRow = ({
             {t({ id: "settings.models.installed.use", message: "Use" })}
           </button>
         )}
-        <button
-          type="button"
-          onClick={onDelete}
-          className={`flex h-6 w-6 items-center justify-center rounded-md transition-all hover:bg-error/10 hover:text-error ${
-            shiftHeld
-              ? "text-error opacity-100"
-              : "text-content-disabled opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:text-error"
-          }`}
-          title={t({
-            id: "settings.models.installed.delete",
-            message: "Delete",
-          })}
-          aria-label={t({
-            id: "settings.models.installed.delete_model",
-            message: "Delete model",
-          })}
-        >
-          <Trash2 size={12} aria-hidden="true" />
-        </button>
+        {!builtIn && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className={`flex h-6 w-6 items-center justify-center rounded-md transition-all hover:bg-error/10 hover:text-error ${
+              shiftHeld
+                ? "text-error opacity-100"
+                : "text-content-disabled opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:text-error"
+            }`}
+            title={t({
+              id: "settings.models.installed.delete",
+              message: "Delete",
+            })}
+            aria-label={t({
+              id: "settings.models.installed.delete_model",
+              message: "Delete model",
+            })}
+          >
+            <Trash2 size={12} aria-hidden="true" />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -257,7 +257,15 @@ fn handle_tray_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
             }
         }
         MENU_ID_CHECK_UPDATES => {
-            if let Err(err) = open_settings_about(app) {
+            if crate::platform::is_store_build() {
+                // Store installs update through the Store's Downloads and Updates page.
+                if let Err(err) = app
+                    .opener()
+                    .open_url("ms-windows-store://downloadsandupdates", None::<&str>)
+                {
+                    tracing::error!("Failed to open Microsoft Store updates: {err}");
+                }
+            } else if let Err(err) = open_settings_about(app) {
                 tracing::error!("Failed to open settings for update check: {err}");
             }
         }

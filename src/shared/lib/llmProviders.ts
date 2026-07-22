@@ -8,6 +8,8 @@ export type LlmProviderPreset = {
   endpoint: string;
   defaultModel: string;
   apiKeyRequired: boolean;
+  // Built-in on-device model: no endpoint, API key, or model choice.
+  onDevice?: boolean;
 };
 
 const LLM_PROVIDER_PRESETS: LlmProviderPreset[] = [
@@ -17,6 +19,14 @@ const LLM_PROVIDER_PRESETS: LlmProviderPreset[] = [
     endpoint: "",
     defaultModel: "",
     apiKeyRequired: false,
+  },
+  {
+    id: "apple",
+    label: "Apple Intelligence",
+    endpoint: "",
+    defaultModel: "",
+    apiKeyRequired: false,
+    onDevice: true,
   },
   {
     id: "lmstudio",

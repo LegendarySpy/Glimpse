@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DownloadSimple } from "@phosphor-icons/react";
 import ModelPickerModal from "../../../shared/ui/ModelPickerModal";
 import ModelStatCard from "../../settings/components/ModelStatCard";
+import { isBuiltInModel } from "../../../shared/lib/modelStats";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../../types";
 import type { OnboardingModelPriority } from "../machine";
 import {
@@ -98,6 +99,20 @@ export function ModelStep({
       }),
     },
   ];
+
+  if (catalog.some(isBuiltInModel)) {
+    priorityOptions.push({
+      value: "builtin",
+      label: t({
+        id: "onboarding.model.priority.builtin",
+        message: "Built in",
+      }),
+      helper: t({
+        id: "onboarding.model.priority.builtin.helper",
+        message: "No download",
+      }),
+    });
+  }
 
   const realStatus = recommendedModel
     ? modelStatusByKey[recommendedModel.key]

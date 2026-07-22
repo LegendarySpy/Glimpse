@@ -12,6 +12,7 @@ export type AutoDeleteTarget = "audio" | "transcripts";
 
 export type LlmProvider =
   | "none"
+  | "apple"
   | "lmstudio"
   | "ollama"
   | "openai"

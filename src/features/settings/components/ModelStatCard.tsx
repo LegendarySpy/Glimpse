@@ -7,6 +7,7 @@ import {
   deriveModelStats,
   formatModelSize,
   formatQuantLabel,
+  isBuiltInModel,
 } from "../../../shared/lib/modelStats";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../../types";
 
@@ -34,10 +35,15 @@ const ModelStatCard = ({
   const { t } = useLingui();
   const stats = deriveModelStats(model);
 
+  const builtIn = isBuiltInModel(model);
   const facts = [stats.languagesLabel];
-  facts.push(formatModelSize(model.size_mb));
+  facts.push(
+    builtIn
+      ? t({ id: "models.card.built_in", message: "Built into Mac" })
+      : formatModelSize(model.size_mb),
+  );
   const quant = formatQuantLabel(model.variant);
-  if (quant && !compact) facts.push(quant);
+  if (quant && !compact && !builtIn) facts.push(quant);
 
   const installed = status?.installed;
   const isDownloading = progress?.status === "downloading";
@@ -93,7 +99,8 @@ const ModelStatCard = ({
           {model.label}
         </h3>
 
-        <div className="mt-2 flex items-center justify-between gap-2">
+        {/* min-h-7 reserves the action-button height so cards without one match. */}
+        <div className="mt-2 flex min-h-7 items-center justify-between gap-2">
           <p
             className="ui-color-muted min-w-0 truncate font-mono tabular-nums"
             style={{ fontSize: "11.5px" }}
@@ -135,7 +142,7 @@ const ModelStatCard = ({
                 <Square size={11} fill="currentColor" aria-hidden="true" />
               </button>
             </div>
-          ) : installed ? (
+          ) : installed && !builtIn ? (
             <button
               type="button"
               onClick={onDelete}
@@ -148,7 +155,7 @@ const ModelStatCard = ({
             >
               <Trash2 size={13} aria-hidden="true" />
             </button>
-          ) : model.downloadable ? (
+          ) : model.downloadable && !builtIn ? (
             <button
               type="button"
               onClick={onDownload}
