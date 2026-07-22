@@ -64,16 +64,15 @@ jobs:
               prerelease: ${{ steps.release-type.outputs.prerelease }},
             };
 
-            try {
-              const { data } = await github.rest.repos.getReleaseByTag({
-                owner: release.owner,
-                repo: release.repo,
-                tag,
-              });
-              return data.id;
-            } catch (error) {
-              if (error.status !== 404) throw error;
-            }
+            // getReleaseByTag can't see drafts (no tag ref yet), so list
+            // releases to avoid minting a duplicate draft per run.
+            const { data: releases } = await github.rest.repos.listReleases({
+              owner: release.owner,
+              repo: release.repo,
+              per_page: 100,
+            });
+            const existing = releases.find((r) => r.tag_name === tag);
+            if (existing) return existing.id;
 
             const { data } = await github.rest.repos.createRelease(release);
             return data.id;
