@@ -6,7 +6,7 @@
 
 use std::sync::OnceLock;
 use windows::ApplicationModel::{StartupTask, StartupTaskState};
-use windows::Win32::Foundation::APPMODEL_ERROR_NO_PACKAGE;
+use windows::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER;
 use windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName;
 use windows::core::HSTRING;
 
@@ -19,7 +19,7 @@ pub fn is_msix_packaged() -> bool {
     *PACKAGED.get_or_init(|| {
         let mut length = 0u32;
         let err = unsafe { GetCurrentPackageFullName(&mut length, None) };
-        err != APPMODEL_ERROR_NO_PACKAGE
+        err == ERROR_INSUFFICIENT_BUFFER
     })
 }
 

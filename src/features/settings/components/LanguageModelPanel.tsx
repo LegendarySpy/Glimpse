@@ -76,25 +76,28 @@ const LanguageModelPanel = ({
     isMac && appleAvailability !== null && appleAvailability !== "unsupported";
 
   const appleStatusText =
-    appleAvailability === "not_enabled"
-      ? t({
-          id: "settings.language_model.apple.not_enabled",
-          message: "Turn on Apple Intelligence in System Settings to use this.",
-        })
-      : appleAvailability === "not_ready"
+    appleAvailability === null
+      ? " "
+      : appleAvailability === "not_enabled"
         ? t({
-            id: "settings.language_model.apple.not_ready",
-            message: "The Apple Intelligence model is still downloading.",
+            id: "settings.language_model.apple.not_enabled",
+            message:
+              "Turn on Apple Intelligence in System Settings to use this.",
           })
-        : appleAvailability === "unsupported"
+        : appleAvailability === "not_ready"
           ? t({
-              id: "settings.language_model.apple.unsupported",
-              message: "Not supported on this Mac.",
+              id: "settings.language_model.apple.not_ready",
+              message: "The Apple Intelligence model is still downloading.",
             })
-          : t({
-              id: "settings.language_model.apple.ready",
-              message: "Built into this Mac.",
-            });
+          : appleAvailability === "unsupported"
+            ? t({
+                id: "settings.language_model.apple.unsupported",
+                message: "Not supported on this Mac.",
+              })
+            : t({
+                id: "settings.language_model.apple.ready",
+                message: "Built into this Mac.",
+              });
 
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-surface-surface p-2.5">

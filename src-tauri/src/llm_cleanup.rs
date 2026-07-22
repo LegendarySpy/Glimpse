@@ -382,15 +382,19 @@ async fn run_apple_text_task(
     user_content: String,
 ) -> Result<String, RemoteError> {
     let started = Instant::now();
-    let result = tokio::task::spawn_blocking(move || {
-        glimpse_speech::cleanup::apple_generate(
-            &system_prompt,
-            &user_content,
-            task.temperature(),
-            Some(task.max_tokens()),
-        )
-    })
+    let result = tokio::time::timeout(
+        CHAT_TIMEOUT,
+        tokio::task::spawn_blocking(move || {
+            glimpse_speech::cleanup::apple_generate(
+                &system_prompt,
+                &user_content,
+                task.temperature(),
+                Some(task.max_tokens()),
+            )
+        }),
+    )
     .await
+    .map_err(|_| remote_lib::transport_error("On-device model timed out".to_string()))?
     .map_err(|err| remote_lib::transport_error(format!("On-device model task failed: {err}")))?
     .map_err(|err| remote_lib::transport_error(format!("On-device model failed: {err}")))?;
     tracing::info!(
