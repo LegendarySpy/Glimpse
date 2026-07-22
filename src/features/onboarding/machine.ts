@@ -7,10 +7,7 @@ import {
 } from "./platform";
 
 export type OnboardingModelPriority =
-  | "quality"
-  | "balanced"
-  | "compact"
-  | "builtin";
+  "quality" | "balanced" | "compact" | "builtin";
 
 export type OnboardingContext = {
   platform: OnboardingPlatform;

@@ -23,6 +23,15 @@ pub fn is_msix_packaged() -> bool {
     })
 }
 
+/// join() must not block the STA main thread; workers use the implicit MTA.
+fn on_worker<T: Send + 'static>(
+    task: impl FnOnce() -> Result<T, String> + Send + 'static,
+) -> Result<T, String> {
+    std::thread::spawn(task)
+        .join()
+        .map_err(|_| "Startup task worker panicked".to_string())?
+}
+
 fn startup_task() -> Result<StartupTask, String> {
     StartupTask::GetAsync(&HSTRING::from(STARTUP_TASK_ID))
         .and_then(|op| op.join())
@@ -30,16 +39,22 @@ fn startup_task() -> Result<StartupTask, String> {
 }
 
 pub fn startup_task_enabled() -> Result<bool, String> {
-    let state = startup_task()?
-        .State()
-        .map_err(|err| format!("Failed to read startup task state: {err}"))?;
-    Ok(matches!(
-        state,
-        StartupTaskState::Enabled | StartupTaskState::EnabledByPolicy
-    ))
+    on_worker(|| {
+        let state = startup_task()?
+            .State()
+            .map_err(|err| format!("Failed to read startup task state: {err}"))?;
+        Ok(matches!(
+            state,
+            StartupTaskState::Enabled | StartupTaskState::EnabledByPolicy
+        ))
+    })
 }
 
 pub fn set_startup_task_enabled(enabled: bool) -> Result<(), String> {
+    on_worker(move || set_startup_task_enabled_blocking(enabled))
+}
+
+fn set_startup_task_enabled_blocking(enabled: bool) -> Result<(), String> {
     let task = startup_task()?;
     if enabled {
         let state = task

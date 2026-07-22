@@ -3,7 +3,7 @@
 ### Features
 
 - Added Apple Speech, the transcription built into your Mac. Spoken punctuation and emoji work like system dictation ("comma", "new line", "thumbs up emoji"). Requires macOS 26 on Apple Silicon.
-- Added Apple Intelligence as a writing model provider.  Requires macOS 26 on Apple Silicon with Apple Intelligence turned on.
+- Added Apple Intelligence as a writing model provider. Requires macOS 26 on Apple Silicon with Apple Intelligence turned on.
 
 ### Changes
 

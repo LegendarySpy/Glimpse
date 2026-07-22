@@ -1462,6 +1462,26 @@ struct AppInfo {
     data_dir_path: String,
     storage_breakdown: StorageBreakdown,
     store_build: bool,
+    os_major: u32,
+}
+
+#[cfg(target_os = "macos")]
+fn macos_major_version() -> u32 {
+    static MAJOR: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    *MAJOR.get_or_init(|| {
+        std::process::Command::new("sw_vers")
+            .arg("-productVersion")
+            .output()
+            .ok()
+            .and_then(|out| String::from_utf8(out.stdout).ok())
+            .and_then(|version| version.trim().split('.').next()?.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
+#[cfg(not(target_os = "macos"))]
+fn macos_major_version() -> u32 {
+    0
 }
 
 #[tauri::command]
@@ -1510,6 +1530,7 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
             total_bytes,
         },
         store_build: platform::is_store_build(),
+        os_major: macos_major_version(),
     })
 }
 

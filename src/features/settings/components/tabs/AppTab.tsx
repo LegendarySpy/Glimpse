@@ -895,33 +895,33 @@ const AppTab = ({
               )}
 
               {!storeBuild && (
-              <div className="px-2 py-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="ui-text-label-strong ui-color-primary">
+                <div className="px-2 py-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="ui-text-label-strong ui-color-primary">
+                      {t({
+                        id: "settings.app.auto_update",
+                        message: "Auto-update",
+                      })}
+                    </span>
+                    <ToggleSwitch
+                      enabled={autoUpdateEnabled}
+                      onToggle={() =>
+                        onAutoUpdateEnabledChange(!autoUpdateEnabled)
+                      }
+                      ariaLabel={t({
+                        id: "settings.app.auto_update.toggle_aria",
+                        message: "Toggle auto-update",
+                      })}
+                    />
+                  </div>
+                  <span className="ui-text-micro ui-color-disabled block mt-0.5">
                     {t({
-                      id: "settings.app.auto_update",
-                      message: "Auto-update",
+                      id: "settings.app.auto_update.body",
+                      message:
+                        "downloads and installs updates in the background.",
                     })}
                   </span>
-                  <ToggleSwitch
-                    enabled={autoUpdateEnabled}
-                    onToggle={() =>
-                      onAutoUpdateEnabledChange(!autoUpdateEnabled)
-                    }
-                    ariaLabel={t({
-                      id: "settings.app.auto_update.toggle_aria",
-                      message: "Toggle auto-update",
-                    })}
-                  />
                 </div>
-                <span className="ui-text-micro ui-color-disabled block mt-0.5">
-                  {t({
-                    id: "settings.app.auto_update.body",
-                    message:
-                      "downloads and installs updates in the background.",
-                  })}
-                </span>
-              </div>
               )}
 
               <div className="px-2 py-1.5">

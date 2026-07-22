@@ -26,6 +26,7 @@ import {
 } from "@phosphor-icons/react";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import WindowControls from "./shared/ui/WindowControls";
+import { detectAppPlatform } from "./platform/service";
 import { useClickOutside } from "./shared/hooks/useClickOutside";
 import { useCopyToClipboard } from "./shared/hooks/useCopyToClipboard";
 import HomeTodayHeader from "./features/transcriptions/components/HomeTodayHeader";
@@ -73,6 +74,8 @@ const STATIC_LOGO_COORDS = [
     cy: STATIC_LOGO_RADIUS + STATIC_LOGO_DISTANCE,
   },
 ];
+
+const isMac = detectAppPlatform() === "macos";
 
 const SUPPORT_GITHUB_URL =
   "https://github.com/glimpse-hq/Glimpse/issues/new/choose";
@@ -131,7 +134,7 @@ const SidebarItem = ({
     onClick={onClick}
     disabled={disabled}
     data-active={active ? "true" : "false"}
-    className={`ui-nav-item group h-9 pl-[17px] pr-3 mb-[2px] disabled:pointer-events-none disabled:opacity-45 ${
+    className={`ui-nav-item group h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 mb-[2px] disabled:pointer-events-none disabled:opacity-45 ${
       collapsed ? "gap-0" : "gap-3"
     }`}
   >
@@ -215,7 +218,10 @@ const Home = () => {
     }
   }, [activeView, licenseGateActive]);
 
-  const sidebarWidth = isSidebarCollapsed ? 68 : 200;
+  const wideLights = isMac && (appInfoData?.os_major ?? 26) >= 26;
+  const collapsedWidth = wideLights ? 78 : 68;
+  const sidebarIconPl = wideLights ? 21 : 17;
+  const sidebarWidth = isSidebarCollapsed ? collapsedWidth : 200;
 
   const updateLocalApiStatus = useCallback((status: LocalApiStatus) => {
     cachedLocalApiStatus = status;
@@ -453,14 +459,19 @@ const Home = () => {
       <WindowControls />
       <aside
         data-app-sidebar
-        style={{ width: sidebarWidth }}
+        style={
+          {
+            width: sidebarWidth,
+            "--sidebar-icon-pl": `${sidebarIconPl}px`,
+          } as React.CSSProperties
+        }
         className="relative z-30 flex flex-col border-r border-border-primary bg-[var(--color-bg-primary)]/85 backdrop-blur-2xl shrink-0 transition-[width] duration-200 ease-out will-change-[width]"
       >
         <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
         <div className="px-2 pb-6 pt-1">
           <div
-            className={`flex items-center h-6 pl-[17px] pr-3 ${isSidebarCollapsed ? "gap-0" : "gap-3"}`}
+            className={`flex items-center h-6 pl-[var(--sidebar-icon-pl,17px)] pr-3 ${isSidebarCollapsed ? "gap-0" : "gap-3"}`}
           >
             <div className="flex w-[20px] shrink-0 items-center justify-center">
               <StaticGlimpseLogo
@@ -544,7 +555,7 @@ const Home = () => {
           <div className="space-y-1 border-t border-border-primary p-2">
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="flex w-full items-center rounded-lg h-9 pl-[17px] text-content-disabled hover:text-content-muted"
+              className="flex w-full items-center rounded-lg h-9 pl-[var(--sidebar-icon-pl,17px)] text-content-disabled hover:text-content-muted"
               aria-label={
                 isSidebarCollapsed
                   ? t({
@@ -570,7 +581,7 @@ const Home = () => {
             <div className="relative" ref={supportMenuRef}>
               <button
                 onClick={() => setShowSupportPopup(!showSupportPopup)}
-                className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 text-content-muted hover:text-content-secondary transition-colors ${
+                className={`group flex w-full items-center rounded-lg h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 text-content-muted hover:text-content-secondary transition-colors ${
                   isSidebarCollapsed ? "gap-0" : "gap-3"
                 }`}
                 aria-expanded={showSupportPopup}
@@ -740,7 +751,7 @@ const Home = () => {
                   setSettingsTab("about");
                   setIsSettingsOpen(true);
                 }}
-                className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 ${isSidebarCollapsed ? "gap-0" : "gap-3"} transition-colors`}
+                className={`group flex w-full items-center rounded-lg h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 ${isSidebarCollapsed ? "gap-0" : "gap-3"} transition-colors`}
                 style={{ color: "var(--color-accent)" }}
               >
                 <div className="flex items-center justify-center w-[20px] shrink-0">
