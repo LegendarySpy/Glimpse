@@ -256,6 +256,14 @@ impl StreamingGuard<'_> {
         self.transcriber.service.streaming_reset();
     }
 
+    /// Language and vocabulary for the next streaming session, for engines
+    /// that take per-session configuration.
+    pub fn configure(&self, model: &ReadyModel, language: Option<String>, dictionary: Vec<String>) {
+        self.transcriber
+            .service
+            .streaming_configure(&model.key, language, dictionary);
+    }
+
     pub fn transcribe_chunk(&self, model: &ReadyModel, chunk: &[f32]) -> Result<String> {
         let transcript = self
             .transcriber
@@ -265,9 +273,9 @@ impl StreamingGuard<'_> {
         Ok(transcript)
     }
 
-    /// Read the accumulated transcript and clear the buffer for the next session.
+    /// Finalize the stream, read the transcript, and clear for the next session.
     pub fn finish(&self) -> String {
-        let transcript = self.transcriber.service.streaming_get_transcript();
+        let transcript = self.transcriber.service.streaming_finalize();
         self.transcriber.service.streaming_reset();
         transcript
     }

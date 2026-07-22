@@ -7,6 +7,7 @@ import {
   deriveModelStats,
   formatModelSize,
   formatQuantLabel,
+  isBuiltInModel,
 } from "../../../shared/lib/modelStats";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../../types";
 
@@ -34,8 +35,13 @@ const ModelStatCard = ({
   const { t } = useLingui();
   const stats = deriveModelStats(model);
 
+  const builtIn = isBuiltInModel(model);
   const facts = [stats.languagesLabel];
-  facts.push(formatModelSize(model.size_mb));
+  facts.push(
+    builtIn
+      ? t({ id: "models.card.built_in", message: "Built into this Mac" })
+      : formatModelSize(model.size_mb),
+  );
   const quant = formatQuantLabel(model.variant);
   if (quant && !compact) facts.push(quant);
 
@@ -135,7 +141,7 @@ const ModelStatCard = ({
                 <Square size={11} fill="currentColor" aria-hidden="true" />
               </button>
             </div>
-          ) : installed ? (
+          ) : installed && !builtIn ? (
             <button
               type="button"
               onClick={onDelete}

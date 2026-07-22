@@ -90,6 +90,9 @@ fn streaming_thread(
             return;
         }
         session.reset();
+        let settings = state.current_settings();
+        let language = (!settings.language.trim().is_empty()).then(|| settings.language.clone());
+        session.configure(&model, language, settings.dictionary.clone());
 
         let recorder = state.pill().recorder();
         let mut buffer_offset: usize = 0;

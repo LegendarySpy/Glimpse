@@ -299,6 +299,19 @@ const DISTIL_WHISPER_DESCRIPTION: &str =
 const WHISPER_CAPABILITIES: &[&str] = &[MODEL_CAPABILITY_DICTIONARY, MODEL_CAPABILITY_TIMESTAMPS];
 
 const MODEL_MANIFESTS: &[LocalModelManifest] = &[
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    LocalModelManifest {
+        id: "apple_speech",
+        family: "apple-speech",
+        label: "Apple Speech",
+        description: "Built into this Mac. Nothing to download.",
+        tags: &["Multilingual", "Built in"],
+        category: "standard",
+        engine: LocalModelEngine::Apple,
+        variant: "System",
+        files: &[],
+        capabilities: &[MODEL_CAPABILITY_TIMESTAMPS],
+    },
     LocalModelManifest {
         id: "whisper_large_v3_turbo_q8",
         family: "whisper-large-v3-turbo",
@@ -790,6 +803,42 @@ fn supported_languages(manifest: &LocalModelManifest) -> Vec<SupportedLanguageIn
                 Vec::new()
             }
         }
+        LocalModelEngine::Apple => apple_supported_languages(),
+    }
+}
+
+fn apple_supported_languages() -> Vec<SupportedLanguageInfo> {
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    {
+        static LANGUAGES: std::sync::OnceLock<Vec<SupportedLanguageInfo>> =
+            std::sync::OnceLock::new();
+        LANGUAGES
+            .get_or_init(|| {
+                let mut codes: Vec<String> = glimpse_speech::engines::apple::supported_locales()
+                    .iter()
+                    .filter_map(|locale| locale.split('-').next())
+                    .map(str::to_string)
+                    .collect();
+                codes.sort();
+                codes.dedup();
+                crate::model_language_table::supported_languages_for_owned_codes(&codes)
+            })
+            .clone()
+    }
+    #[cfg(not(all(target_os = "macos", target_arch = "aarch64")))]
+    {
+        Vec::new()
+    }
+}
+
+pub(crate) fn apple_engine_available() -> bool {
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    {
+        glimpse_speech::engines::apple::available()
+    }
+    #[cfg(not(all(target_os = "macos", target_arch = "aarch64")))]
+    {
+        false
     }
 }
 
@@ -797,12 +846,13 @@ fn engine_id(engine: &LocalModelEngine) -> &'static str {
     match engine {
         LocalModelEngine::Nemotron | LocalModelEngine::Parakeet => "nvidia",
         LocalModelEngine::Whisper => "whisper",
+        LocalModelEngine::Apple => "apple",
     }
 }
 
 fn model_layout(manifest: &LocalModelManifest) -> ModelLayout {
     match manifest.engine {
-        LocalModelEngine::Whisper => ModelLayout::Whisper,
+        LocalModelEngine::Whisper | LocalModelEngine::Apple => ModelLayout::Whisper,
         LocalModelEngine::Nemotron => ModelLayout::Nemotron,
         LocalModelEngine::Parakeet if manifest.family == "parakeet-unified" => {
             ModelLayout::ParakeetUnified
@@ -854,7 +904,11 @@ pub fn api_model_infos() -> Vec<glimpse_speech::api::ApiModelInfo> {
 }
 
 pub fn list_local_models() -> Vec<ModelInfo> {
-    MODEL_MANIFESTS.iter().map(manifest_to_model_info).collect()
+    MODEL_MANIFESTS
+        .iter()
+        .filter(|manifest| manifest.engine != LocalModelEngine::Apple || apple_engine_available())
+        .map(manifest_to_model_info)
+        .collect()
 }
 
 pub fn list_models(app: &AppHandle<AppRuntime>, settings: &UserSettings) -> Vec<SpeechModel> {

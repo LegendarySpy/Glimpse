@@ -576,6 +576,26 @@ msgstr "Browse all models"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.built_in"
+msgstr "Built in"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.built_in"
+msgstr "Built in"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.built_in"
+msgstr "Built into this Mac"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.ready"
+msgstr "Built into this Mac."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.cancel"
 msgstr "Cancel"
 
@@ -3024,11 +3044,6 @@ msgstr "Runs Cleanup for that shortcut only."
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.local.description"
 msgstr "Runs entirely on your device"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/LanguageModelPanel.tsx
-msgid "settings.language_model.apple.ready"
-msgstr "Built into this Mac."
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx

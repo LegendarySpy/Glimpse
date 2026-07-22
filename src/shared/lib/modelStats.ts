@@ -5,6 +5,10 @@ export type ModelStats = {
   englishOnly: boolean;
 };
 
+// The OS provides the model; there is no artifact on disk.
+export const isBuiltInModel = (model: { engine_id: string }): boolean =>
+  model.engine_id === "apple";
+
 export const formatModelSize = (mb: number): string =>
   mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${Math.round(mb)} MB`;
 
