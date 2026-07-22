@@ -39,7 +39,7 @@ const ModelStatCard = ({
   const facts = [stats.languagesLabel];
   facts.push(
     builtIn
-      ? t({ id: "models.card.built_in", message: "Built into this Mac" })
+      ? t({ id: "models.card.built_in", message: "Built into Mac" })
       : formatModelSize(model.size_mb),
   );
   const quant = formatQuantLabel(model.variant);
@@ -154,7 +154,7 @@ const ModelStatCard = ({
             >
               <Trash2 size={13} aria-hidden="true" />
             </button>
-          ) : model.downloadable ? (
+          ) : model.downloadable && !builtIn ? (
             <button
               type="button"
               onClick={onDownload}

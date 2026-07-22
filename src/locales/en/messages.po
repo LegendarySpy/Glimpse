@@ -587,7 +587,7 @@ msgstr "Built in"
 #. js-lingui-explicit-id
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.built_in"
-msgstr "Built into this Mac"
+msgstr "Built into Mac"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx

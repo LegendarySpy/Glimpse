@@ -141,7 +141,7 @@ fn supported_languages_for_codes(codes: &[&str]) -> Vec<SupportedLanguageInfo> {
         .collect()
 }
 
-#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
+#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
 pub fn supported_languages_for_owned_codes(codes: &[String]) -> Vec<SupportedLanguageInfo> {
     codes
         .iter()
