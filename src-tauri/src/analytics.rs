@@ -13,7 +13,7 @@ use crate::{AppRuntime, AppState, settings::UserSettings};
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const POSTHOG_API_KEY: Option<&str> = option_env!("POSTHOG_API_KEY");
 const POSTHOG_HOST: Option<&str> = option_env!("POSTHOG_HOST");
-const CRASH_PHASES: [&str; 12] = [
+const CRASH_PHASES: [&str; 13] = [
     "startup",
     "setup_start",
     "logging",
@@ -26,6 +26,7 @@ const CRASH_PHASES: [&str; 12] = [
     "analytics_init",
     "recording_recovery",
     "running",
+    "shutdown",
 ];
 static CRASH_PHASE: AtomicU8 = AtomicU8::new(0);
 
@@ -448,6 +449,7 @@ pub fn report_frontend_crash(
     source: String,
     error_kind: String,
     fingerprint: String,
+    reason_code: String,
 ) {
     let window_label = match window_label.as_str() {
         "main" | "toast" | "settings" => window_label.as_str(),
@@ -472,11 +474,18 @@ pub fn report_frontend_crash(
     } else {
         "unknown"
     };
+    // Must stay in sync with REASON_RULES in main.tsx.
+    let reason_code = match reason_code.as_str() {
+        "undefined_access" | "cancelled" | "permission" | "network" | "timeout" | "not_found" => {
+            reason_code.as_str()
+        }
+        _ => "unknown",
+    };
     let diagnostics_marker = json!({ "crash_phase": "frontend" });
     capture_exception(
         &app,
         error_kind,
-        source,
+        &format!("{source}:{reason_code}"),
         &format!("frontend_{source}"),
         fingerprint,
         None,
@@ -484,6 +493,7 @@ pub fn report_frontend_crash(
             "window": window_label,
             "source": source,
             "error_kind": error_kind,
+            "reason_code": reason_code,
             "fingerprint": fingerprint,
             "diagnostics": crash_context(&app, &diagnostics_marker),
         }),
@@ -581,9 +591,9 @@ fn write_panic_artifacts(
     when: &str,
 ) {
     let crash_type = classify_panic(message);
-    let _ = std::fs::write(
+    write_marker_atomically(
         marker_path,
-        format!(
+        &format!(
             "{APP_VERSION}\n{location}\n{crash_type}\ncrash_phase={}\n",
             crash_phase()
         ),
@@ -605,6 +615,14 @@ fn write_panic_artifacts(
     }
 }
 
+/// Temp-then-rename so a crash mid-write can't leave a truncated marker.
+pub(crate) fn write_marker_atomically(marker_path: &Path, body: &str) {
+    let temp_path = marker_path.with_extension("tmp");
+    if std::fs::write(&temp_path, body).is_ok() {
+        let _ = std::fs::rename(&temp_path, marker_path);
+    }
+}
+
 fn classify_panic(message: Option<&str>) -> &'static str {
     let Some(message) = message else {
         return "non_string_panic";
@@ -623,15 +641,19 @@ fn classify_panic(message: Option<&str>) -> &'static str {
 }
 
 pub fn report_pending_crash(app: &tauri::AppHandle<AppRuntime>, marker_path: &Path) {
+    // A leftover temp file means a crash died mid-marker-write; drop it.
+    let _ = std::fs::remove_file(marker_path.with_extension("tmp"));
     let Ok(contents) = std::fs::read_to_string(marker_path) else {
         return;
     };
     let _ = std::fs::remove_file(marker_path);
     let payload = parse_crash_marker(&contents);
-    let crash_type = payload["crash_type"]
-        .as_str()
-        .unwrap_or("unknown")
-        .to_string();
+    // Every writer fills the type line, so "unknown" means the marker was
+    // cut short (e.g. the process died mid-write). Group those separately.
+    let crash_type = match payload["crash_type"].as_str() {
+        None | Some("unknown") => "truncated_marker".to_string(),
+        Some(value) => value.to_string(),
+    };
     let location = payload["location"]
         .as_str()
         .unwrap_or("unknown")

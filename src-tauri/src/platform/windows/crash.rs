@@ -71,7 +71,7 @@ unsafe extern "system" fn handler(info: *const EXCEPTION_POINTERS) -> i32 {
         if dump_written { DUMP_FILE_NAME } else { "none" },
         crate::analytics::crash_phase(),
     );
-    let _ = std::fs::write(&paths.marker, marker_body);
+    crate::analytics::write_marker_atomically(&paths.marker, &marker_body);
 
     // Chain to whatever filter we replaced so an existing reporter still runs.
     match PREV_FILTER.get().copied().flatten() {
