@@ -103,11 +103,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: verify Xcode
+      # FoundationModels / SpeechAnalyzer need the macOS 26 SDK; pick the
+      # newest Xcode 26 on the runner instead of pinning a point release.
+      - name: select Xcode
         if: matrix.os == 'macos'
-        env:
-          DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
-        run: xcodebuild -version
+        run: |
+          DEVELOPER_DIR="$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)/Contents/Developer"
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+          DEVELOPER_DIR="$DEVELOPER_DIR" xcodebuild -version
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -205,7 +208,6 @@ jobs:
           APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
           MACOSX_DEPLOYMENT_TARGET: "14.0"
           CMAKE_OSX_DEPLOYMENT_TARGET: "14.0"
-          DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
           # Apple Clang still defines __ARM_FEATURE_MATMUL_INT8 for ggml's +noi8mm build,
           # which makes whisper-rs-sys compile the wrong ARM path on GitHub's arm64 runner.
           CFLAGS_aarch64_apple_darwin: "-U__ARM_FEATURE_MATMUL_INT8"
