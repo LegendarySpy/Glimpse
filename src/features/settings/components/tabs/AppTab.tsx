@@ -130,6 +130,7 @@ type AppTabProps = {
   onMediaActionChange: (action: MediaAction) => void;
   autoUpdateEnabled: boolean;
   onAutoUpdateEnabledChange: (enabled: boolean) => void;
+  storeBuild: boolean;
   autoLaunchEnabled: boolean;
   onAutoLaunchEnabledChange: (enabled: boolean) => void;
   startInBackground: boolean;
@@ -159,6 +160,7 @@ const AppTab = ({
   onMediaActionChange,
   autoUpdateEnabled,
   onAutoUpdateEnabledChange,
+  storeBuild,
   autoLaunchEnabled,
   onAutoLaunchEnabledChange,
   startInBackground,
@@ -892,6 +894,7 @@ const AppTab = ({
                 </div>
               )}
 
+              {!storeBuild && (
               <div className="px-2 py-1.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="ui-text-label-strong ui-color-primary">
@@ -919,6 +922,7 @@ const AppTab = ({
                   })}
                 </span>
               </div>
+              )}
 
               <div className="px-2 py-1.5">
                 <div className="flex items-center justify-between gap-2">

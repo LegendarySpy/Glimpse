@@ -126,7 +126,15 @@ pub(crate) const FFMPEG_HELP_URL: &str =
 pub(crate) const FFMPEG_HELP_URL: &str = "https://github.com/glimpse-hq/Glimpse/wiki/ffmpeg-mac";
 
 fn launched_via_autostart() -> bool {
-    std::env::args_os().any(|arg| arg == "--autostart")
+    if std::env::args_os().any(|arg| arg == "--autostart") {
+        return true;
+    }
+    // Store builds start via the MSIX StartupTask, which passes no args.
+    #[cfg(target_os = "windows")]
+    if platform::windows::store::is_msix_packaged() {
+        return platform::windows::store::launched_via_startup_task();
+    }
+    false
 }
 
 fn should_start_in_background(launched_via_autostart: bool, start_in_background: bool) -> bool {
@@ -167,6 +175,16 @@ pub(crate) fn sync_launch_at_login(
     app: &AppHandle<AppRuntime>,
     enabled: bool,
 ) -> Result<(), String> {
+    // MSIX virtualizes the Run registry key, so store builds go through
+    // the StartupTask declared in the package manifest instead.
+    #[cfg(target_os = "windows")]
+    if platform::windows::store::is_msix_packaged() {
+        if platform::windows::store::startup_task_enabled()? == enabled {
+            return Ok(());
+        }
+        return platform::windows::store::set_startup_task_enabled(enabled);
+    }
+
     let autostart = app.autolaunch();
     let currently_enabled = autostart
         .is_enabled()
@@ -555,9 +573,13 @@ pub fn run() {
             update_checker::check_post_auto_update(handle);
 
             analytics::set_crash_phase("background_tasks");
-            let update_handle = handle.clone();
-            let update_state = handle.state::<AppState>().update_state().clone();
-            update_checker::start_background_checker(update_handle, update_state);
+            if platform::is_store_build() {
+                tracing::info!("store build: built-in updater disabled");
+            } else {
+                let update_handle = handle.clone();
+                let update_state = handle.state::<AppState>().update_state().clone();
+                update_checker::start_background_checker(update_handle, update_state);
+            }
 
             handle
                 .state::<AppState>()
@@ -1439,6 +1461,7 @@ struct AppInfo {
     data_dir_size_bytes: u64,
     data_dir_path: String,
     storage_breakdown: StorageBreakdown,
+    store_build: bool,
 }
 
 #[tauri::command]
@@ -1486,6 +1509,7 @@ fn get_app_info(app: AppHandle<AppRuntime>) -> Result<AppInfo, String> {
             models_bytes,
             total_bytes,
         },
+        store_build: platform::is_store_build(),
     })
 }
 

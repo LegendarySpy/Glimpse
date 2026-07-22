@@ -11,4 +11,5 @@ export type AppInfo = {
   data_dir_size_bytes: number;
   data_dir_path: string;
   storage_breakdown: StorageBreakdown;
+  store_build: boolean;
 };

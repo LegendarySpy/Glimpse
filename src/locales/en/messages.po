@@ -3785,6 +3785,11 @@ msgid "settings.about.updates"
 msgstr "Updates"
 
 #. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.store_managed"
+msgstr "Updates come from the Microsoft Store"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.analytics"
 msgstr "Usage Analytics"

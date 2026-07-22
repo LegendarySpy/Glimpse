@@ -20,6 +20,8 @@ import { updateKeys, useUpdateStatus } from "../queries";
 interface UpdateCheckerProps {
   autoCheck?: boolean;
   onOpenWhatsNew?: () => void;
+  // undefined while app info is loading; true on Microsoft Store installs
+  storeBuild?: boolean;
 }
 
 interface UpdateDownloadProgressPayload {
@@ -50,6 +52,7 @@ const formatError = (err: unknown): string => {
 export function UpdateChecker({
   autoCheck = true,
   onOpenWhatsNew,
+  storeBuild,
 }: UpdateCheckerProps) {
   const { t } = useLingui();
   const queryClient = useQueryClient();
@@ -96,6 +99,9 @@ export function UpdateChecker({
     let cancelled = false;
     let unlistenCheck: UnlistenFn | undefined;
 
+    // Wait until storeBuild resolves to false; store installs never check.
+    if (storeBuild !== false) return;
+
     if (autoCheck) {
       void checkForUpdates();
     }
@@ -111,7 +117,7 @@ export function UpdateChecker({
       cancelled = true;
       unlistenCheck?.();
     };
-  }, [autoCheck, checkForUpdates]);
+  }, [autoCheck, checkForUpdates, storeBuild]);
 
   useEffect(() => {
     let cancelled = false;
@@ -179,6 +185,43 @@ export function UpdateChecker({
     localStorage.removeItem(PENDING_RESTART_KEY);
     await relaunch();
   };
+
+  if (storeBuild) {
+    return (
+      <>
+        <div className={`${UPDATE_BOX_CLASS} bg-surface-surface`}>
+          <CheckCircle size={16} className="text-content-disabled shrink-0" />
+          <p className="flex-1 ui-text-body-sm ui-color-primary">
+            {t({
+              id: "updates.store_managed",
+              message: "Updates come from the Microsoft Store",
+            })}
+          </p>
+          <button
+            onClick={() => {
+              if (onOpenWhatsNew) {
+                onOpenWhatsNew();
+              } else {
+                setWhatsNewOpen(true);
+              }
+            }}
+            className="ui-text-label ui-color-muted hover:text-content-secondary underline underline-offset-2 transition-colors shrink-0"
+          >
+            {t({
+              id: "updates.whats_new",
+              message: "What's new?",
+            })}
+          </button>
+        </div>
+        {!onOpenWhatsNew && (
+          <WhatsNewModal
+            isOpen={whatsNewOpen}
+            onClose={() => setWhatsNewOpen(false)}
+          />
+        )}
+      </>
+    );
+  }
 
   if (installed) {
     return (

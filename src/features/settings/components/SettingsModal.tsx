@@ -422,6 +422,7 @@ const SettingsModal = ({
                         onMediaActionChange={form.setMediaAction}
                         autoUpdateEnabled={form.autoUpdateEnabled}
                         onAutoUpdateEnabledChange={form.setAutoUpdateEnabled}
+                        storeBuild={form.appInfo?.store_build ?? false}
                         autoLaunchEnabled={form.autoLaunchEnabled}
                         onAutoLaunchEnabledChange={form.setAutoLaunchEnabled}
                         startInBackground={form.startInBackground}
