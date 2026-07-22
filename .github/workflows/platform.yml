@@ -29,7 +29,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # FoundationModels / SpeechAnalyzer need the macOS 26 SDK; pick the
       # newest Xcode 26 on the runner instead of pinning a point release.
@@ -42,7 +42,7 @@ jobs:
 
       - name: install LLVM
         if: matrix.os == 'windows'
-        uses: KyleMayes/install-llvm-action@v2
+        uses: KyleMayes/install-llvm-action@ebc0426251bc40c7cd31162802432c68818ab8f0 # v2
         with:
           version: "20.1.8"
           directory: ${{ runner.temp }}/llvm
@@ -59,16 +59,18 @@ jobs:
 
       - name: install Vulkan SDK
         if: matrix.os == 'windows'
-        uses: humbletim/install-vulkan-sdk@v1.2
+        uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
         with:
           version: 1.4.309.0
           cache: true
 
       - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+        with:
+          toolchain: stable
 
       - name: cache Rust
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           key: platform-${{ matrix.platform }}
           workspaces: src-tauri -> target

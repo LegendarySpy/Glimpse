@@ -61,7 +61,7 @@ jobs:
 
       - name: Checkout source repo
         if: steps.latest.outputs.skip == 'false'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # Read the cask from main, not the triggering release's tag.
           ref: main
@@ -70,7 +70,7 @@ jobs:
 
       - name: Checkout tap
         if: steps.latest.outputs.skip == 'false'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: glimpse-hq/homebrew-tap
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}

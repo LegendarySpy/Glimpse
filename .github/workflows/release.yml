@@ -20,7 +20,7 @@ jobs:
       prerelease: ${{ steps.release-type.outputs.prerelease }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: determine release type
         id: release-type
@@ -50,7 +50,7 @@ jobs:
 
       - name: create draft release
         id: create-release
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const tag = `v${{ steps.release-type.outputs.version }}`;
@@ -100,7 +100,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # FoundationModels / SpeechAnalyzer need the macOS 26 SDK; pick the
       # newest Xcode 26 on the runner instead of pinning a point release.
@@ -112,13 +112,13 @@ jobs:
           DEVELOPER_DIR="$DEVELOPER_DIR" xcodebuild -version
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version-file: package.json
 
       - name: install LLVM
         if: matrix.os == 'windows'
-        uses: KyleMayes/install-llvm-action@v2
+        uses: KyleMayes/install-llvm-action@ebc0426251bc40c7cd31162802432c68818ab8f0 # v2
         with:
           version: "20.1.8"
           directory: ${{ runner.temp }}/llvm
@@ -135,13 +135,13 @@ jobs:
 
       - name: install Vulkan SDK
         if: matrix.os == 'windows'
-        uses: humbletim/install-vulkan-sdk@v1.2
+        uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
         with:
           version: 1.4.309.0
           cache: true
 
       - name: cache bun
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             ~/.bun/install/cache
@@ -153,12 +153,13 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
         with:
+          toolchain: stable
           targets: ${{ matrix.rust-targets }}
 
       - name: cache rust
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           key: ${{ matrix.platform }}
           workspaces: src-tauri -> target
@@ -194,7 +195,7 @@ jobs:
 
       - name: build and publish macOS
         if: matrix.os == 'macos'
-        uses: tauri-apps/tauri-action@v1
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -233,7 +234,7 @@ jobs:
 
       - name: build and publish Windows
         if: matrix.os == 'windows'
-        uses: tauri-apps/tauri-action@v1
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
         env:
           # Build whisper.cpp/ggml for a portable AVX2 baseline, not the build host
           GGML_NATIVE: "OFF"
