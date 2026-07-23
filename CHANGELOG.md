@@ -4,6 +4,7 @@
 
 - Added Apple Speech, the transcription built into your Mac. Spoken punctuation and emoji work like system dictation ("comma", "new line", "thumbs up emoji"). Requires macOS 26 on Apple Silicon.
 - Added Apple Intelligence as a writing model provider. Requires macOS 26 on Apple Silicon with Apple Intelligence turned on.
+- Glimpse is now on the [Microsoft Store](https://apps.microsoft.com/detail/9PJWF4W8V4WG), and it's now the main way to install on Windows. Store installs are signed by Microsoft and update through the Store. Downloads from GitHub keep the built-in updater.
 
 ### Changes
 

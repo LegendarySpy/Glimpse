@@ -14,8 +14,12 @@
     <a href="https://tryglimpse.cc/privacy">Privacy</a>
   </p>
   <p>
-    <img src="https://img.shields.io/badge/macOS%2014%2B-1d1d1f?style=for-the-badge&logo=apple&logoColor=white" alt="macOS 14+" />
-    <img src="https://img.shields.io/badge/Windows%2010%2B-0078D6?style=for-the-badge&logo=windows11&logoColor=white" alt="Windows 10+" />
+    <a href="https://tryglimpse.cc/download">
+      <img src="https://img.shields.io/badge/macOS%2014%2B-1d1d1f?style=for-the-badge&logo=apple&logoColor=white" alt="macOS 14+" />
+    </a>
+    <a href="https://apps.microsoft.com/detail/9PJWF4W8V4WG">
+      <img src="https://img.shields.io/badge/Windows%2010%2B-0078D6?style=for-the-badge&logo=windows11&logoColor=white" alt="Windows 10+, on the Microsoft Store" />
+    </a>
   </p>
 </div>
 
