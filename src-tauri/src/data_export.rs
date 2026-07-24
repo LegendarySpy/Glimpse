@@ -353,14 +353,15 @@ fn spawn_windows_cleaner(targets: &[PathBuf]) -> Result<(), String> {
 
     let delete_commands = targets
         .iter()
-        .map(|target| format!("rmdir /S /Q \"{}\"", target.display()))
+        .map(|target| format!("rmdir /S /Q \"{}\" >nul 2>&1", target.display()))
         .collect::<Vec<_>>()
         .join(" & ");
     // SQLite and WebView2 files stay locked until the process exits, so a
     // detached shell waits, deletes, then retries once for slow teardown.
-    let script = format!(
-        "ping -n 4 127.0.0.1 >nul & {delete_commands} & ping -n 3 127.0.0.1 >nul & {delete_commands}"
-    );
+    // ping is called by absolute path: the app may hand the shell a PATH
+    // without System32 (e.g. dev builds run under VsDevCmd).
+    let wait = "\"%SystemRoot%\\System32\\ping.exe\" -n 4 127.0.0.1 >nul";
+    let script = format!("{wait} & {delete_commands} & {wait} & {delete_commands}");
 
     // raw_arg: Command::args applies MSVC-style quoting that cmd.exe does not
     // understand, which would mangle the quoted paths.
