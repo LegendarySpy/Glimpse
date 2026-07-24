@@ -36,7 +36,7 @@ anyhow = "1"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 tracing-appender = "0.2"
-symphonia = { version = "0.6.0", default-features = false, features = ["aac", "alac", "flac", "mp3", "ogg", "pcm", "vorbis", "wav", "isomp4"] }
+symphonia = { version = "0.6.0", default-features = false, features = ["aac", "alac", "flac", "mp3", "ogg", "pcm", "vorbis", "wav", "isomp4", "mkv"] }
 hound = "3.5.1"
 parking_lot = "0.12"
 crossbeam-channel = "0.5"

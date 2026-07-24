@@ -285,9 +285,8 @@ jobs:
           New-Item -ItemType Directory -Force (Join-Path $staging "Assets") | Out-Null
 
           Copy-Item (Join-Path $env:CARGO_TARGET_DIR "release\Glimpse.exe") $staging
-          foreach ($logo in "StoreLogo.png", "Square150x150Logo.png", "Square44x44Logo.png") {
-            Copy-Item (Join-Path "src-tauri\icons" $logo) (Join-Path $staging "Assets")
-          }
+          Copy-Item "src-tauri\icons\StoreLogo.png" (Join-Path $staging "Assets")
+          Copy-Item "src-tauri\icons\Square*.png" (Join-Path $staging "Assets")
 
           $manifest = Get-Content "src-tauri\msix\AppxManifest.xml" -Raw
           $manifest = $manifest.Replace("GLIMPSE_MSIX_IDENTITY_NAME", $env:MSIX_IDENTITY_NAME)

@@ -147,7 +147,7 @@ const LibraryDetail = ({
     value: boolean | ((prev: boolean) => boolean),
   ) => void;
   onClose: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
   onRetry: () => Promise<void>;
   onCancel: () => void;
   onUpdate: (patch: LibraryItemPatch) => Promise<LibraryItem>;
@@ -280,6 +280,19 @@ const LibraryDetail = ({
     isScrubbingRef.current = value;
     setIsScrubbing(value);
   }, []);
+
+  const releaseAudioSource = useCallback(() => {
+    stopSeekLoop();
+    const audio = audioRef.current;
+    audioRef.current = null;
+    if (audio) {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    }
+    updateIsPlaying(false);
+    return audio;
+  }, [stopSeekLoop, updateIsPlaying]);
 
   const setPlaybackRateValue = useCallback((value: number) => {
     playbackRateRef.current = value;
@@ -2360,7 +2373,14 @@ const LibraryDetail = ({
                 <button
                   onClick={() => {
                     setShowDeleteConfirm(false);
-                    onDelete();
+                    const audio = releaseAudioSource();
+                    void onDelete().catch(() => {
+                      if (audio) {
+                        audio.src = audioUrl;
+                        audioRef.current = audio;
+                        audio.load();
+                      }
+                    });
                   }}
                   className="rounded-lg bg-red-500/90 px-4 py-2 ui-text-body-sm font-semibold ui-color-on-solid hover:bg-red-500 transition-colors"
                 >

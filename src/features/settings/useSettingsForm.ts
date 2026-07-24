@@ -1729,7 +1729,7 @@ export function useSettingsForm({
       await installCliAsync();
     } catch (err) {
       console.error(err);
-      showSettingsError(String(err), "local-api");
+      showSettingsError(String(err), "about");
     }
   }, [installCliAsync, showSettingsError]);
 
@@ -1738,7 +1738,7 @@ export function useSettingsForm({
       await removeCliAsync();
     } catch (err) {
       console.error(err);
-      showSettingsError(String(err), "local-api");
+      showSettingsError(String(err), "about");
     }
   }, [removeCliAsync, showSettingsError]);
 

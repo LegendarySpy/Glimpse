@@ -14,7 +14,8 @@ if (process.platform === "win32") {
 }
 
 function defaultWindowsCargoTargetDir() {
-  return path.join(path.parse(process.cwd()).root, ".glimpse-cargo-target");
+  // Keep native build paths short without assuming Windows is installed on C:.
+  return path.join(path.parse(process.cwd()).root, "g");
 }
 
 function configureWindowsEnv() {
@@ -40,14 +41,17 @@ function findVsDevCmd() {
     return explicit;
   }
 
-  const vswhere = path.join(
-    env["ProgramFiles(x86)"] ?? "C:\\Program Files (x86)",
-    "Microsoft Visual Studio",
-    "Installer",
-    "vswhere.exe",
-  );
+  const programFilesX86 = env["ProgramFiles(x86)"];
+  const vswhere = programFilesX86
+    ? path.join(
+        programFilesX86,
+        "Microsoft Visual Studio",
+        "Installer",
+        "vswhere.exe",
+      )
+    : undefined;
 
-  if (fs.existsSync(vswhere)) {
+  if (vswhere && fs.existsSync(vswhere)) {
     try {
       const installationPath = execFileSync(
         vswhere,
@@ -76,12 +80,10 @@ function findVsDevCmd() {
     }
   }
 
-  const programFiles = env.ProgramFiles ?? "C:\\Program Files";
-  const programFilesX86 = env["ProgramFiles(x86)"] ?? "C:\\Program Files (x86)";
   const years = ["18", "2022", "2019"];
   const editions = ["Community", "Professional", "Enterprise", "BuildTools"];
 
-  for (const root of [programFiles, programFilesX86]) {
+  for (const root of [env.ProgramFiles, programFilesX86].filter(Boolean)) {
     for (const year of years) {
       for (const edition of editions) {
         const candidate = path.join(
@@ -103,12 +105,69 @@ function findVsDevCmd() {
   return undefined;
 }
 
+function findLibclangPath(vsDevCmd) {
+  const explicit = env.LIBCLANG_PATH;
+  if (
+    explicit &&
+    ["libclang.dll", "clang.dll"].some((name) =>
+      fs.existsSync(path.join(explicit, name)),
+    )
+  ) {
+    return explicit;
+  }
+
+  const localAppData = env.LOCALAPPDATA;
+  const candidates = [
+    env.LLVM_PATH ? path.join(env.LLVM_PATH, "bin") : undefined,
+    env.ProgramFiles ? path.join(env.ProgramFiles, "LLVM", "bin") : undefined,
+    env["ProgramFiles(x86)"]
+      ? path.join(env["ProgramFiles(x86)"], "LLVM", "bin")
+      : undefined,
+    localAppData
+      ? path.join(localAppData, "Programs", "LLVM", "bin")
+      : undefined,
+  ];
+
+  const pythonUserRoot = env.APPDATA
+    ? path.join(env.APPDATA, "Python")
+    : undefined;
+  if (pythonUserRoot && fs.existsSync(pythonUserRoot)) {
+    for (const pythonVersion of fs.readdirSync(pythonUserRoot)) {
+      candidates.push(
+        path.join(
+          pythonUserRoot,
+          pythonVersion,
+          "site-packages",
+          "clang",
+          "native",
+        ),
+      );
+    }
+  }
+
+  if (vsDevCmd) {
+    const visualStudioRoot = path.resolve(path.dirname(vsDevCmd), "..", "..");
+    candidates.push(
+      path.join(visualStudioRoot, "VC", "Tools", "Llvm", "x64", "bin"),
+      path.join(visualStudioRoot, "VC", "Tools", "Llvm", "bin"),
+    );
+  }
+
+  return candidates.find(
+    (candidate) =>
+      candidate &&
+      ["libclang.dll", "clang.dll"].some((name) =>
+        fs.existsSync(path.join(candidate, name)),
+      ),
+  );
+}
+
 function quoteCmd(value) {
   return `"${value.replace(/"/g, '""')}"`;
 }
 
 function windowsCmdPath() {
-  return "C:\\Windows\\System32\\cmd.exe";
+  return env.ComSpec ?? "cmd.exe";
 }
 
 const tauriCli = path.join(
@@ -124,11 +183,22 @@ function spawnTauriCli() {
 
   if (process.platform === "win32") {
     const vsDevCmd = findVsDevCmd();
+    const libclangPath = findLibclangPath(vsDevCmd);
 
     if (!vsDevCmd && needsNativeBuild) {
       console.warn(
         "Glimpse: VsDevCmd.bat not found. Install Visual Studio 2022 (Desktop development with C++) or Build Tools, or set VSDEVCMD_PATH.",
       );
+    }
+
+    if (!libclangPath && needsNativeBuild) {
+      console.warn(
+        "Glimpse: libclang.dll not found. Install LLVM (`winget install LLVM.LLVM`) or set LIBCLANG_PATH to its bin directory.",
+      );
+    }
+
+    if (libclangPath) {
+      env.LIBCLANG_PATH = libclangPath;
     }
 
     if (vsDevCmd && needsNativeBuild) {
@@ -145,6 +215,9 @@ function spawnTauriCli() {
         `set "CARGO_TARGET_DIR=${env.CARGO_TARGET_DIR}"`,
         `set "TEMP=${env.TEMP}"`,
         `set "TMP=${env.TMP}"`,
+        ...(env.LIBCLANG_PATH
+          ? [`set "LIBCLANG_PATH=${env.LIBCLANG_PATH}"`]
+          : []),
         tauriCommand,
         "",
       ].join("\r\n");

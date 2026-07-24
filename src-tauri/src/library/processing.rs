@@ -470,7 +470,7 @@ fn convert_audio_to_wav(
     output: &Path,
     token: Option<&CancellationToken>,
     duration_ms: Option<u64>,
-    mut progress_cb: Option<&mut dyn FnMut(f32)>,
+    progress_cb: Option<&mut dyn FnMut(f32)>,
 ) -> Result<()> {
     let is_wav = input
         .extension()
@@ -481,39 +481,52 @@ fn convert_audio_to_wav(
         return Ok(());
     }
 
-    let progress_ptr = progress_cb
-        .as_mut()
-        .map(|cb| &mut **cb as *mut dyn FnMut(f32));
-
-    if let Some(ffmpeg) = find_ffmpeg_in_path() {
-        let callback = progress_ptr.map(|ptr| unsafe { &mut *ptr });
-        match convert_with_ffmpeg(&ffmpeg, input, output, token, duration_ms, callback) {
-            Ok(()) => return Ok(()),
-            Err(err) => {
-                let _ = fs::remove_file(output);
-                if is_cancelled_error(&err) {
-                    return Err(err);
-                }
-            }
-        }
-    }
-
-    let decode_result = {
-        // SAFETY: progress_ptr (if present) points to the caller-provided callback,
-        // which lives for the duration of this function and is only used sequentially.
-        let callback = progress_ptr.map(|ptr| unsafe { &mut *ptr });
-        decode_audio_to_wav(input, output, token, duration_ms, callback)
-    };
-    match decode_result {
+    match decode_with_native_then_ffmpeg(input, output, token, duration_ms, progress_cb) {
         Ok(()) => Ok(()),
         Err(err) => {
-            let _ = fs::remove_file(output);
             if is_cancelled_error(&err) {
                 return Err(err);
             }
-            Err(anyhow!(
-                "Audio decode failed: {err}. Install ffmpeg to import this file."
-            ))
+            Err(anyhow!("Audio decode failed: {err}"))
+        }
+    }
+}
+
+fn decode_with_native_then_ffmpeg(
+    input: &Path,
+    output: &Path,
+    token: Option<&CancellationToken>,
+    duration_ms: Option<u64>,
+    mut progress_cb: Option<&mut dyn FnMut(f32)>,
+) -> Result<()> {
+    let native_result = match progress_cb.as_mut() {
+        Some(callback) => {
+            decode_audio_to_wav(input, output, token, duration_ms, Some(&mut **callback))
+        }
+        None => decode_audio_to_wav(input, output, token, duration_ms, None),
+    };
+    match native_result {
+        Ok(()) => return Ok(()),
+        Err(err) if is_cancelled_error(&err) => return Err(err),
+        Err(native_err) => {
+            let _ = fs::remove_file(output);
+            let Some(ffmpeg) = find_ffmpeg_in_path() else {
+                return Err(anyhow!(
+                    "{native_err}. FFmpeg fallback is unavailable for this codec."
+                ));
+            };
+
+            match convert_with_ffmpeg(&ffmpeg, input, output, token, duration_ms, progress_cb) {
+                Ok(()) => Ok(()),
+                Err(err) => {
+                    let _ = fs::remove_file(output);
+                    if is_cancelled_error(&err) {
+                        Err(err)
+                    } else {
+                        Err(anyhow!("{native_err}. FFmpeg fallback also failed: {err}"))
+                    }
+                }
+            }
         }
     }
 }
@@ -844,10 +857,13 @@ fn convert_video_to_wav(
     duration_ms: Option<u64>,
     progress_cb: Option<&mut dyn FnMut(f32)>,
 ) -> Result<()> {
-    let ffmpeg = find_ffmpeg_in_path().ok_or_else(|| {
-        anyhow!("FFmpeg is required to import video files. Install ffmpeg and ensure it is on your PATH.")
-    })?;
-    convert_with_ffmpeg(&ffmpeg, input, output, token, duration_ms, progress_cb)
+    decode_with_native_then_ffmpeg(input, output, token, duration_ms, progress_cb).map_err(|err| {
+        if is_cancelled_error(&err) {
+            err
+        } else {
+            anyhow!("Video audio decode failed: {err}")
+        }
+    })
 }
 
 fn convert_with_ffmpeg(
@@ -1137,6 +1153,46 @@ fn parse_ffmpeg_time_to_ms(value: &str) -> Option<u64> {
         Some((total_seconds * 1000.0) as u64)
     } else {
         None
+    }
+}
+
+#[cfg(test)]
+mod native_media_tests {
+    use super::*;
+
+    fn assert_native_video_audio_decode(file_name: &str) {
+        let input = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("src")
+            .join("library")
+            .join("testdata")
+            .join(file_name);
+        let output = env::temp_dir().join(format!(
+            "glimpse-native-media-{}-{}.wav",
+            file_name.replace('.', "-"),
+            Uuid::new_v4()
+        ));
+
+        decode_audio_to_wav(&input, &output, None, None, None)
+            .unwrap_or_else(|err| panic!("failed to decode {file_name} natively: {err}"));
+        let info = read_wav_info(&output).expect("converted WAV should be readable");
+        assert_eq!(info.sample_rate, TARGET_SAMPLE_RATE);
+        assert!(info.total_samples > 0);
+        fs::remove_file(output).expect("test output should be removable");
+    }
+
+    #[test]
+    fn decodes_mp4_aac_audio_without_ffmpeg() {
+        assert_native_video_audio_decode("aac.mp4");
+    }
+
+    #[test]
+    fn decodes_mov_aac_audio_without_ffmpeg() {
+        assert_native_video_audio_decode("aac.mov");
+    }
+
+    #[test]
+    fn decodes_webm_vorbis_audio_without_ffmpeg() {
+        assert_native_video_audio_decode("vorbis.webm");
     }
 }
 

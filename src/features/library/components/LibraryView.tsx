@@ -143,6 +143,7 @@ const LibraryView = ({
           toastType: "error",
           message: formatDeleteErrorMessage(message),
         }).catch(() => {});
+        throw err;
       }
     },
     [deleteItemMutation, invalidateTags],

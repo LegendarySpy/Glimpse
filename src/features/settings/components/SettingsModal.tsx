@@ -520,7 +520,7 @@ const SettingsErrorBanner = ({
             }
           }}
         >
-          <p className="ui-text-meta ui-color-error leading-snug">
+          <p className="break-words [overflow-wrap:anywhere] ui-text-meta ui-color-error leading-snug">
             <span>{error}</span>
             <button
               type="button"

@@ -56,11 +56,11 @@ const LocalApiSidebarStatus = ({
         onClick={onOpenSettings}
         title={collapsed ? collapsedTitle : openSettingsLabel}
         aria-label={`${runningLabel}. ${statusHint} ${openSettingsLabel}`}
-        className={`group flex w-full items-center rounded-lg h-9 pl-[17px] pr-3 text-left text-content-muted hover:bg-[var(--surface-interactive)] hover:text-content-secondary ${
+        className={`group flex w-full items-center rounded-lg h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 text-left text-content-muted hover:bg-[var(--surface-interactive)] hover:text-content-secondary ${
           collapsed ? "gap-0" : "gap-3"
         }`}
       >
-        <div className="flex w-[18px] shrink-0 items-center justify-center">
+        <div className="flex w-[20px] shrink-0 items-center justify-center">
           <ActivityDots />
         </div>
         <div
@@ -102,7 +102,7 @@ const LocalApiSidebarStatus = ({
           type="button"
           onClick={copyBaseUrl}
           tabIndex={collapsed ? -1 : 0}
-          className="group flex h-6 w-full items-center gap-1.5 pl-[17px] pr-3 text-left"
+          className="group flex h-6 w-full items-center gap-1.5 pl-[var(--sidebar-icon-pl,17px)] pr-3 text-left"
           aria-label={t({
             id: "home.local_api.copy_url",
             message: "Copy base URL",

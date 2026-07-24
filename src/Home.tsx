@@ -76,6 +76,7 @@ const STATIC_LOGO_COORDS = [
 ];
 
 const isMac = detectAppPlatform() === "macos";
+const isWindows = detectAppPlatform() === "windows";
 
 const SUPPORT_GITHUB_URL =
   "https://github.com/glimpse-hq/Glimpse/issues/new/choose";
@@ -220,7 +221,7 @@ const Home = () => {
 
   const wideLights = isMac && (appInfoData?.os_major ?? 26) >= 26;
   const collapsedWidth = wideLights ? 78 : 68;
-  const sidebarIconPl = wideLights ? 21 : 17;
+  const sidebarIconPl = wideLights ? 21 : isWindows ? 16 : 17;
   const sidebarWidth = isSidebarCollapsed ? collapsedWidth : 200;
 
   const updateLocalApiStatus = useCallback((status: LocalApiStatus) => {
@@ -568,7 +569,7 @@ const Home = () => {
                     })
               }
             >
-              <div className="flex items-center justify-center w-[18px]">
+              <div className="flex w-[20px] shrink-0 items-center justify-center">
                 <motion.div
                   animate={{ rotate: isSidebarCollapsed ? 180 : 0 }}
                   transition={{ type: "tween", duration: 0.2 }}

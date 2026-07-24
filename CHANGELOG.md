@@ -1,3 +1,18 @@
+1.0.4
+
+### Improvements
+
+- Video imports on Windows now work out of the box for common MP4, MOV, and WebM files without needing FFmpeg.
+- Microsoft Store installs now include a proper `glimpse` command that stays connected to the Store version.
+
+### Fixes
+
+- Fixed library files sometimes failing to delete on Windows.
+- Fixed the Glimpse icon appearing too small with a blue background in Windows.
+- Fixed sidebar icons sitting slightly off-center on Windows.
+
+---
+
 1.0.3
 
 ### Features
@@ -9,6 +24,10 @@
 ### Changes
 
 - Personality instructions are now in charge of cleanup when a mode matches. 
+
+### Fixes
+
+- Fixed long error messages overflowing the Settings sidebar.
 
 ---
 

@@ -9,6 +9,8 @@ use serde::Serialize;
 const WINDOWS_SHIM_TARGET_MARKER: &str = "REM glimpse-cli-target=";
 #[cfg(windows)]
 const WINDOWS_CLI_SHIM_ENV: &str = "GLIMPSE_CLI_SHIM";
+#[cfg(windows)]
+const WINDOWS_STORE_CLI_ALIAS: &str = "glimpse-cli.exe";
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -56,7 +58,7 @@ fn install_cli_link() -> Result<(), String> {
         .map_err(|err| format!("Failed to install CLI: {err}"))?;
 
     #[cfg(windows)]
-    write_windows_shim(&destination, &source)?;
+    write_windows_shim(&destination, &windows_cli_target(&source))?;
 
     Ok(())
 }
@@ -66,7 +68,7 @@ fn remove_cli_link() -> Result<(), String> {
     let source = cli_source_binary()?;
 
     match fs::symlink_metadata(&destination) {
-        Ok(_) if cli_link_owned_by_glimpse(&destination, Some(&source)) => {
+        Ok(_) if cli_install_artifact_owned_by_glimpse(&destination, &source) => {
             fs::remove_file(&destination)
                 .map_err(|err| format!("Failed to remove CLI shortcut: {err}"))
         }
@@ -194,7 +196,7 @@ fn default_install_relative_path() -> PathBuf {
 fn prepare_install_destination(destination: &Path, source: &Path) -> Result<(), String> {
     match fs::symlink_metadata(destination) {
         Ok(metadata) if is_cli_install_artifact(&metadata) => {
-            if !cli_link_owned_by_glimpse(destination, Some(source)) {
+            if !cli_install_artifact_owned_by_glimpse(destination, source) {
                 return Err(format!(
                     "{} already exists and is not a Glimpse CLI shortcut",
                     destination.to_string_lossy()
@@ -210,6 +212,16 @@ fn prepare_install_destination(destination: &Path, source: &Path) -> Result<(), 
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
         Err(err) => Err(format!("Failed to inspect CLI install path: {err}")),
     }
+}
+
+#[cfg(unix)]
+fn cli_install_artifact_owned_by_glimpse(destination: &Path, source: &Path) -> bool {
+    cli_link_owned_by_glimpse(destination, Some(source))
+}
+
+#[cfg(windows)]
+fn cli_install_artifact_owned_by_glimpse(destination: &Path, _source: &Path) -> bool {
+    is_windows_glimpse_shim(destination)
 }
 
 #[cfg(unix)]
@@ -238,8 +250,34 @@ fn cli_link_owned_by_glimpse(destination: &Path, source: Option<&Path>) -> bool 
         return false;
     };
     source.is_some_and(|source| {
-        parse_windows_shim_target(&content).is_some_and(|target| paths_equivalent(&target, source))
+        parse_windows_shim_target(&content)
+            .is_some_and(|target| paths_equivalent(&target, &windows_cli_target(source)))
     })
+}
+
+#[cfg(windows)]
+fn is_windows_glimpse_shim(destination: &Path) -> bool {
+    let Ok(content) = fs::read_to_string(destination) else {
+        return false;
+    };
+    parse_windows_shim_target(&content).is_some()
+        && content
+            .lines()
+            .any(|line| line.trim() == format!("set \"{WINDOWS_CLI_SHIM_ENV}=1\""))
+}
+
+#[cfg(windows)]
+fn windows_cli_target(source: &Path) -> PathBuf {
+    windows_cli_target_for_install(source, crate::platform::windows::store::is_msix_packaged())
+}
+
+#[cfg(windows)]
+fn windows_cli_target_for_install(source: &Path, packaged: bool) -> PathBuf {
+    if packaged {
+        PathBuf::from(WINDOWS_STORE_CLI_ALIAS)
+    } else {
+        source.to_path_buf()
+    }
 }
 
 #[cfg(windows)]
@@ -342,7 +380,7 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn windows_shim_is_owned_when_marker_matches_source() {
+    fn windows_shim_ownership_distinguishes_current_and_legacy_targets() {
         let temp =
             std::env::temp_dir().join(format!("glimpse-cli-shim-test-{}", std::process::id()));
         let _ = fs::remove_file(&temp);
@@ -351,7 +389,7 @@ mod tests {
         fs::write(
             &temp,
             format!(
-                "@echo off\r\n{WINDOWS_SHIM_TARGET_MARKER}{shim_target}\r\n\"{shim_target}\" %*\r\n"
+                "@echo off\r\n{WINDOWS_SHIM_TARGET_MARKER}{shim_target}\r\nset \"{WINDOWS_CLI_SHIM_ENV}=1\"\r\n\"{shim_target}\" %*\r\n"
             ),
         )
         .expect("write temp shim");
@@ -361,7 +399,44 @@ mod tests {
             &temp,
             Some(Path::new(r"C:\Other\Glimpse\Glimpse.exe"))
         ));
+        assert!(is_windows_glimpse_shim(&temp));
 
+        let _ = fs::remove_file(temp);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn store_cli_shim_targets_the_msix_execution_alias() {
+        assert_eq!(
+            windows_cli_target_for_install(Path::new(r"C:\Package\Glimpse.exe"), true),
+            PathBuf::from(WINDOWS_STORE_CLI_ALIAS)
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn install_replaces_a_legacy_glimpse_shim() {
+        let temp =
+            std::env::temp_dir().join(format!("glimpse-cli-migration-test-{}", std::process::id()));
+        let _ = fs::remove_file(&temp);
+        fs::write(
+            &temp,
+            format!(
+                "@echo off\r\n{WINDOWS_SHIM_TARGET_MARKER}C:\\Old\\Glimpse.exe\r\nset \"{WINDOWS_CLI_SHIM_ENV}=1\"\r\n\"C:\\Old\\Glimpse.exe\" %*\r\n"
+            ),
+        )
+        .expect("write legacy shim");
+
+        prepare_install_destination(&temp, Path::new(r"C:\Package\Glimpse.exe"))
+            .expect("legacy shim should be replaceable");
+        write_windows_shim(&temp, Path::new(WINDOWS_STORE_CLI_ALIAS))
+            .expect("write Store alias shim");
+
+        let migrated = fs::read_to_string(&temp).expect("read migrated shim");
+        assert_eq!(
+            parse_windows_shim_target(&migrated),
+            Some(PathBuf::from(WINDOWS_STORE_CLI_ALIAS))
+        );
         let _ = fs::remove_file(temp);
     }
 }

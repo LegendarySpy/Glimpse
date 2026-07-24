@@ -55,7 +55,7 @@ pub(crate) fn crash_phase() -> &'static str {
         .unwrap_or("unknown")
 }
 
-/// Starts analytics and records your app version, OS, and (once) install date.
+/// Starts analytics and records your app version, OS, install type, and (once) install date.
 pub async fn init(app: &tauri::AppHandle<AppRuntime>) {
     let (api_key, host) = match (POSTHOG_API_KEY, POSTHOG_HOST) {
         (Some(k), Some(h)) if !k.is_empty() && !h.is_empty() => (k, h),
@@ -90,6 +90,7 @@ pub async fn init(app: &tauri::AppHandle<AppRuntime>) {
         json!({
             "app_version": APP_VERSION,
             "platform": std::env::consts::OS,
+            "install_type": crate::platform::install_type(),
             "arch": std::env::consts::ARCH,
         }),
     );
@@ -118,6 +119,7 @@ fn build_event(
     let mut event = posthog_rs::Event::new(event_name, &distinct_id);
     let _ = event.insert_prop("app_version", APP_VERSION);
     let _ = event.insert_prop("platform", std::env::consts::OS);
+    let _ = event.insert_prop("install_type", crate::platform::install_type());
     if let Some(obj) = props.as_object() {
         for (key, value) in obj {
             let _ = event.insert_prop(key.as_str(), value.clone());
