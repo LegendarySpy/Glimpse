@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { useCopyToClipboard } from "../../../../shared/hooks/useCopyToClipboard";
 import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useLingui } from "@lingui/react/macro";
+import { useQuery } from "@tanstack/react-query";
 import { motion, type Variants } from "framer-motion";
 import {
   ArrowUpRight,
   Check,
   EnvelopeSimple,
+  Export,
   FileText,
   GithubLogo,
   Question as HelpCircle,
@@ -14,7 +18,13 @@ import {
   CircleNotch as Loader2,
   ArrowCounterClockwise as RotateCcw,
   TerminalWindow as Terminal,
+  Trash,
 } from "@phosphor-icons/react";
+import {
+  deleteAllData,
+  exportDataset,
+  getDatasetPreview,
+} from "../../data-api";
 
 const CLI_WIKI_URL = "https://github.com/glimpse-hq/Glimpse/wiki/CLI";
 const REPORT_ISSUE_URL = "https://github.com/glimpse-hq/Glimpse/issues/new";
@@ -68,6 +78,70 @@ const AboutTab = ({
 }: AboutTabProps) => {
   const { t } = useLingui();
   const { copied: supportEmailCopied, copy } = useCopyToClipboard(2000);
+
+  const [includeTimestamps, setIncludeTimestamps] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [deletingData, setDeletingData] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
+
+  const datasetPreview = useQuery({
+    queryKey: ["dataset-preview"],
+    queryFn: getDatasetPreview,
+  });
+  const pairCount = datasetPreview.data?.pairs;
+
+  const handleExportDataset = async () => {
+    setDataError(null);
+    const destination = await open({
+      directory: true,
+      multiple: false,
+      title: t({
+        id: "settings.about.data.export_dialog_title",
+        message: "Choose where to save the dataset",
+      }),
+    });
+    if (typeof destination !== "string") return;
+    setExportBusy(true);
+    try {
+      await exportDataset(destination, includeTimestamps);
+    } catch (err) {
+      setDataError(String(err));
+    } finally {
+      setExportBusy(false);
+    }
+  };
+
+  const handleDeleteAllData = async () => {
+    setDataError(null);
+    setDeletingData(true);
+    try {
+      await deleteAllData();
+    } catch (err) {
+      setDataError(String(err));
+      setDeletingData(false);
+    }
+  };
+
+  const datasetSubtitle =
+    pairCount === undefined
+      ? t({
+          id: "settings.about.data.count_loading",
+          message: "Counting recordings…",
+        })
+      : pairCount === 0
+        ? t({
+            id: "settings.about.data.count_zero",
+            message: "No transcribed audio yet",
+          })
+        : pairCount === 1
+          ? t({
+              id: "settings.about.data.count_one",
+              message: "1 audio and text pair",
+            })
+          : t({
+              id: "settings.about.data.count_many",
+              message: `${pairCount} audio and text pairs`,
+            });
 
   const isCloudMode = transcriptionMode === "cloud";
   const modeLabel = isCloudMode
@@ -372,6 +446,105 @@ const AboutTab = ({
             </span>
           </button>
         </div>
+      </section>
+
+      <section className="space-y-2">
+        <SectionLabel>
+          {t({
+            id: "settings.about.data",
+            message: "Data",
+          })}
+        </SectionLabel>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-lg bg-surface-surface p-2.5">
+            <div className="flex gap-2.5 px-1 py-0.5">
+              <span className="flex size-5 shrink-0 self-center items-center justify-center ui-color-muted">
+                <Export size={14} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="min-w-0 flex-1 truncate ui-text-label-strong ui-color-primary">
+                    {t({
+                      id: "settings.about.data.export_dataset",
+                      message: "Export dataset",
+                    })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handleExportDataset();
+                    }}
+                    disabled={exportBusy || !pairCount}
+                    className="inline-flex h-6 min-w-[4.75rem] shrink-0 items-center justify-center gap-1 px-1 ui-text-button-sm ui-color-secondary transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-60"
+                  >
+                    {exportBusy && (
+                      <Loader2 size={10} className="animate-spin" />
+                    )}
+                    <span>
+                      {t({
+                        id: "settings.about.data.export_action",
+                        message: "Export",
+                      })}
+                    </span>
+                  </button>
+                </div>
+                <p className="mt-1 truncate ui-text-meta ui-color-muted">
+                  {datasetSubtitle}
+                </p>
+                <label className="mt-1.5 flex w-fit cursor-pointer items-center gap-1.5 ui-text-meta ui-color-muted">
+                  <input
+                    type="checkbox"
+                    checked={includeTimestamps}
+                    onChange={(event) =>
+                      setIncludeTimestamps(event.target.checked)
+                    }
+                    className="size-3 accent-[var(--color-accent)]"
+                  />
+                  {t({
+                    id: "settings.about.data.include_timestamps",
+                    message: "Include timestamps",
+                  })}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <HoldActionCardButton
+            onConfirm={() => {
+              void handleDeleteAllData();
+            }}
+            accentPreset="error"
+            holdDurationMs={10000}
+            disabled={deletingData}
+            title={
+              deletingData
+                ? t({
+                    id: "settings.about.data.deleting",
+                    message: "Deleting…",
+                  })
+                : t({
+                    id: "settings.about.data.delete_all",
+                    message: "Delete all data",
+                  })
+            }
+            description={t({
+              id: "settings.about.data.delete_all_description",
+              message: "hold to erase everything and quit",
+            })}
+            ariaLabel={t({
+              id: "settings.about.data.delete_all_aria",
+              message: "Delete all data. Hold for ten seconds to confirm.",
+            })}
+            icon={<Trash size={14} strokeWidth={2} />}
+          />
+        </div>
+
+        {dataError ? (
+          <p className="break-words [overflow-wrap:anywhere] px-1 ui-text-micro ui-color-error">
+            {dataError}
+          </p>
+        ) : null}
       </section>
 
       <section className="space-y-2">

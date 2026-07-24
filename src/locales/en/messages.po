@@ -124,6 +124,11 @@ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken tod
 msgstr "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_many"
+msgstr "{pairCount} audio and text pairs"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/CloudModelCard.tsx
 msgid "models.cloud_card.aria"
 msgstr "{providerLabel} cloud model"
@@ -136,6 +141,11 @@ msgstr "{seconds, plural, one {# second spoken today} other {# seconds spoken to
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.add_shortcut"
 msgstr "+ Add shortcut"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_one"
+msgstr "1 audio and text pair"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -575,11 +585,6 @@ msgid "onboarding.model.browse"
 msgstr "Browse all models"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin"
-msgstr "Built in"
-
-#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.built_in"
 msgstr "Built in"
@@ -587,6 +592,11 @@ msgstr "Built in"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.built_in"
+msgstr "Built in"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.builtin"
 msgstr "Built in"
 
 #. js-lingui-explicit-id
@@ -708,6 +718,11 @@ msgstr "Choose a model"
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.title"
 msgstr "Choose a model"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_dialog_title"
+msgstr "Choose where to save the dataset"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -1071,6 +1086,11 @@ msgid "library.modal.export.write_failed"
 msgstr "Couldn't write the export file. Try a different location."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_loading"
+msgstr "Counting recordings…"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.empty.description"
 msgstr "Create a mode to start customizing your apps and websites."
@@ -1104,6 +1124,11 @@ msgstr "Customer portal"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.dark"
 msgstr "Dark"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data"
+msgstr "Data"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -1182,6 +1207,16 @@ msgid "dictionary.delete_entry"
 msgstr "Delete {entry}"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.delete_all"
+msgstr "Delete all data"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.delete_all_aria"
+msgstr "Delete all data. Hold for ten seconds to confirm."
+
+#. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.full_add_prompt"
 msgstr "Delete an entry before adding another."
@@ -1241,6 +1276,11 @@ msgstr "Deleting transcripts also removes the audio they reference."
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_delete.body"
 msgstr "Deleting transcripts also removes their saved audio."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.deleting"
+msgstr "Deleting…"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -1479,9 +1519,19 @@ msgid "model_picker.category.experimental"
 msgstr "Experimental"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_action"
+msgstr "Export"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.export"
 msgstr "Export"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_dataset"
+msgstr "Export dataset"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1705,6 +1755,11 @@ msgstr "Hold"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.delete_all_description"
+msgstr "hold to erase everything and quit"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding_description"
 msgstr "re-run setup wizard"
 
@@ -1807,6 +1862,11 @@ msgstr "In development"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.ane.toggle"
 msgstr "Include the Apple Neural Engine encoder"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.include_timestamps"
+msgstr "Include timestamps"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2437,6 +2497,11 @@ msgstr "No tags yet"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.tags.no_tags_yet"
 msgstr "No tags yet"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_zero"
+msgstr "No transcribed audio yet"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

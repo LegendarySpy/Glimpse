@@ -1,5 +1,10 @@
 1.0.4
 
+### Features
+
+- Export your recordings and transcripts as audio and text pairs, ready for fine-tuning. Find it under Settings, About. Timestamps are optional.
+- Delete all data from Settings, About. Hold the button to erase everything Glimpse has stored and quit the app.
+
 ### Improvements
 
 - Video imports on Windows now work out of the box for common MP4, MOV, and WebM files. FFmpeg is only needed as a fallback for less common codecs.
