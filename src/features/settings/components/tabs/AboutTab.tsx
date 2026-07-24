@@ -1,12 +1,16 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCopyToClipboard } from "../../../../shared/hooks/useCopyToClipboard";
 import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useLingui } from "@lingui/react/macro";
-import { motion, type Variants } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
   ArrowUpRight,
   Check,
   EnvelopeSimple,
+  Export,
   FileText,
   GithubLogo,
   Question as HelpCircle,
@@ -14,7 +18,14 @@ import {
   CircleNotch as Loader2,
   ArrowCounterClockwise as RotateCcw,
   TerminalWindow as Terminal,
+  Trash,
 } from "@phosphor-icons/react";
+import {
+  deleteAllData,
+  exportDataset,
+  getDatasetPreview,
+  type DatasetExportOptions,
+} from "../../data-api";
 
 const CLI_WIKI_URL = "https://github.com/glimpse-hq/Glimpse/wiki/CLI";
 const REPORT_ISSUE_URL = "https://github.com/glimpse-hq/Glimpse/issues/new";
@@ -26,9 +37,8 @@ const SUPPORT_ACTION_ICON_CLASS =
   "shrink-0 text-[var(--color-text-muted)] transition-colors duration-150 group-hover:text-[var(--color-text-primary)]";
 const SUPPORT_ACTION_LABEL_CLASS =
   "flex items-center gap-0.5 ui-text-micro leading-none text-[var(--color-text-secondary)] transition-colors duration-150 group-hover:text-[var(--color-text-primary)]";
-import ActionCardButton from "../../../../shared/ui/ActionCardButton";
+import ToggleSwitch from "../../../../shared/ui/ToggleSwitch";
 import SectionLabel from "../../../../shared/ui/SectionLabel";
-import HoldActionCardButton from "../../../../shared/ui/HoldActionCardButton";
 import { UpdateChecker } from "../../../updates/components/UpdateChecker";
 import { detectAppPlatform } from "../../../../platform/service";
 import type {
@@ -36,6 +46,129 @@ import type {
   CliInstallStatus,
   TranscriptionMode,
 } from "../../../../types";
+
+const InlineHoldButton = ({
+  onConfirm,
+  disabled = false,
+  busy = false,
+  label,
+  busyLabel,
+  ariaLabel,
+  holdMs,
+  tone = "neutral",
+}: {
+  onConfirm: () => void;
+  disabled?: boolean;
+  busy?: boolean;
+  label: string;
+  busyLabel?: string;
+  ariaLabel: string;
+  holdMs: number;
+  tone?: "neutral" | "danger";
+}) => {
+  const [progress, setProgress] = useState(0);
+  const holdingRef = useRef(false);
+  const readyRef = useRef(false);
+  const startTimeRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+
+  const cancelHold = useCallback(() => {
+    holdingRef.current = false;
+    readyRef.current = false;
+    startTimeRef.current = null;
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+    setProgress(0);
+  }, []);
+
+  const stepHold = useCallback(
+    (timestamp: number) => {
+      if (!holdingRef.current || startTimeRef.current === null) return;
+
+      const elapsed = timestamp - startTimeRef.current;
+      const nextProgress = Math.min(1, elapsed / holdMs);
+      setProgress(nextProgress);
+
+      if (nextProgress >= 1) {
+        readyRef.current = true;
+        frameRef.current = null;
+        return;
+      }
+
+      frameRef.current = requestAnimationFrame(stepHold);
+    },
+    [holdMs],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, []);
+
+  const startHold = () => {
+    holdingRef.current = true;
+    readyRef.current = false;
+    startTimeRef.current = performance.now();
+    setProgress(0);
+    frameRef.current = requestAnimationFrame(stepHold);
+  };
+
+  const finishHold = () => {
+    if (!holdingRef.current) return;
+    if (readyRef.current) {
+      onConfirm();
+    }
+    cancelHold();
+  };
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      aria-label={ariaLabel}
+      onPointerDown={(event) => {
+        if (disabled || event.button !== 0) return;
+        event.preventDefault();
+        startHold();
+      }}
+      onPointerUp={finishHold}
+      onPointerLeave={cancelHold}
+      onPointerCancel={cancelHold}
+      onKeyDown={(event) => {
+        if (disabled || (event.key !== "Enter" && event.key !== " ")) return;
+        if (holdingRef.current) return;
+        event.preventDefault();
+        startHold();
+      }}
+      onKeyUp={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        finishHold();
+      }}
+      onBlur={cancelHold}
+      className={`relative inline-flex h-6 min-w-[6rem] shrink-0 select-none touch-none items-center justify-center overflow-hidden rounded-md px-2 ui-text-button-sm transition-opacity hover:opacity-80 disabled:pointer-events-none disabled:opacity-60 ${
+        tone === "danger" ? "ui-color-error" : "ui-color-secondary"
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className={`absolute inset-0 origin-left ${
+          tone === "danger" ? "bg-red-500/20" : "bg-[var(--color-accent-20)]"
+        }`}
+        style={{ transform: `scaleX(${progress})` }}
+      />
+      <span className="relative inline-flex items-center gap-1">
+        {busy && <Loader2 size={10} className="animate-spin" />}
+        <span>{busy && busyLabel ? busyLabel : label}</span>
+      </span>
+    </button>
+  );
+};
 
 type AboutTabProps = {
   variants: Variants;
@@ -68,6 +201,103 @@ const AboutTab = ({
 }: AboutTabProps) => {
   const { t } = useLingui();
   const { copied: supportEmailCopied, copy } = useCopyToClipboard(2000);
+
+  const [exportConfigOpen, setExportConfigOpen] = useState(false);
+  const [exportOptions, setExportOptions] = useState<DatasetExportOptions>({
+    includeTimestamps: true,
+    verbatimText: true,
+    skipShortClips: true,
+  });
+  const [exportBusy, setExportBusy] = useState(false);
+  const [deletingData, setDeletingData] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const exportConfigRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!exportConfigOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!exportConfigRef.current?.contains(event.target as Node)) {
+        setExportConfigOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExportConfigOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [exportConfigOpen]);
+
+  const toggleExportOption = (key: keyof DatasetExportOptions) => {
+    setExportOptions((previous) => ({ ...previous, [key]: !previous[key] }));
+  };
+
+  const datasetPreview = useQuery({
+    queryKey: ["dataset-preview"],
+    queryFn: getDatasetPreview,
+  });
+  const pairCount = datasetPreview.data?.pairs;
+
+  const handleExportDataset = async () => {
+    setExportConfigOpen(false);
+    setDataError(null);
+    const destination = await open({
+      directory: true,
+      multiple: false,
+      title: t({
+        id: "settings.about.data.export_dialog_title",
+        message: "Choose where to save the dataset",
+      }),
+    });
+    if (typeof destination !== "string") return;
+    setExportBusy(true);
+    try {
+      await exportDataset(destination, exportOptions);
+    } catch (err) {
+      setDataError(String(err));
+    } finally {
+      setExportBusy(false);
+    }
+  };
+
+  const handleDeleteAllData = async () => {
+    setDataError(null);
+    setDeletingData(true);
+    try {
+      await deleteAllData();
+    } catch (err) {
+      setDataError(String(err));
+      setDeletingData(false);
+    }
+  };
+
+  const datasetSubtitle = datasetPreview.isError
+    ? t({
+        id: "settings.about.data.count_error",
+        message: "Couldn't read your recordings",
+      })
+    : pairCount === undefined
+      ? t({
+          id: "settings.about.data.count_loading",
+          message: "Counting recordings…",
+        })
+      : pairCount === 0
+        ? t({
+            id: "settings.about.data.count_zero",
+            message: "No transcribed audio yet",
+          })
+        : pairCount === 1
+          ? t({
+              id: "settings.about.data.count_one",
+              message: "1 audio and text pair",
+            })
+          : t({
+              id: "settings.about.data.count_many",
+              message: `${pairCount} audio and text pairs`,
+            });
 
   const isCloudMode = transcriptionMode === "cloud";
   const modeLabel = isCloudMode
@@ -256,7 +486,7 @@ const AboutTab = ({
               message: "Support",
             })}
           </SectionLabel>
-          <div className="grid h-[52px] grid-cols-3 gap-1.5">
+          <div className="grid h-[52px] grid-cols-4 gap-1.5">
             <button
               type="button"
               onClick={() => {
@@ -332,6 +562,23 @@ const AboutTab = ({
                     })}
               </span>
             </button>
+            <button
+              type="button"
+              onClick={onOpenFAQ}
+              className={SUPPORT_ACTION_CLASS}
+            >
+              <HelpCircle
+                size={14}
+                aria-hidden="true"
+                className={SUPPORT_ACTION_ICON_CLASS}
+              />
+              <span className={SUPPORT_ACTION_LABEL_CLASS}>
+                {t({
+                  id: "settings.about.faq",
+                  message: "FAQ",
+                })}
+              </span>
+            </button>
           </div>
         </div>
       </section>
@@ -374,148 +621,342 @@ const AboutTab = ({
         </div>
       </section>
 
-      <section className="space-y-2">
-        <SectionLabel>
-          {t({
-            id: "settings.about.setup",
-            message: "Setup & help",
-          })}
-        </SectionLabel>
+      <section className="grid grid-cols-2 items-start gap-4">
+        <div className="space-y-2">
+          <SectionLabel>
+            {t({
+              id: "settings.about.data",
+              message: "Data",
+            })}
+          </SectionLabel>
 
-        <div className="grid grid-cols-2 gap-4">
-          <HoldActionCardButton
-            onConfirm={() => {
-              void handleResetOnboarding();
-            }}
-            accentPreset="accent"
-            title={t({
-              id: "settings.about.restart_onboarding",
-              message: "Restart Onboarding",
-            })}
-            description={t({
-              id: "settings.about.restart_onboarding_description",
-              message: "hold to re-run setup experience",
-            })}
-            ariaLabel={t({
-              id: "settings.about.restart_onboarding_hold_aria",
-              message: "Restart Onboarding. Hold to confirm.",
-            })}
-            icon={<RotateCcw size={14} strokeWidth={2} />}
-          />
-          <ActionCardButton
-            onClick={onOpenFAQ}
-            title={t({
-              id: "settings.about.faq_help",
-              message: "FAQ & Help",
-            })}
-            description={t({
-              id: "settings.about.faq_help_description",
-              message: "common questions",
-            })}
-            icon={<HelpCircle size={14} strokeWidth={2} />}
-            accentPreset="cloud"
-          />
+          <div className="rounded-lg bg-surface-surface">
+            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
+              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
+                <Export size={14} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate ui-text-label-strong ui-color-primary">
+                  {t({
+                    id: "settings.about.data.export_dataset",
+                    message: "Export dataset",
+                  })}
+                </p>
+                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
+                  {datasetSubtitle}
+                </p>
+              </div>
+              <div className="relative shrink-0" ref={exportConfigRef}>
+                <button
+                  type="button"
+                  onClick={() => setExportConfigOpen((previous) => !previous)}
+                  disabled={exportBusy || pairCount === 0}
+                  className="inline-flex h-6 min-w-[4.75rem] items-center justify-center gap-1 px-1 ui-text-button-sm ui-color-secondary transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-60"
+                >
+                  {exportBusy && <Loader2 size={10} className="animate-spin" />}
+                  <span>
+                    {t({
+                      id: "settings.about.data.export_action",
+                      message: "Export",
+                    })}
+                  </span>
+                </button>
+
+                <AnimatePresence>
+                  {exportConfigOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="ui-surface-menu absolute right-0 top-full z-20 mt-1 w-64"
+                    >
+                      <div className="space-y-3 p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="min-w-0">
+                            <span className="block ui-text-meta ui-color-primary">
+                              {t({
+                                id: "settings.about.data.include_timestamps",
+                                message: "Timestamps",
+                              })}
+                            </span>
+                            <span className="block ui-text-micro ui-color-muted">
+                              {t({
+                                id: "settings.about.data.include_timestamps_hint",
+                                message: "Segment start and end times",
+                              })}
+                            </span>
+                          </span>
+                          <ToggleSwitch
+                            enabled={exportOptions.includeTimestamps}
+                            onToggle={() =>
+                              toggleExportOption("includeTimestamps")
+                            }
+                            size="xs"
+                            ariaLabel={t({
+                              id: "settings.about.data.include_timestamps_aria",
+                              message: "Include timestamps in the export",
+                            })}
+                          />
+                        </div>
+
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="min-w-0">
+                            <span className="block ui-text-meta ui-color-primary">
+                              {t({
+                                id: "settings.about.data.verbatim_text",
+                                message: "Original text",
+                              })}
+                            </span>
+                            <span className="block ui-text-micro ui-color-muted">
+                              {t({
+                                id: "settings.about.data.verbatim_text_hint",
+                                message: "Transcripts before cleanup",
+                              })}
+                            </span>
+                          </span>
+                          <ToggleSwitch
+                            enabled={exportOptions.verbatimText}
+                            onToggle={() => toggleExportOption("verbatimText")}
+                            size="xs"
+                            ariaLabel={t({
+                              id: "settings.about.data.verbatim_text_aria",
+                              message:
+                                "Use the original transcripts before cleanup",
+                            })}
+                          />
+                        </div>
+
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="min-w-0">
+                            <span className="block ui-text-meta ui-color-primary">
+                              {t({
+                                id: "settings.about.data.skip_short",
+                                message: "Skip short clips",
+                              })}
+                            </span>
+                            <span className="block ui-text-micro ui-color-muted">
+                              {t({
+                                id: "settings.about.data.skip_short_hint",
+                                message: "Leaves out clips under a second",
+                              })}
+                            </span>
+                          </span>
+                          <ToggleSwitch
+                            enabled={exportOptions.skipShortClips}
+                            onToggle={() =>
+                              toggleExportOption("skipShortClips")
+                            }
+                            size="xs"
+                            ariaLabel={t({
+                              id: "settings.about.data.skip_short_aria",
+                              message: "Skip clips shorter than one second",
+                            })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="border-t border-border-primary/60" />
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleExportDataset();
+                        }}
+                        className="flex h-8 w-full items-center justify-center ui-text-button-sm ui-color-secondary transition-colors hover:bg-[var(--surface-interactive)] hover:text-content-primary"
+                      >
+                        {t({
+                          id: "settings.about.data.export_confirm",
+                          message: "Export…",
+                        })}
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="ml-[44px] border-t border-border-primary/60" />
+
+            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
+              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
+                <Trash size={14} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate ui-text-label-strong ui-color-primary">
+                  {t({
+                    id: "settings.about.data.delete_all",
+                    message: "Delete all data",
+                  })}
+                </p>
+                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
+                  {t({
+                    id: "settings.about.data.delete_all_description",
+                    message:
+                      "Removes recordings, transcripts, models, and settings, then quits",
+                  })}
+                </p>
+              </div>
+              <InlineHoldButton
+                onConfirm={() => {
+                  void handleDeleteAllData();
+                }}
+                disabled={deletingData}
+                busy={deletingData}
+                label={t({
+                  id: "settings.about.data.hold_to_delete",
+                  message: "Hold to delete",
+                })}
+                busyLabel={t({
+                  id: "settings.about.data.deleting",
+                  message: "Deleting…",
+                })}
+                ariaLabel={t({
+                  id: "settings.about.data.delete_all_aria",
+                  message: "Delete all data. Hold for ten seconds to confirm.",
+                })}
+                holdMs={10000}
+                tone="danger"
+              />
+            </div>
+          </div>
+
+          {dataError ? (
+            <p className="break-words [overflow-wrap:anywhere] px-1 ui-text-micro ui-color-error">
+              {dataError}
+            </p>
+          ) : null}
         </div>
-      </section>
 
-      <section className="space-y-2">
-        <SectionLabel>
-          {t({
-            id: "settings.about.advanced",
-            message: "Advanced",
-          })}
-        </SectionLabel>
+        <div className="space-y-2">
+          <SectionLabel>
+            {t({
+              id: "settings.about.setup",
+              message: "Setup",
+            })}
+          </SectionLabel>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-surface-surface p-2.5">
-            <div className="flex min-h-[52px] gap-2.5 px-1 py-0.5">
-              <span className="flex size-5 shrink-0 self-center items-center justify-center ui-color-muted">
+          <div className="rounded-lg bg-surface-surface">
+            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
+              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
+                <RotateCcw size={14} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate ui-text-label-strong ui-color-primary">
+                  {t({
+                    id: "settings.about.restart_onboarding",
+                    message: "Restart onboarding",
+                  })}
+                </p>
+                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
+                  {t({
+                    id: "settings.about.restart_onboarding_description",
+                    message: "Runs setup again",
+                  })}
+                </p>
+              </div>
+              <InlineHoldButton
+                onConfirm={() => {
+                  void handleResetOnboarding();
+                }}
+                label={t({
+                  id: "settings.about.data.hold_to_restart",
+                  message: "Hold to restart",
+                })}
+                ariaLabel={t({
+                  id: "settings.about.restart_onboarding_hold_aria",
+                  message: "Restart Onboarding. Hold to confirm.",
+                })}
+                holdMs={2000}
+              />
+            </div>
+
+            <div className="ml-[44px] border-t border-border-primary/60" />
+
+            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
+              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
                 <Terminal size={14} strokeWidth={2} aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void openUrl(CLI_WIKI_URL);
+                    }}
+                    aria-label={t({
+                      id: "settings.about.command_line.open_wiki_aria",
+                      message: "Open the command line documentation",
+                    })}
+                    className="inline-flex min-w-0 items-center gap-1 ui-text-label-strong ui-color-primary transition-colors hover:text-content-secondary outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-border-hover"
+                  >
+                    <span className="truncate">
+                      {t({
+                        id: "settings.about.command_line",
+                        message: "Command line",
+                      })}
+                    </span>
+                    <ArrowUpRight
+                      size={12}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                      className="shrink-0 ui-color-muted"
+                    />
+                  </button>
+                  <div className="relative group shrink-0">
                     <button
                       type="button"
-                      onClick={() => {
-                        void openUrl(CLI_WIKI_URL);
-                      }}
+                      className="flex size-4 items-center justify-center ui-color-disabled transition-colors hover:ui-color-muted focus:ui-color-muted focus:outline-none"
                       aria-label={t({
-                        id: "settings.about.command_line.open_wiki_aria",
-                        message: "Open the command line documentation",
+                        id: "settings.about.command_line.info_aria",
+                        message: "More information about command line tools",
                       })}
-                      className="inline-flex min-w-0 items-center gap-1 ui-text-label-strong ui-color-primary transition-colors hover:text-content-secondary outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-border-hover"
                     >
-                      <span className="truncate">
-                        {t({
-                          id: "settings.about.command_line",
-                          message: "Command line",
-                        })}
-                      </span>
-                      <ArrowUpRight
-                        size={12}
-                        strokeWidth={2}
-                        aria-hidden="true"
-                        className="shrink-0 ui-color-muted"
-                      />
+                      <Info size={10} aria-hidden="true" />
                     </button>
-                    <div className="relative group shrink-0">
-                      <button
-                        type="button"
-                        className="flex size-4 items-center justify-center ui-color-disabled transition-colors hover:ui-color-muted focus:ui-color-muted focus:outline-none"
-                        aria-label={t({
-                          id: "settings.about.command_line.info_aria",
-                          message: "More information about command line tools",
-                        })}
-                      >
-                        <Info size={10} aria-hidden="true" />
-                      </button>
-                      <div className="absolute left-1/2 bottom-full z-20 mb-1 hidden -translate-x-1/2 group-hover:block group-focus-within:block">
-                        <div className="w-56 rounded-lg border border-border-secondary bg-surface-overlay px-2.5 py-1.5 ui-text-micro ui-color-secondary shadow-lg leading-tight">
-                          {cliInfo}
-                        </div>
+                    <div className="absolute left-1/2 bottom-full z-20 mb-1 hidden -translate-x-1/2 group-hover:block group-focus-within:block">
+                      <div className="w-56 rounded-lg border border-border-secondary bg-surface-overlay px-2.5 py-1.5 ui-text-micro ui-color-secondary shadow-lg leading-tight">
+                        {cliInfo}
                       </div>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={
-                      cliInstalled && cliManagedByApp
-                        ? onRemoveCli
-                        : onInstallCli
-                    }
-                    disabled={
-                      cliInstallBusy ||
-                      (cliInstalled && !cliManagedByApp) ||
-                      (!cliInstalled && (cliUnavailable || !activeLicense))
-                    }
-                    className="inline-flex h-6 min-w-[4.75rem] shrink-0 items-center justify-center gap-1 px-1 ui-text-button-sm ui-color-secondary transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-60"
-                  >
-                    {cliInstallBusy && (
-                      <Loader2 size={10} className="animate-spin" />
-                    )}
-                    <span>
-                      {cliInstalled && cliManagedByApp
-                        ? t({
-                            id: "settings.about.uninstall_cli",
-                            message: "Uninstall",
-                          })
-                        : cliInstalled
-                          ? t({
-                              id: "settings.about.cli.installed_action",
-                              message: "Installed",
-                            })
-                          : t({
-                              id: "settings.about.install_cli",
-                              message: "Install CLI",
-                            })}
-                    </span>
-                  </button>
                 </div>
-                <p className="mt-1 truncate ui-text-meta ui-color-muted">
+                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
                   {cliSubtitle}
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={
+                  cliInstalled && cliManagedByApp ? onRemoveCli : onInstallCli
+                }
+                disabled={
+                  cliInstallBusy ||
+                  (cliInstalled && !cliManagedByApp) ||
+                  (!cliInstalled && (cliUnavailable || !activeLicense))
+                }
+                className="inline-flex h-6 min-w-[4.75rem] shrink-0 items-center justify-center gap-1 px-1 ui-text-button-sm ui-color-secondary transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-60"
+              >
+                {cliInstallBusy && (
+                  <Loader2 size={10} className="animate-spin" />
+                )}
+                <span>
+                  {cliInstalled && cliManagedByApp
+                    ? t({
+                        id: "settings.about.uninstall_cli",
+                        message: "Uninstall",
+                      })
+                    : cliInstalled
+                      ? t({
+                          id: "settings.about.cli.installed_action",
+                          message: "Installed",
+                        })
+                      : t({
+                          id: "settings.about.install_cli",
+                          message: "Install CLI",
+                        })}
+                </span>
+              </button>
             </div>
           </div>
         </div>

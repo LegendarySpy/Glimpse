@@ -6,6 +6,7 @@ mod auto_dictionary;
 mod cli_install;
 mod core;
 mod crypto;
+mod data_export;
 mod dictionary;
 mod import;
 mod integrations;
@@ -632,6 +633,9 @@ pub fn run() {
             import::commands::apply_import,
             get_app_info,
             open_data_dir,
+            data_export::dataset_preview,
+            data_export::export_dataset,
+            data_export::delete_all_data,
             get_transcriptions_page,
             get_today_dictation_stats,
             delete_transcription,
