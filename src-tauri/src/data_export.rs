@@ -358,9 +358,10 @@ fn spawn_windows_cleaner(targets: &[PathBuf]) -> Result<(), String> {
         .join(" & ");
     // SQLite and WebView2 files stay locked until the process exits, so a
     // detached shell waits, deletes, then retries once for slow teardown.
-    // ping is called by absolute path: the app may hand the shell a PATH
-    // without System32 (e.g. dev builds run under VsDevCmd).
-    let wait = "\"%SystemRoot%\\System32\\ping.exe\" -n 4 127.0.0.1 >nul";
+    // ping is called by absolute path (the app may hand the shell a PATH
+    // without System32) and stays unquoted: a script starting with a quote
+    // triggers cmd /C quote stripping that breaks the whole command line.
+    let wait = "%SystemRoot%\\System32\\ping.exe -n 4 127.0.0.1 >nul";
     let script = format!("{wait} & {delete_commands} & {wait} & {delete_commands}");
 
     // raw_arg: Command::args applies MSVC-style quoting that cmd.exe does not
