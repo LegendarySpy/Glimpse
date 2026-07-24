@@ -2,7 +2,7 @@
 
 ### Improvements
 
-- Video imports on Windows now work out of the box for common MP4, MOV, and WebM files without needing FFmpeg.
+- Video imports on Windows now work out of the box for common MP4, MOV, and WebM files. FFmpeg is only needed as a fallback for less common codecs.
 - Microsoft Store installs now include a proper `glimpse` command that stays connected to the Store version.
 
 ### Fixes

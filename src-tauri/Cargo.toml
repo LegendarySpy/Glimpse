@@ -1,6 +1,6 @@
 [package]
 name = "Glimpse"
-version = "1.0.3"
+version = "1.0.4"
 description = "Open-source voice-to-text productivity app built with Tauri"
 authors = ["Glimpse HQ"]
 edition = "2024"

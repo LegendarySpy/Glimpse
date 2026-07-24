@@ -329,22 +329,30 @@ jobs:
         run: |
           set -euo pipefail
 
-          assets_json=$(gh release view "$TAG_NAME" --json assets)
+          # The asset list can lag behind the upload jobs, so retry.
+          for attempt in 1 2 3 4 5; do
+            assets_json=$(gh release view "$TAG_NAME" --json assets)
 
-          mac_asset=$(jq -r '.assets[].name | select(endswith(".app.tar.gz"))' <<< "$assets_json" | head -n 1)
-          mac_sig="${mac_asset}.sig"
-          windows_asset=$(jq -r '.assets[].name | select(endswith(".exe"))' <<< "$assets_json" | head -n 1)
-          if [[ -z "$windows_asset" ]]; then
-            windows_asset=$(jq -r '.assets[].name | select(endswith(".msi"))' <<< "$assets_json" | head -n 1)
-          fi
-          windows_sig="${windows_asset}.sig"
+            mac_asset=$(jq -r '.assets[].name | select(endswith(".app.tar.gz"))' <<< "$assets_json" | head -n 1)
+            mac_sig="${mac_asset}.sig"
+            windows_asset=$(jq -r '.assets[].name | select(endswith(".exe"))' <<< "$assets_json" | head -n 1)
+            if [[ -z "$windows_asset" ]]; then
+              windows_asset=$(jq -r '.assets[].name | select(endswith(".msi"))' <<< "$assets_json" | head -n 1)
+            fi
+            windows_sig="${windows_asset}.sig"
 
-          for asset in "$mac_asset" "$mac_sig" "$windows_asset" "$windows_sig"; do
-            if [[ -z "$asset" || "$asset" == "null" ]]; then
-              echo "Missing updater asset: $asset" >&2
+            if [[ -n "$mac_asset" && -n "$windows_asset" ]] &&
+              jq -e --arg name "$mac_sig" '.assets[].name | select(. == $name)' <<< "$assets_json" > /dev/null &&
+              jq -e --arg name "$windows_sig" '.assets[].name | select(. == $name)' <<< "$assets_json" > /dev/null; then
+              break
+            fi
+
+            if [[ "$attempt" == 5 ]]; then
+              echo "Updater assets missing after $attempt attempts. Release has:" >&2
               jq -r '.assets[].name' <<< "$assets_json" >&2
               exit 1
             fi
+            sleep 20
           done
 
           workdir=$(mktemp -d)
