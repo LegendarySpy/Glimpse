@@ -936,8 +936,8 @@ msgstr "Continue"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.confirm.continue"
-msgstr "Skip for now"
+msgid "onboarding.model.confirm.title"
+msgstr "Continue without a model?"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
@@ -1442,11 +1442,6 @@ msgstr "Download Neural Engine encoder"
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.download_one"
 msgstr "Download one"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.confirm.title"
-msgstr "Continue without a model?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/ModelStatCard.tsx
@@ -3449,6 +3444,11 @@ msgstr "Skip"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.skip_short_aria"
 msgstr "Skip clips shorter than one second"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.confirm.continue"
+msgstr "Skip for now"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
