@@ -1,0 +1,5312 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: lokalise.com\n"
+"Project-Id-Version: Glimpse\n"
+"PO-Revision-Date: 2026-07-26 00:42\n"
+"Last-Translator: lokalise.com\n"
+"Language-Team: lokalise.com\n\n"
+"Language: fr\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"Plural-Forms: \n"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.saving_suffix"
+#~ msgstr " · Enregistrement en cours…"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.shortcut.capture_placeholder"
+#~ msgstr "…"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.language_model.endpoint.autofilled"
+#~ msgstr "(rempli automatiquement)"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.search_count"
+#~ msgstr "{0} sur {1}"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.results.multiple"
+#~ msgstr "{0} résultats"
+
+#. js-lingui-explicit-id
+#~ msgid "personalization.modal.applications.selected"
+#~ msgstr "{0} sélectionné(s)"
+
+#. js-lingui-explicit-id
+#~ msgid "personalization.modal.websites.count"
+#~ msgstr "{0} sites"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.monthly_transcriptions"
+#~ msgstr "{0} transcriptions"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.word_count.multiple"
+#~ msgstr "{0} mots"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.sessions.location"
+#~ msgstr "{0}, {1}"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.percent_used"
+#~ msgstr "{0} % utilisé"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.audio_duration.seconds"
+#~ msgstr "Audio de {0} s"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.engine.generic.description"
+#~ msgstr "Moteur de transcription {engineLabel}."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.installed_count"
+#~ msgstr "{installedCount} installé(s)"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.audio_duration.minutes_seconds"
+#~ msgstr "Audio de {minutes} min {remaining} s"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.audio_duration.minutes"
+#~ msgstr "{minutes} min audio"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.count.multiple"
+#~ msgstr "{totalCount} transcriptions"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cta.cloud"
+#~ msgstr "> Cloud"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cta.local"
+#~ msgstr "> Local"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.audio_duration.zero"
+#~ msgstr "0 s audio"
+
+#. js-lingui-explicit-id
+#~ msgid "library.import.summary.single"
+#~ msgstr "1 fichier"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.results.single"
+#~ msgstr "1 résultat"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.count.single"
+#~ msgstr "1 transcription"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.word_count.single"
+#~ msgstr "1 mot"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.prune.three_months"
+#~ msgstr "3 mois"
+
+#. js-lingui-explicit-id
+#~ msgid "home.account.fallback"
+#~ msgstr "Compte"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.modal.section.account"
+#~ msgstr "Compte"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.title"
+#~ msgstr "Compte"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.section.title"
+#~ msgstr "Réglages du compte"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.active"
+#~ msgstr "Actif"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.subscription.cloud_plan"
+#~ msgstr "Abonnement cloud actif"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.active_sessions"
+#~ msgstr "Sessions actives"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.add"
+#~ msgstr "Ajouter"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.word_dictionary.description"
+#~ msgstr "Ajoutez des mots ou des expressions personnalisés qui ne figurent pas dans le dictionnaire par défaut."
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.add_entry_aria"
+#~ msgstr "Ajouter une entrée"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.replacements.add_aria"
+#~ msgstr "Ajouter un remplacement"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.status.all"
+#~ msgstr "Tout"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.tags.all"
+#~ msgstr "Tous les tags"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.date.all_time"
+#~ msgstr "Toujours"
+
+#. js-lingui-explicit-id
+#~ msgid "faq.cloud.answer"
+#~ msgstr "Une mise à niveau payante optionnelle offrant la synchronisation entre appareils, un traitement cloud plus rapide et de meilleurs modèles d'IA."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.about.app_info"
+#~ msgstr "Infos sur l'app"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.audio"
+#~ msgstr "Audio"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.audio_processed"
+#~ msgstr "Audio traité"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.auto_delete_recordings.body"
+#~ msgstr "Supprime automatiquement les fichiers audio locaux."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.auto_delete_recordings"
+#~ msgstr "Suppression automatique des enregistrements"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.replacements.description"
+#~ msgstr "Remplacez automatiquement des mots dans vos transcriptions."
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.timestamps.available_later"
+#~ msgstr "Disponible après la transcription"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.language_info.badges"
+#~ msgstr "Les badges indiquent quel moteur installé prend en charge chaque langue."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.local.description"
+#~ msgstr "Idéal pour les sessions hors ligne ou axées sur la confidentialité. Le cloud reste facultatif si vous souhaitez la synchronisation et des réponses plus rapides."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cloud.feature.models"
+#~ msgstr "Modèles plus grands et plus performants"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.subtitle"
+#~ msgstr "Créez à la vitesse de la parole."
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.cancel"
+#~ msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cancel"
+#~ msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.cancel"
+#~ msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.cancel_download"
+#~ msgstr "Annuler le téléchargement"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.canceled"
+#~ msgstr "Annulé"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.canceling"
+#~ msgstr "Annulation…"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.cancelled"
+#~ msgstr "Annulé"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.cancelled"
+#~ msgstr "Annulé"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.change"
+#~ msgstr "Modifier le mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.modal_title"
+#~ msgstr "Modifier le mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.status.checking"
+#~ msgstr "Vérification…"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.title"
+#~ msgstr "Choisir votre modèle local"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.cleanup.help"
+#~ msgstr "Nettoie les transcriptions après la transcription tout en préservant le sens original."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.cleanup"
+#~ msgstr "Nettoyage"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.clear_all"
+#~ msgstr "Tout effacer"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.clearing"
+#~ msgstr "Effacement…"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.accessibility.instructions"
+#~ msgstr "Cliquez ci-dessous pour ouvrir les Réglages Système, puis activez {appName}"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.smart.capture_help_idle"
+#~ msgstr "Cliquez sur le raccourci pour le modifier."
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.click_to_edit"
+#~ msgstr "Cliquer pour modifier"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.close"
+#~ msgstr "Fermer"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.cloud"
+#~ msgstr "Cloud"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud.body"
+#~ msgstr "Les comptes cloud, abonnements et synchronisation sont actuellement {status}."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.history_sync.cloud_feature"
+#~ msgstr "Fonctionnalité Cloud"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.signin.subtitle"
+#~ msgstr "La synchronisation Cloud est actuellement {status}."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage"
+#~ msgstr "Utilisation du Cloud"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.about.faq_help_description"
+#~ msgstr "questions fréquentes"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.confirm"
+#~ msgstr "Confirmer"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.confirm"
+#~ msgstr "Confirmer"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.confirm_placeholder"
+#~ msgstr "Confirmer le nouveau mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.confirm_aria"
+#~ msgstr "Confirmer le nouveau mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.signin.continue"
+#~ msgstr "Continuer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.microphone.continue"
+#~ msgstr "Continuer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.accessibility.continue"
+#~ msgstr "Continuer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.continue"
+#~ msgstr "Continuer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.confirm_without_model.continue"
+#~ msgstr "Continuer quand même"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.confirm_without_model.title"
+#~ msgstr "Continuer sans modèle ?"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.converting"
+#~ msgstr "Conversion en cours"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.status.converting"
+#~ msgstr "Conversion en cours"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.converting_progress"
+#~ msgstr "Conversion {percent} %"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.copy_error"
+#~ msgstr "Copier l'erreur"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cloud.feature.sync"
+#~ msgstr "Synchronisation entre appareils"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.sessions.current"
+#~ msgstr "Actuel"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.current_placeholder"
+#~ msgstr "Mot de passe actuel"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.current_aria"
+#~ msgstr "Mot de passe actuel"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.about.data_location"
+#~ msgstr "Emplacement des données"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.smart.badge"
+#~ msgstr "Par défaut"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.delete"
+#~ msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.action.delete_aria"
+#~ msgstr "Supprimer {modelLabel}"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.delete_model"
+#~ msgstr "Supprimer le modèle"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.page.dictionary"
+#~ msgstr "Dictionnaire"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.replacements.title"
+#~ msgstr "Remplacements directs"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.done"
+#~ msgstr "Terminé"
+
+#. js-lingui-explicit-id
+#~ msgid "library.card.done"
+#~ msgstr "Terminé"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.status.done"
+#~ msgstr "Terminé"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.download"
+#~ msgstr "Télécharger"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.download"
+#~ msgstr "Télécharger"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.action.download_aria"
+#~ msgstr "Télécharger {modelLabel}"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.download_failed"
+#~ msgstr "Échec du téléchargement"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.download_model"
+#~ msgstr "Télécharger le modèle"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.downloaded"
+#~ msgstr "Téléchargé"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.edit"
+#~ msgstr "Modifier"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.edit_entry"
+#~ msgstr "Modifier {entry}"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.name.edit_aria"
+#~ msgstr "Modifier le nom"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.replacements.edit"
+#~ msgstr "Modifier le remplacement pour {0}"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.status.enabled"
+#~ msgstr "Activé"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.language_model.endpoint"
+#~ msgstr "Point de terminaison"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.language.english"
+#~ msgstr "Anglais"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.enhanced"
+#~ msgstr "Amélioré"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.local.feature.privacy"
+#~ msgstr "Tout reste sur l'appareil pour préserver la confidentialité"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.failed"
+#~ msgstr "Échec"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.status.failed"
+#~ msgstr "Échec"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.update_failed"
+#~ msgstr "Impossible de mettre à jour le mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.about.faq_help"
+#~ msgstr "FAQ et aide"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.engine.parakeet.description"
+#~ msgstr "Rapide, multilingue et précis. Basé sur ONNX pour la transcription locale au quotidien."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.loading_body"
+#~ msgstr "Récupération des moteurs de transcription locaux disponibles pour cette version."
+
+#. js-lingui-explicit-id
+#~ msgid "library.card.ffmpeg_help"
+#~ msgstr "Aide FFmpeg"
+
+#. js-lingui-explicit-id
+#~ msgid "library.import.files"
+#~ msgstr "Fichiers"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.local.feature.sync"
+#~ msgstr "Synchronisation cloud optionnelle et gratuite"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.subscription.free_plan"
+#~ msgstr "Forfait gratuit"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.language.french"
+#~ msgstr "Français"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.modal.section.general"
+#~ msgstr "Général"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cloud.description"
+#~ msgstr "Accédez à de meilleurs modèles et à des outils de rédaction plus intelligents (5,99 $/mois) avec le cloud."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.get_started"
+#~ msgstr "Commencer"
+
+#. js-lingui-explicit-id
+#~ msgid "home.support.github.title"
+#~ msgstr "GitHub Issues"
+
+#. js-lingui-explicit-id
+#~ msgid "faq.brand"
+#~ msgstr "Glimpse"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.brand"
+#~ msgstr "Glimpse"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud.title"
+#~ msgstr "Glimpse Cloud"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cloud.title"
+#~ msgstr "Glimpse Cloud"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.unavailable_body"
+#~ msgstr "Glimpse n'a pas pu charger la liste des modèles locaux. La configuration peut se poursuivre avec le moteur local par défaut, et vous pourrez gérer les téléchargements ultérieurement dans Réglages."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.local.title"
+#~ msgstr "Glimpse Local"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.analytics_notice"
+#~ msgstr "Glimpse envoie des données d'utilisation anonymes pour aider à améliorer l'application. Vous pouvez désactiver cette option à tout moment dans Réglages -> Application."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.name.default"
+#~ msgstr "Utilisateur Glimpse"
+
+#. js-lingui-explicit-id
+#~ msgid "home.greeting.afternoon"
+#~ msgstr "Bon après-midi"
+
+#. js-lingui-explicit-id
+#~ msgid "home.greeting.evening"
+#~ msgstr "Bonsoir"
+
+#. js-lingui-explicit-id
+#~ msgid "home.greeting.morning"
+#~ msgstr "Bonjour"
+
+#. js-lingui-explicit-id
+#~ msgid "faq.confirm"
+#~ msgstr "Compris"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.hide"
+#~ msgstr "Masquer le mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.history_sync"
+#~ msgstr "Synchronisation de l'historique"
+
+#. js-lingui-explicit-id
+#~ msgid "faq.data_use.question"
+#~ msgstr "Comment mes données sont-elles utilisées ?"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.hours_unit"
+#~ msgstr "h"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.in_development"
+#~ msgstr "En développement"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cloud.badge"
+#~ msgstr "En développement"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.language_info.installed"
+#~ msgstr "La liste des langues est filtrée selon les modèles que vous avez installés."
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.date.last30"
+#~ msgstr "30 derniers jours"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.date.last7"
+#~ msgstr "7 derniers jours"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.lifetime"
+#~ msgstr "À vie"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.llm_model"
+#~ msgstr "LLM : {llmModelLabel}"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.loading_title"
+#~ msgstr "Chargement des modèles locaux"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.loading"
+#~ msgstr "Chargement…"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.loading_cta"
+#~ msgstr "Chargement…"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.local.feature.models"
+#~ msgstr "Modèles locaux"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.description"
+#~ msgstr "Gérez les moteurs de transcription et les paramètres des fournisseurs d'IA."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.subtitle"
+#~ msgstr "Gérez votre profil, vos sessions et votre abonnement."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.minutes_unit"
+#~ msgstr "min"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.mode"
+#~ msgstr "Mode : {modeLabel}"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.unavailable_title"
+#~ msgstr "Liste de modèles indisponible"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.models_tab"
+#~ msgstr "Modèles"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.title"
+#~ msgstr "Modèles"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.cleanup.info_aria"
+#~ msgstr "En savoir plus sur le nettoyage"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.subtitle"
+#~ msgstr "D'autres modèles et la configuration du modèle de langage sont disponibles dans les Réglages après la configuration initiale."
+
+#. js-lingui-explicit-id
+#~ msgid "library.card.more_options"
+#~ msgstr "Plus d'options"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.new_placeholder"
+#~ msgstr "Nouveau mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.new_aria"
+#~ msgstr "Nouveau mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.empty_title"
+#~ msgstr "Aucun modèle local trouvé"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.tags.none"
+#~ msgstr "Aucun"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.status.not_enabled"
+#~ msgstr "Non activé"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.timestamps.unsupported"
+#~ msgstr "Non pris en charge"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.engine.whisper.description"
+#~ msgstr "Reconnaissance vocale d'OpenAI avec prise en charge du vocabulaire personnalisé."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.too_short"
+#~ msgstr "Le mot de passe doit contenir au moins 8 caractères"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.success"
+#~ msgstr "Mot de passe mis à jour"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.mismatch"
+#~ msgstr "Les mots de passe ne correspondent pas"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.auto_pause_media.body"
+#~ msgstr "met la musique en pause pendant l'enregistrement et la reprend une fois terminé."
+
+#. js-lingui-explicit-id
+#~ msgid "personalization.modal.header"
+#~ msgstr "Personnalisation"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.press_enter_to_save"
+#~ msgstr "Appuyez sur Entrée pour enregistrer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.smart.capture_prompt"
+#~ msgstr "Appuyez sur le nouveau raccourci…"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.smart.capture_help_active"
+#~ msgstr "Appuyez sur votre nouveau raccourci ou sur Échap pour annuler."
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.queued"
+#~ msgstr "En attente"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.queued_fallback"
+#~ msgstr "En attente"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.status.queued"
+#~ msgstr "En attente"
+
+#. js-lingui-explicit-id
+#~ msgid "home.ready_subtitle"
+#~ msgstr "Prêt quand vous l'êtes"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.title"
+#~ msgstr "Transcriptions récentes"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.recommended"
+#~ msgstr "Recommandé"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.shortcut.record_aria"
+#~ msgstr "Enregistrer un nouveau raccourci pour {label}, actuellement {shortcut}"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.smart.capture_aria"
+#~ msgstr "Enregistrer un nouveau raccourci pour Smart, actuellement {shortcut}"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.refresh"
+#~ msgstr "Actualiser"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.refresh_title"
+#~ msgstr "Actualiser les statistiques d'utilisation"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.refreshing"
+#~ msgstr "Actualisation…"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.cleanup.body"
+#~ msgstr "supprimer les mots de remplissage et peaufiner les transcriptions"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.page.replacements"
+#~ msgstr "Remplacements"
+
+#. js-lingui-explicit-id
+#~ msgid "home.support.github.subtitle"
+#~ msgstr "Signaler des bugs et demander des fonctionnalités"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.cleanup.help_requirement"
+#~ msgstr "Nécessite un modèle de langage activé et configuré dans l'onglet Modèles."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.sessions.revoke"
+#~ msgstr "Révoquer"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.save"
+#~ msgstr "Enregistrer et mettre à jour"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.name.save_aria"
+#~ msgstr "Enregistrer le nom"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.saving"
+#~ msgstr "Enregistrement en cours…"
+
+#. js-lingui-explicit-id
+#~ msgid "personalization.modal.applications.search"
+#~ msgstr "Rechercher des applications…"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.search_aria"
+#~ msgstr "Rechercher dans la bibliothèque"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.list.search.placeholder"
+#~ msgstr "Rechercher…"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.select_aria"
+#~ msgstr "Sélectionner {modelLabel}"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.tags.select_existing"
+#~ msgstr "Sélectionner un tag existant"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.local.aria"
+#~ msgstr "Sélectionner le mode Local (confidentialité prioritaire, sur l'appareil)"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.settings"
+#~ msgstr "Réglages"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.shortcuts.invalid_non_modifier"
+#~ msgstr "Le raccourci doit inclure une touche non-modificatrice (par exemple, Contrôle+Espace)."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.password.show"
+#~ msgstr "Afficher le mot de passe"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.sign_out"
+#~ msgstr "Se déconnecter"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.active_sessions.sign_out_all"
+#~ msgstr "Déconnecter tous les appareils"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud.disabled"
+#~ msgstr "La connexion est désactivée."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.microphone.skip"
+#~ msgstr "Ignorer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.accessibility.skip"
+#~ msgstr "Ignorer"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.smart.label"
+#~ msgstr "Intelligent"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.subtitle"
+#~ msgstr "Intelligent est activé par défaut, d'autres options sont disponibles dans les réglages."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.welcome.cloud.feature.tools"
+#~ msgstr "Outils de rédaction intelligents et diffusion"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.speech_model"
+#~ msgstr "Voix : {speechModelLabel}"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.starting"
+#~ msgstr "Démarrage en cours…"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.confirm_without_model.stay"
+#~ msgstr "Rester ici"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.action.stop_download_aria"
+#~ msgstr "Arrêter le téléchargement de {modelLabel}"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.about.storage_used"
+#~ msgstr "Stockage utilisé"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.subscription"
+#~ msgstr "Abonnement"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.timestamps.supported"
+#~ msgstr "Pris en charge"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.history_sync.cloud_description"
+#~ msgstr "Synchroniser les transcriptions sur tous les appareils"
+
+#. js-lingui-explicit-id
+#~ msgid "library.modal.tags"
+#~ msgstr "Étiquettes"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.smart.description"
+#~ msgstr "appuyer pour activer/désactiver, maintenir pour parler"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.empty_body"
+#~ msgstr "Cette version n'a retourné aucun modèle local. Vous pouvez poursuivre la configuration et gérer les modèles ultérieurement dans les Réglages."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.this_month"
+#~ msgstr "Ce mois-ci"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.cleanup.models_suffix"
+#~ msgstr "pour utiliser Nettoyage."
+
+#. js-lingui-explicit-id
+#~ msgid "settings.app.auto_pause_media.toggle_aria"
+#~ msgstr "Activer/désactiver la mise en pause automatique des médias pendant l'enregistrement"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.general.cleanup.toggle_aria"
+#~ msgstr "Activer/Désactiver Nettoyage"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.history_sync.toggle"
+#~ msgstr "Activer/désactiver la synchronisation de l'historique"
+
+#. js-lingui-explicit-id
+#~ msgid "library.view.filter.status.transcribing"
+#~ msgstr "Transcription en cours"
+
+#. js-lingui-explicit-id
+#~ msgid "library.status.transcribing_progress"
+#~ msgstr "Transcription en cours {percent} %"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.transcription_engines"
+#~ msgstr "Moteurs de transcription"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.signin.title"
+#~ msgstr "Synchronisation des transcriptions"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.cloud_usage.transcriptions"
+#~ msgstr "Transcriptions"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.sessions.unknown_device"
+#~ msgstr "Appareil inconnu"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.account.sessions.unknown_location"
+#~ msgstr "Emplacement inconnu"
+
+#. js-lingui-explicit-id
+#~ msgid "transcriptions.item.unknown_model"
+#~ msgstr "Modèle inconnu"
+
+#. js-lingui-explicit-id
+#~ msgid "settings.models.use"
+#~ msgstr "Utiliser"
+
+#. js-lingui-explicit-id
+#~ msgid "faq.cloud.question"
+#~ msgstr "Qu'est-ce que Glimpse Cloud ?"
+
+#. js-lingui-explicit-id
+#~ msgid "dictionary.word_dictionary.title"
+#~ msgstr "Dictionnaire de mots"
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.signin.body"
+#~ msgstr "Vous pouvez continuer à utiliser Glimpse en mode local. Cet écran sera activé dans une prochaine mise à jour."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.models.confirm_without_model.body"
+#~ msgstr "Vous n'avez pas encore téléchargé de modèle local. La transcription hors ligne ne sera pas disponible tant que vous n'en aurez pas ajouté un dans les Réglages."
+
+#. js-lingui-explicit-id
+#~ msgid "onboarding.ready.title"
+#~ msgstr "Vous êtes prêt !"
+
+#. js-lingui-explicit-id
+#~ msgid "faq.data_use.answer"
+#~ msgstr "Vos données vous appartiennent. Nous n'avons pas le droit de les partager. Nous ne vendrons ni ne partagerons jamais vos données avec des tiers."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.api_key.optional_hint"
+msgstr "(si requis)"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.api_key.optional_hint"
+msgstr "(si requis)"
+
+#. placeholder {0}: stats.llmCleanedCount
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
+msgstr "{0, plural, one {# dictée améliorée par l'IA aujourd'hui} other {# dictées améliorées par l'IA aujourd'hui}}"
+
+#. placeholder {0}: stats.count
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "{0, plural, one {# dictation} other {# dictations}}"
+msgstr "{0, plural, one {# dictée} other {# dictées}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: previewForApp.replacementsCount
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.replacements.detail"
+msgstr "{0, plural, one {# règle} other {# règles}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: previewForApp.personalitiesCount
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.personalities.detail"
+msgstr "{0} enregistré"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: previewForApp.transcriptCount
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.history.detail"
+msgstr "{0} transcriptions"
+
+#. placeholder {0}: stats.words
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "{0, plural, one {# word} other {# words}}"
+msgstr "{0, plural, one {# mot} other {# mots}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: previewForApp.dictionaryCount
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.dictionary.detail"
+msgstr "{0, plural, one {# mot} other {# mots}}"
+
+#. placeholder {0}: stats.longestWords
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
+msgstr "{0, plural, one {Dictée la plus longue aujourd'hui : # mot} other {Dictée la plus longue aujourd'hui : # mots}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: apps.length
+#: src/features/import/components/ImportStep.tsx
+msgid "import.subtitle"
+msgstr "{0, plural, one {Nous avons trouvé une autre application de dictée. Choisissez ce que vous souhaitez importer.} other {Nous avons trouvé d'autres applications de dictée. Choisissez ce que vous souhaitez importer.}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: entries.length
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.entry_count.multiple"
+msgstr "{0} entrées"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: unsupported.length
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.unsupported_files"
+msgstr "{0} fichier(s) ignoré(s) en raison d'un format non pris en charge."
+
+#. js-lingui-explicit-id
+#. placeholder {0}: importPaths.length
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.summary.multiple"
+msgstr "{0} fichiers"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: model.label
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.aria"
+msgstr "{0} modèle"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: filteredEntries.length
+#. placeholder {1}: entries.length
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.search_matches"
+msgstr "{0} sur {1} correspondances"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: replacements.length
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.count.multiple"
+msgstr "{0} remplacements"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
+msgstr "{avg, plural, one {Environ # mot par dictée aujourd'hui} other {Environ # mots par dictée aujourd'hui}}"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.coverage_with_devices"
+msgstr "{coverageBase} · {activeDevices} sur {deviceLimit} appareils actifs"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
+msgstr "{minutes, plural, one {# minute dictée aujourd'hui} other {# minutes dictées aujourd'hui}}"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_default_suffix"
+msgstr "{name} (Par défaut)"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_many"
+msgstr "{pairCount} paires audio et texte"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/CloudModelCard.tsx
+msgid "models.cloud_card.aria"
+msgstr "{providerLabel} modèle cloud"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
+msgstr "{seconds, plural, one {# seconde dictée aujourd'hui} other {# secondes dictées aujourd'hui}}"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.add_shortcut"
+msgstr "+ Ajouter un raccourci"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_one"
+msgstr "1 paire audio et texte"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.entry_count.single"
+msgstr "1 entrée"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.count.single"
+msgstr "1 remplacement"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.threshold.day"
+msgstr "par jour"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.day"
+msgstr "1 jour"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.threshold.month"
+msgstr "par mois"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.month"
+msgstr "1 mois"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.threshold.week"
+msgstr "par semaine"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.week"
+msgstr "1 semaine"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.threshold.year"
+msgstr "par an"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.year"
+msgstr "1 an"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.about.title"
+msgstr "À propos"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.tab.about"
+msgstr "À propos"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.info_aria"
+msgstr "À propos de l'encodeur Apple Neural Engine"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.accessibility"
+msgstr "Accessibilité"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.accessibility.title"
+msgstr "Accessibilité"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.tab.account"
+msgstr "Compte"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.account_tab"
+msgstr "Compte"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.balanced.helper"
+msgstr "Précision et taille"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.quality"
+msgstr "Précis"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.submit"
+msgstr "Activer"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.activate"
+msgstr "Activer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.license_prefix"
+msgstr "Activez votre licence Glimpse dans"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.active"
+msgstr "Actif"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.active"
+msgstr "Actif"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.card.active"
+msgstr "Actif"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.filter.active"
+msgstr "Actif"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.add"
+msgstr "Ajouter"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.none_description"
+msgstr "Ajoutez des paires de mots à remplacer automatiquement dans les transcriptions. La correspondance ne tient pas compte de la casse."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.websites.placeholder"
+msgstr "Ajouter un site comme gmail.com"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.applications.add"
+msgstr "Ajouter une application"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.custom_instructions.placeholder"
+msgstr "Ajouter des instructions personnalisées"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.section.dictionary_description"
+msgstr "Ajoutez des mots personnalisés que Glimpse doit reconnaître."
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.combined.description"
+msgstr "Ajoutez des mots personnalisés que le système doit reconnaître et définissez des remplacements automatiques de mots."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.add_files"
+msgstr "Ajouter des fichiers"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.search_or_add_aria"
+msgstr "Ajouter ou rechercher une entrée dans le dictionnaire"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.add_speaker"
+msgstr "Ajouter un intervenant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.tags.add"
+msgstr "Ajouter un tag"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.websites.aria"
+msgstr "Ajouter un domaine de site web"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.no_entries.description"
+msgstr "Ajoutez des mots, des expressions ou des noms qui ne figurent pas dans le dictionnaire par défaut."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.after"
+msgstr "après"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.filter.all"
+msgstr "Tout"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.filter.all"
+msgstr "Tous les modèles"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.filter.all"
+msgstr "Tous les intervenants"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.allow_browser_requests"
+msgstr "Autoriser les requêtes du navigateur"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.allow_browser_requests_aria"
+msgstr "Autoriser les requêtes navigateur cross-origin"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.placeholder"
+msgstr "Déjà acheté ? Collez votre clé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.ane"
+msgstr "ANE"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.analytics.body"
+msgstr "anonyme, aucune transcription ni audio partagé."
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.time.any"
+msgstr "À tout moment"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.api_key"
+msgstr "Clé API"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.api_key"
+msgstr "Clé API"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.api_key"
+msgstr "Clé API"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.tab.api_server"
+msgstr "Serveur API"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.api_server.full_license_required"
+msgstr "Le serveur API nécessite une licence active complète."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.tab.app"
+msgstr "Application"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.appearance"
+msgstr "Apparence"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.applications"
+msgstr "Applications"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.apply"
+msgstr "Appliquer quand même"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.apps"
+msgstr "Apps"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.assign_new_speaker"
+msgstr "Attribuer un nouvel intervenant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.speaker.unassigned"
+msgstr "Attribuer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune_target.audio"
+msgstr "Audio"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.file_filter"
+msgstr "Audio et vidéo"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.noun.audio.one"
+msgstr "fichier audio"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.noun.audio.other"
+msgstr "fichiers audio"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.audio_scrubber"
+msgstr "Barre de défilement audio"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.audio_unavailable"
+msgstr "Audio indisponible"
+
+#. js-lingui-explicit-id
+#: src/features/pill/PillOverlay.tsx
+msgid "pill.visualizer"
+msgstr "Visualiseur audio"
+
+#. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "transcription.language.auto"
+msgstr "Auto"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.auto_dictionary"
+msgstr "Dictionnaire automatique"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete"
+msgstr "Suppression automatique"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media"
+msgstr "Pause automatique des médias"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_update"
+msgstr "Mise à jour automatique"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: providerPreset?.defaultModel || "provider default"
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.model.automatic"
+msgstr "Automatique ({0})"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.start_on_launch_help"
+msgstr "démarrer automatiquement à l'ouverture de Glimpse"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.automation"
+msgstr "Automatisation"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.back"
+msgstr "Retour"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/OnboardingScreen.tsx
+msgid "onboarding.back"
+msgstr "Retour"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.back"
+msgstr "Retour à la bibliothèque"
+
+#. js-lingui-explicit-id
+#: src/features/pill/PillOverlay.tsx
+msgid "pill.background_visualizer"
+msgstr "Visualiseur audio en arrière-plan"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.balanced"
+msgstr "Équilibré"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.behavior"
+msgstr "Comportement"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.quality.helper"
+msgstr "Meilleurs résultats"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.subtitle"
+msgstr "Les modèles plus grands sont plus précis. Les plus petits sont plus rapides."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.browse_all"
+msgstr "Parcourir tous les modèles"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.browse"
+msgstr "Parcourir tous les modèles"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.built_in"
+msgstr "Intégré"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.built_in"
+msgstr "Intégré"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.builtin"
+msgstr "Intégré"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.built_in"
+msgstr "Intégré au Mac"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.ready"
+msgstr "Intégré à ce Mac."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.action.deactivate_cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.cancel"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.cancel_download"
+msgstr "Annuler le téléchargement"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.cancelled"
+msgstr "Annulé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.threshold.unknown_count"
+msgstr "Passer la suppression automatique à {policyLabel} peut immédiatement supprimer les {noun} déjà plus anciens que {threshold}."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.immediately.unknown_count"
+msgstr "Passer la suppression automatique à {policyLabel} peut immédiatement supprimer vos {noun} existants."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.threshold.known_count"
+msgstr "Passer la suppression automatique à {policyLabel} supprimera immédiatement {candidateCount} {noun} déjà plus anciens que {threshold}."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.immediately.known_count"
+msgstr "Passer la suppression automatique à {policyLabel} supprimera immédiatement {candidateCount} {noun} existants."
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.check_title"
+msgstr "Rechercher des mises à jour"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.check_aria"
+msgstr "Rechercher des mises à jour"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.check_updates"
+msgstr "Rechercher des mises à jour"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.check_updates_long"
+msgstr "Rechercher des mises à jour…"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.checking"
+msgstr "Recherche de mises à jour…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.permission.checking"
+msgstr "Vérification de l'autorisation"
+
+#. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "transcription.language.unsupported_description"
+msgstr "Choisissez un modèle compatible pour les activer."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.title"
+msgstr "Choisir un modèle"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.title"
+msgstr "Choisir un modèle"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_dialog_title"
+msgstr "Choisir l'emplacement d'enregistrement du jeu de données"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.cleaning"
+msgstr "Nettoyage en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.cleanup"
+msgstr "Nettoyage"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.logs.clear"
+msgstr "Effacer"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.search.clear"
+msgstr "Effacer la recherche"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.search.clear"
+msgstr "Effacer la recherche"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.speaker.clear"
+msgstr "Effacer l'intervenant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.dropzone"
+msgstr "Déposer des fichiers pour importer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.empty_state"
+msgstr "Faites glisser des fichiers ici pour constituer votre bibliothèque."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.speaker.rename"
+msgstr "Cliquer pour renommer"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.close"
+msgstr "Fermer"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.close"
+msgstr "Fermer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.close"
+msgstr "Fermer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.close"
+msgstr "Fermer"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.close_aria"
+msgstr "Fermer la FAQ"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.close"
+msgstr "Fermer la fenêtre modale"
+
+#. js-lingui-explicit-id
+#: src/features/toast/ToastOverlay.tsx
+msgid "toast.close"
+msgstr "Fermer la notification"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.close_button"
+msgstr "Fermer les réglages"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.close_window"
+msgstr "Fermer la fenêtre"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.mode.cloud"
+msgstr "Cloud"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.mode.cloud"
+msgstr "Cloud"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.cloud.label"
+msgstr "Cloud"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.cloud"
+msgstr "Cloud (clé API)"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.provider.cloud"
+msgstr "Cloud (clé API)"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.cloud.aria"
+msgstr "Traitement Cloud (Bientôt disponible)"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/CloudModelCard.tsx
+msgid "models.cloud_card.transcribing"
+msgstr "Transcription dans le cloud"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.collapse"
+msgstr "Réduire la barre latérale"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.cloud.badge"
+msgstr "bientôt disponible"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.command_line"
+msgstr "Ligne de commande"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.locked_info"
+msgstr "L'installation en ligne de commande nécessite une licence active."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.tier_commercial"
+msgstr "Commercial"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.faq.subtitle"
+msgstr "Questions fréquentes"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.configuration"
+msgstr "Configuration"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.continue"
+msgstr "Continuer"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.permissions.continue"
+msgstr "Continuer"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.confirm.title"
+msgstr "Continuer sans modèle ?"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.tier_contributor"
+msgstr "Contributeur"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.import_status.converting"
+msgstr "Conversion de l'audio en cours…"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: Math.round(clampProgress(item.status.progress) * 100)
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.import_status.converting_progress"
+msgstr "Conversion de l'audio en cours… {0} %"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.copied"
+msgstr "Copié"
+
+#. js-lingui-explicit-id
+#: src/features/toast/ToastOverlay.tsx
+msgid "toast.copied"
+msgstr "Copié"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.email_support.copied"
+msgstr "Copié"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.logs.copied"
+msgstr "Copié"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.copy.copied"
+msgstr "Copié"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.feedback.email_copied"
+msgstr "Copié !"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.copy.copied_exclaim"
+msgstr "Copié !"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.copy"
+msgstr "Copier"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.logs.copy"
+msgstr "Copier"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.copy"
+msgstr "Copier"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LocalApiSidebarStatus.tsx
+msgid "home.local_api.copy_url"
+msgstr "Copier l'URL de base"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.logs.copy_aria"
+msgstr "Copier les journaux"
+
+#. js-lingui-explicit-id
+#: src/features/toast/ToastOverlay.tsx
+msgid "toast.copy_message"
+msgstr "Copier le message"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.copy_selection"
+msgstr "Copier la sélection"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.copy_transcription"
+msgstr "Copier la transcription"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.section.core"
+msgstr "Core"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.free.answer"
+msgstr "Glimpse utilise des modèles d'IA open source sur l'appareil pour la transcription, ce qui évite tout coût récurrent pour les fonctionnalités essentielles."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/OnboardingScreen.tsx
+msgid "onboarding.complete.failed"
+msgstr "Impossible de terminer la configuration. Vérifiez vos réglages et réessayez."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/OnboardingScreen.tsx
+msgid "onboarding.complete.no_model"
+msgstr "Impossible de charger une sélection de modèle local. Essayez de rouvrir l'intégration."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.import_dialog_error"
+msgstr "Impossible d'ouvrir la boîte de dialogue d'importation."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.audio_conversion_failed"
+msgstr "Impossible de convertir ce fichier en audio pour la transcription."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.copy_original_failed"
+msgstr "Impossible de copier le fichier original."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.copy_original_failed"
+msgstr "Impossible de copier le fichier original dans la bibliothèque."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.create_storage_failed"
+msgstr "Impossible de créer le stockage de la bibliothèque."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.create_storage_failed"
+msgstr "Impossible de créer le stockage de la bibliothèque. Vérifiez les autorisations du disque."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.decode_failed"
+msgstr "Impossible de décoder ce fichier audio. Essayez d'installer FFmpeg."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.delete_error.delete_files_failed"
+msgstr "Impossible de supprimer les fichiers de la bibliothèque. Vérifiez les autorisations et réessayez."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.delete_error.outside_folder"
+msgstr "Impossible de supprimer cet élément car ses fichiers se trouvent en dehors du dossier de la bibliothèque."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.delete_error.invalid_path"
+msgstr "Impossible de supprimer cet élément en raison d'un chemin de fichier invalide."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.delete_error.storage_missing"
+msgstr "Impossible de supprimer cet élément. Le stockage de la bibliothèque est introuvable."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.export.item_not_found"
+msgstr "Cet élément de bibliothèque est introuvable. Essayez de le rouvrir."
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.couldnt_load"
+msgstr "Impossible de charger les versions"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_error"
+msgstr "Impossible de lire vos enregistrements"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.generic_error"
+msgstr "Impossible de démarrer le test du microphone."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.start_error"
+msgstr "Impossible de démarrer le test du microphone."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.export.write_failed"
+msgstr "Impossible d'écrire le fichier d'exportation. Essayez un autre emplacement."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_loading"
+msgstr "Comptage des enregistrements…"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.empty.description"
+msgstr "Créez un mode pour commencer à personnaliser vos apps et sites web."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.model.currently_loaded"
+msgstr "actuellement chargé : {loadedModelLabel}"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.custom"
+msgstr "Personnalisé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.provider.custom"
+msgstr "Personnalisé"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.custom_instructions"
+msgstr "Instructions personnalisées"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/CustomerPortalLink.tsx
+msgid "license.customer_portal"
+msgstr "Portail client"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.cut"
+msgstr "Couper"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.theme.dark"
+msgstr "Sombre"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data"
+msgstr "Données"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.storage.database"
+msgstr "Base de données"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.action.deactivate_confirm_short"
+msgstr "Désactiver"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.action.deactivate"
+msgstr "Désactiver cet appareil"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.playback.decrease"
+msgstr "Diminuer la vitesse de lecture"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.text_size.default"
+msgstr "Par défaut"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: pendingDeletePersonality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.delete_mode.description"
+msgstr "Supprimer « {0} » ? Cette action est irréversible."
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.delete_entry"
+msgstr "Supprimer {entry}"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.delete_all"
+msgstr "Supprimer toutes les données"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.delete_all_aria"
+msgstr "Supprimer toutes les données. Maintenez appuyé pendant dix secondes pour confirmer."
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.full_add_prompt"
+msgstr "Supprimez une entrée avant d'en ajouter une autre."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/OnboardingScreen.tsx
+msgid "onboarding.delete.failed"
+msgstr "Échec de la suppression"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.delete_mode"
+msgstr "Mode de suppression"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.delete_mode.title"
+msgstr "Supprimer le mode ?"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.delete_model"
+msgstr "Supprimer le modèle"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.delete_model"
+msgstr "Supprimer le modèle"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.title"
+msgstr "Supprimer les éléments plus anciens maintenant ?"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.delete.answer"
+msgstr "Supprimez les enregistrements localement pour les retirer. Les données synchronisées sont marquées pour suppression immédiatement après leur suppression."
+
+#. js-lingui-explicit-id
+#. placeholder {0}: replacement.from
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.delete"
+msgstr "Supprimer le remplacement de {0}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.delete_confirm.title"
+msgstr "Supprimer cet élément ?"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.audio_too"
+msgstr "La suppression des transcriptions supprime également l'audio associé."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.body"
+msgstr "La suppression des transcriptions supprime également leur audio enregistré."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.deleting"
+msgstr "Suppression…"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.detect_speakers"
+msgstr "Détecter les intervenants"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.detect_speakers.aria"
+msgstr "Détecter les interlocuteurs"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.detect_speakers"
+msgstr "Détecter les intervenants"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.detect_speakers.aria"
+msgstr "Détecter les interlocuteurs"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.section.developer"
+msgstr "Développeur"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.free_title"
+msgstr "La dictée est gratuite pour toujours"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.free_title"
+msgstr "La dictée est gratuite pour toujours"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.dictionary"
+msgstr "Dictionnaire"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.dictionary"
+msgstr "Dictionnaire"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.section.dictionary_title"
+msgstr "Dictionnaire"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.combined.title"
+msgstr "Dictionnaire et remplacements"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.full_hint"
+msgstr "Dictionnaire plein"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: currentModel?.label ?? settings?.local_model
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.warning"
+msgstr "Le dictionnaire fonctionne uniquement avec les modèles compatibles. Le modèle actuel {0} ignorera ces entrées jusqu'à ce que vous passiez à un modèle compatible."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.disable_mode"
+msgstr "Désactiver le mode"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.done"
+msgstr "Terminé"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.filter.done"
+msgstr "Terminé"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.download"
+msgstr "Télécharger"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.download"
+msgstr "Télécharger"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.confirm.download"
+msgstr "Télécharger"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/OnboardingScreen.tsx
+msgid "onboarding.download.failed"
+msgstr "Échec du téléchargement"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.download_model"
+msgstr "Télécharger le modèle"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.download"
+msgstr "Télécharger l'encodeur Neural Engine"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.download_one"
+msgstr "En télécharger un"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.downloading"
+msgstr "Téléchargement en cours"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_update.body"
+msgstr "télécharge et installe les mises à jour en arrière-plan."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_aria"
+msgstr "Rédiger une carte de membre Glimpse"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.custom_instructions.drag"
+msgstr "Faire glisser pour redimensionner"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.drag_import.title"
+msgstr "Déposez des fichiers à transcrire"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.edit"
+msgstr "Modifier"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode"
+msgstr "Mode d'édition"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.edit_name"
+msgstr "Modifier le nom du mode"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.feedback.email"
+msgstr "E-mail"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.email_support"
+msgstr "E-mail"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent_empty_item"
+msgstr "Transcription vide"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.accessibility.enable"
+msgstr "Activer dans les réglages"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.enable_mode"
+msgstr "Activer le mode"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.permission.enabled"
+msgstr "Activé"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.timestamps_supported"
+msgstr "Activé pour les modèles compatibles"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.timestamps_supported"
+msgstr "Activé pour les modèles compatibles"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.english"
+msgstr "Anglais"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.english"
+msgstr "Anglais"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.website.invalid"
+msgstr "Saisissez un domaine valide, par exemple gmail.com"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.custom.description"
+msgstr "Saisir l'URL de votre point de terminaison"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.provider.custom.description"
+msgstr "Saisir l'URL de votre point de terminaison"
+
+#. js-lingui-explicit-id
+#: src/features/pill/PillOverlay.tsx
+msgid "pill.status.error"
+msgstr "Une erreur s'est produite"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.license_active"
+msgstr "Toutes les fonctionnalités sont déverrouillées."
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.expand"
+msgstr "Développer la barre latérale"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.category.experimental"
+msgstr "Expérimental"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_action"
+msgstr "Exporter"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.export"
+msgstr "Exporter"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_dataset"
+msgstr "Exporter le jeu de données"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.export.failed"
+msgstr "L'exportation a échoué. Réessayez."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.export.title"
+msgstr "Exporter la transcription"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_confirm"
+msgstr "Exporter…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.listen_on_lan_help"
+msgstr "exposer aux autres appareils de votre réseau"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.failed"
+msgstr "Échec"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.filter.failed"
+msgstr "Échec"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.delete_error.default"
+msgstr "Impossible de supprimer l'élément de la bibliothèque."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.delete_error.default_fallback"
+msgstr "Impossible de supprimer l'élément de la bibliothèque."
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.load_failed"
+msgstr "Impossible de charger le journal des modifications"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.card.fallback"
+msgstr "Secours"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.model_fallback"
+msgstr "Secours : {model}"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.faq.title"
+msgstr "FAQ"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.faq"
+msgstr "FAQ"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.features"
+msgstr "Fonctionnalités"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.feedback.title"
+msgstr "Commentaires"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.ffmpeg_help"
+msgstr "Aide FFmpeg"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.ffmpeg_required"
+msgstr "FFmpeg est requis pour l'importation de vidéos."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.file_not_found"
+msgstr "Fichier introuvable."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.file_not_found"
+msgstr "Fichier introuvable. Il a peut-être été déplacé ou supprimé."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.filter.aria"
+msgstr "Filtrer par locuteur"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.filter.aria_label"
+msgstr "Filtrer la bibliothèque par statut"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.filter.aria"
+msgstr "Filtrer les modèles par catégorie"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.find_aria"
+msgstr "Rechercher le mot à remplacer"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.find"
+msgstr "Rechercher un mot…"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.loading"
+msgstr "Recherche d'un modèle pour votre appareil"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.follow_timestamp"
+msgstr "Suivre l'horodatage"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.tier_founder"
+msgstr "Fondateur"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/WelcomeStep.tsx
+msgid "onboarding.welcome.title"
+msgstr "Bienvenue dans Glimpse"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.title"
+msgstr "Foire aux questions"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.snippets.full_list"
+msgstr "Liste complète des extraits"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.tab.general"
+msgstr "Général"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.get_license"
+msgstr "Obtenir une licence"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/WelcomeStep.tsx
+msgid "onboarding.welcome.cta"
+msgstr "Commencer"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.title"
+msgstr "Obtenir de l'aide"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.github"
+msgstr "Github"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.report_issue"
+msgstr "GitHub"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.feedback.github"
+msgstr "Problème GitHub"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.github_unavailable"
+msgstr "GitHub est peut-être temporairement indisponible. Vérifiez votre connexion et réessayez."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.version_label"
+msgstr "Glimpse"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.aria"
+msgstr "Carte de membre Glimpse"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.confirm.body"
+msgstr "Glimpse en a besoin pour transcrire. Le modèle recommandé peut se télécharger en arrière-plan pendant que vous terminez la configuration."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.permissions.subtitle"
+msgstr "Glimpse en a besoin pour vous écouter et saisir du texte à votre place."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.placeholder"
+msgstr "GLIMPSE_…"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.microphone.grant"
+msgstr "Autoriser l'accès"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.microphone.subtitle"
+msgstr "Nécessaire pour capter votre voix lors de la transcription."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.help"
+msgstr "Aide"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.hide"
+msgstr "Masquer {app}"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.hide_others"
+msgstr "Masquer les autres"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.hide_shortcuts"
+msgstr "Masquer les raccourcis"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.hold"
+msgstr "Maintenir"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.hold_to_delete"
+msgstr "Maintenir pour supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.hold_to_restart"
+msgstr "Maintenir pour redémarrer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.hold_description"
+msgstr "maintenez pour parler, relâchez pour arrêter"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.home"
+msgstr "Accueil"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.delete.question"
+msgstr "Et si je souhaite supprimer mes données ?"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.how_it_works.question"
+msgstr "Comment fonctionne Glimpse ?"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.subtitle"
+msgstr "Questions fréquentes sur Glimpse"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.endpoint.placeholder"
+msgstr "https://your-llm-endpoint.com"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.endpoint.placeholder"
+msgstr "https://your-speech-endpoint.com"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.confirm"
+msgstr "Importer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.import_button"
+msgstr "Importer"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cta"
+msgstr "Importer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.import_failed"
+msgstr "Échec de l'importation"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.default"
+msgstr "L'importation a échoué pour l'un des fichiers."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.default_fallback"
+msgstr "L'importation a échoué pour l'un des fichiers."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.import_failed"
+msgstr "Échec de l'importation."
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.apply.failed"
+msgstr "L'importation a échoué. Réessayez ou ignorez."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.title"
+msgstr "Importer dans la bibliothèque"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.importing"
+msgstr "Importation en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.importing"
+msgstr "Importation en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.cloud.description"
+msgstr "En développement"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.toggle"
+msgstr "Inclure l'encodeur Apple Neural Engine"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.include_timestamps_aria"
+msgstr "Inclure les horodatages dans l'export"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.playback.increase"
+msgstr "Augmenter la vitesse de lecture"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.input_monitoring"
+msgstr "Surveillance des entrées"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.install_cli"
+msgstr "Installer l'interface CLI"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.installed_action"
+msgstr "Installé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed"
+msgstr "Installé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.installed_subtitle"
+msgstr "Installé dans {cliInstallPath}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: cliInstallStatus.command
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.path_missing_info"
+msgstr "Installe {0} dans {cliInstallPath}. Ce dossier ne figure pas actuellement dans votre PATH shell ; vous devrez peut-être l'appeler par son chemin complet ou mettre à jour votre profil shell."
+
+#. js-lingui-explicit-id
+#. placeholder {0}: cliInstallStatus?.command ?? "glimpse"
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.default_info"
+msgstr "Installe la commande {0} pour le Terminal, les scripts et les outils d'automatisation. Utilisez-la pour appeler Glimpse par programmation sans ouvrir l'interface de l'app."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.instantly"
+msgstr "Instantanément"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_stamp_issuing"
+msgstr "Émission en cours"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.store_original.description"
+msgstr "Conserver une copie dans le dossier de la bibliothèque"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.model.kept_warm"
+msgstr "maintenu en mémoire pour des réponses rapides"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.shortcut"
+msgstr "Raccourci clavier"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.detect_speakers.description"
+msgstr "Étiqueter les segments par intervenant automatiquement"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.detect_speakers.description"
+msgstr "Étiqueter les segments par intervenant automatiquement"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.language.label"
+msgstr "Langue"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ProvidersTab.tsx
+msgid "settings.providers.language_label"
+msgstr "Langue"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.language"
+msgstr "Langue"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.text_size.large"
+msgstr "Grand"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent"
+msgstr "Dernières transcriptions"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.auto_launch"
+msgstr "Lancer à l'ouverture de session"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_launch"
+msgstr "Lancer au démarrage"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.skip_short_hint"
+msgstr "Exclut les clips de moins d'une seconde"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.category.legacy"
+msgstr "Hérité"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.legacy"
+msgstr "Hérité"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.compact.helper"
+msgstr "Moins d'espace"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.library"
+msgstr "Bibliothèque"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.storage.library"
+msgstr "Bibliothèque"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.title"
+msgstr "Bibliothèque"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.drag_import.eyebrow"
+msgstr "Importation de bibliothèque"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.dialog_aria"
+msgstr "Licence"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.license_active_title"
+msgstr "Licence active"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.input_aria"
+msgstr "Code d'activation"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.input_aria"
+msgstr "Clé de licence"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.theme.light"
+msgstr "Clair"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.listen_on_lan"
+msgstr "Écouter sur le réseau local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.listen_on_lan_aria"
+msgstr "Écouter sur le réseau local"
+
+#. js-lingui-explicit-id
+#: src/features/pill/PillOverlay.tsx
+msgid "pill.status.listening"
+msgstr "Écoute en cours…"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.capability.streaming"
+msgstr "Diffusion en direct"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.capability.streaming"
+msgstr "Diffusion en direct"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.api_key.aria"
+msgstr "Clé API LLM"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.endpoint.aria"
+msgstr "URL du point de terminaison LLM"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.load_more"
+msgstr "Charger plus"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.loading_more"
+msgstr "Chargement…"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.mode.local"
+msgstr "Local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.local"
+msgstr "Local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.section.local"
+msgstr "Local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.provider.local"
+msgstr "Local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.mode.local"
+msgstr "Local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.local.label"
+msgstr "Local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LocalApiSidebarStatus.tsx
+msgid "home.local_api.running"
+msgstr "API locale"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.show_logs"
+msgstr "Journaux"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.logs"
+msgstr "Journaux"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.sort.longest"
+msgstr "Le plus long"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media.body_duck"
+msgstr "Réduit le volume système pendant l'enregistrement."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AneCompileOverlay.tsx
+msgid "ane_compile.body"
+msgstr "macOS compile {label} pour l'Apple Neural Engine. Cette opération n'a lieu qu'une seule fois et peut prendre quelques minutes."
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.major_release"
+msgstr "Version majeure"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.help_temporary"
+msgstr "Rend un raccourci temporaire. Il ne sauvegardera ni l'audio, ni la transcription, ni l'historique."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.description"
+msgstr "Importez des fichiers audio et vidéo pour les transcrire."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.label_member_since"
+msgstr "Membre depuis"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.microphone"
+msgstr "Microphone"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.microphone"
+msgstr "Microphone"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone"
+msgstr "Microphone"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.microphone.title"
+msgstr "Accès au microphone"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.permissions.answer"
+msgstr "L'accès au microphone est nécessaire pour enregistrer votre voix, et l'accès à Accessibilité pour insérer du texte et lire le texte sélectionné en Mode édition. Glimpse n'utilise ces autorisations que lorsque vous dictez activement."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.permission_error"
+msgstr "L'accès au microphone a été refusé."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.unsupported"
+msgstr "Le test du microphone n'est pas disponible dans cette fenêtre."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_unavailable"
+msgstr "Microphone indisponible ({error})"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.minimize"
+msgstr "Réduire"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.model"
+msgstr "Modèle"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.model"
+msgstr "Modèle"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.model"
+msgstr "Modèle"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.model"
+msgstr "Modèle"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.model"
+msgstr "Modèle"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: providerPreset?.defaultModel || "none"
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.model.placeholder"
+msgstr "Modèle (par défaut : {0})"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: providerPreset?.defaultModel || "auto"
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.model.placeholder"
+msgstr "Modèle (par défaut : {0})"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.unavailable"
+msgstr "Liste de modèles indisponible. Vous pouvez en ajouter un ultérieurement dans les Réglages."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.model_not_installed"
+msgstr "Modèle non installé."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.variant"
+msgstr "Variante du modèle"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.variant_installed"
+msgstr "Variante du modèle (installée)"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.models"
+msgstr "Modèles"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.tab.models"
+msgstr "Modèles"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.storage.models"
+msgstr "Modèles"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.more_actions"
+msgstr "Plus d'actions"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.analytics.more_info"
+msgstr "Plus d'infos"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.command_line.info_aria"
+msgstr "Plus d'informations sur les outils en ligne de commande"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.info_aria"
+msgstr "Plus d'informations sur le mode d'édition"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.info_aria"
+msgstr "Plus d'informations sur les options de raccourcis"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.language_info_aria"
+msgstr "Plus d'informations sur les badges de prise en charge des langues de transcription"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.more_options"
+msgstr "Plus d'options"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.more_options"
+msgstr "D'autres options sont disponibles dans Réglages."
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.drag_import.subtitle"
+msgstr "MP3, WAV, M4A, MP4, MOV, et plus encore"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.multilingual"
+msgstr "Multilingue"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.multilingual"
+msgstr "Multilingue"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.installed"
+msgstr "Encodeur Neural Engine installé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.never"
+msgstr "Jamais"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.new_mode"
+msgstr "Nouveau mode"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.new_mode.default_name"
+msgstr "Nouveau mode"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.new_tag"
+msgstr "Nouveau tag…"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.tags.new_tag"
+msgstr "Nouveau tag…"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.sort.recent"
+msgstr "Les plus récents en premier"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media.raise"
+msgstr "Action multimédia suivante"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.applications.none"
+msgstr "Aucune application sélectionnée"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.no_apps"
+msgstr "Aucune application pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.no_audio_track"
+msgstr "Aucune piste audio trouvée dans ce fichier."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.no_audio_track"
+msgstr "Aucune piste audio trouvée."
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.no_changelog"
+msgstr "Aucun journal des modifications disponible."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.builtin.helper"
+msgstr "Aucun téléchargement"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.no_entries"
+msgstr "Aucune entrée pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.no_files"
+msgstr "Aucun fichier à importer"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_none"
+msgstr "Aucun périphérique d'entrée trouvé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.logs.empty"
+msgstr "Aucun journal pour l'instant."
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.no_matches"
+msgstr "Aucun résultat trouvé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.not_found_error"
+msgstr "Aucun microphone détecté."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.model.none_held"
+msgstr "aucun modèle conservé en mémoire entre les requêtes"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.no_model"
+msgstr "Aucun modèle installé."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.no_models"
+msgstr "Aucun modèle local n'est installé. Téléchargez un modèle dans Réglages -> Modèles avant d'importer."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.no_models"
+msgstr "Aucun modèle local n'est installé. Téléchargez un modèle dans Réglages → Modèles avant de retranscrire."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.empty"
+msgstr "Aucun modèle trouvé. Vous pouvez en ajouter un ultérieurement dans les Réglages."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.no_results"
+msgstr "Aucun modèle ne correspond à votre recherche."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.empty.title"
+msgstr "Aucun mode pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.no_notes"
+msgstr "Aucune note pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/Dropdown.tsx
+msgid "dropdown.no_options"
+msgstr "Aucune option trouvée"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.no_other_tags"
+msgstr "Aucun autre tag"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.tags.no_other_tags"
+msgstr "Aucun autre tag"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.none"
+msgstr "Aucun remplacement pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.no_results"
+msgstr "Aucun résultat pour « {searchQuery} »"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.no_results_filters"
+msgstr "Aucun résultat pour les filtres sélectionnés"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.no_sites"
+msgstr "Aucun site pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.filter.no_speakers"
+msgstr "Aucun intervenant pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.no_tags_yet"
+msgstr "Aucun tag pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.tags.no_tags_yet"
+msgstr "Aucun tag pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_zero"
+msgstr "Aucun audio transcrit pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent_empty"
+msgstr "Aucune transcription pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.websites.none"
+msgstr "Aucun site web ajouté"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.model.none"
+msgstr "Aucun"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.invalid_audio"
+msgstr "Fichier audio non valide."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.unavailable_subtitle"
+msgstr "Non disponible dans cette version"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.insufficient_disk_space"
+msgstr "Espace disque insuffisant."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.applications.not_installed"
+msgstr "Non installé"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.timestamps_unsupported"
+msgstr "Non pris en charge par ce modèle"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.timestamps_unsupported"
+msgstr "Non pris en charge par ce modèle"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.unsupported"
+msgstr "Non pris en charge sur ce Mac."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.notes"
+msgstr "Notes :"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.empty"
+msgstr "Rien à importer depuis cette application."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.permission.off"
+msgstr "désactivé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media.off"
+msgstr "Désactivé"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.auto_launch.off"
+msgstr "Désactivé"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.sort.oldest"
+msgstr "Les plus anciens en premier"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.auto_launch.on"
+msgstr "Activé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.on_device"
+msgstr "Sur l'appareil"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.ai_writing.answer"
+msgstr "Uniquement si vous activez la rédaction IA et configurez un fournisseur dans Réglages → Fournisseurs. Nettoyage, Mode édition et Personnalisation envoient alors le texte concerné directement à ce fournisseur. Votre clé API est stockée localement dans Glimpse."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.tray.open"
+msgstr "Ouvrir {app}"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LocalApiSidebarStatus.tsx
+msgid "home.local_api.open_settings"
+msgstr "Ouvrir les réglages du serveur API"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.auto_launch"
+msgstr "Ouvrir à la connexion"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.open_settings"
+msgstr "Ouvrir les réglages"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.command_line.open_wiki_aria"
+msgstr "Ouvrir la documentation de ligne de commande"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AneCompileOverlay.tsx
+msgid "ane_compile.title"
+msgstr "Optimisation pour le Neural Engine"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.api_key.optional"
+msgstr "Facultatif"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.api_key.optional"
+msgstr "Facultatif"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.api_key.placeholder_optional"
+msgstr "Facultatif - laisser vide pour désactiver"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.verbatim_text"
+msgstr "Texte original"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.time.7d"
+msgstr "7 derniers jours"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.paste"
+msgstr "Coller"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.section.activate"
+msgstr "Déjà acheté ?"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media.pause"
+msgstr "Pause"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.pause_audio"
+msgstr "Mettre l'audio en pause"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media.body_pause"
+msgstr "Met en pause le son système pendant l'enregistrement."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.permissions_restart_notice"
+msgstr "Des modifications d'autorisations peuvent nécessiter un redémarrage."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.permissions.title"
+msgstr "Autorisations"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.tier_personal"
+msgstr "Personnel"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.personalities"
+msgstr "Personnalités"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.personalization"
+msgstr "Personnalisation"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.title"
+msgstr "Personnalisation"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_idle"
+msgstr "Choisir une licence"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.play_audio"
+msgstr "Lire l'audio"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.port"
+msgstr "Port"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.preloaded_model"
+msgstr "Modèle préchargé"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.shortcut_capture"
+msgstr "Appuyez sur un raccourci"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.press_enter_to_add"
+msgstr "Appuyez sur Entrée dans l'un ou l'autre champ pour ajouter"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.press_enter_to_add"
+msgstr "Appuyer sur Entrée pour ajouter"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: newEntry.trim()
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.add_prompt"
+msgstr "Appuyez sur Entrée pour ajouter « {0} » comme nouvelle entrée."
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.press_enter_to_add_match"
+msgstr "Appuyez sur Entrée pour ajouter ce mot"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.edit_hint"
+msgstr "Appuyez sur Entrée pour enregistrer · Échap pour annuler"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.how_it_works.answer"
+msgstr "Appuyez sur votre raccourci de dictée, parlez, puis relâchez. Glimpse transcrit sur votre appareil et insère le texte à l'emplacement du curseur. La dictée de base fonctionne hors ligne. Aucun compte requis."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.subtitle"
+msgstr "Appuyez sur votre raccourci dans n'importe quelle application pour dicter."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media.lower"
+msgstr "Action média précédente"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.privacy_permissions"
+msgstr "Confidentialité et autorisations"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.privacy.link"
+msgstr "Politique de confidentialité"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.local.badge"
+msgstr "privé"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.processing"
+msgstr "Traitement en cours"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.processing_mode"
+msgstr "Mode de traitement"
+
+#. js-lingui-explicit-id
+#: src/features/pill/PillOverlay.tsx
+msgid "pill.status.processing"
+msgstr "Traitement en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider"
+msgstr "Fournisseur"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.provider"
+msgstr "Fournisseur"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.tab.providers"
+msgstr "Fournisseurs"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.providers_tab"
+msgstr "Fournisseurs"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.tier_purchase_aria"
+msgstr "Acheter {label} pour {price}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.import_status.queued"
+msgstr "En attente de transcription…"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.tray.quit"
+msgstr "Quitter {app}"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.quit"
+msgstr "Quitter {app}"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.ready_to_install"
+msgstr "Prêt à installer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.storage.recordings"
+msgstr "Enregistrements"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.redo"
+msgstr "Rétablir"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.remote_provider"
+msgstr "Fournisseur distant"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.remote_provider"
+msgstr "Fournisseur distant"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.api_key.aria"
+msgstr "Clé API de reconnaissance vocale distante"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.endpoint.aria"
+msgstr "URL du point de terminaison vocal distant"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.title"
+msgstr "Fournisseur vocal distant"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.remove_value"
+msgstr "supprimer"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.remove"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: speaker.name
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.speaker.remove"
+msgstr "Supprimer {0}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: fileName(path)
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.remove_file"
+msgstr "Supprimer {0}"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.remove_app"
+msgstr "Supprimer {app}"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.remove_site"
+msgstr "Supprimer {site}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.remove_tag"
+msgstr "Supprimer {tag}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.tags.remove"
+msgstr "Supprimer {tag}"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.remove_shortcut"
+msgstr "Supprimer le raccourci"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.delete_all_description"
+msgstr "Supprime les enregistrements, transcriptions, modèles et paramètres, puis quitte"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.rename"
+msgstr "Renommer"
+
+#: src/features/settings/components/AccountView.tsx
+msgid "Renews {renewsAt}"
+msgstr "Renouvellement {renewsAt}"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.replace_with_aria"
+msgstr "Remplacer par"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.replace_with"
+msgstr "Remplacer par…"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.section.replacements_title"
+msgstr "Remplacements"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LocalApiSidebarStatus.tsx
+msgid "home.local_api.requests"
+msgstr "Requêtes traitées"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.api_key.required"
+msgstr "Obligatoire"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.api_key.required"
+msgstr "Requis"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.accessibility.description"
+msgstr "requis pour le collage automatique"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.input_monitoring.description"
+msgstr "requis pour les raccourcis globaux"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.api_key.placeholder_required"
+msgstr "Requis pour l'accès au réseau local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.microphone.description"
+msgstr "requis pour la transcription"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.api_key.lan_required"
+msgstr "Requis pour l'écoute sur le réseau local"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.locked_subtitle"
+msgstr "Nécessite une licence active"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.help_license_requirement"
+msgstr "Nécessite une licence Glimpse."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.auto_dictionary.unsupported_body"
+msgstr "nécessite un modèle avec prise en charge du dictionnaire"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.help_requirement"
+msgstr "Nécessite un modèle de langage activé et configuré dans l'onglet Modèles."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.custom_instructions.resize"
+msgstr "Redimensionner les instructions personnalisées"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.restart"
+msgstr "Redémarrer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.restart_onboarding"
+msgstr "Relancer l'intégration"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.restart_onboarding_hold_aria"
+msgstr "Redémarrer l'intégration. Maintenir pour confirmer."
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.restart_to_apply"
+msgstr "Redémarrer pour appliquer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.restart_required"
+msgstr "Redémarrer pour appliquer les modifications"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.restore_original"
+msgstr "Restaurer la transcription d'origine"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.retranscribe"
+msgstr "Retranscrire"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.retranscribe"
+msgstr "Retranscrire"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.title"
+msgstr "Retranscrire"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.confirm"
+msgstr "Retranscrire"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.loading"
+msgstr "Retranscription en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.retry"
+msgstr "Réessayer"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.retry"
+msgstr "Réessayer"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.retry"
+msgstr "Réessayer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.retry"
+msgstr "Réessayer"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.retry"
+msgstr "Réessayer"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.retry_cleanup"
+msgstr "Réessayer le nettoyage"
+
+#. js-lingui-explicit-id
+#: src/features/toast/ToastOverlay.tsx
+msgid "toast.retry_failed"
+msgstr "La nouvelle tentative a échoué. Veuillez réessayer."
+
+#. js-lingui-explicit-id
+#: src/features/toast/ToastOverlay.tsx
+msgid "toast.retry_transcription"
+msgstr "Réessayer la transcription"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.retrying"
+msgstr "Nouvelle tentative en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/toast/ToastOverlay.tsx
+msgid "toast.retrying"
+msgstr "Nouvelle tentative en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.reverting"
+msgstr "Rétablissement…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.threshold.immediately"
+msgstr "maintenant"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.run_cleanup"
+msgstr "Lancer le nettoyage"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.status.running"
+msgstr "En cours d'exécution"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.help_cleanup"
+msgstr "Exécute le Nettoyage pour ce raccourci uniquement."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.local.description"
+msgstr "Fonctionne entièrement sur votre appareil"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.restart_onboarding_description"
+msgstr "relancer l'assistant de configuration"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.info"
+msgstr "Ajoute un encodeur Core ML qui s'exécute sur l'Apple Neural Engine pour une transcription plus rapide et plus économe en énergie. Le premier chargement est plus long le temps que macOS l'optimise pour votre puce."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.save_name"
+msgstr "Enregistrer le nom"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.saving"
+msgstr "Enregistrement…"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.search.placeholder_short"
+msgstr "Rechercher"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.model.search"
+msgstr "Rechercher des modèles disponibles…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.model.search"
+msgstr "Rechercher des modèles vocaux disponibles…"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.search_only"
+msgstr "Rechercher dans le dictionnaire…"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.search_models"
+msgstr "Rechercher des modèles installés…"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.search_models"
+msgstr "Rechercher des modèles installés…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.language.search"
+msgstr "Rechercher une langue…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.search_language"
+msgstr "Rechercher une langue…"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.search_placeholder"
+msgstr "Rechercher dans la bibliothèque…"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.search"
+msgstr "Rechercher des modèles"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.search_aria"
+msgstr "Rechercher des modèles"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/Dropdown.tsx
+msgid "dropdown.search_aria"
+msgstr "Options de recherche"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.search_or_add"
+msgstr "Rechercher ou ajouter un mot…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.search"
+msgstr "Rechercher des fournisseurs…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.provider.search"
+msgstr "Rechercher des services de reconnaissance vocale…"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.search.aria"
+msgstr "Rechercher dans la transcription"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.search.placeholder"
+msgstr "Rechercher dans la transcription…"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.search.aria"
+msgstr "Rechercher des transcriptions"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.search.open"
+msgstr "Rechercher des transcriptions"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/Dropdown.tsx
+msgid "dropdown.search_placeholder"
+msgstr "Rechercher…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.include_timestamps_hint"
+msgstr "Heures de début et de fin des segments"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.select_model"
+msgstr "Sélectionner un modèle"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.select_model"
+msgstr "Sélectionner un modèle"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.select_all"
+msgstr "Tout sélectionner"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.app_picker.aria"
+msgstr "Sélectionner l'application source d'importation"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.select_existing_tag"
+msgstr "Sélectionner un tag existant"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.select_microphone"
+msgstr "Sélectionner un microphone…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.provider.select"
+msgstr "Sélectionner un fournisseur…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.provider.select"
+msgstr "Sélectionner un fournisseur…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.help"
+msgstr "Sélectionnez du texte dans n'importe quelle application et prononcez une commande telle que « rendre ceci plus formel » ou « corriger ma grammaire »."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/Dropdown.tsx
+msgid "dropdown.placeholder"
+msgstr "Sélectionner…"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.model_not_installed"
+msgstr "Le modèle sélectionné n'est pas installé. Téléchargez-en un dans Réglages → Modèles."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.allow_browser_requests_help"
+msgstr "envoyer des en-têtes CORS pour permettre aux apps web d'appeler l'API"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.send_feedback"
+msgstr "Envoyer des commentaires"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.services"
+msgstr "Services"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.configure_prefix"
+msgstr "Configurer la rédaction IA dans"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.settings"
+msgstr "Réglages"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.dialog_label"
+msgstr "Réglages"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.modal.title"
+msgstr "Réglages"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.setup"
+msgstr "Configuration"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts"
+msgstr "Raccourcis"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.sort.shortest"
+msgstr "La plus courte"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.show_all"
+msgstr "Tout afficher"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.show_less"
+msgstr "Afficher moins"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.show_more"
+msgstr "Afficher plus"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.snippets.info"
+msgstr "Afficher des exemples d'extraits de personnalisation"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.show_shortcuts"
+msgstr "Afficher les raccourcis"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.show_timestamps"
+msgstr "Afficher les horodatages"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.show_timestamps.aria"
+msgstr "Afficher les horodatages"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.show_timestamps"
+msgstr "Afficher les horodatages"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryRetranscribeModal.tsx
+msgid "library.retranscribe.show_timestamps.aria"
+msgstr "Afficher les horodatages"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.permissions.skip"
+msgstr "Ignorer"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.skip_short_aria"
+msgstr "Ignorer les clips de moins d'une seconde"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.confirm.continue"
+msgstr "Ignorer pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.skip"
+msgstr "Ignorer pour l'instant"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.skip_short"
+msgstr "Ignorer les clips courts"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.text_size.small"
+msgstr "Petit"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.priority.compact"
+msgstr "Petit"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.smart"
+msgstr "Intelligent"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.shortcut"
+msgstr "Raccourci intelligent"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.filter.sort"
+msgstr "Trier"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.filter.aria"
+msgstr "Trier et filtrer les transcriptions"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.speaker_default_name"
+msgstr "Intervenant {nextIndex}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.speakers"
+msgstr "Intervenants"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ProvidersTab.tsx
+msgid "settings.providers.speech_label"
+msgstr "Parole"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.category.standard"
+msgstr "Standard"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.start"
+msgstr "Démarrer l'API"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.cta"
+msgstr "Commencer la dictée"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.auto_launch.body"
+msgstr "Lancer Glimpse à l'ouverture de session."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.start_in_background"
+msgstr "Démarrer en arrière-plan"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.start_on_launch_aria"
+msgstr "Démarrer l'API locale à l'ouverture de Glimpse"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.start_on_launch"
+msgstr "Démarrer au lancement"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/OnboardingScreen.tsx
+msgid "onboarding.download.starting"
+msgstr "démarrage en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.stop"
+msgstr "Arrêter"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.stop"
+msgstr "Arrêter l'API"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.stop_retry"
+msgstr "Arrêter la transcription"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+msgid "settings.local_api.status.stopped"
+msgstr "Arrêté"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.storage"
+msgstr "Stockage"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.store_original.aria"
+msgstr "Conserver l'original"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryImportModal.tsx
+msgid "library.import.store_original"
+msgstr "Conserver le fichier original"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.auto_dictionary.body"
+msgstr "suggère des noms et des termes après correction du texte dicté"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.label"
+msgstr "Assistance"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.support"
+msgstr "Assistance"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.menu_aria"
+msgstr "Menu Assistance"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.section.replacements_description"
+msgstr "Remplacer automatiquement les expressions courantes après la transcription."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.theme.system"
+msgstr "Système"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.language.system"
+msgstr "Système"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_pause_media.body_off"
+msgstr "Le son système est actif pendant l'enregistrement."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_system_default"
+msgstr "Valeur système par défaut"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.system_default"
+msgstr "Valeur système par défaut"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.tags.label"
+msgstr "Balise"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.description"
+msgstr "Personnalisez le comportement du modèle de langage pour les apps, les sites et les instructions personnalisées."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.toggle_description"
+msgstr "appuyer pour démarrer, appuyer pour arrêter"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.smart_description"
+msgstr "appuyer pour activer/désactiver, maintenir pour parler"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.temporary"
+msgstr "Temporaire"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.test"
+msgstr "Test"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.replacements"
+msgstr "Remplacements de texte"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.text_size.label"
+msgstr "Taille du texte"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.website.duplicate"
+msgstr "Ce domaine est déjà ajouté"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.microphone_test.busy_error"
+msgstr "Ce microphone est déjà utilisé."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.not_ready"
+msgstr "Le modèle Apple Intelligence est encore en cours de téléchargement."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.externally_managed_info"
+msgstr "La commande glimpse est installée à l'emplacement {cliInstallPath} et gérée en dehors de Glimpse. Utilisez son gestionnaire de paquets pour la mettre à jour ou la supprimer."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.installed_info"
+msgstr "La commande glimpse est installée à l'emplacement {cliInstallPath}. Utilisez-la depuis Terminal, des scripts ou des outils d'automatisation pour appeler Glimpse sans ouvrir l'interface de l'app."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.theme.label"
+msgstr "Thème"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.unavailable_info"
+msgstr "Cette version ne comprend pas l'assistant en ligne de commande."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.unsupported_sample_rate"
+msgstr "Ce fichier a une fréquence d'échantillonnage non prise en charge."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.export.no_timestamps"
+msgstr "Cet élément ne contient pas d'horodatages. Retranscrivez-le avec des horodatages pour exporter des sous-titres."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.audio_only"
+msgstr "Seuls les fichiers audio enregistrés sont supprimés, pas vos transcriptions."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.delete_confirm.description"
+msgstr "Cela supprime la transcription et l'audio de votre bibliothèque."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.include_timestamps"
+msgstr "Horodatages"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.timestamps"
+msgstr "Horodatages"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.models_suffix"
+msgstr "pour utiliser le mode Édition."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.to_use_local"
+msgstr "pour utiliser le mode local."
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.group.today"
+msgstr "Aujourd'hui"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.time.today"
+msgstr "Aujourd'hui"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.toggle"
+msgstr "Activer/Désactiver"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcut.toggle_aria"
+msgstr "Raccourci pour activer/désactiver {label}"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.applications.toggle_list"
+msgstr "Afficher/masquer la liste des applications"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.auto_dictionary.toggle_aria"
+msgstr "Activer/désactiver le dictionnaire automatique"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_update.toggle_aria"
+msgstr "Activer/désactiver la mise à jour automatique"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.toggle_aria"
+msgstr "Activer/Désactiver le mode Édition"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.fullscreen"
+msgstr "Activer/Désactiver le plein écran"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_launch.toggle_aria"
+msgstr "Activer/désactiver le lancement à l'ouverture de session"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/Dropdown.tsx
+msgid "dropdown.toggle_menu"
+msgstr "Afficher/masquer les options"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.start_in_background.toggle_aria"
+msgstr "Activer/désactiver le démarrage en arrière-plan"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.analytics.toggle_aria"
+msgstr "Activer/désactiver les analyses d'utilisation"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.storage.total"
+msgstr "Total"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.description"
+msgstr "Transcrivez des enregistrements via des API cloud compatibles OpenAI ou auto-hébergées."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.transcribing"
+msgstr "Transcription en cours…"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.noun.transcripts.one"
+msgstr "transcription"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.history"
+msgstr "Historique des transcriptions"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.modal.transcript_placeholder"
+msgstr "La transcription apparaîtra ici."
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionItem.tsx
+msgid "transcriptions.item.error.default"
+msgstr "Échec de la transcription"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.transcription_language"
+msgstr "Langue de transcription"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.cat.model"
+msgstr "Modèle de transcription"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune.noun.transcripts.other"
+msgstr "transcriptions"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.prune_target.transcripts"
+msgstr "Transcriptions"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.verbatim_text_hint"
+msgstr "Transcriptions avant nettoyage"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.edit_mode.body"
+msgstr "transformer le texte sélectionné par la voix"
+
+#: src/features/settings/components/AccountView.tsx
+msgid "Trial · {trialDaysRemaining} of {TRIAL_TOTAL_DAYS} days left"
+msgstr "Essai · {trialDaysRemaining} jour(s) restant(s) sur {TRIAL_TOTAL_DAYS}"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.trial.text_one"
+msgstr "Essai · 1 jour restant"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.apple.not_enabled"
+msgstr "Activez Apple Intelligence dans les Réglages Système pour utiliser cette fonctionnalité."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/PermissionsStep.tsx
+msgid "onboarding.accessibility.subtitle"
+msgstr "Active le collage automatique dans n'importe quelle application."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent_error"
+msgstr "Impossible de charger les transcriptions"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.undo"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.uninstall_cli"
+msgstr "Désinstaller"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_stamp_empty"
+msgstr "Non émis"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.free_body"
+msgstr "Débloquez le nettoyage IA, l'édition vocale, les personnalités par application, la transcription audio et vidéo, et bien plus encore."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.license_adds"
+msgstr "Débloquez Nettoyage, Mode édition, Personnalités, Transcription de fichiers et bien plus encore."
+
+#. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "transcription.language.unsupported"
+msgstr "Non pris en charge"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.unsupported_audio_settings"
+msgstr "Réglages audio non pris en charge."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.import_error.unsupported_format"
+msgstr "Format de fichier non pris en charge."
+
+#. js-lingui-explicit-id
+#: src/features/library/components/library-utils.ts
+msgid "library.error_details.unsupported_format"
+msgstr "Format de fichier non pris en charge."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.language_info.active_model"
+msgstr "La liste des langues est filtrée selon le modèle de transcription actif."
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.update"
+msgstr "Mettre à jour"
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.update_available"
+msgstr "Mise à jour disponible"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.check_failed"
+msgstr "Échec de la vérification des mises à jour"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.installed"
+msgstr "Mise à jour installée"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.updates"
+msgstr "Mises à jour"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.store_managed"
+msgstr "Les mises à jour proviennent du Microsoft Store"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.analytics"
+msgstr "Analyses d'utilisation"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.use"
+msgstr "Utiliser"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.installed.use"
+msgstr "Utiliser"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.default_subtitle"
+msgstr "Utiliser Glimpse depuis Terminal ou des scripts"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.snippets.summary"
+msgstr "Utilisez des extraits pour transmettre du contexte en direct au modèle de langage, comme"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.verbatim_text_aria"
+msgstr "Utiliser les transcriptions originales avant nettoyage"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.toggle"
+msgstr "Activer/Désactiver les fonctionnalités IA"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.toggle"
+msgstr "Utiliser ce fournisseur pour la reconnaissance vocale"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.description"
+msgstr "Partagé par Nettoyage, Mode édition et Personnalisation."
+
+#. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.support.about.version_mode"
+msgstr "v{version} • {mode}"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.available_version"
+msgstr "v{version} disponible"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "models.card.verifying"
+msgstr "Vérification de l'installation"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.version"
+msgstr "Version"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.view"
+msgstr "Présentation"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.view_all"
+msgstr "Voir toutes les versions sur GitHub"
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.title"
+msgstr "Voulez-vous importer vos réglages ?"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.warning_aria"
+msgstr "Avertissement : problème de compatibilité du modèle"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AppTab.tsx
+msgid "settings.app.auto_delete.confirm.unknown_count"
+msgstr "Impossible de les comptabiliser pour l'instant, mais la suppression automatique s'exécutera dès que vous enregistrerez cette modification."
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.error"
+msgstr "Impossible de lire les données de cette app. Vous pouvez ignorer cette étape et configurer manuellement."
+
+#. js-lingui-explicit-id
+#: src/features/import/components/ImportStep.tsx
+msgid "import.model.unrecognized"
+msgstr "Le modèle de cette app n'est pas reconnu ; vous en choisirez un à l'étape suivante."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.websites"
+msgstr "Sites web"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.websites"
+msgstr "Sites web"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.free.question"
+msgstr "Pourquoi Glimpse est-il gratuit ?"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.permissions.question"
+msgstr "De quelles autorisations Glimpse a-t-il besoin ?"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/WhatsNewModal.tsx
+msgid "updates.whats_new.title"
+msgstr "Nouveautés"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.whats_new"
+msgstr "Quoi de neuf ?"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.filter.when"
+msgstr "Quand"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.ai_writing.question"
+msgstr "Quand le texte quitte-t-il mon appareil ?"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.privacy.question"
+msgstr "Mes données sont-elles privées ?"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.why_paid"
+msgstr "Pourquoi y a-t-il des fonctionnalités payantes ?"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.capability.timestamps"
+msgstr "Horodatages au niveau du mot"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.capability.timestamps"
+msgstr "Horodatages au niveau des mots"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.label_words_spoken"
+msgstr "Mots prononcés"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LanguageModelPanel.tsx
+msgid "settings.language_model.title"
+msgstr "Fournisseur de modèle de langage"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.group.yesterday"
+msgstr "Hier"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.title"
+msgstr "Tout est prêt"
+
+#. js-lingui-explicit-id
+#: src/features/updates/components/UpdateChecker.tsx
+msgid "updates.up_to_date"
+msgstr "Vous êtes à jour"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/LocalApiSidebarStatus.tsx
+msgid "home.local_api.status_hint"
+msgstr "Votre serveur API s'exécute en arrière-plan."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/FAQModal.tsx
+msgid "faq.privacy.answer"
+msgstr "Oui. En mode local, vos fichiers audio et transcriptions restent sur votre appareil. Nous ne collectons ni ne transmettons jamais vos enregistrements. La synchronisation dans le cloud est facultative."
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/components/TranscriptionList.tsx
+msgid "transcriptions.list.empty"
+msgstr "Vos transcriptions récentes apparaîtront ici"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud_active.provider_fallback"
+msgstr "votre service de reconnaissance vocale"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.trial.text_ended_on"
+msgstr "Votre essai a pris fin le"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.trial.text_ended"
+msgstr "Votre période d'essai est terminée"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.zoom"
+msgstr "Zoom"
