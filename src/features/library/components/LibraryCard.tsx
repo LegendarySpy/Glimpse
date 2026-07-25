@@ -182,13 +182,28 @@ const LibraryCard = ({
                 >
                   {isTranscribing
                     ? status.type === "importing"
-                      ? `Converting ${(progress * 100).toFixed(0)}%`
-                      : `Thinking ${(progress * 100).toFixed(0)}%`
+                      ? t({
+                          id: "library.card.status.converting",
+                          message: `Converting ${(progress * 100).toFixed(0)}%`,
+                        })
+                      : t({
+                          id: "library.card.status.thinking",
+                          message: `Thinking ${(progress * 100).toFixed(0)}%`,
+                        })
                     : isError
-                      ? "Failed"
+                      ? t({
+                          id: "library.card.status.failed",
+                          message: "Failed",
+                        })
                       : isComplete
-                        ? "Ready"
-                        : "Queued"}
+                        ? t({
+                            id: "library.card.status.ready",
+                            message: "Ready",
+                          })
+                        : t({
+                            id: "library.card.status.queued",
+                            message: "Queued",
+                          })}
                 </span>
 
                 {isError && errorDetails && (
@@ -259,7 +274,10 @@ const LibraryCard = ({
                       ? "ui-color-primary bg-[var(--color-bg-elevated)]"
                       : "ui-color-muted hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)]"
                 }`}
-                aria-label="More options"
+                aria-label={t({
+                  id: "library.card.more_options",
+                  message: "More options",
+                })}
               >
                 {shiftHeld ? (
                   <Trash2 size={14} className="shrink-0 transform-gpu" />
@@ -380,7 +398,9 @@ const LibraryCard = ({
             {item.source_path && (
               <>
                 <span className="opacity-40">&bull;</span>
-                <span>Imported</span>
+                <span>
+                  {t({ id: "library.card.imported", message: "Imported" })}
+                </span>
               </>
             )}
           </div>

@@ -2,6 +2,7 @@
 
 ### Features
 
+- Glimpse is now available in Arabic, Dutch, French, German, Hindi, Italian, and Russian. It follows your system language, or pick one under Settings, App.
 - Export your recordings and transcripts as audio and text pairs, ready for fine-tuning. Find it under Settings, About. Timestamps are optional.
 - Delete all data from Settings, About. Hold the button to erase everything Glimpse has stored and quit the app.
 

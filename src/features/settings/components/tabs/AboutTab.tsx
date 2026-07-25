@@ -621,7 +621,8 @@ const AboutTab = ({
         </div>
       </section>
 
-      <section className="grid grid-cols-2 items-start gap-4">
+      {/* Stacked full-width sections; row labels get room in wordier locales. */}
+      <section className="space-y-6">
         <div className="space-y-2">
           <SectionLabel>
             {t({
@@ -636,13 +637,13 @@ const AboutTab = ({
                 <Export size={14} strokeWidth={2} aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate ui-text-label-strong ui-color-primary">
+                <p className="break-words ui-text-label-strong ui-color-primary">
                   {t({
                     id: "settings.about.data.export_dataset",
                     message: "Export dataset",
                   })}
                 </p>
-                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
+                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
                   {datasetSubtitle}
                 </p>
               </div>
@@ -783,13 +784,13 @@ const AboutTab = ({
                 <Trash size={14} strokeWidth={2} aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate ui-text-label-strong ui-color-primary">
+                <p className="break-words ui-text-label-strong ui-color-primary">
                   {t({
                     id: "settings.about.data.delete_all",
                     message: "Delete all data",
                   })}
                 </p>
-                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
+                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
                   {t({
                     id: "settings.about.data.delete_all_description",
                     message:
@@ -842,13 +843,13 @@ const AboutTab = ({
                 <RotateCcw size={14} strokeWidth={2} aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate ui-text-label-strong ui-color-primary">
+                <p className="break-words ui-text-label-strong ui-color-primary">
                   {t({
                     id: "settings.about.restart_onboarding",
                     message: "Restart onboarding",
                   })}
                 </p>
-                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
+                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
                   {t({
                     id: "settings.about.restart_onboarding_description",
                     message: "Runs setup again",
@@ -890,7 +891,7 @@ const AboutTab = ({
                     })}
                     className="inline-flex min-w-0 items-center gap-1 ui-text-label-strong ui-color-primary transition-colors hover:text-content-secondary outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-border-hover"
                   >
-                    <span className="truncate">
+                    <span className="min-w-0 break-words">
                       {t({
                         id: "settings.about.command_line",
                         message: "Command line",
@@ -921,7 +922,7 @@ const AboutTab = ({
                     </div>
                   </div>
                 </div>
-                <p className="mt-0.5 truncate ui-text-meta ui-color-muted">
+                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
                   {cliSubtitle}
                 </p>
               </div>

@@ -1,7 +1,10 @@
+import { msg } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
+import { i18n } from "../../i18n";
 import type { ModelInfo } from "../../types";
 
 export type ModelStats = {
-  languagesLabel: string;
+  langCount: number;
   englishOnly: boolean;
 };
 
@@ -19,7 +22,16 @@ export const sortInstalledModels = (models: ModelInfo[]): ModelInfo[] =>
     return a.label.localeCompare(b.label);
   });
 
-export const variantLabel = (variant: string): string => variant;
+// Q5_1/Q8_0/Int8 are technical tokens shown as-is; only word variants localize.
+const VARIANT_LABELS: Record<string, MessageDescriptor> = {
+  Full: msg({ id: "models.variant.full", message: "Full" }),
+  System: msg({ id: "models.variant.system", message: "System" }),
+};
+
+export const variantLabel = (variant: string): string => {
+  const descriptor = VARIANT_LABELS[variant];
+  return descriptor ? i18n._(descriptor) : variant;
+};
 
 export const formatQuantLabel = (variant: string): string | null => {
   if (!variant) return null;
@@ -37,12 +49,8 @@ export const deriveModelStats = (model: ModelInfo): ModelStats => {
         model.supported_languages.every((l) =>
           l.code.toLowerCase().startsWith("en"),
         );
-  const languagesLabel = englishOnly
-    ? "English only"
-    : `${langCount} languages`;
-
   return {
-    languagesLabel,
+    langCount,
     englishOnly,
   };
 };

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useLingui } from "@lingui/react/macro";
+import { plural } from "@lingui/core/macro";
 import { Download, Square, Trash as Trash2 } from "@phosphor-icons/react";
 import ModelCardShell, { WAVE_COLS, waveDots } from "./ModelCardShell";
 import ActivityDots from "../../../shared/ui/ActivityDots";
@@ -36,7 +37,17 @@ const ModelStatCard = ({
   const stats = deriveModelStats(model);
 
   const builtIn = isBuiltInModel(model);
-  const facts = [stats.languagesLabel];
+  const facts = [
+    stats.englishOnly
+      ? t({ id: "models.card.english_only", message: "English only" })
+      : t({
+          id: "models.card.languages",
+          message: plural(stats.langCount, {
+            one: "# language",
+            other: "# languages",
+          }),
+        }),
+  ];
   facts.push(
     builtIn
       ? t({ id: "models.card.built_in", message: "Built into Mac" })

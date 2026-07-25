@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { Minus, Square, X } from "@phosphor-icons/react";
 import { useWindowControls } from "../hooks/useWindowControls";
 import { getPlatformCapabilities } from "../../platform/service";
@@ -11,6 +12,7 @@ const WindowControls = () => {
 };
 
 const WindowControlsButtons = () => {
+  const { t } = useLingui();
   const windowControls = useWindowControls();
 
   const buttonClass =
@@ -20,7 +22,7 @@ const WindowControlsButtons = () => {
     <div className="fixed right-0 top-0 z-50 flex h-8" data-window-controls>
       <button
         type="button"
-        aria-label="Minimize"
+        aria-label={t({ id: "window.controls.minimize", message: "Minimize" })}
         className={buttonClass}
         onClick={() => {
           void windowControls.minimize();
@@ -30,7 +32,7 @@ const WindowControlsButtons = () => {
       </button>
       <button
         type="button"
-        aria-label="Maximize"
+        aria-label={t({ id: "window.controls.maximize", message: "Maximize" })}
         className={buttonClass}
         onClick={() => {
           void windowControls.toggleMaximize();
@@ -40,7 +42,7 @@ const WindowControlsButtons = () => {
       </button>
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t({ id: "window.controls.close", message: "Close" })}
         className={`${buttonClass} hover:bg-red-500 hover:text-white`}
         onClick={() => {
           void windowControls.close();
