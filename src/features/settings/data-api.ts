@@ -14,13 +14,19 @@ export function getDatasetPreview(): Promise<DatasetPreview> {
   return invoke<DatasetPreview>("dataset_preview");
 }
 
+export type DatasetExportOptions = {
+  includeTimestamps: boolean;
+  verbatimText: boolean;
+  skipShortClips: boolean;
+};
+
 export function exportDataset(
   destination: string,
-  includeTimestamps: boolean,
+  options: DatasetExportOptions,
 ): Promise<DatasetSummary> {
   return invoke<DatasetSummary>("export_dataset", {
     destination,
-    includeTimestamps,
+    options,
   });
 }
 

@@ -12,7 +12,7 @@ use crate::{AppRuntime, AppState};
 
 const DATASET_DIR_NAME: &str = "glimpse-dataset";
 const LIBRARY_PAGE_SIZE: usize = 200;
-const DICTATION_FETCH_LIMIT: usize = 100_000;
+const DICTATION_PAGE_SIZE: usize = 500;
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,6 +25,7 @@ pub struct DatasetPreview {
 pub struct DatasetSummary {
     pub pairs: usize,
     pub skipped: usize,
+    pub skipped_short: usize,
     pub path: String,
 }
 
@@ -39,12 +40,24 @@ struct DatasetPair {
     segments: Option<Vec<TranscriptSegment>>,
 }
 
+#[derive(Debug, Clone, Copy, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatasetExportOptions {
+    pub include_timestamps: bool,
+    pub verbatim_text: bool,
+    pub skip_short_clips: bool,
+}
+
+const SHORT_CLIP_SECONDS: f32 = 1.0;
+
 #[derive(Serialize)]
 struct MetadataRow<'a> {
     file_name: String,
     text: &'a str,
     #[serde(skip_serializing_if = "Option::is_none")]
     raw_text: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    cleaned_text: Option<&'a str>,
     duration_seconds: f32,
     source: &'a str,
     created_at: &'a str,
@@ -52,9 +65,10 @@ struct MetadataRow<'a> {
     segments: Option<&'a [TranscriptSegment]>,
 }
 
-fn collect_pairs(storage: &crate::storage::StorageManager) -> Result<Vec<DatasetPair>, String> {
-    let mut pairs = Vec::new();
-
+fn visit_pairs(
+    storage: &crate::storage::StorageManager,
+    mut visit: impl FnMut(DatasetPair),
+) -> Result<(), String> {
     let mut offset = 0;
     loop {
         let (items, has_more) = storage
@@ -77,7 +91,7 @@ fn collect_pairs(storage: &crate::storage::StorageManager) -> Result<Vec<Dataset
             if !audio.is_file() {
                 continue;
             }
-            pairs.push(DatasetPair {
+            visit(DatasetPair {
                 audio,
                 text: text.to_string(),
                 raw_text: None,
@@ -93,40 +107,60 @@ fn collect_pairs(storage: &crate::storage::StorageManager) -> Result<Vec<Dataset
         }
     }
 
-    let records = storage
-        .get_recent_transcriptions(DICTATION_FETCH_LIMIT)
-        .map_err(|err| format!("Failed to read dictation history: {err}"))?;
-    for record in records {
-        if !record.audio_available {
-            continue;
+    let mut offset = 0;
+    loop {
+        let records = storage
+            .get_recent_transcriptions_page(DICTATION_PAGE_SIZE, offset)
+            .map_err(|err| format!("Failed to read dictation history: {err}"))?;
+        let page_len = records.len();
+        offset += page_len;
+        for record in records {
+            if !record.audio_available {
+                continue;
+            }
+            let text = record.text.trim();
+            if text.is_empty() {
+                continue;
+            }
+            let audio = PathBuf::from(&record.audio_path);
+            if !audio.is_file() {
+                continue;
+            }
+            let raw_text = record
+                .raw_text
+                .as_deref()
+                .map(str::trim)
+                .filter(|raw| !raw.is_empty() && *raw != text)
+                .map(str::to_string);
+            visit(DatasetPair {
+                audio,
+                text: text.to_string(),
+                raw_text,
+                duration_seconds: record.audio_duration_seconds,
+                created_at: record.timestamp.to_rfc3339(),
+                source: "dictation",
+                id: record.id.clone(),
+                segments: None,
+            });
         }
-        let text = record.text.trim();
-        if text.is_empty() {
-            continue;
+        if page_len < DICTATION_PAGE_SIZE {
+            break;
         }
-        let audio = PathBuf::from(&record.audio_path);
-        if !audio.is_file() {
-            continue;
-        }
-        let raw_text = record
-            .raw_text
-            .as_deref()
-            .map(str::trim)
-            .filter(|raw| !raw.is_empty() && *raw != text)
-            .map(str::to_string);
-        pairs.push(DatasetPair {
-            audio,
-            text: text.to_string(),
-            raw_text,
-            duration_seconds: record.audio_duration_seconds,
-            created_at: record.timestamp.to_rfc3339(),
-            source: "dictation",
-            id: record.id.clone(),
-            segments: None,
-        });
     }
 
+    Ok(())
+}
+
+fn collect_pairs(storage: &crate::storage::StorageManager) -> Result<Vec<DatasetPair>, String> {
+    let mut pairs = Vec::new();
+    visit_pairs(storage, |pair| pairs.push(pair))?;
     Ok(pairs)
+}
+
+fn count_pairs(storage: &crate::storage::StorageManager) -> Result<usize, String> {
+    let mut count = 0;
+    visit_pairs(storage, |_| count += 1)?;
+    Ok(count)
 }
 
 fn unique_dataset_dir(parent: &Path) -> Result<PathBuf, String> {
@@ -146,7 +180,7 @@ fn unique_dataset_dir(parent: &Path) -> Result<PathBuf, String> {
 fn write_dataset(
     dest: &Path,
     pairs: &[DatasetPair],
-    include_timestamps: bool,
+    options: DatasetExportOptions,
 ) -> Result<DatasetSummary, String> {
     let audio_dir = dest.join("audio");
     fs::create_dir_all(&audio_dir)
@@ -155,8 +189,13 @@ fn write_dataset(
     let mut lines = String::new();
     let mut exported = 0usize;
     let mut skipped = 0usize;
+    let mut skipped_short = 0usize;
 
     for pair in pairs {
+        if options.skip_short_clips && pair.duration_seconds < SHORT_CLIP_SECONDS {
+            skipped_short += 1;
+            continue;
+        }
         let extension = pair
             .audio
             .extension()
@@ -169,14 +208,24 @@ fn write_dataset(
             continue;
         }
 
+        // The verbatim transcript becomes the label when requested; the other
+        // variant rides along under its own key.
+        let (text, raw_text, cleaned_text) = match (&pair.raw_text, options.verbatim_text) {
+            (Some(raw), true) => (raw.as_str(), None, Some(pair.text.as_str())),
+            (raw, false) => (pair.text.as_str(), raw.as_deref(), None),
+            (None, true) => (pair.text.as_str(), None, None),
+        };
+
         let row = MetadataRow {
             file_name: format!("audio/{file_name}"),
-            text: &pair.text,
-            raw_text: pair.raw_text.as_deref(),
+            text,
+            raw_text,
+            cleaned_text,
             duration_seconds: pair.duration_seconds,
             source: pair.source,
             created_at: &pair.created_at,
-            segments: include_timestamps
+            segments: options
+                .include_timestamps
                 .then_some(pair.segments.as_deref())
                 .flatten(),
         };
@@ -193,15 +242,18 @@ fn write_dataset(
     Ok(DatasetSummary {
         pairs: exported,
         skipped,
+        skipped_short,
         path: dest.display().to_string(),
     })
 }
 
 #[tauri::command]
-pub fn dataset_preview(state: tauri::State<AppState>) -> Result<DatasetPreview, String> {
-    Ok(DatasetPreview {
-        pairs: collect_pairs(&state.storage())?.len(),
-    })
+pub async fn dataset_preview(state: tauri::State<'_, AppState>) -> Result<DatasetPreview, String> {
+    let storage = state.storage();
+    let pairs = tauri::async_runtime::spawn_blocking(move || count_pairs(&storage))
+        .await
+        .map_err(|err| format!("Preview task failed: {err}"))??;
+    Ok(DatasetPreview { pairs })
 }
 
 #[tauri::command]
@@ -209,26 +261,33 @@ pub async fn export_dataset(
     app: AppHandle<AppRuntime>,
     state: tauri::State<'_, AppState>,
     destination: String,
-    include_timestamps: bool,
+    options: DatasetExportOptions,
 ) -> Result<DatasetSummary, String> {
-    let pairs = collect_pairs(&state.storage())?;
-    if pairs.is_empty() {
-        return Err("There are no audio and text pairs to export yet.".to_string());
-    }
-
+    let storage = state.storage();
     let dest = unique_dataset_dir(Path::new(&destination))?;
     let summary = tauri::async_runtime::spawn_blocking(move || {
-        write_dataset(&dest, &pairs, include_timestamps)
+        let pairs = collect_pairs(&storage)?;
+        if pairs.is_empty() {
+            return Err("There are no audio and text pairs to export yet.".to_string());
+        }
+        write_dataset(&dest, &pairs, options)
     })
     .await
     .map_err(|err| format!("Export task failed: {err}"))??;
 
-    crate::toast::show(
-        &app,
-        "success",
-        None,
-        &format!("Exported {} audio and text pairs", summary.pairs),
-    );
+    let mut message = format!("Exported {} audio and text pairs", summary.pairs);
+    if summary.skipped_short > 0 {
+        message.push_str(&format!(", skipped {} short clips", summary.skipped_short));
+    }
+    if summary.skipped > 0 {
+        message.push_str(&format!(", {} files could not be copied", summary.skipped));
+    }
+    let toast_type = if summary.skipped > 0 {
+        "info"
+    } else {
+        "success"
+    };
+    crate::toast::show(&app, toast_type, None, &message);
     Ok(summary)
 }
 
@@ -254,7 +313,29 @@ fn wipe_targets(app: &AppHandle<AppRuntime>) -> Result<Vec<PathBuf>, String> {
     if targets.is_empty() {
         return Err("Could not resolve the app data folders".to_string());
     }
+
+    // MSIX file virtualization can redirect AppData writes into the package's
+    // LocalCache, so a Store install must wipe that container too.
+    #[cfg(windows)]
+    if let Some(local_cache) = msix_local_cache_dir() {
+        targets.insert(local_cache);
+    }
+
     Ok(targets.into_iter().collect())
+}
+
+#[cfg(windows)]
+fn msix_local_cache_dir() -> Option<PathBuf> {
+    if !crate::platform::windows::store::is_msix_packaged() {
+        return None;
+    }
+    let family = crate::platform::windows::store::package_family_name()?;
+    let local_app_data = std::env::var_os("LOCALAPPDATA")?;
+    let path = PathBuf::from(local_app_data)
+        .join("Packages")
+        .join(family)
+        .join("LocalCache");
+    path.is_dir().then_some(path)
 }
 
 fn is_safe_wipe_target(path: &Path, identifier: &str) -> bool {
@@ -270,19 +351,25 @@ fn spawn_windows_cleaner(targets: &[PathBuf]) -> Result<(), String> {
     use std::os::windows::process::CommandExt;
     const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
-    let quoted = targets
+    let delete_commands = targets
         .iter()
-        .map(|target| format!("\"{}\"", target.display()))
+        .map(|target| format!("rmdir /S /Q \"{}\" >nul 2>&1", target.display()))
         .collect::<Vec<_>>()
-        .join(" ");
+        .join(" & ");
     // SQLite and WebView2 files stay locked until the process exits, so a
     // detached shell waits, deletes, then retries once for slow teardown.
-    let script = format!(
-        "ping -n 4 127.0.0.1 >nul & rmdir /S /Q {quoted} & ping -n 3 127.0.0.1 >nul & rmdir /S /Q {quoted}"
-    );
+    // ping is called by absolute path (the app may hand the shell a PATH
+    // without System32) and stays unquoted: a script starting with a quote
+    // triggers cmd /C quote stripping that breaks the whole command line.
+    let wait = "%SystemRoot%\\System32\\ping.exe -n 4 127.0.0.1 >nul";
+    let script = format!("{wait} & {delete_commands} & {wait} & {delete_commands}");
 
+    // raw_arg: Command::args applies MSVC-style quoting that cmd.exe does not
+    // understand, which would mangle the quoted paths.
     std::process::Command::new(std::env::var("ComSpec").unwrap_or_else(|_| "cmd.exe".to_string()))
-        .args(["/D", "/C", &script])
+        .raw_arg("/D")
+        .raw_arg("/C")
+        .raw_arg(&script)
         .current_dir(std::env::temp_dir())
         .creation_flags(CREATE_NO_WINDOW)
         .spawn()
@@ -291,18 +378,32 @@ fn spawn_windows_cleaner(targets: &[PathBuf]) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn delete_all_data(app: AppHandle<AppRuntime>) -> Result<(), String> {
+pub async fn delete_all_data(app: AppHandle<AppRuntime>) -> Result<(), String> {
     let targets = wipe_targets(&app)?;
+    crate::sync_launch_at_login(&app, false)?;
 
-    let _ = crate::cli_install::remove_cli();
+    tauri::async_runtime::spawn_blocking(move || {
+        let _ = crate::cli_install::remove_cli();
 
-    #[cfg(windows)]
-    spawn_windows_cleaner(&targets)?;
+        #[cfg(windows)]
+        spawn_windows_cleaner(&targets)?;
 
-    #[cfg(not(windows))]
-    for target in &targets {
-        let _ = fs::remove_dir_all(target);
-    }
+        #[cfg(not(windows))]
+        for target in &targets {
+            if let Err(err) = fs::remove_dir_all(target)
+                && err.kind() != std::io::ErrorKind::NotFound
+            {
+                return Err(format!(
+                    "Unable to delete {}: {err}",
+                    target.to_string_lossy()
+                ));
+            }
+        }
+
+        Ok::<(), String>(())
+    })
+    .await
+    .map_err(|err| format!("Delete task failed: {err}"))??;
 
     std::thread::spawn(move || {
         std::thread::sleep(std::time::Duration::from_millis(400));
@@ -402,9 +503,15 @@ mod tests {
 
         let pairs = collect_pairs(&storage).expect("collect pairs");
         assert_eq!(pairs.len(), 2);
+        assert_eq!(count_pairs(&storage).expect("count pairs"), 2);
 
+        let with_timestamps = DatasetExportOptions {
+            include_timestamps: true,
+            verbatim_text: false,
+            skip_short_clips: false,
+        };
         let dest = root.join("dataset");
-        let summary = write_dataset(&dest, &pairs, true).expect("write dataset");
+        let summary = write_dataset(&dest, &pairs, with_timestamps).expect("write dataset");
         assert_eq!(summary.pairs, 2);
         assert_eq!(summary.skipped, 0);
         assert!(dest.join("audio").join("item-1.wav").is_file());
@@ -420,8 +527,26 @@ mod tests {
         }
         assert!(metadata.contains("\"segments\""));
 
-        let without_timestamps =
-            write_dataset(&root.join("dataset-plain"), &pairs, false).expect("plain dataset");
+        // Skipping short clips drops the 0.9s library item.
+        let skip_short = DatasetExportOptions {
+            include_timestamps: false,
+            verbatim_text: false,
+            skip_short_clips: true,
+        };
+        let filtered =
+            write_dataset(&root.join("dataset-filtered"), &pairs, skip_short).expect("filtered");
+        assert_eq!(filtered.pairs, 1);
+
+        let without_timestamps = write_dataset(
+            &root.join("dataset-plain"),
+            &pairs,
+            DatasetExportOptions {
+                include_timestamps: false,
+                verbatim_text: false,
+                skip_short_clips: false,
+            },
+        )
+        .expect("plain dataset");
         assert_eq!(without_timestamps.pairs, 2);
         let plain = fs::read_to_string(root.join("dataset-plain").join("metadata.jsonl"))
             .expect("read plain metadata");

@@ -7,7 +7,9 @@
 use std::sync::OnceLock;
 use windows::ApplicationModel::{StartupTask, StartupTaskState};
 use windows::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER;
-use windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName;
+use windows::Win32::Storage::Packaging::Appx::{
+    GetCurrentPackageFamilyName, GetCurrentPackageFullName,
+};
 use windows::core::HSTRING;
 
 /// Must match the StartupTask TaskId in src-tauri/msix/AppxManifest.xml.
@@ -21,6 +23,24 @@ pub fn is_msix_packaged() -> bool {
         let err = unsafe { GetCurrentPackageFullName(&mut length, None) };
         err == ERROR_INSUFFICIENT_BUFFER
     })
+}
+
+/// Package family name, used to locate the MSIX LocalCache data folder.
+pub fn package_family_name() -> Option<String> {
+    use windows::Win32::Foundation::ERROR_SUCCESS;
+    use windows::core::PWSTR;
+
+    let mut length = 0u32;
+    let err = unsafe { GetCurrentPackageFamilyName(&mut length, None) };
+    if err != ERROR_INSUFFICIENT_BUFFER || length == 0 {
+        return None;
+    }
+    let mut buffer = vec![0u16; length as usize];
+    let err = unsafe { GetCurrentPackageFamilyName(&mut length, Some(PWSTR(buffer.as_mut_ptr()))) };
+    if err != ERROR_SUCCESS {
+        return None;
+    }
+    String::from_utf16(&buffer[..length.saturating_sub(1) as usize]).ok()
 }
 
 /// join() must not block the STA main thread; workers use the implicit MTA.

@@ -23,7 +23,6 @@ type HoldActionCardButtonProps = {
   disabled?: boolean;
   accentPreset?: ActionCardAccentPreset;
   ariaLabel?: string;
-  holdDurationMs?: number;
 };
 
 const joinClasses = (...classes: Array<string | false | null | undefined>) =>
@@ -37,7 +36,6 @@ const HoldActionCardButton = ({
   disabled = false,
   accentPreset = "accent",
   ariaLabel,
-  holdDurationMs = HOLD_DURATION_MS,
 }: HoldActionCardButtonProps) => {
   const [progress, setProgress] = useState(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -74,30 +72,27 @@ const HoldActionCardButton = ({
     resetVisuals();
   }, [resetVisuals]);
 
-  const stepHold = useCallback(
-    (timestamp: number) => {
-      if (!holdingRef.current || startTimeRef.current === null) return;
+  const stepHold = useCallback((timestamp: number) => {
+    if (!holdingRef.current || startTimeRef.current === null) return;
 
-      const elapsed = timestamp - startTimeRef.current;
-      const nextProgress = Math.min(1, elapsed / holdDurationMs);
-      setProgress(nextProgress);
+    const elapsed = timestamp - startTimeRef.current;
+    const nextProgress = Math.min(1, elapsed / HOLD_DURATION_MS);
+    setProgress(nextProgress);
 
-      if (nextProgress >= 1) {
-        readyRef.current = true;
-        if (buttonRef.current) {
-          buttonRef.current.dataset.ready = "true";
-        }
-        if (frameRef.current !== null) {
-          cancelAnimationFrame(frameRef.current);
-          frameRef.current = null;
-        }
-        return;
+    if (nextProgress >= 1) {
+      readyRef.current = true;
+      if (buttonRef.current) {
+        buttonRef.current.dataset.ready = "true";
       }
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+      return;
+    }
 
-      frameRef.current = requestAnimationFrame(stepHold);
-    },
-    [holdDurationMs],
-  );
+    frameRef.current = requestAnimationFrame(stepHold);
+  }, []);
 
   useEffect(() => {
     return () => {

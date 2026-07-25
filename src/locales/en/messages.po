@@ -14,6 +14,56 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.advanced"
+#~ msgstr "Advanced"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.faq_help_description"
+#~ msgstr "common questions"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.faq_help"
+#~ msgstr "FAQ & Help"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/LocalApiTab.tsx
+#~ msgid "settings.local_api.command_line"
+#~ msgstr "Command line"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.data.include_dictations"
+#~ msgstr "Dictations"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.data.include_dictations_hint"
+#~ msgstr "Everyday dictations with audio"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.data.include_library_hint"
+#~ msgstr "Imported and recorded files"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.data.include_dictations_aria"
+#~ msgstr "Include dictations in the export"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.data.include_library_aria"
+#~ msgstr "Include library recordings in the export"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.data.include_library"
+#~ msgstr "Library recordings"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(if required)"
@@ -341,11 +391,6 @@ msgstr "Add website domain"
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.no_entries.description"
 msgstr "Add words, phrases, or names above and press Enter to save them here."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.advanced"
-msgstr "Advanced"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -870,11 +915,6 @@ msgid "member_card.tier_commercial"
 msgstr "Commercial"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.faq_help_description"
-msgstr "common questions"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.support.faq.subtitle"
 msgstr "Common questions"
@@ -896,8 +936,8 @@ msgstr "Continue"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.confirm.continue"
-msgstr "Continue anyway"
+msgid "onboarding.model.confirm.title"
+msgstr "Continue without a model?"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
@@ -1069,6 +1109,11 @@ msgstr "Couldn't find this library item. Try reopening it."
 #: src/features/updates/components/WhatsNewModal.tsx
 msgid "updates.whats_new.couldnt_load"
 msgstr "Couldn't load releases"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.count_error"
+msgstr "Couldn't read your recordings"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -1399,11 +1444,6 @@ msgid "settings.general.download_one"
 msgstr "Download one"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.confirm.title"
-msgstr "Download your model?"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.downloading"
 msgstr "Downloading"
@@ -1544,6 +1584,11 @@ msgid "library.modal.export.title"
 msgstr "Export transcription"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.export_confirm"
+msgstr "Export…"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.listen_on_lan_help"
 msgstr "expose to other devices on your network"
@@ -1585,8 +1630,8 @@ msgstr "FAQ"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.faq_help"
-msgstr "FAQ & Help"
+msgid "settings.about.faq"
+msgstr "FAQ"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -1721,7 +1766,7 @@ msgstr "Glimpse member card"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.confirm.body"
-msgstr "Glimpse needs it to transcribe. It can download in the background while you finish."
+msgstr "Glimpse needs one to transcribe. The recommended model can download in the background while you finish setup."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -1755,13 +1800,13 @@ msgstr "Hold"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.data.delete_all_description"
-msgstr "hold to erase everything and quit"
+msgid "settings.about.data.hold_to_delete"
+msgstr "Hold to delete"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.restart_onboarding_description"
-msgstr "re-run setup wizard"
+msgid "settings.about.data.hold_to_restart"
+msgstr "Hold to restart"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -1865,8 +1910,8 @@ msgstr "Include the Apple Neural Engine encoder"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.data.include_timestamps"
-msgstr "Include timestamps"
+msgid "settings.about.data.include_timestamps_aria"
+msgstr "Include timestamps in the export"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1974,6 +2019,11 @@ msgstr "Launch at login"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "Launch at Login"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.skip_short_hint"
+msgstr "Leaves out clips under a second"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -2634,6 +2684,11 @@ msgid "settings.local_api.api_key.placeholder_optional"
 msgstr "Optional - blank to disable"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.verbatim_text"
+msgstr "Original text"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.7d"
 msgstr "Past 7 days"
@@ -2897,6 +2952,11 @@ msgid "settings.general.shortcuts.remove_shortcut"
 msgstr "Remove shortcut"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.delete_all_description"
+msgstr "Removes recordings, transcripts, models, and settings, then quits"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.rename"
 msgstr "Rename"
@@ -2993,7 +3053,7 @@ msgstr "Restart"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding"
-msgstr "Restart Onboarding"
+msgstr "Restart onboarding"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3121,6 +3181,11 @@ msgid "settings.general.local.description"
 msgstr "Runs entirely on your device"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.restart_onboarding_description"
+msgstr "Runs setup again"
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.ane.info"
 msgstr "Adds a Core ML encoder that runs on the Apple Neural Engine for faster, more power-efficient transcription. The first load takes longer while macOS optimizes it for your chip."
@@ -3234,6 +3299,11 @@ msgstr "Search transcriptions"
 #: src/shared/ui/Dropdown.tsx
 msgid "dropdown.search_placeholder"
 msgstr "Search..."
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.include_timestamps_hint"
+msgstr "Segment start and end times"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3371,9 +3441,24 @@ msgid "onboarding.permissions.skip"
 msgstr "Skip"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.skip_short_aria"
+msgstr "Skip clips shorter than one second"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.confirm.continue"
+msgstr "Skip for now"
+
+#. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
 msgid "import.skip"
 msgstr "Skip for now"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.skip_short"
+msgstr "Skip short clips"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3636,6 +3721,11 @@ msgid "library.modal.delete_confirm.description"
 msgstr "This removes the transcript and audio from your library."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.include_timestamps"
+msgstr "Timestamps"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.timestamps"
 msgstr "Timestamps"
@@ -3766,6 +3856,11 @@ msgid "settings.app.prune_target.transcripts"
 msgstr "Transcripts"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.verbatim_text_hint"
+msgstr "Transcripts before cleanup"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.edit_mode.body"
 msgstr "transform selected text with voice"
@@ -3888,6 +3983,11 @@ msgstr "Use Glimpse from Terminal or scripts"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.snippets.summary"
 msgstr "Use snippets to pass live context to the language model, like"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.data.verbatim_text_aria"
+msgstr "Use the original transcripts before cleanup"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx

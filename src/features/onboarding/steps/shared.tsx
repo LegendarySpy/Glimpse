@@ -79,7 +79,7 @@ export const StepIndicator = ({
     {Array.from({ length: total }).map((_, i) => (
       <motion.div
         key={i}
-        className="h-1.5 rounded-full bg-cloud"
+        className="h-1.5 rounded-full bg-content-primary"
         animate={{
           width: i === currentStep ? 20 : 6,
           opacity: i <= currentStep ? 1 : 0.25,

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DownloadSimple } from "@phosphor-icons/react";
 import ModelPickerModal from "../../../shared/ui/ModelPickerModal";
 import ModelStatCard from "../../settings/components/ModelStatCard";
 import { isBuiltInModel } from "../../../shared/lib/modelStats";
@@ -318,38 +317,37 @@ function ConfirmModelDownload({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.96, opacity: 0 }}
         transition={{ duration: 0.18 }}
-        className="w-full max-w-sm rounded-2xl border border-border-primary bg-surface-tertiary p-6 text-center ui-shadow-modal-deep"
+        className="w-full max-w-sm rounded-2xl border border-border-secondary bg-surface-secondary p-6 text-left ui-shadow-modal-deep"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="onboarding-model-confirm-title"
       >
-        <DownloadSimple size={22} className="mx-auto mb-3 text-cloud" />
         <p
           id="onboarding-model-confirm-title"
           className="ui-text-body-lg font-semibold text-content-primary"
         >
           {t({
             id: "onboarding.model.confirm.title",
-            message: "Download your model?",
+            message: "Continue without a model?",
           })}
         </p>
-        <p className="mt-1 ui-text-label text-content-disabled text-pretty">
+        <p className="mt-1.5 ui-text-label text-content-muted text-pretty">
           {t({
             id: "onboarding.model.confirm.body",
             message:
-              "Glimpse needs it to transcribe. It can download in the background while you finish.",
+              "Glimpse needs one to transcribe. The recommended model can download in the background while you finish setup.",
           })}
         </p>
-        <div className="mt-5 flex justify-center gap-2">
+        <div className="mt-5 flex justify-end gap-2">
           <button
             type="button"
             onClick={onContinue}
-            className="rounded-lg border border-border-secondary px-4 py-2 ui-text-body-sm font-medium text-content-secondary transition-colors hover:border-border-hover"
+            className="rounded-lg border border-border-secondary px-4 py-2 ui-text-body-sm font-medium text-content-primary transition-colors hover:bg-surface-hover"
           >
             {t({
               id: "onboarding.model.confirm.continue",
-              message: "Continue anyway",
+              message: "Skip for now",
             })}
           </button>
           <button
