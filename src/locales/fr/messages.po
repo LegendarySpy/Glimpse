@@ -698,10 +698,6 @@ msgstr ""
 #~ msgstr "D'autres modèles et la configuration du modèle de langage sont disponibles dans les Réglages après la configuration initiale."
 
 #. js-lingui-explicit-id
-#~ msgid "library.card.more_options"
-#~ msgstr "Plus d'options"
-
-#. js-lingui-explicit-id
 #~ msgid "settings.account.password.new_placeholder"
 #~ msgstr "Nouveau mot de passe"
 
@@ -1048,6 +1044,12 @@ msgstr "{0, plural, one {# dictée améliorée par l'IA aujourd'hui} other {# di
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "{0, plural, one {# dictation} other {# dictations}}"
 msgstr "{0, plural, one {# dictée} other {# dictées}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: stats.langCount
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.languages"
+msgstr "{0, plural, one {# langue} other {# langues}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: previewForApp.replacementsCount
@@ -1801,6 +1803,11 @@ msgid "model_picker.close"
 msgstr "Fermer"
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.close"
+msgstr "Fermer"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.close"
 msgstr "Fermer"
@@ -1931,6 +1938,12 @@ msgid "member_card.tier_contributor"
 msgstr "Contributeur"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.converting"
+msgstr "Conversion {0} %"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.converting"
 msgstr "Conversion de l'audio en cours…"
@@ -1995,6 +2008,11 @@ msgstr "Copier"
 #: src/features/settings/components/LocalApiSidebarStatus.tsx
 msgid "home.local_api.copy_url"
 msgstr "Copier l'URL de base"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.error.copy"
+msgstr "Copier l'erreur"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -2530,6 +2548,11 @@ msgid "settings.models.installed.english"
 msgstr "Anglais"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.english_only"
+msgstr "Anglais uniquement"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.invalid"
 msgstr "Saisissez un domaine valide, par exemple gmail.com"
@@ -2602,6 +2625,11 @@ msgstr "exposer aux autres appareils de votre réseau"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.failed"
+msgstr "Échec"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.failed"
 msgstr "Échec"
 
 #. js-lingui-explicit-id
@@ -2725,6 +2753,11 @@ msgid "faq.title"
 msgstr "Foire aux questions"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.full"
+msgstr "Complet"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.snippets.full_list"
 msgstr "Liste complète des extraits"
@@ -2837,7 +2870,7 @@ msgstr "Maintenir pour supprimer"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.hold_to_restart"
-msgstr "Maintenir pour redémarrer"
+msgstr "Maintenir pour relancer"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2920,6 +2953,11 @@ msgid "library.import.title"
 msgstr "Importer dans la bibliothèque"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.imported"
+msgstr "Importé"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.importing"
 msgstr "Importation en cours…"
@@ -2957,7 +2995,7 @@ msgstr "Surveillance des entrées"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.install_cli"
-msgstr "Installer l'interface CLI"
+msgstr "Installer la CLI"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3242,6 +3280,11 @@ msgid "library.view.description"
 msgstr "Importez des fichiers audio et vidéo pour les transcrire."
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.maximize"
+msgstr "Agrandir"
+
+#. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.label_member_since"
 msgstr "Membre depuis"
@@ -3285,6 +3328,11 @@ msgstr "Le test du microphone n'est pas disponible dans cette fenêtre."
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.mic_unavailable"
 msgstr "Microphone indisponible ({error})"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.minimize"
+msgstr "Réduire"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3396,6 +3444,11 @@ msgstr "Plus d'informations sur les badges de prise en charge des langues de tra
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.more_options"
+msgstr "Plus d'options"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.more_options"
 msgstr "Plus d'options"
 
 #. js-lingui-explicit-id
@@ -3777,7 +3830,7 @@ msgstr "Déjà acheté ?"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_pause_media.pause"
-msgstr "Pause"
+msgstr "Mettre en pause"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3941,6 +3994,11 @@ msgid "member_card.tier_purchase_aria"
 msgstr "Acheter {label} pour {price}"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.queued"
+msgstr "En attente"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.queued"
 msgstr "En attente de transcription…"
@@ -3954,6 +4012,11 @@ msgstr "Quitter {app}"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "Quitter {app}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.ready"
+msgstr "Prêt"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -4045,7 +4108,7 @@ msgstr "Supprimer le raccourci"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
-msgstr "Supprime les enregistrements, transcriptions, modèles et paramètres, puis quitte"
+msgstr "Supprime toutes les données de l'app, puis quitte"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -4144,7 +4207,7 @@ msgstr "Redémarrer"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding"
-msgstr "Relancer l'intégration"
+msgstr "Refaire la configuration"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4274,7 +4337,7 @@ msgstr "Fonctionne entièrement sur votre appareil"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding_description"
-msgstr "relancer l'assistant de configuration"
+msgstr "Relance la configuration"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -4717,6 +4780,11 @@ msgid "dictionary.section.replacements_description"
 msgstr "Remplacer automatiquement les expressions courantes après la transcription."
 
 #. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.system"
+msgstr "Système"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.system"
 msgstr "Système"
@@ -4810,6 +4878,12 @@ msgstr "La commande glimpse est installée à l'emplacement {cliInstallPath}. Ut
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.label"
 msgstr "Thème"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.thinking"
+msgstr "Réfléchit {0} %"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -5108,7 +5182,7 @@ msgstr "Utiliser"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.cli.default_subtitle"
-msgstr "Utiliser Glimpse depuis Terminal ou des scripts"
+msgstr "Utiliser Glimpse depuis le Terminal"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

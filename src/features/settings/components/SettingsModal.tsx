@@ -488,6 +488,7 @@ const SettingsErrorBanner = ({
     tab: "general" | "models" | "providers" | "local-api" | "about" | "app",
   ) => void;
 }) => {
+  const { t } = useLingui();
   const { copied, copy } = useCopyToClipboard(1500);
 
   const handleCopy = () => {
@@ -529,7 +530,10 @@ const SettingsErrorBanner = ({
                 handleCopy();
               }}
               className="ml-1 inline-flex align-[-2px] text-error/60 transition-colors hover:text-error"
-              aria-label="Copy error"
+              aria-label={t({
+                id: "settings.error.copy",
+                message: "Copy error",
+              })}
             >
               {copied ? <Check size={11} /> : <Copy size={11} />}
             </button>

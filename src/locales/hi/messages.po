@@ -698,10 +698,6 @@ msgstr ""
 #~ msgstr "सेटअप पूरा होने के बाद सेटिंग्स में और मॉडल और भाषा मॉडल सेटअप उपलब्ध हैं।"
 
 #. js-lingui-explicit-id
-#~ msgid "library.card.more_options"
-#~ msgstr "अधिक विकल्प"
-
-#. js-lingui-explicit-id
 #~ msgid "settings.account.password.new_placeholder"
 #~ msgstr "नया पासवर्ड"
 
@@ -1048,6 +1044,12 @@ msgstr "{0, plural, one {# डिक्टेशन आज AI से सुध�
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "{0, plural, one {# dictation} other {# dictations}}"
 msgstr "{0, plural, one {# डिक्टेशन} other {# डिक्टेशन}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: stats.langCount
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.languages"
+msgstr "{0, plural, one {# भाषा} other {# भाषाएँ}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: previewForApp.replacementsCount
@@ -1801,6 +1803,11 @@ msgid "model_picker.close"
 msgstr "बंद करें"
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.close"
+msgstr "बंद करें"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.close"
 msgstr "बंद करें"
@@ -1931,6 +1938,12 @@ msgid "member_card.tier_contributor"
 msgstr "सहयोगी"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.converting"
+msgstr "कनवर्ट हो रहा है {0}%"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.converting"
 msgstr "ऑडियो कनवर्ट किया जा रहा है..."
@@ -1995,6 +2008,11 @@ msgstr "कॉपी करें"
 #: src/features/settings/components/LocalApiSidebarStatus.tsx
 msgid "home.local_api.copy_url"
 msgstr "बेस URL कॉपी करें"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.error.copy"
+msgstr "त्रुटि कॉपी करें"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -2530,6 +2548,11 @@ msgid "settings.models.installed.english"
 msgstr "अंग्रेज़ी"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.english_only"
+msgstr "केवल अंग्रेज़ी"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.invalid"
 msgstr "gmail.com जैसा कोई मान्य डोमेन दर्ज करें"
@@ -2603,6 +2626,11 @@ msgstr "अपने नेटवर्क के अन्य डिवाइ�
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.failed"
 msgstr "विफल"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.failed"
+msgstr "असफल"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryView.tsx
@@ -2723,6 +2751,11 @@ msgstr "Glimpse में आपका स्वागत है"
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.title"
 msgstr "अक्सर पूछे जाने वाले प्रश्न"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.full"
+msgstr "पूर्ण"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -2918,6 +2951,11 @@ msgstr "आयात असफल रहा। दोबारा कोशि�
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.title"
 msgstr "लाइब्रेरी में आयात करें"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.imported"
+msgstr "आयातित"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3242,6 +3280,11 @@ msgid "library.view.description"
 msgstr "ट्रांसक्रिप्शन के लिए ऑडियो और वीडियो फ़ाइलें आयात करें।"
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.maximize"
+msgstr "बड़ा करें"
+
+#. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.label_member_since"
 msgstr "सदस्यता आरंभ"
@@ -3285,6 +3328,11 @@ msgstr "इस विंडो में माइक्रोफ़ोन प�
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.mic_unavailable"
 msgstr "माइक्रोफ़ोन उपलब्ध नहीं है ({error})"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.minimize"
+msgstr "छोटा करें"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3396,6 +3444,11 @@ msgstr "ट्रांसक्रिप्शन भाषा सहायत�
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.more_options"
+msgstr "अधिक विकल्प"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.more_options"
 msgstr "अधिक विकल्प"
 
 #. js-lingui-explicit-id
@@ -3941,6 +3994,11 @@ msgid "member_card.tier_purchase_aria"
 msgstr "{label} को {price} में ख़रीदें"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.queued"
+msgstr "कतार में"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.queued"
 msgstr "ट्रांसक्रिप्शन के लिए कतार में..."
@@ -3954,6 +4012,11 @@ msgstr "{app} बंद करें"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "{app} बंद करें"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.ready"
+msgstr "तैयार"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -4717,6 +4780,11 @@ msgid "dictionary.section.replacements_description"
 msgstr "ट्रांसक्रिप्शन के बाद सामान्य वाक्यांशों को अपने‑आप बदलें।"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.system"
+msgstr "सिस्टम"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.system"
 msgstr "सिस्टम"
@@ -4810,6 +4878,12 @@ msgstr "glimpse कमांड {cliInstallPath} पर इंस्टॉल �
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.label"
 msgstr "थीम"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.thinking"
+msgstr "सोच रहा है {0}%"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx

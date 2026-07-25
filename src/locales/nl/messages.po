@@ -698,10 +698,6 @@ msgstr ""
 #~ msgstr "Meer modellen en taalmodelconfiguratie beschikbaar in Instellingen na de eerste configuratie."
 
 #. js-lingui-explicit-id
-#~ msgid "library.card.more_options"
-#~ msgstr "Meer opties"
-
-#. js-lingui-explicit-id
 #~ msgid "settings.account.password.new_placeholder"
 #~ msgstr "Nieuw wachtwoord"
 
@@ -1048,6 +1044,12 @@ msgstr "{0, plural, one {# dictee vandaag bijgewerkt met AI} other {# dictees va
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "{0, plural, one {# dictation} other {# dictations}}"
 msgstr "{0, plural, one {# dictee} other {# dictees}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: stats.langCount
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.languages"
+msgstr "{0, plural, one {# taal} other {# talen}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: previewForApp.replacementsCount
@@ -1801,6 +1803,11 @@ msgid "model_picker.close"
 msgstr "Sluit"
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.close"
+msgstr "Sluiten"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.close"
 msgstr "Sluit"
@@ -1931,6 +1938,12 @@ msgid "member_card.tier_contributor"
 msgstr "Bijdrager"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.converting"
+msgstr "Converteren {0}%"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.converting"
 msgstr "Audio wordt geconverteerd…"
@@ -1995,6 +2008,11 @@ msgstr "Kopiëren"
 #: src/features/settings/components/LocalApiSidebarStatus.tsx
 msgid "home.local_api.copy_url"
 msgstr "Basis-URL kopiëren"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.error.copy"
+msgstr "Fout kopiëren"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -2530,6 +2548,11 @@ msgid "settings.models.installed.english"
 msgstr "Engels"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.english_only"
+msgstr "Alleen Engels"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.invalid"
 msgstr "Voer een geldig domein in, zoals gmail.com"
@@ -2602,6 +2625,11 @@ msgstr "blootstellen aan andere apparaten op je netwerk"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.failed"
+msgstr "Mislukt"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.failed"
 msgstr "Mislukt"
 
 #. js-lingui-explicit-id
@@ -2723,6 +2751,11 @@ msgstr "Welkom bij Glimpse"
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.title"
 msgstr "Veelgestelde vragen"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.full"
+msgstr "Volledig"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -2918,6 +2951,11 @@ msgstr "Importeren is mislukt. Probeer het opnieuw of sla deze stap over."
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.title"
 msgstr "Importeren in bibliotheek"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.imported"
+msgstr "Geïmporteerd"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3242,6 +3280,11 @@ msgid "library.view.description"
 msgstr "Audio- en videobestanden importeren voor transcriptie."
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.maximize"
+msgstr "Maximaliseren"
+
+#. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.label_member_since"
 msgstr "Lid sinds"
@@ -3285,6 +3328,11 @@ msgstr "Microfoontest is in dit venster niet beschikbaar."
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.mic_unavailable"
 msgstr "Microfoon niet beschikbaar ({error})"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.minimize"
+msgstr "Minimaliseren"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3396,6 +3444,11 @@ msgstr "Meer informatie over badges voor transcriptietaalondersteuning"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.more_options"
+msgstr "Meer opties"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.more_options"
 msgstr "Meer opties"
 
 #. js-lingui-explicit-id
@@ -3941,6 +3994,11 @@ msgid "member_card.tier_purchase_aria"
 msgstr "Koop {label} voor {price}"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.queued"
+msgstr "In wachtrij"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.queued"
 msgstr "In de wachtrij voor transcriptie..."
@@ -3954,6 +4012,11 @@ msgstr "Stop {app}"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "Stop {app}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.ready"
+msgstr "Gereed"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -4717,6 +4780,11 @@ msgid "dictionary.section.replacements_description"
 msgstr "Veelgebruikte zinnen na transcriptie automatisch vervangen."
 
 #. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.system"
+msgstr "Systeem"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.system"
 msgstr "Systeem"
@@ -4810,6 +4878,12 @@ msgstr "De glimpse-opdracht is geïnstalleerd op {cliInstallPath}. Gebruik deze 
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.label"
 msgstr "Thema"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.thinking"
+msgstr "Denkt na {0}%"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx

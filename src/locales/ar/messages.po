@@ -698,10 +698,6 @@ msgstr ""
 #~ msgstr "تتوفر نماذج إضافية وإعداد نموذج اللغة في الإعدادات بعد الإعداد الأولي."
 
 #. js-lingui-explicit-id
-#~ msgid "library.card.more_options"
-#~ msgstr "خيارات إضافية"
-
-#. js-lingui-explicit-id
 #~ msgid "settings.account.password.new_placeholder"
 #~ msgstr "كلمة مرور جديدة"
 
@@ -1048,6 +1044,12 @@ msgstr "{0, plural, one {# إملاء مُحسَّن بالذكاء الاصطن
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "{0, plural, one {# dictation} other {# dictations}}"
 msgstr "{0, plural, one {# إملاء} other {# إملاءات}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: stats.langCount
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.languages"
+msgstr "{0, plural, zero {لا لغات} one {لغة واحدة} two {لغتان} few {# لغات} many {# لغة} other {# لغة}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: previewForApp.replacementsCount
@@ -1801,6 +1803,11 @@ msgid "model_picker.close"
 msgstr "إغلاق"
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.close"
+msgstr "إغلاق"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.close"
 msgstr "إغلاق"
@@ -1931,6 +1938,12 @@ msgid "member_card.tier_contributor"
 msgstr "مساهم"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.converting"
+msgstr "جارٍ التحويل {0}%"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.converting"
 msgstr "جارٍ تحويل الصوت..."
@@ -1995,6 +2008,11 @@ msgstr "نسخ"
 #: src/features/settings/components/LocalApiSidebarStatus.tsx
 msgid "home.local_api.copy_url"
 msgstr "نسخ عنوان URL الأساسي"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SettingsModal.tsx
+msgid "settings.error.copy"
+msgstr "نسخ الخطأ"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -2530,6 +2548,11 @@ msgid "settings.models.installed.english"
 msgstr "الإنجليزية"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/ModelStatCard.tsx
+msgid "models.card.english_only"
+msgstr "الإنجليزية فقط"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.invalid"
 msgstr "أدخل نطاقًا صالحًا مثل gmail.com"
@@ -2602,6 +2625,11 @@ msgstr "الكشف للأجهزة الأخرى على شبكتك"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.failed"
+msgstr "فشل"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.failed"
 msgstr "فشل"
 
 #. js-lingui-explicit-id
@@ -2723,6 +2751,11 @@ msgstr "مرحباً بك في Glimpse"
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.title"
 msgstr "الأسئلة الشائعة"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.full"
+msgstr "كامل"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -2918,6 +2951,11 @@ msgstr "فشل الاستيراد. حاول مجدداً أو تخطَّ."
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.title"
 msgstr "استيراد إلى المكتبة"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.imported"
+msgstr "مستورد"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3242,6 +3280,11 @@ msgid "library.view.description"
 msgstr "استورد ملفات الصوت والفيديو للنسخ."
 
 #. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.maximize"
+msgstr "تكبير"
+
+#. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.label_member_since"
 msgstr "عضو منذ"
@@ -3285,6 +3328,11 @@ msgstr "اختبار الميكروفون غير متاح في هذه الناف
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.mic_unavailable"
 msgstr "الميكروفون غير متاح ({error})"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/WindowControls.tsx
+msgid "window.controls.minimize"
+msgstr "تصغير"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3396,6 +3444,11 @@ msgstr "مزيد من المعلومات حول شارات دعم لغة الن�
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
 msgid "transcriptions.item.more_options"
+msgstr "خيارات إضافية"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.more_options"
 msgstr "خيارات إضافية"
 
 #. js-lingui-explicit-id
@@ -3941,6 +3994,11 @@ msgid "member_card.tier_purchase_aria"
 msgstr "شراء {label} مقابل {price}"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.queued"
+msgstr "في قائمة الانتظار"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_status.queued"
 msgstr "في قائمة الانتظار للنسخ..."
@@ -3954,6 +4012,11 @@ msgstr "إنهاء {app}"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "إنهاء {app}"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.ready"
+msgstr "جاهز"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -4717,6 +4780,11 @@ msgid "dictionary.section.replacements_description"
 msgstr "استبدال العبارات الشائعة تلقائيًا بعد التحويل."
 
 #. js-lingui-explicit-id
+#: src/shared/lib/modelStats.ts
+msgid "models.variant.system"
+msgstr "النظام"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.system"
 msgstr "النظام"
@@ -4810,6 +4878,12 @@ msgstr "أمر glimpse مثبَّت في {cliInstallPath}. استخدمه من T
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.label"
 msgstr "المظهر"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: (progress * 100).toFixed(0)
+#: src/features/library/components/LibraryCard.tsx
+msgid "library.card.status.thinking"
+msgstr "يفكر {0}%"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx

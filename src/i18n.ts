@@ -80,6 +80,7 @@ export function activateLocale(
   return nextLocale;
 }
 
-activateLocale(DEFAULT_APP_LOCALE);
+// Keep the active locale when HMR re-evaluates this module (catalog edits).
+activateLocale(i18n.locale || DEFAULT_APP_LOCALE);
 
 export { i18n };

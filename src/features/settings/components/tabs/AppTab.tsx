@@ -848,24 +848,38 @@ const AppTab = ({
                       >
                         <ChevronLeft size={10} />
                       </button>
-                      <AnimatePresence mode="popLayout" initial={false}>
-                        <motion.span
-                          key={duckIndex}
-                          initial={{ opacity: 0, y: -2, scale: 0.92 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 2, scale: 0.92 }}
-                          transition={{ duration: 0.16, ease: "easeOut" }}
-                          onMouseDown={handleDuckScrubStart}
-                          onTouchStart={handleDuckScrubStart}
-                          className={`w-[40px] min-w-[40px] text-center font-medium tabular-nums cursor-ew-resize select-none ${
-                            mediaAction === "off"
-                              ? "ui-color-disabled"
-                              : "ui-color-cloud"
-                          }`}
-                        >
-                          {duckStops[duckIndex].label}
-                        </motion.span>
-                      </AnimatePresence>
+                      {/* Invisible copies of every label reserve the widest width, so the value never shifts the arrows. */}
+                      <div
+                        onMouseDown={handleDuckScrubStart}
+                        onTouchStart={handleDuckScrubStart}
+                        className="inline-grid whitespace-nowrap px-0.5 text-center font-medium tabular-nums cursor-ew-resize select-none"
+                      >
+                        {duckStops.map((stop) => (
+                          <span
+                            key={stop.value}
+                            aria-hidden="true"
+                            className="invisible col-start-1 row-start-1"
+                          >
+                            {stop.label}
+                          </span>
+                        ))}
+                        <AnimatePresence mode="popLayout" initial={false}>
+                          <motion.span
+                            key={duckIndex}
+                            initial={{ opacity: 0, y: -2, scale: 0.92 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 2, scale: 0.92 }}
+                            transition={{ duration: 0.16, ease: "easeOut" }}
+                            className={`col-start-1 row-start-1 ${
+                              mediaAction === "off"
+                                ? "ui-color-disabled"
+                                : "ui-color-cloud"
+                            }`}
+                          >
+                            {duckStops[duckIndex].label}
+                          </motion.span>
+                        </AnimatePresence>
+                      </div>
                       <button
                         type="button"
                         onClick={() =>
