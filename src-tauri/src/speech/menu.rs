@@ -1,6 +1,7 @@
 use tauri::menu::{CheckMenuItemBuilder, MenuItem, SubmenuBuilder};
 use tauri::{AppHandle, Manager};
 
+use crate::native_i18n::MenuStrings;
 use crate::settings::UserSettings;
 use crate::speech::{self, catalog, install, remote};
 use crate::{AppRuntime, AppState};
@@ -47,7 +48,9 @@ pub fn model_status_lines(settings: &UserSettings) -> Vec<String> {
     if remote::is_configured(settings) {
         let active = catalog::label(&speech::selected_model(settings));
         let fallback = install::model_label(&settings.local_model);
-        vec![active, format!("Fallback: {fallback}")]
+        let label = MenuStrings::resolve(settings)
+            .format("native.menu.model_fallback", &[("model", &fallback)]);
+        vec![active, label]
     } else {
         vec![install::model_label(&settings.local_model)]
     }
@@ -76,7 +79,10 @@ pub fn build_models_submenu(
 ) -> tauri::Result<tauri::menu::Submenu<AppRuntime>> {
     let speech_models = catalog::list_models(app, settings);
     let remote_active = remote::is_configured(settings);
-    let mut model_submenu = SubmenuBuilder::new(app, "Models");
+    let mut model_submenu = SubmenuBuilder::new(
+        app,
+        MenuStrings::resolve(settings).get("native.menu.models"),
+    );
 
     let remote_model = speech_models
         .iter()

@@ -1,3 +1,4 @@
+use crate::native_i18n::MenuStrings;
 use crate::{AppRuntime, AppState, assistive, toast};
 use tauri::menu::{MenuItem, SubmenuBuilder};
 use tauri::{AppHandle, Manager};
@@ -10,9 +11,9 @@ const RECENT_TRANSCRIPTIONS_PREVIEW_LEN: usize = 60;
 
 pub fn build_recent_transcriptions_menu(
     app: &AppHandle<AppRuntime>,
-    label: &str,
+    strings: &MenuStrings,
 ) -> tauri::Result<tauri::menu::Submenu<AppRuntime>> {
-    let mut submenu = SubmenuBuilder::new(app, label);
+    let mut submenu = SubmenuBuilder::new(app, strings.get("native.menu.recent"));
     if let Some(state) = app.try_state::<AppState>() {
         match state
             .storage()
@@ -23,6 +24,7 @@ pub fn build_recent_transcriptions_menu(
                     let preview = format_transcription_preview(
                         &record.text,
                         RECENT_TRANSCRIPTIONS_PREVIEW_LEN,
+                        strings.get("native.menu.recent_empty_item"),
                     );
                     let item = MenuItem::with_id(
                         app,
@@ -38,7 +40,7 @@ pub fn build_recent_transcriptions_menu(
                 let item = MenuItem::with_id(
                     app,
                     MENU_ID_RECENT_TRANSCRIPTION_EMPTY,
-                    "No transcriptions yet",
+                    strings.get("native.menu.recent_empty"),
                     false,
                     None::<&str>,
                 )?;
@@ -49,7 +51,7 @@ pub fn build_recent_transcriptions_menu(
                 let item = MenuItem::with_id(
                     app,
                     MENU_ID_RECENT_TRANSCRIPTION_ERROR,
-                    "Unable to load transcriptions",
+                    strings.get("native.menu.recent_error"),
                     false,
                     None::<&str>,
                 )?;
@@ -60,7 +62,7 @@ pub fn build_recent_transcriptions_menu(
         let item = MenuItem::with_id(
             app,
             MENU_ID_RECENT_TRANSCRIPTION_EMPTY,
-            "No transcriptions yet",
+            strings.get("native.menu.recent_empty"),
             false,
             None::<&str>,
         )?;
@@ -140,10 +142,10 @@ fn refresh_recent_menus(app: &AppHandle<AppRuntime>) {
     }
 }
 
-fn format_transcription_preview(text: &str, max_len: usize) -> String {
+fn format_transcription_preview(text: &str, max_len: usize, empty_label: &str) -> String {
     let cleaned = text.split_whitespace().collect::<Vec<_>>().join(" ");
     if cleaned.is_empty() {
-        return "Empty transcription".to_string();
+        return empty_label.to_string();
     }
 
     let mut chars = cleaned.chars();

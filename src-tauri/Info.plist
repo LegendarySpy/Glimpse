@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <!-- Mirrors supported-app-locales.json. macOS resolves the app language
+         from this list, so an undeclared locale never reaches the webview. -->
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+    </array>
     <key>NSMicrophoneUsageDescription</key>
     <string>Glimpse needs microphone access to transcribe your voice to text.</string>
     <key>NSAppleEventsUsageDescription</key>
