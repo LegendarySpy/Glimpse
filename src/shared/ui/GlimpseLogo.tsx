@@ -21,7 +21,6 @@ const GLIMPSE_LOGO_DOT_COLORS = [
 
 const COLOR_MATRIX_VALUES = "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7";
 
-
 const CLOUD_TRANSITION: Transition = {
   duration: 4,
   repeat: Infinity,
