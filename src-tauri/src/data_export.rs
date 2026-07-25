@@ -418,20 +418,26 @@ mod tests {
 
     #[test]
     fn wipe_targets_require_per_app_directories() {
-        let id = "cc.tryglimpse.app";
-        assert!(is_safe_wipe_target(
-            Path::new("/Users/me/Library/Application Support/cc.tryglimpse.app"),
-            id
-        ));
-        assert!(!is_safe_wipe_target(
-            Path::new("/Users/me/Library/Application Support"),
-            id
-        ));
-        assert!(!is_safe_wipe_target(Path::new("/cc.tryglimpse.app"), id));
-        assert!(!is_safe_wipe_target(
-            Path::new("relative/cc.tryglimpse.app"),
-            id
-        ));
+        let id = "com.glimpse.data";
+        #[cfg(windows)]
+        let (app_dir, parent_dir, root_dir, relative_dir) = (
+            "C:\\Users\\me\\AppData\\Roaming\\com.glimpse.data",
+            "C:\\Users\\me\\AppData\\Roaming",
+            "C:\\com.glimpse.data",
+            "relative\\com.glimpse.data",
+        );
+        #[cfg(not(windows))]
+        let (app_dir, parent_dir, root_dir, relative_dir) = (
+            "/Users/me/Library/Application Support/com.glimpse.data",
+            "/Users/me/Library/Application Support",
+            "/com.glimpse.data",
+            "relative/com.glimpse.data",
+        );
+
+        assert!(is_safe_wipe_target(Path::new(app_dir), id));
+        assert!(!is_safe_wipe_target(Path::new(parent_dir), id));
+        assert!(!is_safe_wipe_target(Path::new(root_dir), id));
+        assert!(!is_safe_wipe_target(Path::new(relative_dir), id));
     }
 
     #[test]
