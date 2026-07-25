@@ -174,6 +174,11 @@ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken tod
 msgstr "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_default_suffix"
+msgstr "{name} (Default)"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.count_many"
 msgstr "{pairCount} audio and text pairs"
@@ -740,6 +745,16 @@ msgid "updates.check_aria"
 msgstr "Check for updates"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.check_updates"
+msgstr "Check for Updates"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.check_updates_long"
+msgstr "Check for Updates..."
+
+#. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
 msgid "updates.checking"
 msgstr "Checking for updates..."
@@ -853,6 +868,11 @@ msgstr "Close notification"
 #: src/features/settings/components/SettingsModal.tsx
 msgid "settings.modal.close_button"
 msgstr "Close settings"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.close_window"
+msgstr "Close Window"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -989,6 +1009,11 @@ msgstr "Copied!"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.copy.copied_exclaim"
 msgstr "Copied!"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.copy"
+msgstr "Copy"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -1164,6 +1189,11 @@ msgstr "Custom instructions"
 #: src/features/license/components/CustomerPortalLink.tsx
 msgid "license.customer_portal"
 msgstr "Customer portal"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.cut"
+msgstr "Cut"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -1469,6 +1499,11 @@ msgid "home.drag_import.title"
 msgstr "Drop files to transcribe"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.edit"
+msgstr "Edit"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.edit_mode"
 msgstr "Edit Mode"
@@ -1487,6 +1522,11 @@ msgstr "Email"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.email_support"
 msgstr "Email"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent_empty_item"
+msgstr "Empty transcription"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -1624,6 +1664,11 @@ msgid "settings.models.card.fallback"
 msgstr "Fallback"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.model_fallback"
+msgstr "Fallback: {model}"
+
+#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.support.faq.title"
 msgstr "FAQ"
@@ -1739,6 +1784,11 @@ msgid "home.support.title"
 msgstr "Get Support"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.github"
+msgstr "Github"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.report_issue"
 msgstr "GitHub"
@@ -1787,6 +1837,21 @@ msgstr "Grant Access"
 #: src/features/onboarding/steps/PermissionsStep.tsx
 msgid "onboarding.microphone.subtitle"
 msgstr "Hears your voice."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.help"
+msgstr "Help"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.hide"
+msgstr "Hide {app}"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.hide_others"
+msgstr "Hide Others"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2011,6 +2076,11 @@ msgid "settings.app.text_size.large"
 msgstr "Large"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent"
+msgstr "Last Transcriptions"
+
+#. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
 msgid "import.cat.auto_launch"
 msgstr "Launch at login"
@@ -2211,6 +2281,11 @@ msgid "member_card.label_member_since"
 msgstr "Member since"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.microphone"
+msgstr "Microphone"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.microphone"
 msgstr "Microphone"
@@ -2239,6 +2314,16 @@ msgstr "Microphone access was denied."
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.unsupported"
 msgstr "Microphone testing isn't available in this window."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_unavailable"
+msgstr "Microphone unavailable ({error})"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.minimize"
+msgstr "Minimize"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -2296,6 +2381,11 @@ msgstr "Model variant"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.variant_installed"
 msgstr "Model variant (installed)"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.models"
+msgstr "Models"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/SettingsModal.tsx
@@ -2444,6 +2534,11 @@ msgid "library.import.no_files"
 msgstr "No files left to import"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_none"
+msgstr "No input devices found"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.logs.empty"
 msgstr "No logs yet."
@@ -2554,6 +2649,11 @@ msgid "settings.about.data.count_zero"
 msgstr "No transcribed audio yet"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent_empty"
+msgstr "No transcriptions yet"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.websites.none"
 msgstr "No websites added"
@@ -2644,6 +2744,11 @@ msgid "faq.ai_writing.answer"
 msgstr "Only if you enable AI writing and set up a provider under Settings → Providers. Cleanup, Edit Mode, and Personalization then send the relevant text directly to that provider. Your API key stays stored locally in Glimpse."
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.tray.open"
+msgstr "Open {app}"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LocalApiSidebarStatus.tsx
 msgid "home.local_api.open_settings"
 msgstr "Open API server settings"
@@ -2692,6 +2797,11 @@ msgstr "Original text"
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.7d"
 msgstr "Past 7 days"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.paste"
+msgstr "Paste"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -2870,6 +2980,16 @@ msgid "library.modal.import_status.queued"
 msgstr "Queued for transcription..."
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.tray.quit"
+msgstr "Quit {app}"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.quit"
+msgstr "Quit {app}"
+
+#. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
 msgid "updates.ready_to_install"
 msgstr "Ready to install"
@@ -2878,6 +2998,11 @@ msgstr "Ready to install"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.recordings"
 msgstr "Recordings"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.redo"
+msgstr "Redo"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3316,6 +3441,11 @@ msgid "library.retranscribe.select_model"
 msgstr "Select a model"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.select_all"
+msgstr "Select All"
+
+#. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
 msgid "import.app_picker.aria"
 msgstr "Select app to import from"
@@ -3361,6 +3491,16 @@ msgid "settings.local_api.allow_browser_requests_help"
 msgstr "send CORS headers so web apps can call the API"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.send_feedback"
+msgstr "Send Feedback"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.services"
+msgstr "Services"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.edit_mode.configure_prefix"
 msgstr "Set up AI writing in"
@@ -3394,6 +3534,11 @@ msgstr "Shortcuts"
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.sort.shortest"
 msgstr "Shortest"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.show_all"
+msgstr "Show All"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -3621,6 +3766,11 @@ msgid "settings.app.auto_pause_media.body_off"
 msgstr "System audio plays while recording."
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.mic_system_default"
+msgstr "System Default"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.system_default"
 msgstr "System Default"
@@ -3781,6 +3931,11 @@ msgid "settings.general.edit_mode.toggle_aria"
 msgstr "Toggle Edit Mode"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.fullscreen"
+msgstr "Toggle Full Screen"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch.toggle_aria"
 msgstr "Toggle launch at login"
@@ -3883,6 +4038,16 @@ msgstr "Turn on Apple Intelligence in System Settings to use this."
 #: src/features/onboarding/steps/PermissionsStep.tsx
 msgid "onboarding.accessibility.subtitle"
 msgstr "Types text into any app."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.recent_error"
+msgstr "Unable to load transcriptions"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.undo"
+msgstr "Undo"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4024,6 +4189,11 @@ msgstr "Verifying install"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.version"
 msgstr "Version"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.view"
+msgstr "View"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/WhatsNewModal.tsx
@@ -4169,3 +4339,8 @@ msgstr "Your trial ended on"
 #: src/features/settings/components/AccountView.tsx
 msgid "settings.account.trial.text_ended"
 msgstr "Your trial has ended"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.menu.zoom"
+msgstr "Zoom"

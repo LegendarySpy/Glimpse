@@ -2,7 +2,8 @@ import type { AppLocaleSetting } from "../../types/settings";
 import supportedAppLocalesJson from "../../../supported-app-locales.json";
 
 // `supported-app-locales.json` is the single source of truth for shipped app
-// translations. Add a locale there only after adding `src/locales/<locale>/messages.po`.
+// translations. Add a locale there only after adding `src/locales/<locale>/messages.po`,
+// and mirror it in CFBundleLocalizations in src-tauri/Info.plist.
 function parseSupportedAppLocales(value: unknown): string[] {
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error("supported-app-locales.json must be a non-empty array");
@@ -58,10 +59,10 @@ function normalizeLocaleCode(locale?: string | null): string | null {
   return trimmed.replace(/_/g, "-").toLowerCase();
 }
 
-export function normalizeSupportedAppLocale(locale?: string | null): string {
+export function matchSupportedAppLocale(locale?: string | null): string | null {
   const normalized = normalizeLocaleCode(locale);
   if (!normalized) {
-    return DEFAULT_LOCALE;
+    return null;
   }
 
   if (supportedAppLocaleSet.has(normalized)) {
@@ -73,7 +74,11 @@ export function normalizeSupportedAppLocale(locale?: string | null): string {
     return baseLocale;
   }
 
-  return DEFAULT_LOCALE;
+  return null;
+}
+
+export function normalizeSupportedAppLocale(locale?: string | null): string {
+  return matchSupportedAppLocale(locale) ?? DEFAULT_LOCALE;
 }
 
 function getLocaleAutonym(locale: string): string {

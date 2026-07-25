@@ -414,6 +414,7 @@ pub(crate) fn update_settings(
         || prev.remote_speech_provider != next.remote_speech_provider
         || prev.remote_speech_model != next.remote_speech_model
         || prev.microphone_device != next.microphone_device
+        || prev.app_locale != next.app_locale
     {
         if let Err(err) = tray::refresh_tray_menu(app, &next) {
             tracing::error!("Failed to refresh tray menu: {err}");

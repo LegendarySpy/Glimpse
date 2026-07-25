@@ -4,6 +4,7 @@ import {
   DEFAULT_APP_LOCALE,
   DEFAULT_LOCALE,
   SUPPORTED_APP_LOCALES,
+  matchSupportedAppLocale,
   normalizeSupportedAppLocale,
 } from "./shared/lib/appLocales";
 
@@ -32,13 +33,30 @@ for (const locale of SUPPORTED_APP_LOCALES) {
   }
 }
 
+function resolveSystemLocale(): string {
+  if (typeof navigator === "undefined") {
+    return DEFAULT_LOCALE;
+  }
+
+  const preferred = navigator.languages?.length
+    ? navigator.languages
+    : [navigator.language];
+
+  for (const locale of preferred) {
+    const match = matchSupportedAppLocale(locale);
+    if (match) {
+      return match;
+    }
+  }
+
+  return DEFAULT_LOCALE;
+}
+
 function resolveRequestedLocale(
   localeSetting?: AppLocaleSetting | string | null,
 ): string | null {
   if (!localeSetting || localeSetting === DEFAULT_APP_LOCALE) {
-    return typeof navigator !== "undefined"
-      ? navigator.language
-      : DEFAULT_LOCALE;
+    return resolveSystemLocale();
   }
   return localeSetting;
 }

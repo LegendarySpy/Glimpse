@@ -1,3 +1,4 @@
+use crate::native_i18n::MenuStrings;
 use crate::recent_transcriptions::{
     MENU_ID_RECENT_TRANSCRIPTION_PREFIX, build_recent_transcriptions_menu,
     copy_transcription_to_clipboard,
@@ -113,12 +114,14 @@ fn build_tray_menu(
     app: &AppHandle<AppRuntime>,
     settings: &UserSettings,
 ) -> tauri::Result<Menu<AppRuntime>> {
+    let strings = MenuStrings::resolve(settings);
+    let app_name = app.package_info().name.clone();
     let mut menu = MenuBuilder::new(app);
 
     let check_updates = MenuItem::with_id(
         app,
         MENU_ID_CHECK_UPDATES,
-        "Check for Updates",
+        strings.get("native.menu.check_updates"),
         true,
         None::<&str>,
     )?;
@@ -137,10 +140,13 @@ fn build_tray_menu(
 
     menu = menu.item(&build_models_submenu(app, settings)?);
 
-    let mut mic_submenu = SubmenuBuilder::new(app, "Microphone");
-    let default_mic = CheckMenuItemBuilder::with_id(MENU_ID_MIC_DEFAULT, "System Default")
-        .checked(settings.microphone_device.is_none())
-        .build(app)?;
+    let mut mic_submenu = SubmenuBuilder::new(app, strings.get("native.menu.microphone"));
+    let default_mic = CheckMenuItemBuilder::with_id(
+        MENU_ID_MIC_DEFAULT,
+        strings.get("native.menu.mic_system_default"),
+    )
+    .checked(settings.microphone_device.is_none())
+    .build(app)?;
     mic_submenu = mic_submenu.item(&default_mic);
 
     match audio::list_input_devices() {
@@ -149,7 +155,7 @@ fn build_tray_menu(
                 let unavailable = MenuItem::with_id(
                     app,
                     "menu_mic_none",
-                    "No input devices found",
+                    strings.get("native.menu.mic_none"),
                     false,
                     None::<&str>,
                 )?;
@@ -157,7 +163,7 @@ fn build_tray_menu(
             } else {
                 for device in devices {
                     let label = if device.is_default {
-                        format!("{} (Default)", device.name)
+                        strings.format("native.menu.mic_default_suffix", &[("name", &device.name)])
                     } else {
                         device.name.clone()
                     };
@@ -176,7 +182,10 @@ fn build_tray_menu(
             let unavailable = MenuItem::with_id(
                 app,
                 "menu_mic_error",
-                format!("Microphone unavailable ({err})"),
+                strings.format(
+                    "native.menu.mic_unavailable",
+                    &[("error", &err.to_string())],
+                ),
                 false,
                 None::<&str>,
             )?;
@@ -186,18 +195,34 @@ fn build_tray_menu(
     menu = menu.item(&mic_submenu.build()?);
 
     menu = menu.separator();
-    let recent_submenu = build_recent_transcriptions_menu(app, "Last Transcriptions")?;
+    let recent_submenu = build_recent_transcriptions_menu(app, &strings)?;
     menu = menu.item(&recent_submenu);
     menu = menu.separator();
 
-    let send_feedback =
-        MenuItem::with_id(app, MENU_ID_FEEDBACK, "Send Feedback", true, None::<&str>)?;
+    let send_feedback = MenuItem::with_id(
+        app,
+        MENU_ID_FEEDBACK,
+        strings.get("native.menu.send_feedback"),
+        true,
+        None::<&str>,
+    )?;
     menu = menu.item(&send_feedback);
     menu = menu.separator();
 
-    let open_settings =
-        MenuItem::with_id(app, "open_settings", "Open Glimpse", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit_glimpse", "Quit Glimpse", true, None::<&str>)?;
+    let open_settings = MenuItem::with_id(
+        app,
+        "open_settings",
+        strings.format("native.tray.open", &[("app", &app_name)]),
+        true,
+        None::<&str>,
+    )?;
+    let quit = MenuItem::with_id(
+        app,
+        "quit_glimpse",
+        strings.format("native.tray.quit", &[("app", &app_name)]),
+        true,
+        None::<&str>,
+    )?;
     menu = menu.item(&open_settings).item(&quit);
 
     menu.build()

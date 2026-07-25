@@ -17,6 +17,7 @@ mod local_api;
 mod mode_context;
 mod model_language_table;
 mod music;
+mod native_i18n;
 mod permissions;
 mod personalization;
 mod personalization_snippets;
