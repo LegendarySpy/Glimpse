@@ -586,18 +586,6 @@ msgstr ""
 #~ msgstr "Glimpse उपयोगकर्ता"
 
 #. js-lingui-explicit-id
-#~ msgid "home.greeting.afternoon"
-#~ msgstr "नमस्कार"
-
-#. js-lingui-explicit-id
-#~ msgid "home.greeting.evening"
-#~ msgstr "शुभ संध्या"
-
-#. js-lingui-explicit-id
-#~ msgid "home.greeting.morning"
-#~ msgstr "शुभ प्रभात"
-
-#. js-lingui-explicit-id
 #~ msgid "faq.confirm"
 #~ msgstr "समझ गया"
 
@@ -1035,15 +1023,28 @@ msgstr "(यदि आवश्यक हो)"
 msgid "settings.speech_model.api_key.optional_hint"
 msgstr "(यदि आवश्यक हो)"
 
+#. js-lingui-explicit-id
 #. placeholder {0}: stats.llmCleanedCount
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
+msgid "home.today.stats.llm_cleaned"
 msgstr "{0, plural, one {# डिक्टेशन आज AI से सुधारा गया} other {# डिक्टेशन आज AI से सुधारे गए}}"
+
+#. placeholder {0}: stats.llmCleanedCount
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
+#~ msgstr "{0, plural, one {# डिक्टेशन आज AI से सुधारा गया} other {# डिक्टेशन आज AI से सुधारे गए}}"
 
 #. placeholder {0}: stats.count
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {# dictation} other {# dictations}}"
-msgstr "{0, plural, one {# डिक्टेशन} other {# डिक्टेशन}}"
+#~ msgid "{0, plural, one {# dictation} other {# dictations}}"
+#~ msgstr "{0, plural, one {# डिक्टेशन} other {# डिक्टेशन}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: stats.count
+#. placeholder {1}: stats.words
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "home.today.stats.dictations_words"
+msgstr "आज {0, plural, one {# डिक्टेशन} other {# डिक्टेशन}} · {1, plural, one {# शब्द} other {# शब्द}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.langCount
@@ -1069,21 +1070,27 @@ msgstr "{0} सहेजे गए"
 msgid "import.cat.history.detail"
 msgstr "{0} ट्रांसक्रिप्ट"
 
-#. placeholder {0}: stats.words
-#: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {# word} other {# words}}"
-msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
-
 #. js-lingui-explicit-id
 #. placeholder {0}: previewForApp.dictionaryCount
 #: src/features/import/components/ImportStep.tsx
 msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
 
+#. placeholder {0}: stats.words
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{0, plural, one {# word} other {# words}}"
+#~ msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
+msgid "home.today.stats.longest_words"
 msgstr "{0, plural, one {आज की सबसे लंबी डिक्टेशन: # शब्द} other {आज की सबसे लंबी डिक्टेशन: # शब्द}}"
+
+#. placeholder {0}: stats.longestWords
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
+#~ msgstr "{0, plural, one {आज की सबसे लंबी डिक्टेशन: # शब्द} other {आज की सबसे लंबी डिक्टेशन: # शब्द}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: apps.length
@@ -1128,18 +1135,28 @@ msgstr "{0}/{1} मेल"
 msgid "dictionary.replacements.count.multiple"
 msgstr "{0} प्रतिस्थापन"
 
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
+msgid "home.today.stats.avg_words"
 msgstr "{avg, plural, one {आज प्रति डिक्टेशन औसतन # शब्द} other {आज प्रति डिक्टेशन औसतन # शब्द}}"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
+#~ msgstr "{avg, plural, one {आज प्रति डिक्टेशन औसतन # शब्द} other {आज प्रति डिक्टेशन औसतन # शब्द}}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.coverage_with_devices"
 msgstr "{coverageBase} · {activeDevices}/{deviceLimit} डिवाइस सक्रिय"
 
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
-msgstr "{minutes, plural, one {# मिनट} other {# मिनट}}"
+msgid "home.today.stats.minutes_spoken"
+msgstr "{minutes, plural, one {आज # मिनट बोला गया} other {आज # मिनट बोले गए}}"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
+#~ msgstr "{minutes, plural, one {# मिनट} other {# मिनट}}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -1156,9 +1173,19 @@ msgstr "{pairCount} ऑडियो और टेक्स्ट जोड़े
 msgid "models.cloud_card.aria"
 msgstr "{providerLabel} क्लाउड मॉडल"
 
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
-msgstr "{seconds, plural, one {# सेकंड} other {# सेकंड}}"
+msgid "home.today.stats.seconds_spoken"
+msgstr "{seconds, plural, one {आज # सेकंड बोला गया} other {आज # सेकंड बोले गए}}"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
+#~ msgstr "{seconds, plural, one {# सेकंड} other {# सेकंड}}"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "home.today.stats.pace_wpm"
+msgstr "{wpm, plural, one {आज लगभग # शब्द प्रति मिनट} other {आज लगभग # शब्द प्रति मिनट}}"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2828,9 +2855,29 @@ msgid "settings.account.activate.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.afternoon"
+msgstr "नमस्कार"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.evening"
+msgstr "शुभ संध्या"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.morning"
+msgstr "शुभ प्रभात"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
 msgid "onboarding.microphone.grant"
 msgstr "अनुमति दें"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.occasion.leap_day"
+msgstr "लीप दिवस की शुभकामनाएँ"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3253,6 +3300,12 @@ msgstr "लॉग्स"
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.sort.longest"
 msgstr "सबसे लंबा"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: formatRecordingClock(stats.longestAudioSeconds)
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "home.today.stats.longest_duration"
+msgstr "आज की सबसे लंबी रिकॉर्डिंग: {0}"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx

@@ -75,6 +75,7 @@ export function activateLocale(
 
   if (typeof document !== "undefined") {
     document.documentElement.lang = nextLocale;
+    document.documentElement.dir = "ltr";
   }
 
   return nextLocale;

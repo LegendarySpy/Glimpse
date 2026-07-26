@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { msg } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
 
 export type TimeOfDayPeriod = "morning" | "afternoon" | "evening";
 
@@ -17,16 +19,17 @@ export function timeOfDayPeriod(now: Date = new Date()): TimeOfDayPeriod {
 
 type OccasionRule = {
   id: HomeOccasionId;
-  messageId: string;
-  message: string;
+  descriptor: MessageDescriptor;
   when: (date: Date) => boolean;
 };
 
 const OCCASION_RULES: OccasionRule[] = [
   {
     id: "leap_day",
-    messageId: "home.greeting.occasion.leap_day",
-    message: "Happy leap day",
+    descriptor: msg({
+      id: "home.greeting.occasion.leap_day",
+      message: "Happy leap day",
+    }),
     when: (date) => date.getMonth() === 1 && date.getDate() === 29,
   },
 ];
@@ -148,31 +151,37 @@ export function homeGreetingKey(
 
 export function labelForHomeGreeting(
   variant: HomeGreetingVariant,
-  t: (descriptor: { id: string; message: string }) => string,
+  t: (descriptor: MessageDescriptor) => string,
 ): string {
   switch (variant.kind) {
     case "occasion": {
       const rule = OCCASION_RULES.find((entry) => entry.id === variant.id);
       if (!rule) return "";
-      return t({ id: rule.messageId, message: rule.message });
+      return t(rule.descriptor);
     }
     case "time":
       switch (timeOfDayPeriod()) {
         case "morning":
-          return t({
-            id: "home.greeting.morning",
-            message: "Good morning",
-          });
+          return t(
+            msg({
+              id: "home.greeting.morning",
+              message: "Good morning",
+            }),
+          );
         case "afternoon":
-          return t({
-            id: "home.greeting.afternoon",
-            message: "Good afternoon",
-          });
+          return t(
+            msg({
+              id: "home.greeting.afternoon",
+              message: "Good afternoon",
+            }),
+          );
         default:
-          return t({
-            id: "home.greeting.evening",
-            message: "Good evening",
-          });
+          return t(
+            msg({
+              id: "home.greeting.evening",
+              message: "Good evening",
+            }),
+          );
       }
   }
 }

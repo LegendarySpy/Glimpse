@@ -54,7 +54,7 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({
   initialOverflowing = false,
   onOverflowChange,
 }) => {
-  const { t } = useLingui();
+  const { i18n, t } = useLingui();
   const { data: speechModels } = useSpeechModels();
   const { copied, copy } = useCopyToClipboard(2000);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -190,11 +190,11 @@ const TranscriptionItem: React.FC<TranscriptionItemProps> = ({
   };
 
   const timestamp = new Date(record.timestamp);
-  const timeStr = timestamp.toLocaleTimeString([], {
+  const timeStr = timestamp.toLocaleTimeString(i18n.locale, {
     hour: "numeric",
     minute: "2-digit",
   });
-  const dateStr = timestamp.toLocaleDateString([], {
+  const dateStr = timestamp.toLocaleDateString(i18n.locale, {
     month: "short",
     day: "numeric",
   });

@@ -57,7 +57,7 @@ const CloudModelCard = ({
           </div>
 
           <p
-            className="ui-color-muted mt-2 min-w-0 truncate font-mono tabular-nums"
+            className="ui-color-muted mt-2 min-h-7 min-w-0 truncate font-mono tabular-nums"
             style={{ fontSize: "11.5px" }}
             title={modelLabel ?? undefined}
           >
