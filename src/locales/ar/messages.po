@@ -5,7 +5,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: lokalise.com\n"
 "Project-Id-Version: Glimpse\n"
-"PO-Revision-Date: 2026-07-26 00:42\n"
+"PO-Revision-Date: 2026-07-26 04:49\n"
 "Last-Translator: lokalise.com\n"
 "Language-Team: lokalise.com\n\n"
 "Language: ar\n"
@@ -1029,13 +1029,9 @@ msgstr "(إذا لزم الأمر)"
 msgid "home.today.stats.llm_cleaned"
 msgstr "{0, plural, one {# إملاء مُحسَّن بالذكاء الاصطناعي اليوم} other {# إملاءات مُحسَّنة بالذكاء الاصطناعي اليوم}}"
 
-#. placeholder {0}: stats.llmCleanedCount
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
 #~ msgstr "{0, plural, one {# إملاء مُحسَّن بالذكاء الاصطناعي اليوم} other {# إملاءات مُحسَّنة بالذكاء الاصطناعي اليوم}}"
 
-#. placeholder {0}: stats.count
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {# dictation} other {# dictations}}"
 #~ msgstr "{0, plural, one {# إملاء} other {# إملاءات}}"
 
@@ -1050,7 +1046,7 @@ msgstr "{0, plural, one {# إملاء} other {# إملاءات}} · {1, plural, 
 #. placeholder {0}: stats.langCount
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.languages"
-msgstr "{0, plural, zero {لا لغات} one {لغة واحدة} two {لغتان} few {# لغات} many {# لغة} other {# لغة}}"
+msgstr "{0, plural, one {# لغة} other {# لغات}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: previewForApp.replacementsCount
@@ -1076,8 +1072,6 @@ msgstr "{0} نصوص مُفرَّغة"
 msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# كلمة} other {# كلمات}}"
 
-#. placeholder {0}: stats.words
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {# word} other {# words}}"
 #~ msgstr "{0, plural, one {# كلمة} other {# كلمات}}"
 
@@ -1087,8 +1081,6 @@ msgstr "{0, plural, one {# كلمة} other {# كلمات}}"
 msgid "home.today.stats.longest_words"
 msgstr "{0, plural, one {أطول إملاء اليوم: # كلمة} other {أطول إملاء اليوم: # كلمات}}"
 
-#. placeholder {0}: stats.longestWords
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
 #~ msgstr "{0, plural, one {Longest dictation today: # كلمة} other {Longest dictation today: # كلمات}}"
 
@@ -1140,7 +1132,6 @@ msgstr "{0} استبدالات"
 msgid "home.today.stats.avg_words"
 msgstr "{avg, plural, one {حوالي # كلمة لكل إملاء اليوم} other {حوالي # كلمات لكل إملاء اليوم}}"
 
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
 #~ msgstr "{avg, plural, one {حوالي # كلمة لكل إملاء اليوم} other {حوالي # كلمات لكل إملاء اليوم}}"
 
@@ -1152,9 +1143,8 @@ msgstr "{coverageBase} · {activeDevices} من أصل {deviceLimit} أجهزة �
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.minutes_spoken"
-msgstr "{minutes, plural, one {# دقيقة مُملاة اليوم} other {# دقائق مُملاة اليوم}}"
+msgstr "{minutes, plural, one {# دقيقة منطوقة اليوم} other {# دقائق منطوقة اليوم}}"
 
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
 #~ msgstr "{minutes, plural, one {# دقيقة مُملاة اليوم} other {# دقائق مُملاة اليوم}}"
 
@@ -1176,9 +1166,8 @@ msgstr "{providerLabel} نموذج سحابي"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.seconds_spoken"
-msgstr "{seconds, plural, one {# ثانية مُملاة اليوم} other {# ثوانٍ مُملاة اليوم}}"
+msgstr "{seconds, plural, one {# ثانية منطوقة اليوم} other {# ثوانٍ منطوقة اليوم}}"
 
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
 #~ msgstr "{seconds, plural, one {# ثانية مُملاة اليوم} other {# ثوانٍ مُملاة اليوم}}"
 
@@ -1968,7 +1957,7 @@ msgstr "مساهم"
 #. placeholder {0}: (progress * 100).toFixed(0)
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.status.converting"
-msgstr "جارٍ التحويل {0}%"
+msgstr "جارٍ تحويل {0}%"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2877,7 +2866,7 @@ msgstr "منح الوصول"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeGreeting.ts
 msgid "home.greeting.occasion.leap_day"
-msgstr "يوم كبيس سعيد"
+msgstr "عيد السنة الكبيسة سعيد"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4936,7 +4925,7 @@ msgstr "المظهر"
 #. placeholder {0}: (progress * 100).toFixed(0)
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.status.thinking"
-msgstr "يفكر {0}%"
+msgstr "جارٍ المعالجة {0}%"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx

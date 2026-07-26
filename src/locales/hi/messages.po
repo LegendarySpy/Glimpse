@@ -5,7 +5,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: lokalise.com\n"
 "Project-Id-Version: Glimpse\n"
-"PO-Revision-Date: 2026-07-26 00:42\n"
+"PO-Revision-Date: 2026-07-26 04:49\n"
 "Last-Translator: lokalise.com\n"
 "Language-Team: lokalise.com\n\n"
 "Language: hi\n"
@@ -1027,15 +1027,11 @@ msgstr "(यदि आवश्यक हो)"
 #. placeholder {0}: stats.llmCleanedCount
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.llm_cleaned"
-msgstr "{0, plural, one {# डिक्टेशन आज AI से सुधारा गया} other {# डिक्टेशन आज AI से सुधारे गए}}"
+msgstr "{0, plural, one {आज # डिक्टेशन AI से सुधारा गया} other {आज # डिक्टेशन AI से सुधारे गए}}"
 
-#. placeholder {0}: stats.llmCleanedCount
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
 #~ msgstr "{0, plural, one {# डिक्टेशन आज AI से सुधारा गया} other {# डिक्टेशन आज AI से सुधारे गए}}"
 
-#. placeholder {0}: stats.count
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {# dictation} other {# dictations}}"
 #~ msgstr "{0, plural, one {# डिक्टेशन} other {# डिक्टेशन}}"
 
@@ -1044,7 +1040,7 @@ msgstr "{0, plural, one {# डिक्टेशन आज AI से सुध�
 #. placeholder {1}: stats.words
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.dictations_words"
-msgstr "आज {0, plural, one {# डिक्टेशन} other {# डिक्टेशन}} · {1, plural, one {# शब्द} other {# शब्द}}"
+msgstr "{0, plural, one {# डिक्टेशन} other {# डिक्टेशन}} · {1, plural, one {# शब्द} other {# शब्द}} आज"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.langCount
@@ -1076,8 +1072,6 @@ msgstr "{0} ट्रांसक्रिप्ट"
 msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
 
-#. placeholder {0}: stats.words
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {# word} other {# words}}"
 #~ msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
 
@@ -1087,8 +1081,6 @@ msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
 msgid "home.today.stats.longest_words"
 msgstr "{0, plural, one {आज की सबसे लंबी डिक्टेशन: # शब्द} other {आज की सबसे लंबी डिक्टेशन: # शब्द}}"
 
-#. placeholder {0}: stats.longestWords
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
 #~ msgstr "{0, plural, one {आज की सबसे लंबी डिक्टेशन: # शब्द} other {आज की सबसे लंबी डिक्टेशन: # शब्द}}"
 
@@ -1138,9 +1130,8 @@ msgstr "{0} प्रतिस्थापन"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.avg_words"
-msgstr "{avg, plural, one {आज प्रति डिक्टेशन औसतन # शब्द} other {आज प्रति डिक्टेशन औसतन # शब्द}}"
+msgstr "{avg, plural, one {आज प्रति डिक्टेशन लगभग # शब्द} other {आज प्रति डिक्टेशन लगभग # शब्द}}"
 
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
 #~ msgstr "{avg, plural, one {आज प्रति डिक्टेशन औसतन # शब्द} other {आज प्रति डिक्टेशन औसतन # शब्द}}"
 
@@ -1152,9 +1143,8 @@ msgstr "{coverageBase} · {activeDevices}/{deviceLimit} डिवाइस स�
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.minutes_spoken"
-msgstr "{minutes, plural, one {आज # मिनट बोला गया} other {आज # मिनट बोले गए}}"
+msgstr "{minutes, plural, one {#आज कुल # मिनट बोला गया} other {#आज कुल # मिनट बोले गए}}"
 
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
 #~ msgstr "{minutes, plural, one {# मिनट} other {# मिनट}}"
 
@@ -1176,9 +1166,8 @@ msgstr "{providerLabel} क्लाउड मॉडल"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.seconds_spoken"
-msgstr "{seconds, plural, one {आज # सेकंड बोला गया} other {आज # सेकंड बोले गए}}"
+msgstr "{seconds, plural, one {# सेकंड आज बोला गया} other {# सेकंड आज बोले गए}}"
 
-#: src/features/transcriptions/homeHeaderStats.ts
 #~ msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
 #~ msgstr "{seconds, plural, one {# सेकंड} other {# सेकंड}}"
 
@@ -1968,7 +1957,7 @@ msgstr "सहयोगी"
 #. placeholder {0}: (progress * 100).toFixed(0)
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.status.converting"
-msgstr "कनवर्ट हो रहा है {0}%"
+msgstr "{0}% परिवर्तित किया जा रहा है"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2039,7 +2028,7 @@ msgstr "बेस URL कॉपी करें"
 #. js-lingui-explicit-id
 #: src/features/settings/components/SettingsModal.tsx
 msgid "settings.error.copy"
-msgstr "त्रुटि कॉपी करें"
+msgstr "कॉपी त्रुटि"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -2877,7 +2866,7 @@ msgstr "अनुमति दें"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeGreeting.ts
 msgid "home.greeting.occasion.leap_day"
-msgstr "लीप दिवस की शुभकामनाएँ"
+msgstr "हैपी लीप डे"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3002,7 +2991,7 @@ msgstr "लाइब्रेरी में आयात करें"
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.imported"
-msgstr "आयातित"
+msgstr "आयात किया गया"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3335,7 +3324,7 @@ msgstr "ट्रांसक्रिप्शन के लिए ऑडिय
 #. js-lingui-explicit-id
 #: src/shared/ui/WindowControls.tsx
 msgid "window.controls.maximize"
-msgstr "बड़ा करें"
+msgstr "अधिकतम करें"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
@@ -3385,7 +3374,7 @@ msgstr "माइक्रोफ़ोन उपलब्ध नहीं है
 #. js-lingui-explicit-id
 #: src/shared/ui/WindowControls.tsx
 msgid "window.controls.minimize"
-msgstr "छोटा करें"
+msgstr "न्यूनतम करें"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4049,7 +4038,7 @@ msgstr "{label} को {price} में ख़रीदें"
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.status.queued"
-msgstr "कतार में"
+msgstr "पंक्ति में"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4936,7 +4925,7 @@ msgstr "थीम"
 #. placeholder {0}: (progress * 100).toFixed(0)
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.status.thinking"
-msgstr "सोच रहा है {0}%"
+msgstr "{0}% संसाधित किया जा रहा है"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
