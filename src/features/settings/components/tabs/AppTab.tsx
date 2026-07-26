@@ -12,6 +12,8 @@ import {
 } from "@phosphor-icons/react";
 import ToggleSwitch from "../../../../shared/ui/ToggleSwitch";
 import SectionLabel from "../../../../shared/ui/SectionLabel";
+import SettingCard from "../../../../shared/ui/SettingCard";
+import SettingRow, { ToggleRow } from "../../../../shared/ui/SettingRow";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
   checkMacInputMonitoringPermission,
@@ -67,13 +69,28 @@ const inlineAutoDeleteDropdownProps = {
   buttonClassName:
     "!h-[22px] !w-auto !rounded-md !border-transparent !bg-transparent !px-0.5 !py-0 ui-text-label-strong focus:!border-transparent",
   valueClassName:
-    "text-left underline underline-offset-[3px] decoration-content-muted hover:decoration-content-primary transition-colors",
+    "text-start underline underline-offset-[3px] decoration-content-muted hover:decoration-content-primary transition-colors",
   optionClassName: "!px-2 !py-1.5",
   optionLabelClassName: "ui-text-meta font-medium whitespace-nowrap",
   menuClassName: "w-max min-w-full !right-auto",
   truncate: false as const,
   fitButtonToWidestOption: false as const,
   hideChevron: true as const,
+};
+
+const OpenSettingsButton = ({ onClick }: { onClick: () => void }) => {
+  const { t } = useLingui();
+  return (
+    <button
+      onClick={onClick}
+      className="mt-1.5 self-start ui-text-meta ui-color-muted hover:text-content-secondary transition-colors"
+    >
+      {t({
+        id: "settings.app.open_settings",
+        message: "Open Settings",
+      })}
+    </button>
+  );
 };
 
 const PermissionStatus = ({ granted }: { granted: boolean | null }) => {
@@ -644,60 +661,42 @@ const AppTab = ({
             </SectionLabel>
 
             {hasPermissionRows && (
-              <div className="space-y-3 rounded-lg bg-surface-surface p-2.5">
+              <SettingCard equalizeRows className="gap-3">
                 {platformCapabilities.requiresNativeMicrophonePermission && (
-                  <div className="px-2 py-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                        <span className="shrink-0 whitespace-nowrap ui-text-label-strong ui-color-primary">
-                          {t({
-                            id: "settings.app.microphone",
-                            message: "Microphone",
-                          })}
-                        </span>
-                        <span className="min-w-0 ui-text-meta ui-color-disabled">
-                          {t({
-                            id: "settings.app.microphone.description",
-                            message: "required for transcription",
-                          })}
-                        </span>
-                      </div>
-                      <PermissionStatus granted={micPermission} />
-                    </div>
-                    <button
+                  <SettingRow
+                    title={t({
+                      id: "settings.app.microphone",
+                      message: "Microphone",
+                    })}
+                    inlineDescription={t({
+                      id: "settings.app.microphone.description",
+                      message: "required for transcription",
+                    })}
+                    control={<PermissionStatus granted={micPermission} />}
+                  >
+                    <OpenSettingsButton
                       onClick={() => {
                         void onRequestMicrophonePermission();
                       }}
-                      className="mt-1.5 ui-text-meta ui-color-muted hover:text-content-secondary transition-colors"
-                    >
-                      {t({
-                        id: "settings.app.open_settings",
-                        message: "Open Settings",
-                      })}
-                    </button>
-                  </div>
+                    />
+                  </SettingRow>
                 )}
 
                 {platformCapabilities.requiresAccessibilityPermission && (
-                  <div className="px-2 py-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                        <span className="shrink-0 whitespace-nowrap ui-text-label-strong ui-color-primary">
-                          {t({
-                            id: "settings.app.accessibility",
-                            message: "Accessibility",
-                          })}
-                        </span>
-                        <span className="min-w-0 ui-text-meta ui-color-disabled">
-                          {t({
-                            id: "settings.app.accessibility.description",
-                            message: "required for auto-paste",
-                          })}
-                        </span>
-                      </div>
+                  <SettingRow
+                    title={t({
+                      id: "settings.app.accessibility",
+                      message: "Accessibility",
+                    })}
+                    inlineDescription={t({
+                      id: "settings.app.accessibility.description",
+                      message: "required for auto-paste",
+                    })}
+                    control={
                       <PermissionStatus granted={accessibilityPermission} />
-                    </div>
-                    <button
+                    }
+                  >
+                    <OpenSettingsButton
                       onClick={async () => {
                         try {
                           const granted =
@@ -708,36 +707,25 @@ const AppTab = ({
                           await invoke("open_accessibility_settings");
                         }
                       }}
-                      className="mt-1.5 ui-text-meta ui-color-muted hover:text-content-secondary transition-colors"
-                    >
-                      {t({
-                        id: "settings.app.open_settings",
-                        message: "Open Settings",
-                      })}
-                    </button>
-                  </div>
+                    />
+                  </SettingRow>
                 )}
 
                 {platformCapabilities.requiresInputMonitoringPermission && (
-                  <div className="px-2 py-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                        <span className="shrink-0 whitespace-nowrap ui-text-label-strong ui-color-primary">
-                          {t({
-                            id: "settings.app.input_monitoring",
-                            message: "Input Monitoring",
-                          })}
-                        </span>
-                        <span className="min-w-0 ui-text-meta ui-color-disabled">
-                          {t({
-                            id: "settings.app.input_monitoring.description",
-                            message: "required for global shortcuts",
-                          })}
-                        </span>
-                      </div>
+                  <SettingRow
+                    title={t({
+                      id: "settings.app.input_monitoring",
+                      message: "Input Monitoring",
+                    })}
+                    inlineDescription={t({
+                      id: "settings.app.input_monitoring.description",
+                      message: "required for global shortcuts",
+                    })}
+                    control={
                       <PermissionStatus granted={inputMonitoringPermission} />
-                    </div>
-                    <button
+                    }
+                  >
+                    <OpenSettingsButton
                       onClick={async () => {
                         try {
                           await requestMacInputMonitoringPermission();
@@ -749,66 +737,47 @@ const AppTab = ({
                           await invoke("open_input_monitoring_settings");
                         }
                       }}
-                      className="mt-1.5 ui-text-meta ui-color-muted hover:text-content-secondary transition-colors"
+                    />
+                  </SettingRow>
+                )}
+              </SettingCard>
+            )}
+
+            <SettingCard className="flex-1 grid content-center">
+              <ToggleRow
+                title={t({
+                  id: "settings.app.analytics",
+                  message: "Usage Analytics",
+                })}
+                enabled={analyticsEnabled}
+                onToggle={() => onAnalyticsEnabledChange(!analyticsEnabled)}
+                ariaLabel={t({
+                  id: "settings.app.analytics.toggle_aria",
+                  message: "Toggle usage analytics",
+                })}
+                description={
+                  <>
+                    {t({
+                      id: "settings.app.analytics.body",
+                      message: "anonymous, no transcripts or audio shared.",
+                    })}{" "}
+                    <button
+                      onClick={() =>
+                        openUrl(
+                          "https://github.com/glimpse-hq/Glimpse/wiki/Analytics",
+                        )
+                      }
+                      className="ui-color-muted hover:text-content-secondary transition-colors underline"
                     >
                       {t({
-                        id: "settings.app.open_settings",
-                        message: "Open Settings",
+                        id: "settings.app.analytics.more_info",
+                        message: "More info",
                       })}
                     </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="rounded-lg bg-surface-surface p-2.5">
-              <div className="px-2 py-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="ui-text-label-strong ui-color-primary">
-                    {t({
-                      id: "settings.app.analytics",
-                      message: "Usage Analytics",
-                    })}
-                  </span>
-                  <ToggleSwitch
-                    enabled={analyticsEnabled}
-                    onToggle={() => onAnalyticsEnabledChange(!analyticsEnabled)}
-                    ariaLabel={t({
-                      id: "settings.app.analytics.toggle_aria",
-                      message: "Toggle usage analytics",
-                    })}
-                  />
-                </div>
-                <span className="ui-text-micro ui-color-disabled block mt-0.5">
-                  {t({
-                    id: "settings.app.analytics.body",
-                    message: "anonymous, no transcripts or audio shared.",
-                  })}{" "}
-                  <button
-                    onClick={() =>
-                      openUrl(
-                        "https://github.com/glimpse-hq/Glimpse/wiki/Analytics",
-                      )
-                    }
-                    className="ui-color-muted hover:text-content-secondary transition-colors underline"
-                  >
-                    {t({
-                      id: "settings.app.analytics.more_info",
-                      message: "More info",
-                    })}
-                  </button>
-                </span>
-              </div>
-            </div>
-
-            {hasPermissionRows && (
-              <p className="ui-text-micro ui-color-disabled px-0.5">
-                {t({
-                  id: "settings.app.permissions_restart_notice",
-                  message: "Permission changes may require a restart.",
-                })}
-              </p>
-            )}
+                  </>
+                }
+              />
+            </SettingCard>
           </div>
 
           <div className="space-y-2 flex flex-col">
@@ -819,16 +788,15 @@ const AppTab = ({
               })}
             </SectionLabel>
 
-            <div className="flex-1 space-y-6 rounded-lg bg-surface-surface p-2.5">
+            <SettingCard className="flex-1 space-y-6">
               {platformCapabilities.supportsAutoPauseMedia && (
-                <div className="px-2 py-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="ui-text-label-strong ui-color-primary">
-                      {t({
-                        id: "settings.app.auto_pause_media",
-                        message: "Auto-pause Media",
-                      })}
-                    </span>
+                <SettingRow
+                  title={t({
+                    id: "settings.app.auto_pause_media",
+                    message: "Auto-pause Media",
+                  })}
+                  description={duckDescription}
+                  control={
                     <div className="flex items-center gap-0.5 ui-text-micro leading-none">
                       <button
                         type="button"
@@ -846,9 +814,8 @@ const AppTab = ({
                             : "text-content-muted hover:text-content-primary"
                         }`}
                       >
-                        <ChevronLeft size={10} />
+                        <ChevronLeft size={10} className="rtl:rotate-180" />
                       </button>
-                      {/* Invisible copies of every label reserve the widest width, so the value never shifts the arrows. */}
                       <div
                         onMouseDown={handleDuckScrubStart}
                         onTouchStart={handleDuckScrubStart}
@@ -898,73 +865,53 @@ const AppTab = ({
                             : "text-content-muted hover:text-content-primary"
                         }`}
                       >
-                        <ChevronRight size={10} />
+                        <ChevronRight size={10} className="rtl:rotate-180" />
                       </button>
                     </div>
-                  </div>
-                  <span className="ui-text-micro ui-color-disabled block mt-0.5">
-                    {duckDescription}
-                  </span>
-                </div>
+                  }
+                />
               )}
 
               {!storeBuild && (
-                <div className="px-2 py-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="ui-text-label-strong ui-color-primary">
-                      {t({
-                        id: "settings.app.auto_update",
-                        message: "Auto-update",
-                      })}
-                    </span>
-                    <ToggleSwitch
-                      enabled={autoUpdateEnabled}
-                      onToggle={() =>
-                        onAutoUpdateEnabledChange(!autoUpdateEnabled)
-                      }
-                      ariaLabel={t({
-                        id: "settings.app.auto_update.toggle_aria",
-                        message: "Toggle auto-update",
-                      })}
-                    />
-                  </div>
-                  <span className="ui-text-micro ui-color-disabled block mt-0.5">
-                    {t({
-                      id: "settings.app.auto_update.body",
-                      message:
-                        "downloads and installs updates in the background.",
-                    })}
-                  </span>
-                </div>
+                <ToggleRow
+                  title={t({
+                    id: "settings.app.auto_update",
+                    message: "Auto-update",
+                  })}
+                  enabled={autoUpdateEnabled}
+                  onToggle={() => onAutoUpdateEnabledChange(!autoUpdateEnabled)}
+                  ariaLabel={t({
+                    id: "settings.app.auto_update.toggle_aria",
+                    message: "Toggle auto-update",
+                  })}
+                  description={t({
+                    id: "settings.app.auto_update.body",
+                    message:
+                      "downloads and installs updates in the background.",
+                  })}
+                />
               )}
 
-              <div className="px-2 py-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="ui-text-label-strong ui-color-primary">
-                    {t({
-                      id: "settings.app.auto_launch",
-                      message: "Launch at Login",
-                    })}
-                  </span>
-                  <ToggleSwitch
-                    enabled={autoLaunchEnabled}
-                    onToggle={() =>
-                      onAutoLaunchEnabledChange(!autoLaunchEnabled)
-                    }
-                    ariaLabel={t({
-                      id: "settings.app.auto_launch.toggle_aria",
-                      message: "Toggle launch at login",
-                    })}
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-2 pl-3 mt-1.5">
-                  <div className="flex items-center gap-1.5 ui-text-meta text-content-secondary">
+              <ToggleRow
+                title={t({
+                  id: "settings.app.auto_launch",
+                  message: "Launch at Login",
+                })}
+                enabled={autoLaunchEnabled}
+                onToggle={() => onAutoLaunchEnabledChange(!autoLaunchEnabled)}
+                ariaLabel={t({
+                  id: "settings.app.auto_launch.toggle_aria",
+                  message: "Toggle launch at login",
+                })}
+              >
+                <div className="flex items-center justify-between gap-2 ps-3 mt-1.5">
+                  <div className="flex min-w-0 items-center gap-1.5 ui-text-meta text-content-secondary">
                     <CornerDownRight
                       size={10}
-                      className="text-content-disabled"
+                      className="shrink-0 text-content-disabled"
                       aria-hidden="true"
                     />
-                    <span>
+                    <span className="min-w-0">
                       {t({
                         id: "settings.app.start_in_background",
                         message: "Start in background",
@@ -984,7 +931,7 @@ const AppTab = ({
                     size="xs"
                   />
                 </div>
-              </div>
+              </ToggleRow>
               <div className="relative px-2 py-1.5 overflow-visible">
                 <div
                   className={
@@ -1036,12 +983,18 @@ const AppTab = ({
                   })}
                 </span>
               </div>
-            </div>
-            <p className="ui-text-micro px-0.5 invisible" aria-hidden="true">
-              &nbsp;
-            </p>
+            </SettingCard>
           </div>
         </div>
+
+        {hasPermissionRows && (
+          <p className="ui-text-micro ui-color-disabled px-0.5 !mt-2">
+            {t({
+              id: "settings.app.permissions_restart_notice",
+              message: "Permission changes may require a restart.",
+            })}
+          </p>
+        )}
       </motion.div>
 
       <AnimatePresence>

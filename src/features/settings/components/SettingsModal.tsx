@@ -131,7 +131,7 @@ const SettingsModal = ({
           >
             <motion.button
               onClick={onClose}
-              className="absolute right-2 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-lg text-content-muted hover:bg-surface-elevated hover:text-content-secondary transition-colors"
+              className="absolute end-2 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-lg text-content-muted hover:bg-surface-elevated hover:text-content-secondary transition-colors"
               whileTap={{ scale: 0.95 }}
               aria-label={t({
                 id: "settings.modal.close_button",

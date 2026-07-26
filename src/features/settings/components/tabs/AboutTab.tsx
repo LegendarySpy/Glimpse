@@ -10,15 +10,11 @@ import {
   ArrowUpRight,
   Check,
   EnvelopeSimple,
-  Export,
   FileText,
   GithubLogo,
   Question as HelpCircle,
   Info,
   CircleNotch as Loader2,
-  ArrowCounterClockwise as RotateCcw,
-  TerminalWindow as Terminal,
-  Trash,
 } from "@phosphor-icons/react";
 import {
   deleteAllData,
@@ -37,8 +33,12 @@ const SUPPORT_ACTION_ICON_CLASS =
   "shrink-0 text-[var(--color-text-muted)] transition-colors duration-150 group-hover:text-[var(--color-text-primary)]";
 const SUPPORT_ACTION_LABEL_CLASS =
   "flex items-center gap-0.5 ui-text-micro leading-none text-[var(--color-text-secondary)] transition-colors duration-150 group-hover:text-[var(--color-text-primary)]";
+const MANAGEMENT_ACTION_CLASS =
+  "relative -ms-2 inline-flex h-7 shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md px-2 ui-text-button-sm ui-color-secondary outline-none transition-colors hover:bg-surface-elevated/60 hover:text-content-primary focus-visible:ring-2 focus-visible:ring-border-hover disabled:pointer-events-none disabled:opacity-60";
 import ToggleSwitch from "../../../../shared/ui/ToggleSwitch";
 import SectionLabel from "../../../../shared/ui/SectionLabel";
+import SettingCard from "../../../../shared/ui/SettingCard";
+import SettingRow from "../../../../shared/ui/SettingRow";
 import { UpdateChecker } from "../../../updates/components/UpdateChecker";
 import { detectAppPlatform } from "../../../../platform/service";
 import type {
@@ -151,13 +151,13 @@ const InlineHoldButton = ({
         finishHold();
       }}
       onBlur={cancelHold}
-      className={`relative inline-flex h-6 min-w-[6rem] shrink-0 select-none touch-none items-center justify-center overflow-hidden rounded-md px-2 ui-text-button-sm transition-opacity hover:opacity-80 disabled:pointer-events-none disabled:opacity-60 ${
+      className={`relative -ms-2 inline-flex h-7 shrink-0 select-none touch-none items-center justify-center overflow-hidden rounded-md px-2 ui-text-button-sm outline-none transition-colors hover:bg-surface-elevated/60 focus-visible:ring-2 focus-visible:ring-border-hover disabled:pointer-events-none disabled:opacity-60 ${
         tone === "danger" ? "ui-color-error" : "ui-color-secondary"
       }`}
     >
       <span
         aria-hidden="true"
-        className={`absolute inset-0 origin-left ${
+        className={`absolute inset-0 origin-left rtl:origin-right ${
           tone === "danger" ? "bg-red-500/20" : "bg-[var(--color-accent-20)]"
         }`}
         style={{ transform: `scaleX(${progress})` }}
@@ -597,7 +597,8 @@ const AboutTab = ({
               <div key={row.label} className="min-w-0">
                 <p className="ui-text-micro ui-color-disabled">{row.label}</p>
                 <p
-                  className={`mt-1 truncate font-mono tabular-nums ui-text-meta ${
+                  dir="ltr"
+                  className={`mt-1 truncate text-start font-mono tabular-nums ui-text-meta ${
                     row.primary ? "ui-color-primary" : "ui-color-secondary"
                   }`}
                 >
@@ -612,215 +613,210 @@ const AboutTab = ({
             onClick={onOpenDataDir}
             disabled={!appInfo?.data_dir_path}
             title={appInfo?.data_dir_path}
-            className="block w-full min-w-0 truncate text-left ui-text-meta font-mono ui-color-muted transition-colors hover:ui-color-primary disabled:cursor-not-allowed disabled:opacity-50"
+            className="block w-full min-w-0 truncate text-start ui-text-meta font-mono ui-color-muted transition-colors hover:ui-color-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <span className="border-b border-dotted border-content-disabled/70 pb-px">
+            <span
+              dir="ltr"
+              className="border-b border-dotted border-content-disabled/70 pb-px"
+            >
               {appInfo?.data_dir_path ?? "-"}
             </span>
           </button>
         </div>
       </section>
 
-      {/* Stacked full-width sections; row labels get room in wordier locales. */}
-      <section className="space-y-6">
-        <div className="space-y-2">
-          <SectionLabel>
+      <section className="grid grid-cols-2 items-stretch gap-4">
+        <div className="flex flex-col space-y-2">
+          <SectionLabel className="shrink-0">
             {t({
               id: "settings.about.data",
               message: "Data",
             })}
           </SectionLabel>
 
-          <div className="rounded-lg bg-surface-surface">
-            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
-              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
-                <Export size={14} strokeWidth={2} aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="break-words ui-text-label-strong ui-color-primary">
-                  {t({
-                    id: "settings.about.data.export_dataset",
-                    message: "Export dataset",
-                  })}
-                </p>
-                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
-                  {datasetSubtitle}
-                </p>
-              </div>
-              <div className="relative shrink-0" ref={exportConfigRef}>
-                <button
-                  type="button"
-                  onClick={() => setExportConfigOpen((previous) => !previous)}
-                  disabled={exportBusy || pairCount === 0}
-                  className="inline-flex h-6 min-w-[4.75rem] items-center justify-center gap-1 px-1 ui-text-button-sm ui-color-secondary transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-60"
-                >
-                  {exportBusy && <Loader2 size={10} className="animate-spin" />}
-                  <span>
-                    {t({
-                      id: "settings.about.data.export_action",
-                      message: "Export",
-                    })}
-                  </span>
-                </button>
+          <SettingCard flush className="flex flex-1 flex-col">
+            <SettingRow
+              className="min-h-[88px] flex-1 px-3.5 py-2.5"
+              title={t({
+                id: "settings.about.data.export_dataset",
+                message: "Export dataset",
+              })}
+              description={datasetSubtitle}
+              footer={
+                <div className="relative" ref={exportConfigRef}>
+                  <button
+                    type="button"
+                    onClick={() => setExportConfigOpen((previous) => !previous)}
+                    disabled={exportBusy || pairCount === 0}
+                    className={MANAGEMENT_ACTION_CLASS}
+                  >
+                    {exportBusy && (
+                      <Loader2 size={10} className="animate-spin" />
+                    )}
+                    <span>
+                      {t({
+                        id: "settings.about.data.export_action",
+                        message: "Export",
+                      })}
+                    </span>
+                  </button>
 
-                <AnimatePresence>
-                  {exportConfigOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.15 }}
-                      className="ui-surface-menu absolute right-0 top-full z-20 mt-1 w-64"
-                    >
-                      <div className="space-y-3 p-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <span className="min-w-0">
-                            <span className="block ui-text-meta ui-color-primary">
-                              {t({
-                                id: "settings.about.data.include_timestamps",
-                                message: "Timestamps",
-                              })}
-                            </span>
-                            <span className="block ui-text-micro ui-color-muted">
-                              {t({
-                                id: "settings.about.data.include_timestamps_hint",
-                                message: "Segment start and end times",
-                              })}
-                            </span>
-                          </span>
-                          <ToggleSwitch
-                            enabled={exportOptions.includeTimestamps}
-                            onToggle={() =>
-                              toggleExportOption("includeTimestamps")
-                            }
-                            size="xs"
-                            ariaLabel={t({
-                              id: "settings.about.data.include_timestamps_aria",
-                              message: "Include timestamps in the export",
-                            })}
-                          />
-                        </div>
-
-                        <div className="flex items-start justify-between gap-3">
-                          <span className="min-w-0">
-                            <span className="block ui-text-meta ui-color-primary">
-                              {t({
-                                id: "settings.about.data.verbatim_text",
-                                message: "Original text",
-                              })}
-                            </span>
-                            <span className="block ui-text-micro ui-color-muted">
-                              {t({
-                                id: "settings.about.data.verbatim_text_hint",
-                                message: "Transcripts before cleanup",
-                              })}
-                            </span>
-                          </span>
-                          <ToggleSwitch
-                            enabled={exportOptions.verbatimText}
-                            onToggle={() => toggleExportOption("verbatimText")}
-                            size="xs"
-                            ariaLabel={t({
-                              id: "settings.about.data.verbatim_text_aria",
-                              message:
-                                "Use the original transcripts before cleanup",
-                            })}
-                          />
-                        </div>
-
-                        <div className="flex items-start justify-between gap-3">
-                          <span className="min-w-0">
-                            <span className="block ui-text-meta ui-color-primary">
-                              {t({
-                                id: "settings.about.data.skip_short",
-                                message: "Skip short clips",
-                              })}
-                            </span>
-                            <span className="block ui-text-micro ui-color-muted">
-                              {t({
-                                id: "settings.about.data.skip_short_hint",
-                                message: "Leaves out clips under a second",
-                              })}
-                            </span>
-                          </span>
-                          <ToggleSwitch
-                            enabled={exportOptions.skipShortClips}
-                            onToggle={() =>
-                              toggleExportOption("skipShortClips")
-                            }
-                            size="xs"
-                            ariaLabel={t({
-                              id: "settings.about.data.skip_short_aria",
-                              message: "Skip clips shorter than one second",
-                            })}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="border-t border-border-primary/60" />
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          void handleExportDataset();
-                        }}
-                        className="flex h-8 w-full items-center justify-center ui-text-button-sm ui-color-secondary transition-colors hover:bg-[var(--surface-interactive)] hover:text-content-primary"
+                  <AnimatePresence>
+                    {exportConfigOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.15 }}
+                        className="ui-surface-menu absolute end-0 top-full z-20 mt-1 w-64"
                       >
-                        {t({
-                          id: "settings.about.data.export_confirm",
-                          message: "Export…",
-                        })}
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
+                        <div className="space-y-3 p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="min-w-0">
+                              <span className="block ui-text-meta ui-color-primary">
+                                {t({
+                                  id: "settings.about.data.include_timestamps",
+                                  message: "Timestamps",
+                                })}
+                              </span>
+                              <span className="block ui-text-micro ui-color-muted">
+                                {t({
+                                  id: "settings.about.data.include_timestamps_hint",
+                                  message: "Segment start and end times",
+                                })}
+                              </span>
+                            </span>
+                            <ToggleSwitch
+                              enabled={exportOptions.includeTimestamps}
+                              onToggle={() =>
+                                toggleExportOption("includeTimestamps")
+                              }
+                              size="xs"
+                              ariaLabel={t({
+                                id: "settings.about.data.include_timestamps_aria",
+                                message: "Include timestamps in the export",
+                              })}
+                            />
+                          </div>
 
-            <div className="ml-[44px] border-t border-border-primary/60" />
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="min-w-0">
+                              <span className="block ui-text-meta ui-color-primary">
+                                {t({
+                                  id: "settings.about.data.verbatim_text",
+                                  message: "Original text",
+                                })}
+                              </span>
+                              <span className="block ui-text-micro ui-color-muted">
+                                {t({
+                                  id: "settings.about.data.verbatim_text_hint",
+                                  message: "Transcripts before cleanup",
+                                })}
+                              </span>
+                            </span>
+                            <ToggleSwitch
+                              enabled={exportOptions.verbatimText}
+                              onToggle={() =>
+                                toggleExportOption("verbatimText")
+                              }
+                              size="xs"
+                              ariaLabel={t({
+                                id: "settings.about.data.verbatim_text_aria",
+                                message:
+                                  "Use the original transcripts before cleanup",
+                              })}
+                            />
+                          </div>
 
-            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
-              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
-                <Trash size={14} strokeWidth={2} aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="break-words ui-text-label-strong ui-color-primary">
-                  {t({
-                    id: "settings.about.data.delete_all",
-                    message: "Delete all data",
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="min-w-0">
+                              <span className="block ui-text-meta ui-color-primary">
+                                {t({
+                                  id: "settings.about.data.skip_short",
+                                  message: "Skip short clips",
+                                })}
+                              </span>
+                              <span className="block ui-text-micro ui-color-muted">
+                                {t({
+                                  id: "settings.about.data.skip_short_hint",
+                                  message: "Leaves out clips under a second",
+                                })}
+                              </span>
+                            </span>
+                            <ToggleSwitch
+                              enabled={exportOptions.skipShortClips}
+                              onToggle={() =>
+                                toggleExportOption("skipShortClips")
+                              }
+                              size="xs"
+                              ariaLabel={t({
+                                id: "settings.about.data.skip_short_aria",
+                                message: "Skip clips shorter than one second",
+                              })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="border-t border-border-primary/60" />
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleExportDataset();
+                          }}
+                          className="flex h-8 w-full items-center justify-center ui-text-button-sm ui-color-secondary transition-colors hover:bg-[var(--surface-interactive)] hover:text-content-primary"
+                        >
+                          {t({
+                            id: "settings.about.data.export_confirm",
+                            message: "Export…",
+                          })}
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              }
+            />
+
+            <div className="ms-[44px] shrink-0 border-t border-border-primary/60" />
+
+            <SettingRow
+              className="min-h-[88px] flex-1 px-3.5 py-2.5"
+              title={t({
+                id: "settings.about.data.delete_all",
+                message: "Delete all data",
+              })}
+              description={t({
+                id: "settings.about.data.delete_all_description",
+                message:
+                  "Removes recordings, transcripts, models, and settings, then quits",
+              })}
+              footer={
+                <InlineHoldButton
+                  onConfirm={() => {
+                    void handleDeleteAllData();
+                  }}
+                  disabled={deletingData}
+                  busy={deletingData}
+                  label={t({
+                    id: "settings.about.data.hold_to_delete",
+                    message: "Hold to delete",
                   })}
-                </p>
-                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
-                  {t({
-                    id: "settings.about.data.delete_all_description",
+                  busyLabel={t({
+                    id: "settings.about.data.deleting",
+                    message: "Deleting…",
+                  })}
+                  ariaLabel={t({
+                    id: "settings.about.data.delete_all_aria",
                     message:
-                      "Removes recordings, transcripts, models, and settings, then quits",
+                      "Delete all data. Hold for ten seconds to confirm.",
                   })}
-                </p>
-              </div>
-              <InlineHoldButton
-                onConfirm={() => {
-                  void handleDeleteAllData();
-                }}
-                disabled={deletingData}
-                busy={deletingData}
-                label={t({
-                  id: "settings.about.data.hold_to_delete",
-                  message: "Hold to delete",
-                })}
-                busyLabel={t({
-                  id: "settings.about.data.deleting",
-                  message: "Deleting…",
-                })}
-                ariaLabel={t({
-                  id: "settings.about.data.delete_all_aria",
-                  message: "Delete all data. Hold for ten seconds to confirm.",
-                })}
-                holdMs={10000}
-                tone="danger"
-              />
-            </div>
-          </div>
+                  holdMs={10000}
+                  tone="danger"
+                />
+              }
+            />
+          </SettingCard>
 
           {dataError ? (
             <p className="break-words [overflow-wrap:anywhere] px-1 ui-text-micro ui-color-error">
@@ -829,56 +825,18 @@ const AboutTab = ({
           ) : null}
         </div>
 
-        <div className="space-y-2">
-          <SectionLabel>
+        <div className="flex flex-col space-y-2">
+          <SectionLabel className="shrink-0">
             {t({
               id: "settings.about.setup",
               message: "Setup",
             })}
           </SectionLabel>
 
-          <div className="rounded-lg bg-surface-surface">
-            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
-              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
-                <RotateCcw size={14} strokeWidth={2} aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="break-words ui-text-label-strong ui-color-primary">
-                  {t({
-                    id: "settings.about.restart_onboarding",
-                    message: "Restart onboarding",
-                  })}
-                </p>
-                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
-                  {t({
-                    id: "settings.about.restart_onboarding_description",
-                    message: "Runs setup again",
-                  })}
-                </p>
-              </div>
-              <InlineHoldButton
-                onConfirm={() => {
-                  void handleResetOnboarding();
-                }}
-                label={t({
-                  id: "settings.about.data.hold_to_restart",
-                  message: "Hold to restart",
-                })}
-                ariaLabel={t({
-                  id: "settings.about.restart_onboarding_hold_aria",
-                  message: "Restart Onboarding. Hold to confirm.",
-                })}
-                holdMs={2000}
-              />
-            </div>
-
-            <div className="ml-[44px] border-t border-border-primary/60" />
-
-            <div className="flex min-h-[52px] items-center gap-2.5 px-3.5 py-2">
-              <span className="flex size-5 shrink-0 items-center justify-center ui-color-muted">
-                <Terminal size={14} strokeWidth={2} aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
+          <SettingCard flush className="flex flex-1 flex-col">
+            <SettingRow
+              className="min-h-[88px] flex-1 px-3.5 py-2.5"
+              title={
                 <div className="flex min-w-0 items-center gap-1.5">
                   <button
                     type="button"
@@ -922,44 +880,74 @@ const AboutTab = ({
                     </div>
                   </div>
                 </div>
-                <p className="mt-0.5 break-words ui-text-meta ui-color-muted">
-                  {cliSubtitle}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={
-                  cliInstalled && cliManagedByApp ? onRemoveCli : onInstallCli
-                }
-                disabled={
-                  cliInstallBusy ||
-                  (cliInstalled && !cliManagedByApp) ||
-                  (!cliInstalled && (cliUnavailable || !activeLicense))
-                }
-                className="inline-flex h-6 min-w-[4.75rem] shrink-0 items-center justify-center gap-1 px-1 ui-text-button-sm ui-color-secondary transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-60"
-              >
-                {cliInstallBusy && (
-                  <Loader2 size={10} className="animate-spin" />
-                )}
-                <span>
-                  {cliInstalled && cliManagedByApp
-                    ? t({
-                        id: "settings.about.uninstall_cli",
-                        message: "Uninstall",
-                      })
-                    : cliInstalled
+              }
+              description={cliSubtitle}
+              footer={
+                <button
+                  type="button"
+                  onClick={
+                    cliInstalled && cliManagedByApp ? onRemoveCli : onInstallCli
+                  }
+                  disabled={
+                    cliInstallBusy ||
+                    (cliInstalled && !cliManagedByApp) ||
+                    (!cliInstalled && (cliUnavailable || !activeLicense))
+                  }
+                  className={MANAGEMENT_ACTION_CLASS}
+                >
+                  {cliInstallBusy && (
+                    <Loader2 size={10} className="animate-spin" />
+                  )}
+                  <span>
+                    {cliInstalled && cliManagedByApp
                       ? t({
-                          id: "settings.about.cli.installed_action",
-                          message: "Installed",
+                          id: "settings.about.uninstall_cli",
+                          message: "Uninstall",
                         })
-                      : t({
-                          id: "settings.about.install_cli",
-                          message: "Install CLI",
-                        })}
-                </span>
-              </button>
-            </div>
-          </div>
+                      : cliInstalled
+                        ? t({
+                            id: "settings.about.cli.installed_action",
+                            message: "Installed",
+                          })
+                        : t({
+                            id: "settings.about.install_cli",
+                            message: "Install CLI",
+                          })}
+                  </span>
+                </button>
+              }
+            />
+
+            <div className="ms-[44px] shrink-0 border-t border-border-primary/60" />
+
+            <SettingRow
+              className="min-h-[88px] flex-1 px-3.5 py-2.5"
+              title={t({
+                id: "settings.about.restart_onboarding",
+                message: "Restart onboarding",
+              })}
+              description={t({
+                id: "settings.about.restart_onboarding_description",
+                message: "Runs setup again",
+              })}
+              footer={
+                <InlineHoldButton
+                  onConfirm={() => {
+                    void handleResetOnboarding();
+                  }}
+                  label={t({
+                    id: "settings.about.data.hold_to_restart",
+                    message: "Hold to restart",
+                  })}
+                  ariaLabel={t({
+                    id: "settings.about.restart_onboarding_hold_aria",
+                    message: "Restart Onboarding. Hold to confirm.",
+                  })}
+                  holdMs={2000}
+                />
+              }
+            />
+          </SettingCard>
         </div>
       </section>
     </motion.div>

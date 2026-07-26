@@ -13,8 +13,8 @@ import type { TodayDictationStats } from "../../../types";
 
 const fadeTransition = { duration: 0.22, ease: "easeOut" as const };
 
-function formatHomeDate(now: Date): string {
-  return now.toLocaleDateString(undefined, {
+function formatHomeDate(now: Date, locale: string): string {
+  return now.toLocaleDateString(locale, {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -32,11 +32,11 @@ export default function HomeTodayHeader({
   stats,
   active,
 }: HomeTodayHeaderProps) {
-  const { t } = useLingui();
+  const { i18n, t } = useLingui();
   const periodTick = useTimeOfDayPeriodTick(active);
 
   const now = new Date();
-  const dateLabel = formatHomeDate(now);
+  const dateLabel = formatHomeDate(now, i18n.locale);
 
   const greetingVariant = useMemo(
     () => getHomeGreetingVariant(now),

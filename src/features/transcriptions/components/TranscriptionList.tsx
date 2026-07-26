@@ -60,7 +60,7 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
   showLlmButtons = false,
   isActive = true,
 }) => {
-  const { t } = useLingui();
+  const { i18n, t } = useLingui();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -172,21 +172,21 @@ const TranscriptionList: React.FC<TranscriptionListProps> = ({
           message: "Yesterday",
         });
       if (diffDays > 1 && diffDays < 7) {
-        return target.toLocaleDateString([], { weekday: "long" });
+        return target.toLocaleDateString(i18n.locale, { weekday: "long" });
       }
       if (target.getFullYear() === now.getFullYear()) {
-        return target.toLocaleDateString([], {
+        return target.toLocaleDateString(i18n.locale, {
           month: "long",
           day: "numeric",
         });
       }
-      return target.toLocaleDateString([], {
+      return target.toLocaleDateString(i18n.locale, {
         month: "short",
         day: "numeric",
         year: "numeric",
       });
     },
-    [t],
+    [i18n.locale, t],
   );
 
   const deleteTranscription = useCallback(

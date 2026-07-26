@@ -586,18 +586,6 @@ msgstr ""
 #~ msgstr "Utente Glimpse"
 
 #. js-lingui-explicit-id
-#~ msgid "home.greeting.afternoon"
-#~ msgstr "Buon pomeriggio"
-
-#. js-lingui-explicit-id
-#~ msgid "home.greeting.evening"
-#~ msgstr "Buonasera"
-
-#. js-lingui-explicit-id
-#~ msgid "home.greeting.morning"
-#~ msgstr "Buongiorno"
-
-#. js-lingui-explicit-id
 #~ msgid "faq.confirm"
 #~ msgstr "Capito"
 
@@ -1035,15 +1023,28 @@ msgstr "(se richiesto)"
 msgid "settings.speech_model.api_key.optional_hint"
 msgstr "(se necessario)"
 
+#. js-lingui-explicit-id
 #. placeholder {0}: stats.llmCleanedCount
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
+msgid "home.today.stats.llm_cleaned"
 msgstr "{0, plural, one {# dettatura elaborata con l'IA oggi} other {# dettature elaborate con l'IA oggi}}"
+
+#. placeholder {0}: stats.llmCleanedCount
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
+#~ msgstr "{0, plural, one {# dettatura elaborata con l'IA oggi} other {# dettature elaborate con l'IA oggi}}"
 
 #. placeholder {0}: stats.count
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {# dictation} other {# dictations}}"
-msgstr "{0, plural, one {# dettatura} other {# dettature}}"
+#~ msgid "{0, plural, one {# dictation} other {# dictations}}"
+#~ msgstr "{0, plural, one {# dettatura} other {# dettature}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: stats.count
+#. placeholder {1}: stats.words
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "home.today.stats.dictations_words"
+msgstr "Oggi: {0, plural, one {# dettatura} other {# dettature}} · {1, plural, one {# parola} other {# parole}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.langCount
@@ -1069,21 +1070,27 @@ msgstr "{0} salvato"
 msgid "import.cat.history.detail"
 msgstr "{0} trascrizioni"
 
-#. placeholder {0}: stats.words
-#: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {# word} other {# words}}"
-msgstr "{0, plural, one {# parola} other {# parole}}"
-
 #. js-lingui-explicit-id
 #. placeholder {0}: previewForApp.dictionaryCount
 #: src/features/import/components/ImportStep.tsx
 msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# parola} other {# parole}}"
 
+#. placeholder {0}: stats.words
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{0, plural, one {# word} other {# words}}"
+#~ msgstr "{0, plural, one {# parola} other {# parole}}"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
+msgid "home.today.stats.longest_words"
 msgstr "{0, plural, one {Dettatura più lunga oggi: # parola} other {Dettatura più lunga oggi: # parole}}"
+
+#. placeholder {0}: stats.longestWords
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
+#~ msgstr "{0, plural, one {Dettatura più lunga oggi: # parola} other {Dettatura più lunga oggi: # parole}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: apps.length
@@ -1128,18 +1135,28 @@ msgstr "{0} di {1} corrispondenze"
 msgid "dictionary.replacements.count.multiple"
 msgstr "{0} sostituzioni"
 
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
+msgid "home.today.stats.avg_words"
 msgstr "{avg, plural, one {Circa # parola per dettatura oggi} other {Circa # parole per dettatura oggi}}"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
+#~ msgstr "{avg, plural, one {Circa # parola per dettatura oggi} other {Circa # parole per dettatura oggi}}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.coverage_with_devices"
 msgstr "{coverageBase} · {activeDevices} di {deviceLimit} dispositivi attivi"
 
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
+msgid "home.today.stats.minutes_spoken"
 msgstr "{minutes, plural, one {# minuto parlato oggi} other {# minuti parlati oggi}}"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
+#~ msgstr "{minutes, plural, one {# minuto parlato oggi} other {# minuti parlati oggi}}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -1156,9 +1173,19 @@ msgstr "{pairCount} coppie audio e testo"
 msgid "models.cloud_card.aria"
 msgstr "{providerLabel} modello cloud"
 
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
-msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
+msgid "home.today.stats.seconds_spoken"
 msgstr "{seconds, plural, one {# secondo parlato oggi} other {# secondi parlati oggi}}"
+
+#: src/features/transcriptions/homeHeaderStats.ts
+#~ msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
+#~ msgstr "{seconds, plural, one {# secondo parlato oggi} other {# secondi parlati oggi}}"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "home.today.stats.pace_wpm"
+msgstr "{wpm, plural, one {Circa # parola al minuto oggi} other {Circa # parole al minuto oggi}}"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2828,9 +2855,29 @@ msgid "settings.account.activate.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.afternoon"
+msgstr "Buon pomeriggio"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.evening"
+msgstr "Buonasera"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.morning"
+msgstr "Buongiorno"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
 msgid "onboarding.microphone.grant"
 msgstr "Concedi accesso"
+
+#. js-lingui-explicit-id
+#: src/features/transcriptions/homeGreeting.ts
+msgid "home.greeting.occasion.leap_day"
+msgstr "Buon 29 febbraio"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3253,6 +3300,12 @@ msgstr "Log"
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.sort.longest"
 msgstr "Più lungo"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: formatRecordingClock(stats.longestAudioSeconds)
+#: src/features/transcriptions/homeHeaderStats.ts
+msgid "home.today.stats.longest_duration"
+msgstr "Registrazione più lunga oggi: {0}"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
