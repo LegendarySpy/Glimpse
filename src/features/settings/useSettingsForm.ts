@@ -34,7 +34,7 @@ import {
   languageSupportedByModel,
 } from "../../shared/lib/transcriptionLanguages";
 import { useShortcutCapture } from "../../shared/hooks/useShortcutCapture";
-import { i18n } from "../../i18n";
+import { activateLocale, i18n } from "../../i18n";
 import { useAppInfo, useInputDevices, useSettings } from "./queries";
 import * as modelsApi from "./models-api";
 import {
@@ -98,6 +98,7 @@ type SaveSettingsOverrides = ShortcutOverrides & {
   localModel?: string;
   localApiModel?: string;
   language?: string;
+  appLocale?: AppLocaleSetting;
   shortcutBindings?: ShortcutBindings;
   shortcutDraftTarget?: ShortcutTarget;
 };
@@ -760,7 +761,7 @@ export function useSettingsForm({
         remoteSpeechModel,
         microphoneDevice,
         language: persistedLanguage,
-        appLocale,
+        appLocale: overrides.appLocale ?? appLocale,
         themeMode,
 
         llmEnabled: licenseGateActive && llmEnabled && llmConfigReady,
@@ -888,6 +889,16 @@ export function useSettingsForm({
     clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = null;
   }, []);
+
+  const handleAppLocaleChange = useCallback(
+    (nextLocale: AppLocaleSetting) => {
+      clearPendingSettingsSave();
+      setAppLocale(nextLocale);
+      activateLocale(nextLocale);
+      void saveSettingsNow({ appLocale: nextLocale });
+    },
+    [clearPendingSettingsSave, saveSettingsNow],
+  );
 
   const flushPendingSettingsSave = useCallback(() => {
     if (saveTimeoutRef.current === null) return;
@@ -1790,7 +1801,7 @@ export function useSettingsForm({
     language: displayedLanguage,
     setLanguage,
     appLocale,
-    setAppLocale,
+    setAppLocale: handleAppLocaleChange,
     languages: displayedLanguageOptions,
 
     inputDevices,
