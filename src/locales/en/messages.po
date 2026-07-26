@@ -2575,6 +2575,11 @@ msgid "settings.models.installed.multilingual"
 msgstr "Multilingual"
 
 #. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.locked_hint"
+msgstr "Needs a Glimpse license. Opens Account."
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.ane.installed"
 msgstr "Neural Engine encoder installed"

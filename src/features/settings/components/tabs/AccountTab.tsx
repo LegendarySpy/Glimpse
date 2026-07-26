@@ -3,6 +3,7 @@ import { motion, type Variants } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
   checkoutUrlFor,
+  type PurchaseSource,
   type PurchaseTier,
 } from "../../../license/purchaseConfig";
 import {
@@ -15,9 +16,13 @@ import AccountView from "../AccountView";
 
 type AccountTabProps = {
   variants: Variants;
+  source?: PurchaseSource;
 };
 
-const AccountTab = ({ variants }: AccountTabProps) => {
+const AccountTab = ({
+  variants,
+  source = "settings_account",
+}: AccountTabProps) => {
   const licenseQuery = useLicenseState();
   const activateLicense = useActivateLicense();
   const { mutate: refreshLicense, isPending: refreshLicensePending } =
@@ -45,7 +50,7 @@ const AccountTab = ({ variants }: AccountTabProps) => {
     setOpenError(null);
     setOpeningTarget(tier);
     try {
-      const checkoutUrl = checkoutUrlFor(tier, "settings_account");
+      const checkoutUrl = checkoutUrlFor(tier, source);
       if (!checkoutUrl) {
         throw new Error(
           `${tier === "commercial" ? "Commercial" : "Personal"} checkout link is not configured for this build.`,

@@ -3514,6 +3514,11 @@ msgid "settings.models.installed.multilingual"
 msgstr "Meertalig"
 
 #. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.locked_hint"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.ane.installed"
 msgstr "Neural Engine-encoder geïnstalleerd"

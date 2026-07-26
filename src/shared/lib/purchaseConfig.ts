@@ -1,5 +1,6 @@
 export type PurchaseTier = "personal" | "commercial";
-export type PurchaseSource = "onboarding" | "settings_account";
+export type PurchaseSource =
+  "onboarding" | "settings_account" | "sidebar_lock" | "trial_toast";
 
 export type TierInfo = {
   id: PurchaseTier;

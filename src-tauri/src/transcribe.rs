@@ -1118,7 +1118,9 @@ fn emit_transcription_complete_with_cleanup(
     crate::schedule_transcription_prune(app.clone(), settings);
 
     let update_state = app.state::<AppState>().update_state().clone();
-    update_checker::maybe_show_update_toast(app, &update_state);
+    if !update_checker::maybe_show_update_toast(app, &update_state) {
+        crate::notifications::evaluate_after_use(app);
+    }
 
     persisted
 }

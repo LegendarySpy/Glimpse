@@ -366,9 +366,9 @@ async fn check_for_update(
 
 // Auto-update installs silently when the app is idle, so the toast is
 // only useful to users who opted out of it.
-pub fn maybe_show_update_toast(app: &AppHandle<AppRuntime>, state: &SharedUpdateState) {
+pub fn maybe_show_update_toast(app: &AppHandle<AppRuntime>, state: &SharedUpdateState) -> bool {
     if app.state::<AppState>().is_auto_update_enabled() {
-        return;
+        return false;
     }
 
     let (should_show, new_version) = {
@@ -380,7 +380,7 @@ pub fn maybe_show_update_toast(app: &AppHandle<AppRuntime>, state: &SharedUpdate
     };
 
     if !should_show {
-        return;
+        return false;
     }
 
     state.lock().mark_toast_shown();
@@ -407,6 +407,8 @@ pub fn maybe_show_update_toast(app: &AppHandle<AppRuntime>, state: &SharedUpdate
             secondary_action_label: None,
         },
     );
+
+    true
 }
 
 #[derive(Serialize)]
