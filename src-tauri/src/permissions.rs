@@ -69,7 +69,7 @@ mod macos {
         }
     }
 
-    /// Check if microphone permission is granted.
+    /// Check if microphone permission is granted. Preflights TCC over XPC, which can block.
     pub fn check_microphone_permission() -> bool {
         tauri::async_runtime::block_on(async {
             tauri_plugin_macos_permissions::check_microphone_permission().await
@@ -90,10 +90,17 @@ mod macos {
         granted
     }
 
-    /// Warms the cache so the first recording doesn't pay for the TCC query.
-    pub fn prime_microphone_permission() {
+    /// Re-queries TCC and updates the cache, so a revoked grant is picked up.
+    pub fn refresh_microphone_permission() -> bool {
+        let granted = check_microphone_permission();
+        MICROPHONE_GRANTED.store(granted, Ordering::Relaxed);
+        granted
+    }
+
+    /// Refreshes off the caller's thread, for hot paths that must not block.
+    pub fn refresh_microphone_permission_detached() {
         std::thread::spawn(|| {
-            let _ = check_microphone_permission_cached();
+            let _ = refresh_microphone_permission();
         });
     }
 

@@ -84,9 +84,17 @@ export async function fetchNews(): Promise<NewsItem[]> {
 }
 
 export function getLastSeenId(): string | null {
-  return localStorage.getItem(LAST_SEEN_KEY);
+  try {
+    return localStorage.getItem(LAST_SEEN_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function setLastSeenId(id: string) {
-  localStorage.setItem(LAST_SEEN_KEY, id);
+  try {
+    localStorage.setItem(LAST_SEEN_KEY, id);
+  } catch {
+    // storage unavailable; unread state just won't persist
+  }
 }

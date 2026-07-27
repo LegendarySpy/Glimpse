@@ -543,7 +543,7 @@ pub fn run() {
                 if let Err(err) = platform::macos::audio_devices::init(handle) {
                     tracing::error!("Failed to initialize input device watcher: {err}");
                 }
-                permissions::prime_microphone_permission();
+                permissions::refresh_microphone_permission_detached();
             }
 
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
