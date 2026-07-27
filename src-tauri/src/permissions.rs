@@ -3,6 +3,7 @@
 #[cfg(target_os = "macos")]
 mod macos {
     use std::process::Command;
+    use std::sync::atomic::{AtomicBool, Ordering};
     #[cfg(debug_assertions)]
     use tracing::debug;
 
@@ -68,11 +69,46 @@ mod macos {
         }
     }
 
-    /// Check if microphone permission is granted.
+    /// Check if microphone permission is granted. Preflights TCC over XPC, which can block.
     pub fn check_microphone_permission() -> bool {
         tauri::async_runtime::block_on(async {
             tauri_plugin_macos_permissions::check_microphone_permission().await
         })
+    }
+
+    static MICROPHONE_GRANTED: AtomicBool = AtomicBool::new(false);
+
+    pub fn check_microphone_permission_cached() -> bool {
+        if MICROPHONE_GRANTED.load(Ordering::Relaxed) {
+            return true;
+        }
+
+        let granted = check_microphone_permission();
+        if granted {
+            MICROPHONE_GRANTED.store(true, Ordering::Relaxed);
+        }
+        granted
+    }
+
+    /// Re-queries TCC and updates the cache, so a revoked grant is picked up.
+    pub fn refresh_microphone_permission() -> bool {
+        let granted = check_microphone_permission();
+        MICROPHONE_GRANTED.store(granted, Ordering::Relaxed);
+        granted
+    }
+
+    static REFRESH_IN_FLIGHT: AtomicBool = AtomicBool::new(false);
+
+    /// Refreshes off the caller's thread, for hot paths that must not block.
+    pub fn refresh_microphone_permission_detached() {
+        if REFRESH_IN_FLIGHT.swap(true, Ordering::Relaxed) {
+            return;
+        }
+
+        std::thread::spawn(|| {
+            let _ = refresh_microphone_permission();
+            REFRESH_IN_FLIGHT.store(false, Ordering::Relaxed);
+        });
     }
 
     /// Request microphone permission from macOS.

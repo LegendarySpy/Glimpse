@@ -106,18 +106,13 @@ impl AudioSpectrumEmitter {
                             + normalized * (1.0 - SPECTRUM_SMOOTHING);
                         bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
                     }
-                } else {
-                    for idx in 0..SPECTRUM_BINS {
-                        smoothed[idx] *= SPECTRUM_SMOOTHING;
-                        bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
-                    }
-                }
 
-                emit_event(
-                    &app,
-                    EVENT_AUDIO_SPECTRUM,
-                    AudioSpectrumPayload { bins: bins.clone() },
-                );
+                    emit_event(
+                        &app,
+                        EVENT_AUDIO_SPECTRUM,
+                        AudioSpectrumPayload { bins: bins.clone() },
+                    );
+                }
                 std::thread::sleep(interval);
             }
         });
@@ -552,6 +547,11 @@ impl PillController {
             .start(settings.microphone_device.clone(), pending_dir)
         {
             Ok(started) => {
+                // The gate above trusts a cached grant; re-check now that the
+                // keypress is served, so a revoked grant is caught next press.
+                #[cfg(target_os = "macos")]
+                permissions::refresh_microphone_permission_detached();
+
                 self.arm_capture_after_settle(app, generation);
                 self.start_audio_spectrum_emitter(app);
                 self.pause_media_if_playing(app);
@@ -579,6 +579,11 @@ impl PillController {
                 self.set_hold_key_down(false);
                 // Drop out of Listening so transition_to_error isn't suppressed.
                 self.transition_to(app, PillStatus::Idle);
+
+                if handle_revoked_mic_permission(app) {
+                    return false;
+                }
+
                 self.transition_to_error(app, &format!("Unable to start recording: {err}"));
                 false
             }
@@ -935,10 +940,37 @@ fn discard_pending_recording(recording: &crate::recorder::CompletedRecording) {
     }
 }
 
+#[cfg(target_os = "macos")]
+fn show_microphone_permission_toast(app: &AppHandle<AppRuntime>) {
+    toast::show_with_action(
+        app,
+        "error",
+        Some("Microphone"),
+        "Allow microphone access, then try again.",
+        "open_microphone_settings",
+        "Open Settings",
+    );
+}
+
+#[cfg(target_os = "macos")]
+fn handle_revoked_mic_permission(app: &AppHandle<AppRuntime>) -> bool {
+    if permissions::refresh_microphone_permission() {
+        return false;
+    }
+
+    show_microphone_permission_toast(app);
+    true
+}
+
+#[cfg(not(target_os = "macos"))]
+fn handle_revoked_mic_permission(_app: &AppHandle<AppRuntime>) -> bool {
+    false
+}
+
 fn check_mic_permission(app: &AppHandle<AppRuntime>) -> bool {
     #[cfg(target_os = "macos")]
     {
-        if permissions::check_microphone_permission() {
+        if permissions::check_microphone_permission_cached() {
             return true;
         }
 
@@ -946,15 +978,8 @@ fn check_mic_permission(app: &AppHandle<AppRuntime>) -> bool {
             tracing::error!("Failed to request microphone permission: {err}");
         }
 
-        if !permissions::check_microphone_permission() {
-            toast::show_with_action(
-                app,
-                "error",
-                Some("Microphone"),
-                "Microphone access required to record. Allow it, then try again.",
-                "open_microphone_settings",
-                "Open Settings",
-            );
+        if !permissions::refresh_microphone_permission() {
+            show_microphone_permission_toast(app);
             return false;
         }
     }

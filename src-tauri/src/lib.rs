@@ -18,6 +18,7 @@ mod mode_context;
 mod model_language_table;
 mod music;
 mod native_i18n;
+mod notifications;
 mod permissions;
 mod personalization;
 mod personalization_snippets;
@@ -542,6 +543,7 @@ pub fn run() {
                 if let Err(err) = platform::macos::audio_devices::init(handle) {
                     tracing::error!("Failed to initialize input device watcher: {err}");
                 }
+                permissions::refresh_microphone_permission_detached();
             }
 
             if let Some(window) = handle.get_webview_window(MAIN_WINDOW_LABEL) {
@@ -688,6 +690,7 @@ pub fn run() {
             apple_llm_availability,
             fetch_remote_speech_models,
             open_about_page,
+            open_account_page,
             reveal_logs,
             update_checker::get_update_status,
             update_checker::check_for_updates,
@@ -1590,6 +1593,13 @@ async fn fetch_remote_speech_models(
 #[tauri::command]
 fn open_about_page(app: AppHandle<AppRuntime>) {
     if let Err(err) = tray::open_settings_about(&app) {
+        tracing::error!("Failed to open settings window: {err}");
+    }
+}
+
+#[tauri::command]
+fn open_account_page(app: AppHandle<AppRuntime>) {
+    if let Err(err) = tray::open_settings_account(&app) {
         tracing::error!("Failed to open settings window: {err}");
     }
 }

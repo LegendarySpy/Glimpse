@@ -58,7 +58,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' asset: http://asset.localhost customprotocol:; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data: blob: https:; connect-src 'self' ipc: http://ipc.localhost https://api.github.com http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*",
+      "csp": "default-src 'self' asset: http://asset.localhost customprotocol:; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data: blob: https:; connect-src 'self' ipc: http://ipc.localhost https://api.github.com https://tryglimpse.cc http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*",
       "assetProtocol": {
         "enable": true,
         "scope": [

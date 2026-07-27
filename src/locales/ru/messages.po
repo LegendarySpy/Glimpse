@@ -114,10 +114,6 @@ msgstr ""
 #~ msgstr "3 месяца"
 
 #. js-lingui-explicit-id
-#~ msgid "home.account.fallback"
-#~ msgstr "Учётная запись"
-
-#. js-lingui-explicit-id
 #~ msgid "settings.modal.section.account"
 #~ msgstr "Учётная запись"
 
@@ -1272,6 +1268,11 @@ msgid "settings.general.account_tab"
 msgstr "Учётная запись"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/AccountPill.tsx
+msgid "home.account.fallback"
+msgstr "Учётная запись"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.priority.balanced.helper"
 msgstr "Точность и размер"
@@ -1395,6 +1396,11 @@ msgstr "Все"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.filter.all"
 msgstr "Все модели"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.all_posts"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1737,6 +1743,11 @@ msgstr "Проверить обновления"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.check_updates_long"
 msgstr "Проверить обновления…"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.loading"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -3514,6 +3525,11 @@ msgid "settings.models.installed.multilingual"
 msgstr "Многоязычный"
 
 #. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.locked_hint"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.ane.installed"
 msgstr "Энкодер Neural Engine установлен"
@@ -3548,6 +3564,11 @@ msgstr "Новый тег…"
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.sort.recent"
 msgstr "Сначала новые"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3763,6 +3784,11 @@ msgstr "Не поддерживается на этом Mac."
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.notes"
 msgstr "Примечания:"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.empty"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

@@ -114,10 +114,6 @@ msgstr ""
 #~ msgstr "3 माह"
 
 #. js-lingui-explicit-id
-#~ msgid "home.account.fallback"
-#~ msgstr "खाता"
-
-#. js-lingui-explicit-id
 #~ msgid "settings.modal.section.account"
 #~ msgstr "खाता"
 
@@ -1272,6 +1268,11 @@ msgid "settings.general.account_tab"
 msgstr "खाता"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/AccountPill.tsx
+msgid "home.account.fallback"
+msgstr "खाता"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.priority.balanced.helper"
 msgstr "सटीकता और आकार"
@@ -1395,6 +1396,11 @@ msgstr "सभी"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.filter.all"
 msgstr "सभी मॉडल"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.all_posts"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1737,6 +1743,11 @@ msgstr "अपडेट जाँचें"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.check_updates_long"
 msgstr "अपडेट जाँचें..."
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.loading"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -3514,6 +3525,11 @@ msgid "settings.models.installed.multilingual"
 msgstr "बहुभाषी"
 
 #. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.locked_hint"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.ane.installed"
 msgstr "Neural Engine एन्कोडर इंस्टॉल हो गया"
@@ -3548,6 +3564,11 @@ msgstr "नया टैग..."
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.sort.recent"
 msgstr "नवीनतम पहले"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3763,6 +3784,11 @@ msgstr "इस Mac पर समर्थित नहीं है।"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.notes"
 msgstr "टिप्पणियाँ:"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.empty"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
