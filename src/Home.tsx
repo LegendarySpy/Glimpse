@@ -22,6 +22,7 @@ import {
   X,
   ArrowCircleUp as ArrowUpCircle,
   Books as Library,
+  Lock,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
@@ -38,9 +39,12 @@ import DictionaryView from "./features/dictionary/components/DictionaryView";
 import PersonalizationView from "./features/personalization/components/PersonalizationView";
 import LibraryView from "./features/library/components/LibraryView";
 import LocalApiSidebarStatus from "./features/settings/components/LocalApiSidebarStatus";
+import NewsMenu from "./features/news/components/NewsMenu";
+import AccountPill from "./features/license/components/AccountPill";
 import { getLocalApiStatus } from "./features/settings/models-api";
 import type { LocalApiStatus } from "./types";
 import { useLicenseGate } from "./features/license/queries";
+import type { PurchaseSource } from "./features/license/purchaseConfig";
 import { useSettings, useAppInfo } from "./features/settings/queries";
 import { useUpdateStatus } from "./features/updates/queries";
 import type { TranscriptionMode } from "./types";
@@ -121,23 +125,25 @@ const SidebarItem = ({
   label,
   active = false,
   collapsed,
-  disabled = false,
+  locked = false,
+  lockedHint,
   onClick,
 }: {
   icon: PhosphorIcon;
   label: string;
   active?: boolean;
   collapsed: boolean;
-  disabled?: boolean;
+  locked?: boolean;
+  lockedHint?: string;
   onClick?: () => void;
 }) => (
   <button
     onClick={onClick}
-    disabled={disabled}
+    title={locked ? lockedHint : undefined}
     data-active={active ? "true" : "false"}
-    className={`ui-nav-item group h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 mb-[2px] disabled:pointer-events-none disabled:opacity-45 ${
+    className={`ui-nav-item group h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 mb-[2px] ${
       collapsed ? "gap-0" : "gap-3"
-    }`}
+    } ${locked ? "opacity-45 hover:opacity-75" : ""}`}
   >
     <div className="flex items-center justify-center w-[20px] shrink-0">
       <Icon size={20} weight={active ? "fill" : "regular"} />
@@ -150,6 +156,9 @@ const SidebarItem = ({
     >
       {label}
     </span>
+    {locked && !collapsed ? (
+      <Lock size={12} className="ml-auto shrink-0" aria-hidden="true" />
+    ) : null}
   </button>
 );
 
@@ -166,6 +175,8 @@ const Home = () => {
     | "about"
     | "app"
   >("general");
+  const [accountSource, setAccountSource] =
+    useState<PurchaseSource>("settings_account");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeView, setActiveView] = useState<ActiveView>("home");
   const licenseGateActive = useLicenseGate();
@@ -229,6 +240,15 @@ const Home = () => {
     setLocalApiStatus(status);
   }, []);
 
+  const openAccountSettings = useCallback(
+    (source: PurchaseSource = "settings_account") => {
+      setAccountSource(source);
+      setSettingsTab("account");
+      setIsSettingsOpen(true);
+    },
+    [],
+  );
+
   const openLocalApiSettings = useCallback(() => {
     setSettingsTab(licenseGateActive ? "local-api" : "general");
     setIsSettingsOpen(true);
@@ -264,6 +284,7 @@ const Home = () => {
     let unlistenNavigate: UnlistenFn | null = null;
     let unlistenHistory: UnlistenFn | null = null;
     let unlistenModels: UnlistenFn | null = null;
+    let unlistenAccount: UnlistenFn | null = null;
     let unlistenDragEnter: UnlistenFn | null = null;
     let unlistenDragOver: UnlistenFn | null = null;
     let unlistenDragLeave: UnlistenFn | null = null;
@@ -282,6 +303,7 @@ const Home = () => {
 
     const historyReady = listen("navigate:history", () => {
       setIsSettingsOpen(false);
+      setAccountSource("settings_account");
       setActiveView("home");
       setDragActive(false);
       setPendingImportPaths(null);
@@ -298,7 +320,16 @@ const Home = () => {
       else unlistenModels = fn;
     });
 
-    Promise.all([navigateReady, historyReady, modelsReady])
+    const accountReady = listen("navigate:account", () => {
+      setAccountSource("trial_toast");
+      setSettingsTab("account");
+      setIsSettingsOpen(true);
+    }).then((fn) => {
+      if (cancelled) fn();
+      else unlistenAccount = fn;
+    });
+
+    Promise.all([navigateReady, historyReady, modelsReady, accountReady])
       .then(() => {
         if (!cancelled) {
           emit("settings:renderer_ready").catch(() => {});
@@ -383,6 +414,7 @@ const Home = () => {
       unlistenNavigate?.();
       unlistenHistory?.();
       unlistenModels?.();
+      unlistenAccount?.();
       unlistenDragEnter?.();
       unlistenDragOver?.();
       unlistenDragLeave?.();
@@ -447,6 +479,11 @@ const Home = () => {
         id: "home.mode.local",
         message: "Local",
       });
+
+  const lockedHint = t({
+    id: "home.sidebar.locked_hint",
+    message: "Needs a Glimpse license. Opens Account.",
+  });
 
   const homeViewActive = activeView === "home";
   useTimeOfDayPeriodTick(homeViewActive);
@@ -524,8 +561,13 @@ const Home = () => {
               })}
               active={activeView === "brain"}
               collapsed={isSidebarCollapsed}
-              disabled={!licenseGateActive}
-              onClick={() => setActiveView("brain")}
+              locked={!licenseGateActive}
+              lockedHint={lockedHint}
+              onClick={() =>
+                licenseGateActive
+                  ? setActiveView("brain")
+                  : openAccountSettings("sidebar_lock")
+              }
             />
             <SidebarItem
               icon={Library}
@@ -535,8 +577,13 @@ const Home = () => {
               })}
               active={activeView === "library"}
               collapsed={isSidebarCollapsed}
-              disabled={!licenseGateActive}
-              onClick={() => setActiveView("library")}
+              locked={!licenseGateActive}
+              lockedHint={lockedHint}
+              onClick={() =>
+                licenseGateActive
+                  ? setActiveView("library")
+                  : openAccountSettings("sidebar_lock")
+              }
             />
           </div>
           <div className="flex-1" />
@@ -789,6 +836,13 @@ const Home = () => {
       <main className="flex flex-1 flex-col min-w-0 bg-surface-tertiary overflow-hidden relative will-change-contents">
         <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
+        {homeViewActive && (
+          <div className="absolute right-6 top-10 z-40 flex items-center gap-2">
+            <AccountPill onClick={() => openAccountSettings("home_pill")} />
+            <NewsMenu />
+          </div>
+        )}
+
         <div
           className={`flex-1 flex flex-col px-8 min-h-0 ${activeView === "home" ? "pb-3" : "pb-6"}`}
         >
@@ -879,8 +933,10 @@ const Home = () => {
             onClose={() => {
               setIsSettingsOpen(false);
               setSettingsTab("general");
+              setAccountSource("settings_account");
             }}
             initialTab={settingsTab}
+            accountSource={accountSource}
             transcriptionMode={transcriptionMode}
           />
         )}

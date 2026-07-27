@@ -213,7 +213,7 @@ fn invalidate_gate_cache() {
     *GATE_CACHE.lock() = None;
 }
 
-fn developer_license_bypass_active() -> bool {
+pub(crate) fn developer_license_bypass_active() -> bool {
     cfg!(debug_assertions) && option_env!("GLIMPSE_FORCE_LICENSE_GATE") != Some("1")
 }
 

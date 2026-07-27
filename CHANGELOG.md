@@ -1,3 +1,13 @@
+1.0.5
+
+### Improvements
+
+- The recording pill has reduced latency.
+- News from Glimpse now appears in the app.
+- Your account is back in the top right. Click it to open Account.
+
+---
+
 1.0.4
 
 ### Features

@@ -24,6 +24,7 @@ import LocalApiTab from "./tabs/LocalApiTab";
 import ModelsTab from "./tabs/ModelsTab";
 import AppTab from "./tabs/AppTab";
 import ProvidersTab from "./tabs/ProvidersTab";
+import type { PurchaseSource } from "../../license/purchaseConfig";
 import type { TranscriptionMode } from "../../../types";
 import { useSettingsForm } from "../useSettingsForm";
 
@@ -38,6 +39,7 @@ interface SettingsModalProps {
     | "local-api"
     | "about"
     | "app";
+  accountSource?: PurchaseSource;
   transcriptionMode: TranscriptionMode;
 }
 
@@ -72,6 +74,7 @@ const SettingsModal = ({
   isOpen,
   onClose,
   initialTab = "general",
+  accountSource = "settings_account",
   transcriptionMode: initialTranscriptionMode,
 }: SettingsModalProps) => {
   const { t } = useLingui();
@@ -269,7 +272,11 @@ const SettingsModal = ({
                 {form.loading ? null : (
                   <AnimatePresence mode="wait">
                     {form.activeTab === "account" && (
-                      <AccountTab key="account" variants={tabContentVariants} />
+                      <AccountTab
+                        key="account"
+                        variants={tabContentVariants}
+                        source={accountSource}
+                      />
                     )}
 
                     {form.activeTab === "general" && (

@@ -32,12 +32,14 @@ pub(crate) const EVENT_SETTINGS_RENDERER_READY: &str = "settings:renderer_ready"
 const EVENT_NAVIGATE_ABOUT: &str = "navigate:about";
 const EVENT_NAVIGATE_HISTORY: &str = "navigate:history";
 const EVENT_NAVIGATE_MODELS: &str = "navigate:models";
+const EVENT_NAVIGATE_ACCOUNT: &str = "navigate:account";
 
 #[derive(Clone, Copy)]
 enum SettingsNavigationTarget {
     About,
     History,
     Models,
+    Account,
 }
 
 #[derive(Default)]
@@ -69,6 +71,9 @@ fn flush_pending_settings_navigation(app: &AppHandle<AppRuntime>) {
         }
         Some(SettingsNavigationTarget::Models) => {
             let _ = app.emit(EVENT_NAVIGATE_MODELS, ());
+        }
+        Some(SettingsNavigationTarget::Account) => {
+            let _ = app.emit(EVENT_NAVIGATE_ACCOUNT, ());
         }
         None => {}
     }
@@ -108,6 +113,10 @@ pub(crate) fn open_settings_history(app: &AppHandle<AppRuntime>) -> tauri::Resul
 
 pub(crate) fn open_settings_models(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
     open_settings_navigation(app, SettingsNavigationTarget::Models)
+}
+
+pub(crate) fn open_settings_account(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
+    open_settings_navigation(app, SettingsNavigationTarget::Account)
 }
 
 fn build_tray_menu(

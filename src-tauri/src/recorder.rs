@@ -1443,6 +1443,16 @@ fn push_samples<T>(
     i16: FromSample<T>,
     f32: FromSample<T>,
 {
+    if let Some(mut analysis) = spectrum.try_lock() {
+        for frame in data.chunks(channels) {
+            let mono: f32 = frame
+                .iter()
+                .map(|&sample| f32::from_sample(sample).clamp(-1.0, 1.0))
+                .sum();
+            analysis.push_sample(mono / frame.len() as f32);
+        }
+    }
+
     if !armed.load(Ordering::Relaxed) {
         let peak = data
             .iter()
@@ -1452,16 +1462,6 @@ fn push_samples<T>(
             return;
         }
         armed.store(true, Ordering::Relaxed);
-    }
-
-    if let Some(mut analysis) = spectrum.try_lock() {
-        for frame in data.chunks(channels) {
-            let mono: f32 = frame
-                .iter()
-                .map(|&sample| f32::from_sample(sample).clamp(-1.0, 1.0))
-                .sum();
-            analysis.push_sample(mono / frame.len() as f32);
-        }
     }
 
     let mut writer = buffer.lock();
