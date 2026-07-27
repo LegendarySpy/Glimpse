@@ -39,6 +39,8 @@ import DictionaryView from "./features/dictionary/components/DictionaryView";
 import PersonalizationView from "./features/personalization/components/PersonalizationView";
 import LibraryView from "./features/library/components/LibraryView";
 import LocalApiSidebarStatus from "./features/settings/components/LocalApiSidebarStatus";
+import NewsMenu from "./features/news/components/NewsMenu";
+import AccountPill from "./features/license/components/AccountPill";
 import { getLocalApiStatus } from "./features/settings/models-api";
 import type { LocalApiStatus } from "./types";
 import { useLicenseGate } from "./features/license/queries";
@@ -833,6 +835,13 @@ const Home = () => {
 
       <main className="flex flex-1 flex-col min-w-0 bg-surface-tertiary overflow-hidden relative will-change-contents">
         <div data-tauri-drag-region className="h-8 w-full shrink-0" />
+
+        {homeViewActive && (
+          <div className="absolute right-6 top-10 z-40 flex items-center gap-2">
+            <AccountPill onClick={() => openAccountSettings("home_pill")} />
+            <NewsMenu />
+          </div>
+        )}
 
         <div
           className={`flex-1 flex flex-col px-8 min-h-0 ${activeView === "home" ? "pb-3" : "pb-6"}`}

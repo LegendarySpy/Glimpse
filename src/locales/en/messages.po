@@ -333,6 +333,11 @@ msgid "settings.general.account_tab"
 msgstr "Account"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/AccountPill.tsx
+msgid "home.account.fallback"
+msgstr "Account"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.priority.balanced.helper"
 msgstr "Accuracy & size"
@@ -456,6 +461,11 @@ msgstr "All"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.filter.all"
 msgstr "All models"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.all_posts"
+msgstr "All posts"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -798,6 +808,11 @@ msgstr "Check for Updates"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.check_updates_long"
 msgstr "Check for Updates..."
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.loading"
+msgstr "Checking for news…"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -2616,6 +2631,11 @@ msgid "transcriptions.sort.recent"
 msgstr "Newest first"
 
 #. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.title"
+msgstr "News from Glimpse"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_pause_media.raise"
 msgstr "Next media action"
@@ -2829,6 +2849,11 @@ msgstr "Not supported on this Mac."
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.notes"
 msgstr "Notes:"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.empty"
+msgstr "Nothing new right now."
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

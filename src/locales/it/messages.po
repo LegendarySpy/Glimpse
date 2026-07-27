@@ -114,10 +114,6 @@ msgstr ""
 #~ msgstr "3 mesi"
 
 #. js-lingui-explicit-id
-#~ msgid "home.account.fallback"
-#~ msgstr "Account"
-
-#. js-lingui-explicit-id
 #~ msgid "settings.modal.section.account"
 #~ msgstr "Account"
 
@@ -1272,6 +1268,11 @@ msgid "settings.general.account_tab"
 msgstr "Account"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/AccountPill.tsx
+msgid "home.account.fallback"
+msgstr "Account"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.priority.balanced.helper"
 msgstr "Precisione e dimensione"
@@ -1395,6 +1396,11 @@ msgstr "Tutti"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.filter.all"
 msgstr "Tutti i modelli"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.all_posts"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1737,6 +1743,11 @@ msgstr "Controlla aggiornamenti"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.check_updates_long"
 msgstr "Controlla aggiornamenti..."
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.loading"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -3555,6 +3566,11 @@ msgid "transcriptions.sort.recent"
 msgstr "Prima i più recenti"
 
 #. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.title"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_pause_media.raise"
 msgstr "Azione multimediale successiva"
@@ -3768,6 +3784,11 @@ msgstr "Non supportato su questo Mac."
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.notes"
 msgstr "Note:"
+
+#. js-lingui-explicit-id
+#: src/features/news/components/NewsMenu.tsx
+msgid "news.empty"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
