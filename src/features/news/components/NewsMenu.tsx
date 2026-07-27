@@ -84,11 +84,13 @@ const NewsMenu = () => {
             className="ui-surface-menu absolute right-0 top-full mt-1.5 w-[300px] z-[60]"
           >
             <div className="px-3.5 pt-2.5 pb-2">
-              <span className="ui-text-body-sm ui-color-muted">{title}</span>
+              <span className="ui-text-body-sm ui-color-secondary">
+                {title}
+              </span>
             </div>
 
             {items.length === 0 ? (
-              <div className="px-3.5 pb-5 ui-text-meta ui-color-muted">
+              <div className="px-3.5 pb-5 ui-text-meta ui-color-secondary">
                 {isLoading
                   ? t({ id: "news.loading", message: "Checking for news…" })
                   : t({ id: "news.empty", message: "Nothing new right now." })}
@@ -109,14 +111,14 @@ const NewsMenu = () => {
                     />
                   )}
                   <div className="px-3.5 pt-2.5 pb-3">
-                    <div className="ui-text-meta ui-color-muted mb-0.5">
+                    <div className="ui-text-meta ui-color-secondary mb-0.5">
                       {[lead.tag, lead.date].filter(Boolean).join(" · ")}
                     </div>
                     <div className="ui-text-body-sm-strong ui-color-primary mb-0.5">
                       {lead.title}
                     </div>
                     {lead.description && (
-                      <div className="ui-text-meta ui-color-muted line-clamp-2">
+                      <div className="ui-text-meta ui-color-secondary line-clamp-2">
                         {lead.description}
                       </div>
                     )}
@@ -130,10 +132,10 @@ const NewsMenu = () => {
                     onClick={() => openLink(item.url)}
                     className="flex w-full items-baseline gap-2 px-3.5 py-2.5 text-left border-t border-border-primary transition-colors hover:bg-[var(--surface-interactive)]"
                   >
-                    <span className="ui-text-body-sm ui-color-secondary min-w-0 flex-1 truncate">
+                    <span className="ui-text-body-sm ui-color-primary min-w-0 flex-1 truncate">
                       {item.title}
                     </span>
-                    <span className="ui-text-meta ui-color-muted shrink-0">
+                    <span className="ui-text-meta ui-color-secondary shrink-0">
                       {item.date}
                     </span>
                   </button>
@@ -142,7 +144,7 @@ const NewsMenu = () => {
                 <button
                   type="button"
                   onClick={() => openLink(BLOG_URL)}
-                  className="flex w-full items-center gap-1 px-3.5 py-2.5 border-t border-border-primary ui-text-meta ui-color-muted transition-colors hover:bg-[var(--surface-interactive)] hover:text-content-secondary"
+                  className="flex w-full items-center gap-1 px-3.5 py-2.5 border-t border-border-primary ui-text-meta ui-color-secondary transition-colors hover:bg-[var(--surface-interactive)] hover:text-content-primary"
                 >
                   {t({ id: "news.all_posts", message: "All posts" })}
                   <ArrowUpRight size={11} aria-hidden="true" />

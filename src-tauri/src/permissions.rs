@@ -97,10 +97,17 @@ mod macos {
         granted
     }
 
+    static REFRESH_IN_FLIGHT: AtomicBool = AtomicBool::new(false);
+
     /// Refreshes off the caller's thread, for hot paths that must not block.
     pub fn refresh_microphone_permission_detached() {
+        if REFRESH_IN_FLIGHT.swap(true, Ordering::Relaxed) {
+            return;
+        }
+
         std::thread::spawn(|| {
             let _ = refresh_microphone_permission();
+            REFRESH_IN_FLIGHT.store(false, Ordering::Relaxed);
         });
     }
 
