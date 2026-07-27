@@ -1010,6 +1010,11 @@ msgstr ""
 #~ msgstr "आपका डेटा आपका ही है, हमारा नहीं कि हम उसे साझा करें। हम कभी भी आपका डेटा थर्ड पार्टी के साथ न बेचेंगे, न साझा करेंगे।"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.version"
+#~ msgstr "संस्करण"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(यदि आवश्यक हो)"
@@ -5315,8 +5320,8 @@ msgstr "इंस्टॉल की जाँच हो रही है"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.version"
-msgstr "संस्करण"
+msgid "settings.about.version_mode"
+msgstr "संस्करण {version} • {mode}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

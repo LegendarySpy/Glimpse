@@ -64,6 +64,11 @@ msgstr ""
 #~ msgstr "Library recordings"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.version"
+#~ msgstr "Version"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(if required)"
@@ -4380,8 +4385,8 @@ msgstr "Verifying install"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.version"
-msgstr "Version"
+msgid "settings.about.version_mode"
+msgstr "Version {version} • {mode}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

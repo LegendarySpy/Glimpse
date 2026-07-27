@@ -453,16 +453,9 @@ const AboutTab = ({
         </h1>
         <p className="mt-1 ui-text-body-sm ui-color-muted">
           {t({
-            id: "settings.about.version",
-            message: "Version",
-          })}{" "}
-          <span className="font-mono tabular-nums">
-            {appInfo?.version ?? "-"}
-          </span>
-          <span aria-hidden="true" className="mx-1.5 ui-color-disabled">
-            ·
-          </span>
-          <span>{modeLabel}</span>
+            id: "settings.about.version_mode",
+            message: `Version ${{ version: appInfo?.version ?? "-" }} • ${{ mode: modeLabel }}`,
+          })}
         </p>
       </header>
 

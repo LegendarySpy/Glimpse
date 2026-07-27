@@ -1010,6 +1010,11 @@ msgstr ""
 #~ msgstr "Vos données vous appartiennent. Nous n'avons pas le droit de les partager. Nous ne vendrons ni ne partagerons jamais vos données avec des tiers."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.version"
+#~ msgstr "Version"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(si requis)"
@@ -3269,7 +3274,7 @@ msgstr "Chargement…"
 #. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.mode.local"
-msgstr "Local"
+msgstr "Mode local"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -3289,7 +3294,7 @@ msgstr "Local"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.mode.local"
-msgstr "Local"
+msgstr "Mode local"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -5315,8 +5320,8 @@ msgstr "Vérification de l'installation"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.version"
-msgstr "Version"
+msgid "settings.about.version_mode"
+msgstr "Version {version} • {mode}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

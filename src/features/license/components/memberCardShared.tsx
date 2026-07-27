@@ -164,8 +164,8 @@ export function getCardContentHeight(): number {
   );
 }
 
-export function getMemberCardHeight(): number {
-  return CARD_PADDING + getCardContentHeight();
+export function getMemberCardHeight(extraHeight = 0): number {
+  return CARD_PADDING + getCardContentHeight() + extraHeight;
 }
 
 export const STRIPE_DOT_SIZE = 3;
@@ -185,8 +185,8 @@ export const SECURITY_DOT_SIZE = 2;
 export const SECURITY_DOT_PITCH = 9;
 export const SECURITY_COLS = Math.floor(CARD_WIDTH / SECURITY_DOT_PITCH);
 
-export function getCardShellStyle(palette: MemberCardPalette) {
-  const height = getMemberCardHeight();
+export function getCardShellStyle(palette: MemberCardPalette, extraHeight = 0) {
+  const height = getMemberCardHeight(extraHeight);
   return {
     width: `${CARD_WIDTH}px`,
     height: `${height}px`,

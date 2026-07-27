@@ -1,16 +1,15 @@
 import { useLingui } from "@lingui/react/macro";
 import { motion } from "framer-motion";
 import { ArrowUpRight, CircleNotch as Loader2 } from "@phosphor-icons/react";
-import { useEffect, useRef, useState } from "react";
-import {
-  editionFromLicenseState,
-} from "../../../shared/lib/licenseEdition";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { editionFromLicenseState } from "../../../shared/lib/licenseEdition";
 import { tierInfo, type PurchaseTier } from "../../license/purchaseConfig";
 import { TypewriterText } from "../../../shared/ui/TypewriterText";
 import type { LicenseState } from "../api";
 import { useDictationStats } from "../queries";
 import {
   CARD_TITLE_FONT,
+  CARD_DETAILS_HEIGHT,
   CardDetailsGrid,
   CardDottedRule,
   CardHeadlineBlock,
@@ -72,6 +71,8 @@ const MemberCardInner = ({
   const { t } = useLingui();
   const palette = useMemberCardPalette();
   const [previewTier, setPreviewTier] = useState<PurchaseTier | null>(null);
+  const [coverageExtraHeight, setCoverageExtraHeight] = useState(0);
+  const coverageTextRef = useRef<HTMLDivElement>(null);
   const stripeSeedRef = useRef(
     licenseState?.displayKey && active
       ? licenseState.displayKey
@@ -129,7 +130,7 @@ const MemberCardInner = ({
     wordsSpoken !== null ? wordsSpoken.toLocaleString() : PLACEHOLDER;
   const licenseReady = Boolean(active && displayKey && (name || email));
 
-  const cardHeight = getMemberCardHeight();
+  const cardHeight = getMemberCardHeight(coverageExtraHeight);
   const expandedHeadline = !active;
   const tierDisabled = checkoutDisabled || openingTarget !== null;
 
@@ -209,6 +210,29 @@ const MemberCardInner = ({
         })
       : coverageBase;
 
+  useLayoutEffect(() => {
+    const element = coverageTextRef.current;
+    if (!element) {
+      setCoverageExtraHeight(0);
+      return;
+    }
+
+    const updateHeight = () => {
+      const lineHeight = Number.parseFloat(
+        window.getComputedStyle(element).lineHeight,
+      );
+      const singleLineHeight = Number.isFinite(lineHeight) ? lineHeight : 14;
+      setCoverageExtraHeight(
+        Math.max(0, Math.ceil(element.scrollHeight - singleLineHeight)),
+      );
+    };
+
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [coverageLine, showCoverage, typingReveal]);
+
   const titleStyle = {
     fontFamily: CARD_TITLE_FONT,
     fontSize: "1.625rem",
@@ -243,7 +267,7 @@ const MemberCardInner = ({
   return (
     <article
       className="relative flex flex-col overflow-visible text-left"
-      style={getCardShellStyle(palette)}
+      style={getCardShellStyle(palette, coverageExtraHeight)}
       aria-label={
         active
           ? t({
@@ -409,7 +433,11 @@ const MemberCardInner = ({
         />
 
         <CardDetailsGrid
-          height={expandedHeadline ? CARD_DETAILS_HEIGHT_SLIM : undefined}
+          height={
+            expandedHeadline
+              ? CARD_DETAILS_HEIGHT_SLIM
+              : CARD_DETAILS_HEIGHT + coverageExtraHeight
+          }
         >
           {active ? (
             <>
@@ -435,7 +463,10 @@ const MemberCardInner = ({
 
           <div className="relative col-span-2 shrink-0 pt-1">
             <CardDottedRule />
-            <div className="relative mt-1.5 min-h-[28px]">
+            <div
+              className="relative mt-1.5"
+              style={{ minHeight: `${28 + coverageExtraHeight}px` }}
+            >
               {showTierPicker && showDraftChrome ? (
                 <div className="absolute inset-0 flex items-stretch gap-0">
                   <TierOption
@@ -474,7 +505,8 @@ const MemberCardInner = ({
                 stage === "coverage" ? (
                   <motion.div
                     key="coverage-reveal"
-                    className="absolute inset-x-0 top-0 truncate font-mono"
+                    ref={coverageTextRef}
+                    className="absolute inset-x-0 top-0 whitespace-normal break-words font-mono"
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, ease: revealEase }}
@@ -493,7 +525,8 @@ const MemberCardInner = ({
                   </motion.div>
                 ) : (
                   <p
-                    className="absolute inset-x-0 top-0 truncate font-mono"
+                    ref={coverageTextRef}
+                    className="absolute inset-x-0 top-0 whitespace-normal break-words font-mono"
                     style={{
                       fontSize: "10px",
                       fontWeight: 500,

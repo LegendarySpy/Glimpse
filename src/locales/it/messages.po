@@ -1010,6 +1010,11 @@ msgstr ""
 #~ msgstr "I tuoi dati sono tuoi. Non spetta a noi condividerli. Non venderemo né condivideremo mai i tuoi dati con terze parti."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.version"
+#~ msgstr "Versione"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(se richiesto)"
@@ -5315,8 +5320,8 @@ msgstr "Verifica installazione in corso"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.version"
-msgstr "Versione"
+msgid "settings.about.version_mode"
+msgstr "Versione {version} • {mode}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

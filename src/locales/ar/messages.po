@@ -1010,6 +1010,11 @@ msgstr ""
 #~ msgstr "بياناتك ملكٌ لك وحدك. لن نبيع بياناتك أو نشاركها مع أطراف ثالثة أبداً."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.version"
+#~ msgstr "الإصدار"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(إذا لزم الأمر)"
@@ -5315,8 +5320,8 @@ msgstr "جارٍ التحقق من التثبيت"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.version"
-msgstr "الإصدار"
+msgid "settings.about.version_mode"
+msgstr "الإصدار {version} • {mode}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

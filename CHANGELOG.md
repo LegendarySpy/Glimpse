@@ -5,6 +5,12 @@
 - The recording pill has reduced latency.
 - News from Glimpse now appears in the app.
 - Your account is back in the top right. Click it to open Account.
+- Added Spanish language support.
+- Improved translations across every supported language.
+
+### Fixes
+
+- Fixed long membership details being cut off on the account card.
 
 ---
 

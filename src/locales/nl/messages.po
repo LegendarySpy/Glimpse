@@ -1010,6 +1010,11 @@ msgstr ""
 #~ msgstr "Jouw gegevens zijn jouw gegevens. Niet van ons om te delen. We zullen je gegevens nooit verkopen of delen met derden."
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+#~ msgid "settings.about.version"
+#~ msgstr "Versie"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(indien nodig)"
@@ -5315,8 +5320,8 @@ msgstr "Installatie verifiëren"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.version"
-msgstr "Versie"
+msgid "settings.about.version_mode"
+msgstr "Versie {version} • {mode}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
