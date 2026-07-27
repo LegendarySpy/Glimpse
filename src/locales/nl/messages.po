@@ -1400,7 +1400,7 @@ msgstr "Alle modellen"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.all_posts"
-msgstr ""
+msgstr "Alle berichten"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1747,7 +1747,7 @@ msgstr "Zoek naar updates…"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.loading"
-msgstr ""
+msgstr "Zoeken naar nieuws…"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -3527,7 +3527,7 @@ msgstr "Meertalig"
 #. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.locked_hint"
-msgstr ""
+msgstr "Vereist een Glimpse-licentie. Opent Account."
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -3568,7 +3568,7 @@ msgstr "Nieuwste eerst"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.title"
-msgstr ""
+msgstr "Nieuws van Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3698,7 +3698,7 @@ msgstr "Nog geen vervangingen"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.list.no_results"
-msgstr "Geen resultaten voor \"{searchQuery}\""
+msgstr "Geen resultaten voor \"{resultSearchText}\""
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -3788,7 +3788,8 @@ msgstr "Notities:"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
-msgstr ""
+msgstr "Momenteel niets nieuws."
+
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

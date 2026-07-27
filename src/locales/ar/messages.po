@@ -1400,7 +1400,7 @@ msgstr "جميع النماذج"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.all_posts"
-msgstr ""
+msgstr "كل المنشورات"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1747,7 +1747,7 @@ msgstr "التحقق من التحديثات..."
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.loading"
-msgstr ""
+msgstr "جارٍ التحقق من الأخبار…"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -3527,7 +3527,7 @@ msgstr "متعدد اللغات"
 #. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.locked_hint"
-msgstr ""
+msgstr "يتطلب ترخيص Glimpse. يفتح الحساب."
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -3568,7 +3568,7 @@ msgstr "الأحدث أولاً"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.title"
-msgstr ""
+msgstr "أخبار من Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3698,7 +3698,7 @@ msgstr "لا توجد استبدالات بعد"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.list.no_results"
-msgstr "لا توجد نتائج لـ \"{searchQuery}\"\""
+msgstr "لا توجد نتائج لـ \"{resultSearchText}\""
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -3788,7 +3788,8 @@ msgstr "ملاحظات:"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
-msgstr ""
+msgstr "لا جديد في الوقت الحالي."
+
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

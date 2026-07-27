@@ -1400,7 +1400,7 @@ msgstr "Tous les modèles"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.all_posts"
-msgstr ""
+msgstr "Toutes les publications"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1747,7 +1747,7 @@ msgstr "Rechercher des mises à jour…"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.loading"
-msgstr ""
+msgstr "Recherche de nouveautés…"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -3527,7 +3527,7 @@ msgstr "Multilingue"
 #. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.locked_hint"
-msgstr ""
+msgstr "Nécessite une licence Glimpse. Ouvre le compte."
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -3568,7 +3568,7 @@ msgstr "Les plus récents en premier"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.title"
-msgstr ""
+msgstr "Actualités de Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3698,7 +3698,7 @@ msgstr "Aucun remplacement pour l'instant"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.list.no_results"
-msgstr "Aucun résultat pour « {searchQuery} »"
+msgstr "Aucun résultat pour « {resultSearchText} »"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -3788,7 +3788,8 @@ msgstr "Notes :"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
-msgstr ""
+msgstr "Rien de nouveau pour l'instant."
+
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

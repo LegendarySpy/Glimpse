@@ -1400,7 +1400,7 @@ msgstr "Все модели"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.all_posts"
-msgstr ""
+msgstr "Все публикации"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1747,7 +1747,7 @@ msgstr "Проверить обновления…"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.loading"
-msgstr ""
+msgstr "Проверка новостей…"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -3527,7 +3527,7 @@ msgstr "Многоязычный"
 #. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.locked_hint"
-msgstr ""
+msgstr "Требуется лицензия Glimpse. Открывает раздел «Аккаунт»."
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -3568,7 +3568,7 @@ msgstr "Сначала новые"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.title"
-msgstr ""
+msgstr "Новости от Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3698,7 +3698,7 @@ msgstr "Замен пока нет"
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.list.no_results"
-msgstr "Нет результатов для «{searchQuery}»"
+msgstr "Нет результатов для «{resultSearchText}»"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -3788,7 +3788,8 @@ msgstr "Примечания:"
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
-msgstr ""
+msgstr "Пока ничего нового."
+
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
