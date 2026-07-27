@@ -50,7 +50,7 @@ uuid = { version = "1.23.4", features = ["v4"] }
 aes-gcm = "0.11"
 pbkdf2 = "0.13"
 sha2 = "0.11"
-base64 = "0.22"
+base64 = "0.23"
 rand = "0.10"
 rusqlite = { version = "0.40", features = ["bundled"] }
 regex = "1"
