@@ -35,7 +35,12 @@ import {
 } from "../../shared/lib/transcriptionLanguages";
 import { useShortcutCapture } from "../../shared/hooks/useShortcutCapture";
 import { activateLocale, i18n } from "../../i18n";
-import { useAppInfo, useInputDevices, useSettings } from "./queries";
+import {
+  settingsKeys,
+  useAppInfo,
+  useInputDevices,
+  useSettings,
+} from "./queries";
 import * as modelsApi from "./models-api";
 import {
   applyModelDiscoveryFailure,
@@ -895,9 +900,20 @@ export function useSettingsForm({
       clearPendingSettingsSave();
       setAppLocale(nextLocale);
       activateLocale(nextLocale);
-      void saveSettingsNow({ appLocale: nextLocale });
+      queryClient.setQueryData<StoredSettings>(
+        settingsKeys.detail(),
+        (current) =>
+          current ? { ...current, app_locale: nextLocale } : current,
+      );
+      void saveSettingsNow({ appLocale: nextLocale }).then((saved) => {
+        if (!saved) {
+          void queryClient.invalidateQueries({
+            queryKey: settingsKeys.detail(),
+          });
+        }
+      });
     },
-    [clearPendingSettingsSave, saveSettingsNow],
+    [clearPendingSettingsSave, queryClient, saveSettingsNow],
   );
 
   const flushPendingSettingsSave = useCallback(() => {

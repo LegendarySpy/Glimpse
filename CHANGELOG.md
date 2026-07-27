@@ -11,6 +11,7 @@
 ### Fixes
 
 - Fixed long membership details being cut off on the account card.
+- Fixed the app language sometimes switching back after changing Settings tabs.
 
 ---
 

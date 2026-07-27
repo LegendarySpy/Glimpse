@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { activateLocale } from "../i18n";
@@ -97,10 +97,14 @@ function QuerySyncBridge() {
 function SettingsContent() {
   const { data: settings, isLoading } = useSettings();
   const showOnboarding = !!settings && !settings.onboarding_completed;
+  const didActivateInitialLocale = useRef(false);
 
   useEffect(() => {
-    activateLocale(settings?.app_locale);
-  }, [settings?.app_locale]);
+    // Later locale changes activate immediately in the settings form.
+    if (!settings || didActivateInitialLocale.current) return;
+    didActivateInitialLocale.current = true;
+    activateLocale(settings.app_locale);
+  }, [settings]);
 
   useEffect(() => {
     const root = document.documentElement;
