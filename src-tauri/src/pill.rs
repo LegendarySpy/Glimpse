@@ -106,18 +106,13 @@ impl AudioSpectrumEmitter {
                             + normalized * (1.0 - SPECTRUM_SMOOTHING);
                         bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
                     }
-                } else {
-                    for idx in 0..SPECTRUM_BINS {
-                        smoothed[idx] *= SPECTRUM_SMOOTHING;
-                        bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
-                    }
-                }
 
-                emit_event(
-                    &app,
-                    EVENT_AUDIO_SPECTRUM,
-                    AudioSpectrumPayload { bins: bins.clone() },
-                );
+                    emit_event(
+                        &app,
+                        EVENT_AUDIO_SPECTRUM,
+                        AudioSpectrumPayload { bins: bins.clone() },
+                    );
+                }
                 std::thread::sleep(interval);
             }
         });
@@ -938,7 +933,7 @@ fn discard_pending_recording(recording: &crate::recorder::CompletedRecording) {
 fn check_mic_permission(app: &AppHandle<AppRuntime>) -> bool {
     #[cfg(target_os = "macos")]
     {
-        if permissions::check_microphone_permission() {
+        if permissions::check_microphone_permission_cached() {
             return true;
         }
 

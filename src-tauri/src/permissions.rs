@@ -3,6 +3,7 @@
 #[cfg(target_os = "macos")]
 mod macos {
     use std::process::Command;
+    use std::sync::atomic::{AtomicBool, Ordering};
     #[cfg(debug_assertions)]
     use tracing::debug;
 
@@ -73,6 +74,27 @@ mod macos {
         tauri::async_runtime::block_on(async {
             tauri_plugin_macos_permissions::check_microphone_permission().await
         })
+    }
+
+    static MICROPHONE_GRANTED: AtomicBool = AtomicBool::new(false);
+
+    pub fn check_microphone_permission_cached() -> bool {
+        if MICROPHONE_GRANTED.load(Ordering::Relaxed) {
+            return true;
+        }
+
+        let granted = check_microphone_permission();
+        if granted {
+            MICROPHONE_GRANTED.store(true, Ordering::Relaxed);
+        }
+        granted
+    }
+
+    /// Warms the cache so the first recording doesn't pay for the TCC query.
+    pub fn prime_microphone_permission() {
+        std::thread::spawn(|| {
+            let _ = check_microphone_permission_cached();
+        });
     }
 
     /// Request microphone permission from macOS.

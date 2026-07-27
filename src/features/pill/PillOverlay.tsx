@@ -30,6 +30,11 @@ const EXPANDED_WIDTH = 260;
 const EXPANDED_HEIGHT = 90;
 const EXPANDED_BORDER_RADIUS = 24;
 const WARM_ENTRY_IDLE_MS = 5 * 1000;
+const DOT_SETTLE_MS = 120;
+const WAVE_ONSET_MS = 220;
+const PREROLL_DOT_LEVEL = 0.45;
+
+const smoothstep = (t: number): number => t * t * (3 - 2 * t);
 const EXPANDED_TEXT_TOP_FADE =
   "linear-gradient(to bottom, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.82) 38%, rgba(0, 0, 0, 0.38) 74%, transparent 100%)";
 
@@ -272,6 +277,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
   const colorPaletteRef = useRef<PillColorPalette>(FALLBACK_PILL_COLOR_PALETTE);
   const audioReferenceLevelRef = useRef<number>(0);
   const audioFrameCountRef = useRef<number>(0);
+  const audioOnsetAtRef = useRef<number>(0);
   const hasShownPillRef = useRef(false);
   const lastIdleAtRef = useRef(0);
   const hoverPrevRef = useRef(false);
@@ -432,16 +438,15 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         audioFrameCountRef.current++;
 
         if (framePeak > SIGNAL_FLOOR) {
-          const frameCount = audioFrameCountRef.current;
-          const adaptUp = frameCount < 30 ? 0.3 : 0.1;
-          const adaptDown = frameCount < 30 ? 0.05 : 0.005;
+          const reference = audioReferenceLevelRef.current;
+          if (reference === 0) {
 
-          if (framePeak > audioReferenceLevelRef.current) {
-            audioReferenceLevelRef.current +=
-              (framePeak - audioReferenceLevelRef.current) * adaptUp;
+            audioReferenceLevelRef.current = framePeak;
           } else {
-            audioReferenceLevelRef.current +=
-              (framePeak - audioReferenceLevelRef.current) * adaptDown;
+            const [adaptUp, adaptDown] =
+              audioFrameCountRef.current < 30 ? [0.3, 0.05] : [0.1, 0.005];
+            const rate = framePeak > reference ? adaptUp : adaptDown;
+            audioReferenceLevelRef.current += (framePeak - reference) * rate;
           }
         }
 
@@ -451,6 +456,13 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         );
         normalizationFactor = TARGET_PEAK / effectiveRef;
       }
+
+      const now = performance.now();
+      if (audioOnsetAtRef.current === 0) audioOnsetAtRef.current = now;
+      const onsetGain = smoothstep(
+        Math.min(1, (now - audioOnsetAtRef.current) / WAVE_ONSET_MS),
+      );
+      const dotLevel = PREROLL_DOT_LEVEL + (1 - PREROLL_DOT_LEVEL) * onsetGain;
 
       const targets = isExpandedRef.current
         ? [
@@ -490,7 +502,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
                 let val = ((sample * normalizationFactor) / 255) * sensitivity;
                 if (distFromCenter < 0.2) val *= 1.25;
-                val = Math.min(val, 1.0);
+                val = Math.min(val, 1.0) * onsetGain;
 
                 const leftIdx = centerCol - i;
                 if (leftIdx >= 0 && leftIdx < cols) {
@@ -538,7 +550,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
                       : "transparent";
                   ctx.arc(cx, cy, DOT_RADIUS.wave, 0, Math.PI * 2);
                 } else {
-                  ctx.fillStyle = `rgba(${palette.base}, ${maskAlpha})`;
+                  ctx.fillStyle = `rgba(${palette.base}, ${maskAlpha * dotLevel})`;
                   ctx.shadowBlur = 0;
                   ctx.shadowColor = "transparent";
                   ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
@@ -555,31 +567,34 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
   /* ── Draw: Idle (static base dots) ── */
 
-  const drawBaseDots = useCallback(() => {
-    renderVisible(
-      (
-        ctx,
-        width,
-        height,
-        { cols, rows, spacing, offsetX, offsetY },
-        palette,
-      ) => {
-        for (let c = 0; c < cols; c++) {
-          for (let r = 0; r < rows; r++) {
-            const cx = offsetX + c * spacing + spacing / 2;
-            const cy = offsetY + r * spacing + spacing / 2;
-            const maskAlpha = getMaskOpacity(cx, cy, width, height);
-            if (maskAlpha <= 0.05) continue;
+  const drawBaseDots = useCallback(
+    (fade: number = 1) => {
+      renderVisible(
+        (
+          ctx,
+          width,
+          height,
+          { cols, rows, spacing, offsetX, offsetY },
+          palette,
+        ) => {
+          for (let c = 0; c < cols; c++) {
+            for (let r = 0; r < rows; r++) {
+              const cx = offsetX + c * spacing + spacing / 2;
+              const cy = offsetY + r * spacing + spacing / 2;
+              const maskAlpha = getMaskOpacity(cx, cy, width, height);
+              if (maskAlpha <= 0.05) continue;
 
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(${palette.base}, ${maskAlpha})`;
-            ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
-            ctx.fill();
+              ctx.beginPath();
+              ctx.fillStyle = `rgba(${palette.base}, ${maskAlpha * fade})`;
+              ctx.arc(cx, cy, DOT_RADIUS.base, 0, Math.PI * 2);
+              ctx.fill();
+            }
           }
-        }
-      },
-    );
-  }, [renderVisible]);
+        },
+      );
+    },
+    [renderVisible],
+  );
 
   /* ── Draw: Static icon (error settled state) ── */
 
@@ -669,6 +684,7 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
     if (pillStatus === "listening") {
       audioReferenceLevelRef.current = 0;
       audioFrameCountRef.current = 0;
+      audioOnsetAtRef.current = 0;
       heightsRef.current.fill(0);
     }
 
@@ -683,11 +699,15 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
 
       switch (pillStatus) {
         case "listening": {
-          const now = performance.now();
-          if (now - lastSpectrumAtRef.current > 250) {
-            drawBaseDotsRef.current();
-          } else {
+          // Zero until the device delivers its first samples.
+          const lastSpectrumAt = lastSpectrumAtRef.current;
+          if (lastSpectrumAt && frameTime - lastSpectrumAt <= 250) {
             drawAudioFrameRef.current(spectrumBinsRef.current);
+          } else {
+            drawBaseDotsRef.current(
+              PREROLL_DOT_LEVEL *
+                smoothstep(Math.min(1, loaderTimeRef.current / DOT_SETTLE_MS)),
+            );
           }
           break;
         }

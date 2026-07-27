@@ -1,3 +1,11 @@
+1.0.5
+
+### Improvements
+
+- The recording pill has reduced latency.
+
+---
+
 1.0.4
 
 ### Features
