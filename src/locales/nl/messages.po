@@ -1516,7 +1516,7 @@ msgstr "audiodossier"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.prune.noun.audio.other"
-msgstr "audiodateien"
+msgstr "audiobestanden"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx

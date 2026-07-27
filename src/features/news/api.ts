@@ -114,6 +114,12 @@ function readCache(): NewsItem[] {
   }
 }
 
+function feedIsEmpty(raw: unknown): boolean {
+  if (typeof raw !== "object" || raw === null) return false;
+  const items = (raw as { items?: unknown }).items;
+  return Array.isArray(items) && items.length === 0;
+}
+
 function writeCache(items: NewsItem[]) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ items }));
@@ -130,8 +136,11 @@ export async function fetchNews(): Promise<NewsItem[]> {
       referrerPolicy: "no-referrer",
     });
     if (!response.ok) return readCache();
-    const items = parseFeed(await response.json());
-    writeCache(items);
+    const payload = await response.json();
+    const items = parseFeed(payload);
+    // An empty result can mean the feed is empty, or that a schema change made
+    // every entry fail validation. Only the first should overwrite the cache.
+    if (items.length > 0 || feedIsEmpty(payload)) writeCache(items);
     return items;
   } catch {
     return readCache();
