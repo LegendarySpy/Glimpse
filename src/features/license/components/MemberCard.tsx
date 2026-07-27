@@ -4,7 +4,6 @@ import { ArrowUpRight, CircleNotch as Loader2 } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import {
   editionFromLicenseState,
-  editionInfo,
 } from "../../../shared/lib/licenseEdition";
 import { tierInfo, type PurchaseTier } from "../../license/purchaseConfig";
 import { TypewriterText } from "../../../shared/ui/TypewriterText";
@@ -100,6 +99,26 @@ const MemberCardInner = ({
         : edition === "contributor"
           ? t({ id: "member_card.tier_contributor", message: "Contributor" })
           : t({ id: "member_card.tier_personal", message: "Personal" });
+  const editionBlurb =
+    edition === "commercial"
+      ? t({
+          id: "member_card.edition_blurb_commercial",
+          message: "For work. One person per seat, billed yearly.",
+        })
+      : edition === "founder"
+        ? t({
+            id: "member_card.edition_blurb_founder",
+            message: "Launch founder. Up to 5 devices.",
+          })
+        : edition === "contributor"
+          ? t({
+              id: "member_card.edition_blurb_contributor",
+              message: "Thank you for contributing. Up to 5 devices.",
+            })
+          : t({
+              id: "member_card.edition_blurb_personal",
+              message: "For you. Up to 5 devices.",
+            });
   const editionColors = EDITION_STAMP_COLORS[edition];
   const name = customerName?.trim() || null;
   const displayTitle = name || email;
@@ -181,7 +200,7 @@ const MemberCardInner = ({
     message: "Pick a license",
   });
 
-  const coverageBase = editionInfo(edition).blurb;
+  const coverageBase = editionBlurb;
   const coverageLine =
     activeDevices !== null
       ? t({

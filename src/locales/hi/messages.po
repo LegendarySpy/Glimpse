@@ -2766,6 +2766,16 @@ msgstr "टाइमस्टैम्प के साथ फ़ॉलो क�
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_commercial"
+msgstr "काम के लिए। हर सीट पर एक व्यक्ति, सालाना बिलिंग।"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_personal"
+msgstr "आपके लिए। अधिकतम 5 डिवाइस।"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
 msgid "member_card.tier_founder"
 msgstr "संस्थापक"
 
@@ -3140,6 +3150,11 @@ msgstr "लॉग‑इन पर लॉन्च करें"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "लॉगिन पर लॉन्च करें"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_founder"
+msgstr "लॉन्च के संस्थापक सदस्य। अधिकतम 5 डिवाइस।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3789,7 +3804,6 @@ msgstr "टिप्पणियाँ:"
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
 msgstr "अभी कुछ नया नहीं है।"
-
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4917,6 +4931,11 @@ msgstr "पाठ प्रतिस्थापन"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.text_size.label"
 msgstr "पाठ का आकार"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_contributor"
+msgstr "योगदान देने के लिए धन्यवाद। अधिकतम 5 डिवाइस।"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

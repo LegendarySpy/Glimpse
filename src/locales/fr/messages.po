@@ -2766,6 +2766,16 @@ msgstr "Suivre l'horodatage"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_commercial"
+msgstr "Pour le travail. Une personne par licence, facturation annuelle."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_personal"
+msgstr "Pour vous. Jusqu’à 5 appareils."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
 msgid "member_card.tier_founder"
 msgstr "Fondateur"
 
@@ -3140,6 +3150,11 @@ msgstr "Lancer à l'ouverture de session"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "Lancer au démarrage"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_founder"
+msgstr "Membre fondateur depuis le lancement. Jusqu’à 5 appareils."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3789,7 +3804,6 @@ msgstr "Notes :"
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
 msgstr "Rien de nouveau pour l'instant."
-
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4917,6 +4931,11 @@ msgstr "Remplacements de texte"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.text_size.label"
 msgstr "Taille du texte"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_contributor"
+msgstr "Merci pour votre contribution. Jusqu’à 5 appareils."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

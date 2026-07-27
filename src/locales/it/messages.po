@@ -2766,6 +2766,16 @@ msgstr "Segui il timestamp"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_commercial"
+msgstr "Per lavoro. Una persona per licenza, fatturazione annuale."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_personal"
+msgstr "Per te. Fino a 5 dispositivi."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
 msgid "member_card.tier_founder"
 msgstr "Fondatore"
 
@@ -3140,6 +3150,11 @@ msgstr "Avvia all'accesso"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "Avvia all'accesso"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_founder"
+msgstr "Fondatore dal lancio. Fino a 5 dispositivi."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3789,7 +3804,6 @@ msgstr "Note:"
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
 msgstr "Nessuna novità al momento."
-
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4917,6 +4931,11 @@ msgstr "Sostituzioni testo"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.text_size.label"
 msgstr "Dimensione testo"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_contributor"
+msgstr "Grazie per il tuo contributo. Fino a 5 dispositivi."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

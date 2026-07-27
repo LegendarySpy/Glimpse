@@ -2766,6 +2766,16 @@ msgstr "Следовать за меткой времени"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_commercial"
+msgstr "Для работы. Один человек на лицензию, ежегодная оплата."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_personal"
+msgstr "Для вас. До 5 устройств."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
 msgid "member_card.tier_founder"
 msgstr "Основатель"
 
@@ -3140,6 +3150,11 @@ msgstr "Запускать при входе в систему"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "Запуск при входе"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_founder"
+msgstr "Основатель с момента запуска. До 5 устройств."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3789,7 +3804,6 @@ msgstr "Примечания:"
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
 msgstr "Пока ничего нового."
-
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4917,6 +4931,11 @@ msgstr "Замены текста"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.text_size.label"
 msgstr "Размер текста"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_contributor"
+msgstr "Спасибо за ваш вклад. До 5 устройств."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

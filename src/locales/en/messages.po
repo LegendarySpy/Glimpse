@@ -1831,6 +1831,16 @@ msgstr "Follow timestamp"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_commercial"
+msgstr "For work. One person per seat, billed yearly."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_personal"
+msgstr "For you. Up to 5 devices."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
 msgid "member_card.tier_founder"
 msgstr "Founder"
 
@@ -2205,6 +2215,11 @@ msgstr "Launch at login"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "Launch at Login"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_founder"
+msgstr "Launch founder. Up to 5 devices."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3981,6 +3996,11 @@ msgstr "Text replacements"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.text_size.label"
 msgstr "Text Size"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_contributor"
+msgstr "Thank you for contributing. Up to 5 devices."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

@@ -2766,6 +2766,16 @@ msgstr "متابعة الطابع الزمني"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_commercial"
+msgstr "للعمل. شخص واحد لكل مقعد، بفوترة سنوية."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_personal"
+msgstr "لاستخدامك الشخصي. حتى 5 أجهزة."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
 msgid "member_card.tier_founder"
 msgstr "المؤسِّس"
 
@@ -3140,6 +3150,11 @@ msgstr "التشغيل عند تسجيل الدخول"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "التشغيل عند تسجيل الدخول"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_founder"
+msgstr "مؤسس منذ الإطلاق. حتى 5 أجهزة."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3789,7 +3804,6 @@ msgstr "ملاحظات:"
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
 msgstr "لا جديد في الوقت الحالي."
-
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4917,6 +4931,11 @@ msgstr "استبدالات النص"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.text_size.label"
 msgstr "حجم النص"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_contributor"
+msgstr "شكرًا لمساهمتك. حتى 5 أجهزة."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx

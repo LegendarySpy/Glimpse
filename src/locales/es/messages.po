@@ -9,6 +9,9 @@ msgstr ""
 "Last-Translator: lokalise.com\n"
 "Language-Team: lokalise.com\n\n"
 "Language: es\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"Plural-Forms: \n"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -1746,6 +1749,16 @@ msgstr "Seguir marca de tiempo"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_commercial"
+msgstr "Para trabajar. Una persona por licencia, con facturación anual."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_personal"
+msgstr "Para ti. Hasta 5 dispositivos."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
 msgid "member_card.tier_founder"
 msgstr "Fundador"
 
@@ -2120,6 +2133,11 @@ msgstr "Abrir al iniciar sesión"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_launch"
 msgstr "Abrir al iniciar sesión"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_founder"
+msgstr "Fundador desde el lanzamiento. Hasta 5 dispositivos."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -2769,7 +2787,6 @@ msgstr "Notas:"
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.empty"
 msgstr "Nada nuevo por ahora."
-
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -3897,6 +3914,11 @@ msgstr "Reemplazos de texto"
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.text_size.label"
 msgstr "Tamaño de texto"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.edition_blurb_contributor"
+msgstr "Gracias por contribuir. Hasta 5 dispositivos."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
