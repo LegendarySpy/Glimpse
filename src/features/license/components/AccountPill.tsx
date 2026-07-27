@@ -15,7 +15,8 @@ const AccountPill = ({ onClick }: AccountPillProps) => {
     license?.customerEmail?.split("@")[0].trim() ||
     "";
 
-  const label = holder || t({ id: "home.account.fallback", message: "Account" });
+  const label =
+    holder || t({ id: "home.account.fallback", message: "Account" });
 
   return (
     <button

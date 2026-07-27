@@ -16,7 +16,9 @@ const NewsMenu = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { data: items = [], isLoading } = useNewsFeed();
-  const [lastSeen, setLastSeen] = useState<string | null>(() => getLastSeenId());
+  const [lastSeen, setLastSeen] = useState<string | null>(() =>
+    getLastSeenId(),
+  );
 
   const markSeen = useCallback((id: string) => {
     setLastSeenId(id);

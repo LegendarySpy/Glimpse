@@ -440,7 +440,6 @@ const PillOverlay: React.FC<PillOverlayProps> = ({
         if (framePeak > SIGNAL_FLOOR) {
           const reference = audioReferenceLevelRef.current;
           if (reference === 0) {
-
             audioReferenceLevelRef.current = framePeak;
           } else {
             const [adaptUp, adaptDown] =
