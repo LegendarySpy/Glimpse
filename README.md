@@ -64,7 +64,7 @@ Configure AI writing in **Settings → Providers**. Speech models live in **Sett
 
 ## Integrations
 
-- **[Raycast](https://github.com/glimpse-hq/Glimpse-raycast)** _(coming soon)_. Search dictations, transcribe files, switch models, and more, without leaving Raycast. Requires a [license](#pricing).
+- **[Raycast](https://www.raycast.com/garon/glimpse)**. Search dictations, transcribe files, switch models, and more, without leaving Raycast. Requires a [license](#pricing).
 
 Want to build your own? See the [CLI guide](https://github.com/glimpse-hq/Glimpse/wiki/CLI).
 
