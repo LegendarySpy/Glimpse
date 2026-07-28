@@ -220,6 +220,7 @@ pub(crate) fn queue_transcription(
                         &app_handle,
                         "Edit mode requires a selected language model. Choose one in Settings -> Models."
                             .to_string(),
+                        None,
                         "edit_mode",
                         audio_duration_seconds,
                         "microphone",
@@ -326,6 +327,7 @@ pub(crate) fn queue_transcription(
                 emit_transcription_error_inner(
                     &app_handle,
                     format!("Transcription failed: {err}"),
+                    Some(analytics::classify_error(&err)),
                     "transcription",
                     audio_duration_seconds,
                     "microphone",
@@ -520,6 +522,7 @@ async fn transcribe_recovered_recording(
             emit_transcription_error_inner(
                 app,
                 format!("Transcription failed: {err}"),
+                Some(analytics::classify_error(&err)),
                 "transcription",
                 audio_duration_seconds,
                 "microphone",
@@ -1004,6 +1007,7 @@ pub(crate) fn retry_transcription_async(
                 emit_transcription_error_inner(
                     &app_handle,
                     format!("Transcription failed: {err}"),
+                    Some(analytics::classify_error(&err)),
                     "transcription",
                     audio_duration_seconds,
                     "microphone",
@@ -1225,6 +1229,7 @@ fn emit_auto_paste_error(
 fn emit_transcription_error_inner(
     app: &AppHandle<AppRuntime>,
     message: String,
+    reason: Option<&'static str>,
     stage: &str,
     audio_duration_seconds: f32,
     audio_source: &str,
@@ -1234,7 +1239,7 @@ fn emit_transcription_error_inner(
     temporary: bool,
     show_toast: bool,
 ) {
-    let reason = analytics::classify_failure_reason(&message);
+    let reason = reason.unwrap_or_else(|| analytics::classify_failure_reason(&message));
     let state = app.state::<AppState>();
     let settings = state.current_settings();
     analytics::track_transcription_failed(

@@ -540,6 +540,16 @@ pub fn classify_failure_reason(message: &str) -> &'static str {
         .map_or("unknown", |(reason, _)| *reason)
 }
 
+/// Classifies an error, falling back to the full cause chain when the outermost
+/// message alone yields nothing. `anyhow`'s plain Display shows only the
+/// outermost context, so the matchable text is often in the chain.
+pub fn classify_error(err: &anyhow::Error) -> &'static str {
+    match classify_failure_reason(&err.to_string()) {
+        "unknown" => classify_failure_reason(&format!("{err:#}")),
+        reason => reason,
+    }
+}
+
 /// Reduces a shortcut to its canonical parsed form so only values the parser
 /// can produce reach analytics.
 pub fn canonical_shortcut(shortcut: &str) -> String {
