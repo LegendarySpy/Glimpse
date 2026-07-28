@@ -98,6 +98,8 @@ fn spawn_ane_compile(app: AppHandle<AppRuntime>, model: String) {
                 .any(|line| line.contains("failed to load Core ML model"))
         };
 
+        let compiled = result.is_ok();
+
         match result {
             Ok(()) if coreml_failed() => {
                 tracing::error!(
@@ -136,6 +138,10 @@ fn spawn_ane_compile(app: AppHandle<AppRuntime>, model: String) {
                 );
                 emit("error");
             }
+        }
+
+        if compiled {
+            super::warm_model(&app, model.clone());
         }
     });
 }
@@ -342,7 +348,10 @@ pub async fn download_model(
     crate::analytics::track_model_downloaded(&app, &status.id);
 
     if ane_pending {
+        // The compile loads the model itself and warms once it lands.
         spawn_ane_compile(app.clone(), model.clone());
+    } else {
+        super::warm_model(&app, status.id.clone());
     }
 
     let settings = state.current_settings();
