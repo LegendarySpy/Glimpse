@@ -20,6 +20,7 @@ import {
   hasModelCapability,
   MODEL_CAPABILITY_DICTIONARY,
 } from "../../../shared/lib/modelCapabilities";
+import { isRemoteSpeechConfigured } from "../../../shared/lib/speechProviders";
 import { useShiftHeld } from "../../../shared/hooks/useShiftHeld";
 import { useModelCatalog } from "../../settings/models-queries";
 import { useSettings } from "../../settings/queries";
@@ -270,11 +271,19 @@ const DictionaryView = ({ isActive = true }: { isActive?: boolean }) => {
 
   const currentModel = models.find((m) => m.key === settings?.local_model);
   const isLocal = settings?.transcription_mode === "local";
+  const remoteSpeechActive = isRemoteSpeechConfigured({
+    enabled: Boolean(settings?.remote_speech_enabled),
+    provider: settings?.remote_speech_provider ?? "custom",
+    endpoint: settings?.remote_speech_endpoint ?? "",
+    model: settings?.remote_speech_model ?? "",
+  });
   const supportsDictionary = hasModelCapability(
     currentModel,
     MODEL_CAPABILITY_DICTIONARY,
   );
-  const showWarning = Boolean(isLocal && currentModel && !supportsDictionary);
+  const showWarning = Boolean(
+    isLocal && !remoteSpeechActive && currentModel && !supportsDictionary,
+  );
   const entryCountLabel =
     entries.length === 1
       ? t({

@@ -1,20 +1,32 @@
 1.0.6
 
+### Improvements
+
+- Your first dictation after setup is faster. The model now loads in the background as soon as it finishes downloading, instead of on your first recording.
+- Choosing a model during setup now names the actual models and shows what each one supports, instead of Accurate, Balanced, and Small.
+- Glimpse now tells you when a recording was too quiet or had no speech, instead of discarding it without a word.
+
 ### Fixes
 
+- Fixed the default dictation shortcut on Windows. Alt+Space opens the Windows window menu, so Glimpse never received it. New setups use Ctrl+Shift+Space. If you set Glimpse up before this update, pick a new shortcut under Settings, General.
 - Fixed the Usage Analytics box stretching down the page on Windows.
 - Fixed the Glimpse icon showing small on a blue square in the Microsoft Store version. The 1.0.4 fix for this never took effect.
 - Fixed the Glimpse icon looking blurry on high-resolution Windows displays.
-- The export UI button out of frame.
+- Fixed the export options panel opening off the edge of the window, where it couldn't be clicked.
+- Fixed the Dictionary warning appearing when a cloud speech model is selected. Cloud models use your dictionary, so the warning didn't apply.
+- Fixed the API start and stop buttons splitting onto two lines in languages other than English.
 
 ---
 
 1.0.5
 
+### Features
+
+- There is now a notification menu in the top right to show new updates surrounding Glimpse.
+
 ### Improvements
 
 - The recording pill has reduced latency.
-- News from Glimpse now appears in the app.
 - Your account is back in the top right. Click it to open Account.
 - Added Spanish language support.
 - Improved translations across every supported language.
@@ -23,7 +35,6 @@
 
 - Fixed long membership details being cut off on the account card.
 - Fixed the app language sometimes switching back after changing Settings tabs.
-
 ---
 
 1.0.4

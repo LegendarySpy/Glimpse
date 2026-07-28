@@ -1815,27 +1815,36 @@ pub(crate) fn persist_recording_async(
 
     // Validate before persisting so rejected recordings never touch disk.
     if let Err(rejection) = validate_recording(&recording) {
-        let (code, reason) = match rejection {
+        let (code, reason, notice) = match rejection {
             RecordingRejectionReason::TooShort {
                 duration_ms,
                 min_ms,
             } => (
                 "too_short",
                 format!("Recording too short ({duration_ms}ms < {min_ms}ms minimum)"),
+                None,
             ),
             RecordingRejectionReason::TooQuiet { rms, threshold } => (
                 "too_quiet",
                 format!("Recording too quiet (energy {rms:.4} < {threshold} threshold)"),
+                Some("That was too quiet to hear. Recording deleted."),
             ),
-            RecordingRejectionReason::NoSpeechDetected => {
-                ("no_speech", "No speech detected in recording".to_string())
-            }
-            RecordingRejectionReason::EmptyBuffer => {
-                ("empty_buffer", "Recording buffer is empty".to_string())
-            }
+            RecordingRejectionReason::NoSpeechDetected => (
+                "no_speech",
+                "No speech detected in recording".to_string(),
+                Some("No speech detected. Recording deleted."),
+            ),
+            RecordingRejectionReason::EmptyBuffer => (
+                "empty_buffer",
+                "Recording buffer is empty".to_string(),
+                None,
+            ),
         };
         analytics::track_dictation_discarded(&app, code);
         tracing::error!("Recording rejected: {reason}");
+        if let Some(notice) = notice {
+            toast::show(&app, "warning", None, notice);
+        }
 
         if let Some(path) = recording.pending_path.as_deref() {
             let _ = std::fs::remove_file(path);

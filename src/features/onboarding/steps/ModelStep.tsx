@@ -5,7 +5,10 @@ import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ModelPickerModal from "../../../shared/ui/ModelPickerModal";
 import ModelStatCard from "../../settings/components/ModelStatCard";
-import { isBuiltInModel, formatModelSize } from "../../../shared/lib/modelStats";
+import {
+  isBuiltInModel,
+  formatModelSize,
+} from "../../../shared/lib/modelStats";
 import {
   hasModelCapability,
   MODEL_CAPABILITY_DICTIONARY,

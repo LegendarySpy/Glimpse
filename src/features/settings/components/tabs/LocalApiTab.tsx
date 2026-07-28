@@ -259,7 +259,7 @@ const LocalApiTab = ({
 
         {running ? (
           <button
-            className="ml-6 w-[92px] shrink-0 px-5 py-1.5 rounded-lg bg-red-500 hover:bg-red-400 text-white ui-text-button-sm font-semibold transition-all shadow-[0_3px_0_-1px_rgba(248,113,113,0.35),inset_0_1px_0_0_rgba(255,255,255,0.15)] active:translate-y-[1px] active:shadow-none"
+            className="ml-6 min-w-[92px] shrink-0 whitespace-nowrap px-5 py-1.5 rounded-lg bg-red-500 hover:bg-red-400 text-white ui-text-button-sm font-semibold transition-all shadow-[0_3px_0_-1px_rgba(248,113,113,0.35),inset_0_1px_0_0_rgba(255,255,255,0.15)] active:translate-y-[1px] active:shadow-none"
             onClick={onStop}
             disabled={busy}
           >
@@ -270,7 +270,7 @@ const LocalApiTab = ({
           </button>
         ) : (
           <button
-            className="ml-6 w-[92px] shrink-0 px-5 py-1.5 rounded-lg bg-content-primary hover:bg-content-secondary text-surface-secondary ui-text-button-sm font-semibold transition-all shadow-[0_3px_0_-1px_rgba(255,255,255,0.25),inset_0_1px_0_0_rgba(255,255,255,0.1)] active:translate-y-[1px] active:shadow-none"
+            className="ml-6 min-w-[92px] shrink-0 whitespace-nowrap px-5 py-1.5 rounded-lg bg-content-primary hover:bg-content-secondary text-surface-secondary ui-text-button-sm font-semibold transition-all shadow-[0_3px_0_-1px_rgba(255,255,255,0.25),inset_0_1px_0_0_rgba(255,255,255,0.1)] active:translate-y-[1px] active:shadow-none"
             onClick={onStart}
             disabled={busy || lanRequiresApiKey}
           >
