@@ -2,7 +2,9 @@
 
 ### Fixes
 
-- Fixed the Usage Analytics box on Windows stretching to fill the column with the toggle floating in the middle.
+- Fixed the Usage Analytics box stretching down the page on Windows.
+- Fixed the Glimpse icon showing small on a blue square in the Microsoft Store version. The 1.0.4 fix for this never took effect.
+- Fixed the Glimpse icon looking blurry on high-resolution Windows displays.
 
 ---
 

@@ -285,8 +285,12 @@ jobs:
           New-Item -ItemType Directory -Force (Join-Path $staging "Assets") | Out-Null
 
           Copy-Item (Join-Path $env:CARGO_TARGET_DIR "release\Glimpse.exe") $staging
-          Copy-Item "src-tauri\icons\StoreLogo.png" (Join-Path $staging "Assets")
-          Copy-Item "src-tauri\icons\Square*.png" (Join-Path $staging "Assets")
+          # Only the logos the manifest names, plus their scale / targetsize variants.
+          $assets = Join-Path $staging "Assets"
+          foreach ($logo in "StoreLogo", "Square44x44Logo", "Square150x150Logo") {
+            Copy-Item "src-tauri\icons\$logo.png" $assets
+            Copy-Item "src-tauri\icons\$logo.*-*.png" $assets
+          }
 
           $manifest = Get-Content "src-tauri\msix\AppxManifest.xml" -Raw
           $manifest = $manifest.Replace("GLIMPSE_MSIX_IDENTITY_NAME", $env:MSIX_IDENTITY_NAME)
@@ -296,15 +300,37 @@ jobs:
           $manifest = $manifest.Replace("GLIMPSE_MSIX_VERSION", "$env:VERSION.0")
           Set-Content -Path (Join-Path $staging "AppxManifest.xml") -Value $manifest -Encoding utf8
 
-          $makeappx = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.*\x64\makeappx.exe" |
+          $sdkBin = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.*\x64" -Directory |
             Sort-Object FullName -Descending | Select-Object -First 1
-          if (-not $makeappx) {
-            Write-Error "makeappx.exe not found in Windows SDK"
+          if (-not $sdkBin) {
+            Write-Error "Windows SDK bin directory not found"
+            exit 1
+          }
+          $makeappx = Join-Path $sdkBin.FullName "makeappx.exe"
+          $makepri = Join-Path $sdkBin.FullName "makepri.exe"
+          if (-not (Test-Path $makeappx) -or -not (Test-Path $makepri)) {
+            Write-Error "makeappx.exe / makepri.exe not found in Windows SDK"
             exit 1
           }
 
+          # Without resources.pri the shell resolves Square44x44Logo literally and
+          # ignores the targetsize / altform-unplated assets, so it draws the accent
+          # colored plate behind a shrunken icon.
+          $priConfig = Join-Path $env:RUNNER_TEMP "priconfig.xml"
+          $pri = Join-Path $env:RUNNER_TEMP "resources.pri"
+          & $makepri createconfig /cf $priConfig /dq en-US /o
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          # The packaging section splits resources into separate .pri files we do not ship.
+          $config = [xml](Get-Content $priConfig)
+          $packaging = $config.SelectSingleNode("/resources/packaging")
+          if ($packaging) { $config.DocumentElement.RemoveChild($packaging) | Out-Null }
+          $config.Save($priConfig)
+          & $makepri new /pr $staging /cf $priConfig /of $pri /o
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Copy-Item $pri $staging
+
           $msix = "Glimpse_${env:VERSION}_x64.msix"
-          & $makeappx.FullName pack /d $staging /p $msix /o
+          & $makeappx pack /d $staging /p $msix /o
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
           gh release upload "v$env:VERSION" $msix --clobber
