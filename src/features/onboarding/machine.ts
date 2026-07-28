@@ -6,15 +6,11 @@ import {
   type OnboardingStep,
 } from "./platform";
 
-export type OnboardingModelPriority =
-  "quality" | "balanced" | "compact" | "builtin";
-
 export type OnboardingContext = {
   platform: OnboardingPlatform;
   selectedMode: TranscriptionMode;
   importableApps: DetectedApp[];
   localModelChoice: string;
-  modelPriority: OnboardingModelPriority | null;
   autoLaunch: boolean;
   showLocalConfirm: boolean;
   smartShortcut: string;
@@ -31,7 +27,6 @@ export type OnboardingEvent =
   | { type: "SELECT_MODE"; mode: TranscriptionMode }
   | { type: "SET_IMPORTABLE"; apps: DetectedApp[] }
   | { type: "SELECT_MODEL"; key: string }
-  | { type: "SELECT_PRIORITY"; priority: OnboardingModelPriority }
   | { type: "SET_AUTO_LAUNCH"; value: boolean }
   | { type: "SET_SHORTCUT"; shortcut: string }
   | { type: "SHOW_LOCAL_CONFIRM"; show: boolean }
@@ -96,7 +91,6 @@ export const onboardingMachine = setup({
     selectedMode: "local",
     importableApps: [],
     localModelChoice: "",
-    modelPriority: "balanced",
     autoLaunch: false,
     showLocalConfirm: false,
     smartShortcut: "Alt+Space",
@@ -115,12 +109,6 @@ export const onboardingMachine = setup({
     },
     SELECT_MODEL: {
       actions: assign({ localModelChoice: ({ event }) => event.key }),
-    },
-    SELECT_PRIORITY: {
-      actions: assign({
-        modelPriority: ({ event }) => event.priority,
-        localModelChoice: "",
-      }),
     },
     SET_AUTO_LAUNCH: {
       actions: assign({ autoLaunch: ({ event }) => event.value }),

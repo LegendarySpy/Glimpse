@@ -22,11 +22,7 @@ import {
   useModelCatalog,
   useModelStatuses,
 } from "../settings/models-queries";
-import {
-  onboardingMachine,
-  getSteps,
-  type OnboardingModelPriority,
-} from "./machine";
+import { onboardingMachine, getSteps } from "./machine";
 import { useImportableApps } from "../import/queries";
 import { ImportStep } from "../import/components/ImportStep";
 import { WelcomeStep } from "./steps/WelcomeStep";
@@ -40,15 +36,13 @@ import FAQModal from "../../shared/ui/FAQModal";
 import WindowControls from "../../shared/ui/WindowControls";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../types";
 
-const hasRecommendedTag = (model: Pick<ModelInfo, "tags">) =>
-  model.tags.some((tag) => tag.toLowerCase() === "recommended");
-
-const PREFERRED_ONBOARDING_MODEL_KEYS = [
+// Whisper leads because it is the only family with dictionary support.
+const ONBOARDING_MODEL_KEYS = [
   "whisper_large_v3_turbo_q8",
   "parakeet_tdt_int8",
 ] as const;
 
-const ONBOARDING_MODEL_LIMIT = 2;
+const ONBOARDING_COMPACT_MODEL_KEY = "whisper_small_q5";
 
 const onboardingPermissionKeys = {
   all: ["onboarding", "permissions"] as const,
@@ -57,28 +51,18 @@ const onboardingPermissionKeys = {
     [...onboardingPermissionKeys.all, "accessibility"] as const,
 };
 
-const sortOnboardingModels = (models: ModelInfo[]) =>
-  [...models].sort((a, b) => {
-    const recommendedDelta =
-      Number(hasRecommendedTag(b)) - Number(hasRecommendedTag(a));
-    if (recommendedDelta !== 0) return recommendedDelta;
-    return a.label.localeCompare(b.label);
-  });
-
 const downloadableModels = (models: ModelInfo[]) =>
   models.filter((model) => model.downloadable);
 
 const pickOnboardingModels = (models: ModelInfo[]) => {
-  const sortedModels = sortOnboardingModels(downloadableModels(models));
-  const preferred = PREFERRED_ONBOARDING_MODEL_KEYS.map((key) =>
-    sortedModels.find((model) => model.key === key),
-  ).filter((model): model is ModelInfo => Boolean(model));
-  const preferredKeys = new Set(preferred.map((model) => model.key));
-  const fallback = sortedModels.filter(
-    (model) => !preferredKeys.has(model.key),
-  );
+  const available = downloadableModels(models);
+  const byKey = (key: string) =>
+    available.find((model) => model.key === key) ?? null;
 
-  return [...preferred, ...fallback].slice(0, ONBOARDING_MODEL_LIMIT);
+  return [
+    ...ONBOARDING_MODEL_KEYS.map(byKey),
+    available.find(isBuiltInModel) ?? byKey(ONBOARDING_COMPACT_MODEL_KEY),
+  ].filter((model): model is ModelInfo => Boolean(model));
 };
 
 const pickDefaultOnboardingModel = (
@@ -92,32 +76,7 @@ const pickDefaultOnboardingModel = (
   ) {
     return persistedModel;
   }
-  return available[0]?.key ?? persistedModel;
-};
-
-const ONBOARDING_MODEL: Record<
-  Exclude<OnboardingModelPriority, "builtin">,
-  string
-> = {
-  compact: "whisper_small_q5",
-  balanced: "whisper_large_v3_turbo_q5",
-  quality: "whisper_large_v3_turbo_q8",
-};
-
-const pickRecommendedOnboardingModel = (
-  models: ModelInfo[],
-  priority: OnboardingModelPriority | null,
-) => {
-  const available = downloadableModels(models);
-  if (!priority) {
-    return available.find(hasRecommendedTag) ?? available[0] ?? null;
-  }
-  if (priority === "builtin") {
-    return available.find(isBuiltInModel) ?? null;
-  }
-  return (
-    available.find((model) => model.key === ONBOARDING_MODEL[priority]) ?? null
-  );
+  return pickOnboardingModels(models)[0]?.key ?? persistedModel;
 };
 
 const checkMicrophonePermission = () =>
@@ -260,30 +219,18 @@ export default function OnboardingScreen({
   }, [modelCatalogQuery.data, ctx.localModelChoice]);
   const persistedLocalModel = settingsQuery.data?.local_model ?? "";
   const persistedSettings = settingsQuery.data;
-  const recommendedOnboardingModel = useMemo(
-    () =>
-      pickRecommendedOnboardingModel(
-        modelCatalogQuery.data ?? [],
-        ctx.modelPriority,
-      ),
-    [modelCatalogQuery.data, ctx.modelPriority],
-  );
   const selectedModel =
     ctx.localModelChoice ||
-    recommendedOnboardingModel?.key ||
-    pickDefaultOnboardingModel(onboardingModelCatalog, persistedLocalModel);
+    pickDefaultOnboardingModel(
+      modelCatalogQuery.data ?? [],
+      persistedLocalModel,
+    );
   const selectedModelInfo = useMemo(
     () =>
       onboardingModelCatalog.find((model) => model.key === selectedModel) ??
       modelCatalogQuery.data?.find((model) => model.key === selectedModel) ??
-      recommendedOnboardingModel ??
       null,
-    [
-      onboardingModelCatalog,
-      modelCatalogQuery.data,
-      recommendedOnboardingModel,
-      selectedModel,
-    ],
+    [onboardingModelCatalog, modelCatalogQuery.data, selectedModel],
   );
   const statusModelKeys = useMemo(
     () =>
@@ -687,8 +634,8 @@ export default function OnboardingScreen({
           <ModelStep
             key="model"
             stepMotionProps={stepMotionProps}
-            modelPriority={ctx.modelPriority}
-            recommendedModel={selectedModelInfo}
+            options={onboardingModelCatalog}
+            selectedModel={selectedModelInfo}
             catalog={modelCatalogQuery.data ?? []}
             modelStatus={modelStatus}
             displayStateByModel={displayStateByModel}
@@ -704,9 +651,6 @@ export default function OnboardingScreen({
             }
             selectedModelReady={selectedModelReady}
             showLocalConfirm={ctx.showLocalConfirm}
-            onSelectPriority={(priority) =>
-              send({ type: "SELECT_PRIORITY", priority })
-            }
             onShowConfirm={(show) => send({ type: "SHOW_LOCAL_CONFIRM", show })}
             onDownload={handleDownload}
             onDelete={handleDelete}
