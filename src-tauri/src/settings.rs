@@ -206,11 +206,19 @@ fn default_smart_shortcut() -> String {
 }
 
 fn default_hold_shortcut() -> String {
-    "Control+Shift+Space".to_string()
+    if cfg!(target_os = "windows") {
+        "Control+Alt+Space".to_string()
+    } else {
+        "Control+Shift+Space".to_string()
+    }
 }
 
 fn default_toggle_shortcut() -> String {
-    "Control+Alt+Space".to_string()
+    if cfg!(target_os = "windows") {
+        "Control+Shift+Alt+Space".to_string()
+    } else {
+        "Control+Alt+Space".to_string()
+    }
 }
 
 pub fn default_shortcut_bindings() -> ShortcutBindings {

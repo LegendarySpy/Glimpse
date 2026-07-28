@@ -610,6 +610,7 @@ mod tests {
     fn rejects_shortcut_collisions_after_normalization() {
         let mut args = base_args();
         args.hold_enabled = true;
+        set_primary_shortcut(&mut args, "Smart", "Control+Space");
         set_primary_shortcut(&mut args, "Hold", "Ctrl+Space");
 
         let err = validate_update_settings_args(&args).unwrap_err();

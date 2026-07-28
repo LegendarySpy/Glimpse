@@ -23,6 +23,7 @@ import {
   useModelStatuses,
 } from "../settings/models-queries";
 import { onboardingMachine, getSteps } from "./machine";
+import { getDefaultShortcuts, getOnboardingPlatform } from "./platform";
 import { useImportableApps } from "../import/queries";
 import { ImportStep } from "../import/components/ImportStep";
 import { WelcomeStep } from "./steps/WelcomeStep";
@@ -97,8 +98,9 @@ const buildSettingsArgs = (
   localModel: string,
   autoLaunchEnabled: boolean,
 ) => {
-  const holdShortcut = "Control+Shift+Space";
-  const toggleShortcut = "Control+Alt+Space";
+  const { hold: holdShortcut, toggle: toggleShortcut } = getDefaultShortcuts(
+    getOnboardingPlatform().id,
+  );
   return {
     smartShortcut,
     smartEnabled: true,

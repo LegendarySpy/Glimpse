@@ -1,7 +1,7 @@
 import { setup, assign } from "xstate";
 import type { DetectedApp, TranscriptionMode } from "../../types";
 import {
-  getDefaultSmartShortcut,
+  getDefaultShortcuts,
   getOnboardingPlatform,
   type OnboardingPlatform,
   type OnboardingStep,
@@ -96,7 +96,7 @@ export const onboardingMachine = setup({
     localModelChoice: "",
     autoLaunch: false,
     showLocalConfirm: false,
-    smartShortcut: getDefaultSmartShortcut(initialPlatform.id),
+    smartShortcut: getDefaultShortcuts(initialPlatform.id).smart,
     completionError: null,
     isCompleting: false,
     showFAQModal: false,
