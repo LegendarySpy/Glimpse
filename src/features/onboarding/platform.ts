@@ -15,6 +15,10 @@ export type OnboardingPlatform = {
   requiresAccessibilityPermission: boolean;
 };
 
+// Alt+Space opens the window menu on Windows, so the hotkey never reaches us.
+export const getDefaultSmartShortcut = (platform: OnboardingPlatformId) =>
+  platform === "windows" ? "Control+Shift+Space" : "Alt+Space";
+
 export const getOnboardingPlatform = (): OnboardingPlatform => {
   const id = detectAppPlatform();
   const capabilities = getPlatformCapabilities();
