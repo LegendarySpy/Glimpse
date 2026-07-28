@@ -253,7 +253,13 @@ pub(crate) fn complete_onboarding(
 
     state.emit_settings_changed(app, &next);
 
-    analytics::track_onboarding_completed(app);
+    let smart_shortcut = next
+        .shortcut_bindings
+        .smart
+        .first()
+        .map(|binding| analytics::canonical_shortcut(&binding.shortcut))
+        .unwrap_or_else(|| "none".to_string());
+    analytics::track_onboarding_completed(app, &smart_shortcut);
     Ok(())
 }
 

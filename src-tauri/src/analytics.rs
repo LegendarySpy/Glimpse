@@ -540,9 +540,22 @@ pub fn classify_failure_reason(message: &str) -> &'static str {
         .map_or("unknown", |(reason, _)| *reason)
 }
 
-/// Records that you finished the first-run setup.
-pub fn track_onboarding_completed(app: &tauri::AppHandle<AppRuntime>) {
-    capture_event(app, "onboarding_completed", json!({}));
+/// Reduces a shortcut to its canonical parsed form so only values the parser
+/// can produce reach analytics.
+pub fn canonical_shortcut(shortcut: &str) -> String {
+    crate::core::hotkeys::parse_shortcut(shortcut)
+        .map(|hotkey| hotkey.to_string())
+        .unwrap_or_else(|_| "invalid".to_string())
+}
+
+/// Records that you finished the first-run setup, and which dictation shortcut
+/// you ended up on.
+pub fn track_onboarding_completed(app: &tauri::AppHandle<AppRuntime>, smart_shortcut: &str) {
+    capture_event(
+        app,
+        "onboarding_completed",
+        json!({ "smart_shortcut": smart_shortcut }),
+    );
 }
 
 /// Flushes PostHog's global worker on app exit; `capture` only enqueues.
