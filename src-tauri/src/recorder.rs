@@ -597,6 +597,8 @@ fn process_raw_samples(raw_samples: &[i16], sample_rate: u32, channels: u16) -> 
     }
 }
 
+pub const MIN_RECORDING_DURATION_MS: i64 = 300;
+
 pub struct ValidationConfig {
     pub min_duration_ms: i64,
     pub min_rms_energy: f32,
@@ -606,7 +608,7 @@ pub struct ValidationConfig {
 impl Default for ValidationConfig {
     fn default() -> Self {
         Self {
-            min_duration_ms: 300,
+            min_duration_ms: MIN_RECORDING_DURATION_MS,
             min_rms_energy: 0.0002,
             min_speech_percentage: 3.0,
         }

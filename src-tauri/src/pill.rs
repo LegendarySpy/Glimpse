@@ -4,7 +4,7 @@ use crate::{
     AppRuntime, AppState, AudioSpectrumPayload, EVENT_AUDIO_SPECTRUM, MAIN_WINDOW_LABEL, assistive,
     core::hotkeys::{self, HotkeyState},
     emit_event, model_manager, music, platform,
-    recorder::RecorderManager,
+    recorder::{MIN_RECORDING_DURATION_MS, RecorderManager},
     settings::{MediaAction, UserSettings},
     toast,
 };
@@ -19,7 +19,6 @@ use std::sync::{
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 
-const MIN_RECORDING_DURATION_MS: i64 = 300;
 const SMART_MODE_TAP_THRESHOLD_MS: i64 = 200;
 const OVERLAY_HIDE_AFTER_IDLE_MS: u64 = 180;
 const MAX_RECORDING_DURATION: Duration = Duration::from_secs(30 * 60);
