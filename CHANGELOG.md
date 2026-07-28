@@ -1,3 +1,11 @@
+1.0.6
+
+### Fixes
+
+- Fixed the Usage Analytics box on Windows stretching to fill the column with the toggle floating in the middle.
+
+---
+
 1.0.5
 
 ### Improvements
