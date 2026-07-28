@@ -746,6 +746,7 @@ impl PillController {
                             (recording.ended_at - recording.started_at).num_milliseconds();
 
                         if duration_ms < MIN_RECORDING_DURATION_MS {
+                            crate::analytics::track_dictation_discarded(&app_handle, "too_short");
                             discard_pending_recording(&recording);
                             collapse_expanded_pill(&app_handle);
                             app_handle
@@ -830,6 +831,7 @@ impl PillController {
                         let duration_ms =
                             (recording.ended_at - recording.started_at).num_milliseconds();
                         if duration_ms < MIN_RECORDING_DURATION_MS {
+                            crate::analytics::track_dictation_discarded(&app_handle, "too_short");
                             discard_pending_recording(&recording);
                             app_handle
                                 .state::<AppState>()

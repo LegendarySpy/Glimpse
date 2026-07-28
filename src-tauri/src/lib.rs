@@ -1815,21 +1815,26 @@ pub(crate) fn persist_recording_async(
 
     // Validate before persisting so rejected recordings never touch disk.
     if let Err(rejection) = validate_recording(&recording) {
-        let reason = match rejection {
+        let (code, reason) = match rejection {
             RecordingRejectionReason::TooShort {
                 duration_ms,
                 min_ms,
-            } => {
-                format!("Recording too short ({duration_ms}ms < {min_ms}ms minimum)")
-            }
-            RecordingRejectionReason::TooQuiet { rms, threshold } => {
-                format!("Recording too quiet (energy {rms:.4} < {threshold} threshold)")
-            }
+            } => (
+                "too_short",
+                format!("Recording too short ({duration_ms}ms < {min_ms}ms minimum)"),
+            ),
+            RecordingRejectionReason::TooQuiet { rms, threshold } => (
+                "too_quiet",
+                format!("Recording too quiet (energy {rms:.4} < {threshold} threshold)"),
+            ),
             RecordingRejectionReason::NoSpeechDetected => {
-                "No speech detected in recording".to_string()
+                ("no_speech", "No speech detected in recording".to_string())
             }
-            RecordingRejectionReason::EmptyBuffer => "Recording buffer is empty".to_string(),
+            RecordingRejectionReason::EmptyBuffer => {
+                ("empty_buffer", "Recording buffer is empty".to_string())
+            }
         };
+        analytics::track_dictation_discarded(&app, code);
         tracing::error!("Recording rejected: {reason}");
 
         if let Some(path) = recording.pending_path.as_deref() {

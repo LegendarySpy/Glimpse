@@ -302,6 +302,12 @@ pub fn track_transcription_failed(
     );
 }
 
+/// Records a dictation the app threw away before it reached you, as a bounded
+/// reason code. Never records audio, timings, or transcript content.
+pub fn track_dictation_discarded(app: &tauri::AppHandle<AppRuntime>, reason: &str) {
+    capture_event(app, "dictation_discarded", json!({ "reason": reason }));
+}
+
 /// Records a bounded onboarding screen identifier without form contents.
 #[tauri::command]
 pub fn track_onboarding_step_viewed(app: tauri::AppHandle<AppRuntime>, step: String) {

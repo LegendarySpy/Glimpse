@@ -1136,6 +1136,8 @@ fn handle_empty_transcription(
     audio_path: &Path,
     pending_path: Option<&Path>,
 ) {
+    analytics::track_dictation_discarded(app, "empty_transcript");
+
     crate::emit_event(
         app,
         EVENT_TRANSCRIPTION_COMPLETE,
