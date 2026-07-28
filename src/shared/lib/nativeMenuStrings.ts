@@ -54,4 +54,35 @@ export const NATIVE_MENU_STRINGS = [
   msg({ id: "native.menu.select_all", message: "Select All" }),
   msg({ id: "native.menu.help", message: "Help" }),
   msg({ id: "native.menu.github", message: "Github" }),
+
+  msg({
+    id: "native.toast.too_quiet",
+    message: "That was too quiet to hear. Recording deleted.",
+  }),
+  msg({
+    id: "native.toast.no_speech",
+    message: "No speech detected. Recording deleted.",
+  }),
+  msg({
+    id: "native.toast.no_words",
+    message: "No words detected. Recording deleted.",
+  }),
+  msg({ id: "native.toast.cancelled", message: "Transcription cancelled" }),
+  msg({ id: "native.toast.copied", message: "Copied to clipboard" }),
+
+  msg({
+    id: "native.toast.recovering",
+    message: "Recovering your last recording...",
+  }),
+  msg({ id: "native.toast.recovered_one", message: "Recording recovered" }),
+  msg({ id: "native.toast.recovered_many", message: "Recordings recovered" }),
+  msg({
+    id: "native.toast.recovered_saved_one",
+    message: "Recording saved to History.",
+  }),
+  msg({
+    id: "native.toast.recovered_saved_many",
+    message: "Recordings saved to History.",
+  }),
+  msg({ id: "native.toast.view_history", message: "View History" }),
 ];

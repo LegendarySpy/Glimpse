@@ -1065,6 +1065,11 @@ msgstr ""
 #~ msgstr ""
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+#~ msgid "native.toast.recovered_saved"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(यदि आवश्यक हो)"
@@ -2030,6 +2035,11 @@ msgstr "कॉपी किया गया"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.copy.copied"
 msgstr "कॉपी हो गया"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.copied"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -3756,6 +3766,11 @@ msgid "library.detail.filter.no_speakers"
 msgstr "अभी तक कोई स्पीकर नहीं"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.no_speech"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.no_tags_yet"
 msgstr "अभी तक कोई टैग नहीं"
@@ -3779,6 +3794,11 @@ msgstr "अभी तक कोई ट्रांसक्रिप्शन �
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.websites.none"
 msgstr "कोई वेबसाइट नहीं जोड़ी गई"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.no_words"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -4132,9 +4152,34 @@ msgid "updates.ready_to_install"
 msgstr "इंस्टॉल करने के लिए तैयार"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_one"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_saved_one"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.recordings"
 msgstr "रिकॉर्डिंग"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_many"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_saved_many"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovering"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4968,6 +5013,11 @@ msgid "settings.general.microphone_test.busy_error"
 msgstr "यह माइक्रोफ़ोन पहले से उपयोग में है।"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.too_quiet"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_ready"
 msgstr "Apple Intelligence मॉडल अभी डाउनलोड हो रहा है।"
@@ -5137,6 +5187,11 @@ msgstr "लिप्यंतरण इतिहास"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.transcript_placeholder"
 msgstr "ट्रांसक्रिप्ट यहाँ दिखाई देगा।"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.cancelled"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -5352,6 +5407,11 @@ msgstr "दृश्य"
 #: src/features/updates/components/WhatsNewModal.tsx
 msgid "updates.whats_new.view_all"
 msgstr "GitHub पर सभी रिलीज़ देखें"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.view_history"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

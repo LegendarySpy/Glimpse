@@ -69,6 +69,11 @@ msgstr ""
 #~ msgstr ""
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+#~ msgid "native.toast.recovered_saved"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(si es necesario)"
@@ -1013,6 +1018,11 @@ msgstr "Copiado"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.copy.copied"
 msgstr "Copiado"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.copied"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2739,6 +2749,11 @@ msgid "library.detail.filter.no_speakers"
 msgstr "Aún no hay oradores"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.no_speech"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.no_tags_yet"
 msgstr "Todavía no hay etiquetas"
@@ -2762,6 +2777,11 @@ msgstr "Aún no hay transcripciones"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.websites.none"
 msgstr "No se añadieron sitios web"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.no_words"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3115,9 +3135,34 @@ msgid "updates.ready_to_install"
 msgstr "Listo para instalar"
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_one"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_saved_one"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.recordings"
 msgstr "Grabaciones"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_many"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovered_saved_many"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.recovering"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3951,6 +3996,11 @@ msgid "settings.general.microphone_test.busy_error"
 msgstr "Ese micrófono ya está en uso."
 
 #. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.too_quiet"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_ready"
 msgstr "El modelo de Apple Intelligence aún se está descargando."
@@ -4120,6 +4170,11 @@ msgstr "Historial de transcripciones"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.transcript_placeholder"
 msgstr "La transcripción aparecerá aquí."
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.cancelled"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -4335,6 +4390,11 @@ msgstr "Vista"
 #: src/features/updates/components/WhatsNewModal.tsx
 msgid "updates.whats_new.view_all"
 msgstr "Ver todas las versiones en GitHub"
+
+#. js-lingui-explicit-id
+#: src/shared/lib/nativeMenuStrings.ts
+msgid "native.toast.view_history"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

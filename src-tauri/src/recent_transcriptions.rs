@@ -99,7 +99,7 @@ pub fn copy_transcription_to_clipboard(app: &AppHandle<AppRuntime>, transcriptio
         toast::Payload {
             toast_type: "success".to_string(),
             title: None,
-            message: "Copied to clipboard".to_string(),
+            message: toast::native(app, "native.toast.copied"),
             auto_dismiss: Some(true),
             duration: Some(1200),
             retry_id: None,

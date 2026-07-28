@@ -1827,12 +1827,12 @@ pub(crate) fn persist_recording_async(
             RecordingRejectionReason::TooQuiet { rms, threshold } => (
                 "too_quiet",
                 format!("Recording too quiet (energy {rms:.4} < {threshold} threshold)"),
-                Some("That was too quiet to hear. Recording deleted."),
+                Some("native.toast.too_quiet"),
             ),
             RecordingRejectionReason::NoSpeechDetected => (
                 "no_speech",
                 "No speech detected in recording".to_string(),
-                Some("No speech detected. Recording deleted."),
+                Some("native.toast.no_speech"),
             ),
             RecordingRejectionReason::EmptyBuffer => (
                 "empty_buffer",
@@ -1843,7 +1843,7 @@ pub(crate) fn persist_recording_async(
         analytics::track_dictation_discarded(&app, code);
         tracing::error!("Recording rejected: {reason}");
         if let Some(notice) = notice {
-            toast::show(&app, "warning", None, notice);
+            toast::show(&app, "warning", None, &toast::native(&app, notice));
         }
 
         if let Some(path) = recording.pending_path.as_deref() {

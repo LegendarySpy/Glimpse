@@ -5,6 +5,7 @@
 - Your first dictation after setup is faster. The model now loads in the background as soon as it finishes downloading, instead of on your first recording.
 - Choosing a model during setup now names the actual models and shows what each one supports, instead of Accurate, Balanced, and Small.
 - Glimpse now tells you when a recording was too quiet or had no speech, instead of discarding it without a word.
+- The toasts Glimpse shows while you dictate now follow your app language.
 
 ### Changes
 

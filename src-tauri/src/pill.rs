@@ -906,7 +906,12 @@ impl PillController {
             let _ = std::fs::remove_file(&path);
         }
 
-        toast::show(app, "info", None, "Transcription cancelled");
+        toast::show(
+            app,
+            "info",
+            None,
+            &toast::native(app, "native.toast.cancelled"),
+        );
         self.reset(app);
     }
 }

@@ -36,6 +36,13 @@ pub fn emit_toast(app: &AppHandle<AppRuntime>, payload: Payload) {
     let _ = app.emit(EVENT_SHOW, payload);
 }
 
+pub fn native(app: &AppHandle<AppRuntime>, key: &'static str) -> String {
+    let settings = app.state::<AppState>().current_settings();
+    crate::native_i18n::MenuStrings::resolve(&settings)
+        .get(key)
+        .to_string()
+}
+
 pub fn show(app: &AppHandle<AppRuntime>, toast_type: &str, title: Option<&str>, message: &str) {
     emit_toast(
         app,

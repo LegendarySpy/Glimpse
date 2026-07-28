@@ -430,7 +430,7 @@ pub(crate) fn recover_interrupted_recordings(app: &AppHandle<AppRuntime>) {
             toast::Payload {
                 toast_type: "info".to_string(),
                 title: None,
-                message: "Recovering your last recording...".to_string(),
+                message: toast::native(&app, "native.toast.recovering"),
                 auto_dismiss: Some(true),
                 duration: Some(30000),
                 retry_id: None,
@@ -462,22 +462,29 @@ pub(crate) fn recover_interrupted_recordings(app: &AppHandle<AppRuntime>) {
             &app,
             toast::Payload {
                 toast_type: "success".to_string(),
-                title: Some(if saved_count == 1 {
-                    "Recording recovered".to_string()
-                } else {
-                    "Recordings recovered".to_string()
-                }),
-                message: if saved_count == 1 {
-                    "Saved to History.".to_string()
-                } else {
-                    format!("{saved_count} recordings saved to History.")
-                },
+
+                title: Some(toast::native(
+                    &app,
+                    if saved_count == 1 {
+                        "native.toast.recovered_one"
+                    } else {
+                        "native.toast.recovered_many"
+                    },
+                )),
+                message: toast::native(
+                    &app,
+                    if saved_count == 1 {
+                        "native.toast.recovered_saved_one"
+                    } else {
+                        "native.toast.recovered_saved_many"
+                    },
+                ),
                 auto_dismiss: Some(false),
                 duration: None,
                 retry_id: None,
                 mode: None,
                 action: Some("view_recovered_transcriptions".to_string()),
-                action_label: Some("View History".to_string()),
+                action_label: Some(toast::native(&app, "native.toast.view_history")),
                 secondary_action: Some("copy_last_transcription".to_string()),
                 secondary_action_label: Some("Copy".to_string()),
             },
@@ -1157,7 +1164,7 @@ fn handle_empty_transcription(
         toast::Payload {
             toast_type: "warning".to_string(),
             title: None,
-            message: "No words detected. Recording deleted.".to_string(),
+            message: toast::native(app, "native.toast.no_words"),
             auto_dismiss: Some(true),
             duration: Some(3000),
             retry_id: None,
