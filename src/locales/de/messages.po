@@ -2039,7 +2039,7 @@ msgstr "Kopiert"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.copied"
-msgstr ""
+msgstr "In die Zwischenablage kopiert"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2234,7 +2234,7 @@ msgstr "Eigene Anweisungen"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.dictionary"
-msgstr ""
+msgstr "Eigene Wörter"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3653,7 +3653,7 @@ msgstr "Kein Changelog verfügbar."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
-msgstr ""
+msgstr "Kein Download"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -3768,7 +3768,7 @@ msgstr "Noch keine Sprecher"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_speech"
-msgstr ""
+msgstr "Keine Sprache erkannt. Aufnahme gelöscht."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3798,7 +3798,7 @@ msgstr "Keine Websites hinzugefügt"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_words"
-msgstr ""
+msgstr "Keine Wörter erkannt. Aufnahme gelöscht."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -4154,12 +4154,12 @@ msgstr "Bereit zur Installation"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_one"
-msgstr ""
+msgstr "Aufnahme wiederhergestellt"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_one"
-msgstr ""
+msgstr "Aufnahme im Verlauf gespeichert."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4169,17 +4169,17 @@ msgstr "Aufnahmen"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_many"
-msgstr ""
+msgstr "Aufnahmen wiederhergestellt"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_many"
-msgstr ""
+msgstr "Aufnahmen im Verlauf gespeichert."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovering"
-msgstr ""
+msgstr "Letzte Aufnahme wird wiederhergestellt..."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -5015,7 +5015,7 @@ msgstr "Dieses Mikrofon wird bereits verwendet."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.too_quiet"
-msgstr ""
+msgstr "Das war zu leise zum Hören. Aufnahme gelöscht."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -5076,7 +5076,7 @@ msgstr "Zeitstempel"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.timestamps"
-msgstr ""
+msgstr "Zeitstempel"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -5191,7 +5191,7 @@ msgstr "Das Transkript wird hier angezeigt."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.cancelled"
-msgstr ""
+msgstr "Transkription abgebrochen"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -5411,7 +5411,7 @@ msgstr "Alle Releases auf GitHub anzeigen"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.view_history"
-msgstr ""
+msgstr "Verlauf anzeigen"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

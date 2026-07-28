@@ -1022,7 +1022,7 @@ msgstr "Copiado"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.copied"
-msgstr ""
+msgstr "Copiado al portapapeles"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -1217,7 +1217,7 @@ msgstr "Instrucciones personalizadas"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.dictionary"
-msgstr ""
+msgstr "Palabras personalizadas"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -2636,7 +2636,7 @@ msgstr "No hay registro de cambios disponible."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
-msgstr ""
+msgstr "Sin descarga"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -2751,7 +2751,7 @@ msgstr "Aún no hay oradores"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_speech"
-msgstr ""
+msgstr "No se detectó voz. Grabación eliminada."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -2781,7 +2781,7 @@ msgstr "No se añadieron sitios web"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_words"
-msgstr ""
+msgstr "No se detectaron palabras. Grabación eliminada."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3137,12 +3137,12 @@ msgstr "Listo para instalar"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_one"
-msgstr ""
+msgstr "Grabación recuperada"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_one"
-msgstr ""
+msgstr "Grabación guardada en el Historial."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -3152,17 +3152,17 @@ msgstr "Grabaciones"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_many"
-msgstr ""
+msgstr "Grabaciones recuperadas"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_many"
-msgstr ""
+msgstr "Grabaciones guardadas en el Historial."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovering"
-msgstr ""
+msgstr "Recuperando tu última grabación..."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3998,7 +3998,7 @@ msgstr "Ese micrófono ya está en uso."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.too_quiet"
-msgstr ""
+msgstr "Eso fue demasiado silencioso para oírlo. Grabación eliminada."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4059,7 +4059,7 @@ msgstr "Marcas de tiempo"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.timestamps"
-msgstr ""
+msgstr "Marcas de tiempo"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4174,7 +4174,7 @@ msgstr "La transcripción aparecerá aquí."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.cancelled"
-msgstr ""
+msgstr "Transcripción cancelada"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -4394,7 +4394,7 @@ msgstr "Ver todas las versiones en GitHub"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.view_history"
-msgstr ""
+msgstr "Ver historial"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

@@ -2039,7 +2039,7 @@ msgstr "تم النسخ"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.copied"
-msgstr ""
+msgstr "تم النسخ إلى الحافظة"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2234,7 +2234,7 @@ msgstr "تعليمات مخصصة"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.dictionary"
-msgstr ""
+msgstr "كلمات مخصصة"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3653,7 +3653,7 @@ msgstr "لا يتوفر سجل تغييرات."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
-msgstr ""
+msgstr "لا يوجد تنزيل"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -3768,7 +3768,7 @@ msgstr "لا يوجد متحدثون بعد"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_speech"
-msgstr ""
+msgstr "لم يتم اكتشاف أي كلام. تم حذف التسجيل."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3798,7 +3798,7 @@ msgstr "لم تتم إضافة أي مواقع ويب"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_words"
-msgstr ""
+msgstr "لم يتم اكتشاف أي كلمات. تم حذف التسجيل."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -4154,12 +4154,12 @@ msgstr "جاهز للتثبيت"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_one"
-msgstr ""
+msgstr "تم استرداد التسجيل"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_one"
-msgstr ""
+msgstr "تم حفظ التسجيل في السجل."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4169,17 +4169,17 @@ msgstr "التسجيلات"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_many"
-msgstr ""
+msgstr "تم استرداد التسجيلات"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_many"
-msgstr ""
+msgstr "تم حفظ التسجيلات في السجل."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovering"
-msgstr ""
+msgstr "جارٍ استرداد آخر تسجيل..."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -5015,7 +5015,7 @@ msgstr "هذا الميكروفون قيد الاستخدام بالفعل."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.too_quiet"
-msgstr ""
+msgstr "كان الصوت خافتًا جدًا. تم حذف التسجيل."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -5076,7 +5076,7 @@ msgstr "الطوابع الزمنية"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.timestamps"
-msgstr ""
+msgstr "الطوابع الزمنية"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -5191,7 +5191,7 @@ msgstr "ستظهر النسخة النصية هنا."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.cancelled"
-msgstr ""
+msgstr "تم إلغاء النسخ"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -5411,7 +5411,7 @@ msgstr "عرض جميع الإصدارات على GitHub"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.view_history"
-msgstr ""
+msgstr "عرض السجل"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

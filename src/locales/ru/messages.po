@@ -2039,7 +2039,7 @@ msgstr "Скопировано"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.copied"
-msgstr ""
+msgstr "Скопировано в буфер обмена"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2234,7 +2234,7 @@ msgstr "Пользовательские инструкции"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.dictionary"
-msgstr ""
+msgstr "Пользовательские слова"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3653,7 +3653,7 @@ msgstr "Журнал изменений недоступен."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
-msgstr ""
+msgstr "Без загрузки"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -3768,7 +3768,7 @@ msgstr "Говорящие ещё не добавлены"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_speech"
-msgstr ""
+msgstr "Речь не обнаружена. Запись удалена."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3798,7 +3798,7 @@ msgstr "Сайты не добавлены"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_words"
-msgstr ""
+msgstr "Слова не обнаружены. Запись удалена."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -4154,12 +4154,12 @@ msgstr "Готово к установке"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_one"
-msgstr ""
+msgstr "Запись восстановлена"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_one"
-msgstr ""
+msgstr "Запись сохранена в историю."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4169,17 +4169,17 @@ msgstr "Записи"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_many"
-msgstr ""
+msgstr "Записи восстановлены"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_many"
-msgstr ""
+msgstr "Записи сохранены в историю."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovering"
-msgstr ""
+msgstr "Восстановление последней записи..."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -5015,7 +5015,7 @@ msgstr "Этот микрофон уже используется."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.too_quiet"
-msgstr ""
+msgstr "Слишком тихо для распознавания. Запись удалена."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -5076,7 +5076,7 @@ msgstr "Временные метки"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.timestamps"
-msgstr ""
+msgstr "Временные метки"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -5191,7 +5191,7 @@ msgstr "Здесь появится транскрипция."
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.cancelled"
-msgstr ""
+msgstr "Транскрипция отменена"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -5411,7 +5411,7 @@ msgstr "Все выпуски на GitHub"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.view_history"
-msgstr ""
+msgstr "Открыть историю"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

@@ -2039,7 +2039,7 @@ msgstr "कॉपी हो गया"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.copied"
-msgstr ""
+msgstr "क्लिपबोर्ड पर कॉपी किया गया"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2234,7 +2234,7 @@ msgstr "कस्टम निर्देश"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.dictionary"
-msgstr ""
+msgstr "कस्टम शब्द"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3653,7 +3653,7 @@ msgstr "कोई चेंजलॉग उपलब्ध नहीं है�
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
-msgstr ""
+msgstr "कोई डाउनलोड नहीं"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -3768,7 +3768,7 @@ msgstr "अभी तक कोई स्पीकर नहीं"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_speech"
-msgstr ""
+msgstr "कोई वाणी नहीं मिली। रिकॉर्डिंग हटाई गई।"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3798,7 +3798,7 @@ msgstr "कोई वेबसाइट नहीं जोड़ी गई"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_words"
-msgstr ""
+msgstr "कोई शब्द नहीं मिले। रिकॉर्डिंग हटाई गई।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -4154,12 +4154,12 @@ msgstr "इंस्टॉल करने के लिए तैयार"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_one"
-msgstr ""
+msgstr "रिकॉर्डिंग पुनः प्राप्त की गई"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_one"
-msgstr ""
+msgstr "रिकॉर्डिंग हिस्ट्री में सहेजी गई।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4169,17 +4169,17 @@ msgstr "रिकॉर्डिंग"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_many"
-msgstr ""
+msgstr "रिकॉर्डिंग्स पुनः प्राप्त की गईं"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovered_saved_many"
-msgstr ""
+msgstr "रिकॉर्डिंग्स हिस्ट्री में सहेजी गईं।"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.recovering"
-msgstr ""
+msgstr "आपकी पिछली रिकॉर्डिंग पुनः प्राप्त की जा रही है..."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -5015,7 +5015,7 @@ msgstr "यह माइक्रोफ़ोन पहले से उपय�
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.too_quiet"
-msgstr ""
+msgstr "यह सुनने के लिए बहुत धीमा था। रिकॉर्डिंग हटाई गई।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -5076,7 +5076,7 @@ msgstr "टाइमस्टैम्प"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.capability.timestamps"
-msgstr ""
+msgstr "टाइमस्टैम्प"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -5191,7 +5191,7 @@ msgstr "ट्रांसक्रिप्ट यहाँ दिखाई द
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.cancelled"
-msgstr ""
+msgstr "ट्रांसक्रिप्शन रद्द किया गया"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionItem.tsx
@@ -5411,7 +5411,7 @@ msgstr "GitHub पर सभी रिलीज़ देखें"
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.view_history"
-msgstr ""
+msgstr "हिस्ट्री देखें"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
