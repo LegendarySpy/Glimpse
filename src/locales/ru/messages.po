@@ -1015,6 +1015,56 @@ msgstr ""
 #~ msgstr "Версия"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced.helper"
+#~ msgstr "Точность и размер"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality"
+#~ msgstr "Точный"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced"
+#~ msgstr "Сбалансированный"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality.helper"
+#~ msgstr "Наилучшие результаты"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle"
+#~ msgstr "Более крупные модели точнее. Меньшие работают быстрее."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin"
+#~ msgstr "Встроенный"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact.helper"
+#~ msgstr "Меньше места"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin.helper"
+#~ msgstr "Без загрузки"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact"
+#~ msgstr "Маленький"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle.languages"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(если требуется)"
@@ -1276,16 +1326,6 @@ msgstr "Учётная запись"
 #: src/features/license/components/AccountPill.tsx
 msgid "home.account.fallback"
 msgstr "Учётная запись"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced.helper"
-msgstr "Точность и размер"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality"
-msgstr "Точный"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -1600,24 +1640,9 @@ msgid "pill.background_visualizer"
 msgstr "Фоновый визуализатор аудио"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced"
-msgstr "Сбалансированный"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.behavior"
 msgstr "Поведение"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality.helper"
-msgstr "Наилучшие результаты"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.subtitle"
-msgstr "Более крупные модели точнее. Меньшие работают быстрее."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -1637,11 +1662,6 @@ msgstr "Встроенный"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.built_in"
-msgstr "Встроенный"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin"
 msgstr "Встроенный"
 
 #. js-lingui-explicit-id
@@ -2200,6 +2220,11 @@ msgstr "Пользовательский"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.custom_instructions"
 msgstr "Пользовательские инструкции"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.dictionary"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3177,11 +3202,6 @@ msgid "settings.models.installed.legacy"
 msgstr "Устаревший"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact.helper"
-msgstr "Меньше места"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "Библиотека"
@@ -3622,8 +3642,8 @@ msgstr "Журнал изменений недоступен."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin.helper"
-msgstr "Без загрузки"
+msgid "onboarding.model.option.no_download"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -4728,11 +4748,6 @@ msgid "settings.app.text_size.small"
 msgstr "Маленький"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact"
-msgstr "Маленький"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.smart"
 msgstr "Умный"
@@ -5007,6 +5022,11 @@ msgstr "Это удалит транскрипцию и аудио из ваше
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.include_timestamps"
 msgstr "Временные метки"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.timestamps"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx

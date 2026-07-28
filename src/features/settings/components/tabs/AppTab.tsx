@@ -743,7 +743,9 @@ const AppTab = ({
               </SettingCard>
             )}
 
-            <SettingCard className="flex-1 grid content-center">
+            <SettingCard
+              className={hasPermissionRows ? "flex-1 grid content-center" : ""}
+            >
               <ToggleRow
                 title={t({
                   id: "settings.app.analytics",

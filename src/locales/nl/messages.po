@@ -1015,6 +1015,56 @@ msgstr ""
 #~ msgstr "Versie"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced.helper"
+#~ msgstr "Nauwkeurigheid en grootte"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality"
+#~ msgstr "Nauwkeurig"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced"
+#~ msgstr "Gebalanceerd"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality.helper"
+#~ msgstr "Beste resultaten"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle"
+#~ msgstr "Grotere modellen zijn nauwkeuriger, kleinere zijn sneller."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin"
+#~ msgstr "Ingebouwd"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact.helper"
+#~ msgstr "Minder ruimte"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin.helper"
+#~ msgstr "Geen download"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact"
+#~ msgstr "Klein"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle.languages"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(indien nodig)"
@@ -1276,16 +1326,6 @@ msgstr "Account"
 #: src/features/license/components/AccountPill.tsx
 msgid "home.account.fallback"
 msgstr "Account"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced.helper"
-msgstr "Nauwkeurigheid en grootte"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality"
-msgstr "Nauwkeurig"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -1600,24 +1640,9 @@ msgid "pill.background_visualizer"
 msgstr "Achtergrond‑audiovisualisatie"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced"
-msgstr "Gebalanceerd"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.behavior"
 msgstr "Gedrag"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality.helper"
-msgstr "Beste resultaten"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.subtitle"
-msgstr "Grotere modellen zijn nauwkeuriger, kleinere zijn sneller."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -1637,11 +1662,6 @@ msgstr "Ingebouwd"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.built_in"
-msgstr "Ingebouwd"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin"
 msgstr "Ingebouwd"
 
 #. js-lingui-explicit-id
@@ -2200,6 +2220,11 @@ msgstr "Aangepast"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.custom_instructions"
 msgstr "Aangepaste instructies"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.dictionary"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3177,11 +3202,6 @@ msgid "settings.models.installed.legacy"
 msgstr "Oudere versie"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact.helper"
-msgstr "Minder ruimte"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "Bibliotheek"
@@ -3622,8 +3642,8 @@ msgstr "Geen changelog beschikbaar."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin.helper"
-msgstr "Geen download"
+msgid "onboarding.model.option.no_download"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -4728,11 +4748,6 @@ msgid "settings.app.text_size.small"
 msgstr "Klein"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact"
-msgstr "Klein"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.smart"
 msgstr "Slim"
@@ -5007,6 +5022,11 @@ msgstr "Hiermee verwijder je de transcriptie en audio uit je bibliotheek."
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.include_timestamps"
 msgstr "Tijdstempels"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.timestamps"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx

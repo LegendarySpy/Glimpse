@@ -1015,6 +1015,56 @@ msgstr ""
 #~ msgstr "संस्करण"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced.helper"
+#~ msgstr "सटीकता और आकार"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality"
+#~ msgstr "सटीक"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced"
+#~ msgstr "संतुलित"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality.helper"
+#~ msgstr "सर्वोत्तम परिणाम"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle"
+#~ msgstr "बड़े मॉडल अधिक सटीक होते हैं। छोटे मॉडल तेज़ होते हैं।"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin"
+#~ msgstr "अंतर्निहित"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact.helper"
+#~ msgstr "कम स्थान"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin.helper"
+#~ msgstr "कोई डाउनलोड नहीं"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact"
+#~ msgstr "छोटा"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle.languages"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(यदि आवश्यक हो)"
@@ -1276,16 +1326,6 @@ msgstr "खाता"
 #: src/features/license/components/AccountPill.tsx
 msgid "home.account.fallback"
 msgstr "खाता"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced.helper"
-msgstr "सटीकता और आकार"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality"
-msgstr "सटीक"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -1600,24 +1640,9 @@ msgid "pill.background_visualizer"
 msgstr "पृष्ठभूमि ऑडियो विज़ुअलाइज़र"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced"
-msgstr "संतुलित"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.behavior"
 msgstr "व्यवहार"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality.helper"
-msgstr "सर्वोत्तम परिणाम"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.subtitle"
-msgstr "बड़े मॉडल अधिक सटीक होते हैं। छोटे मॉडल तेज़ होते हैं।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -1637,11 +1662,6 @@ msgstr "अंतर्निहित"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.built_in"
-msgstr "अंतर्निहित"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin"
 msgstr "अंतर्निहित"
 
 #. js-lingui-explicit-id
@@ -2200,6 +2220,11 @@ msgstr "कस्टम"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.custom_instructions"
 msgstr "कस्टम निर्देश"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.dictionary"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3177,11 +3202,6 @@ msgid "settings.models.installed.legacy"
 msgstr "पुराना (लेगेसी)"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact.helper"
-msgstr "कम स्थान"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "लाइब्रेरी"
@@ -3622,8 +3642,8 @@ msgstr "कोई चेंजलॉग उपलब्ध नहीं है�
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin.helper"
-msgstr "कोई डाउनलोड नहीं"
+msgid "onboarding.model.option.no_download"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -4728,11 +4748,6 @@ msgid "settings.app.text_size.small"
 msgstr "छोटा"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact"
-msgstr "छोटा"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.smart"
 msgstr "स्मार्ट"
@@ -5007,6 +5022,11 @@ msgstr "यह आपके संग्रह से ट्रांसक्�
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.include_timestamps"
 msgstr "टाइमस्टैम्प"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.timestamps"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx

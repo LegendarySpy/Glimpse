@@ -1015,6 +1015,56 @@ msgstr ""
 #~ msgstr "Versione"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced.helper"
+#~ msgstr "Precisione e dimensione"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality"
+#~ msgstr "Preciso"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.balanced"
+#~ msgstr "Bilanciato"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.quality.helper"
+#~ msgstr "Risultati migliori"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle"
+#~ msgstr "I modelli più grandi sono più precisi. Quelli più piccoli sono più veloci."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin"
+#~ msgstr "Integrato"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact.helper"
+#~ msgstr "Meno spazio"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.builtin.helper"
+#~ msgstr "Nessun download"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.priority.compact"
+#~ msgstr "Piccolo"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+#~ msgid "onboarding.model.subtitle.languages"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(se richiesto)"
@@ -1276,16 +1326,6 @@ msgstr "Account"
 #: src/features/license/components/AccountPill.tsx
 msgid "home.account.fallback"
 msgstr "Account"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced.helper"
-msgstr "Precisione e dimensione"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality"
-msgstr "Preciso"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -1600,24 +1640,9 @@ msgid "pill.background_visualizer"
 msgstr "Visualizzatore audio in background"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.balanced"
-msgstr "Bilanciato"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.behavior"
 msgstr "Comportamento"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.quality.helper"
-msgstr "Risultati migliori"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.subtitle"
-msgstr "I modelli più grandi sono più precisi. Quelli più piccoli sono più veloci."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -1637,11 +1662,6 @@ msgstr "Integrato"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.built_in"
-msgstr "Integrato"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin"
 msgstr "Integrato"
 
 #. js-lingui-explicit-id
@@ -2200,6 +2220,11 @@ msgstr "Personalizzato"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.custom_instructions"
 msgstr "Istruzioni personalizzate"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.dictionary"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/CustomerPortalLink.tsx
@@ -3177,11 +3202,6 @@ msgid "settings.models.installed.legacy"
 msgstr "Legacy"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact.helper"
-msgstr "Meno spazio"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "Libreria"
@@ -3622,8 +3642,8 @@ msgstr "Nessun registro delle modifiche disponibile."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.builtin.helper"
-msgstr "Nessun download"
+msgid "onboarding.model.option.no_download"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
@@ -4728,11 +4748,6 @@ msgid "settings.app.text_size.small"
 msgstr "Piccolo"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-msgid "onboarding.model.priority.compact"
-msgstr "Piccolo"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.smart"
 msgstr "Smart"
@@ -5007,6 +5022,11 @@ msgstr "Questa operazione rimuove la trascrizione e l'audio dalla libreria."
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.include_timestamps"
 msgstr "Timestamp"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ModelStep.tsx
+msgid "onboarding.model.capability.timestamps"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx

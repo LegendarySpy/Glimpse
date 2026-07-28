@@ -196,16 +196,29 @@ pub struct UserSettings {
     pub local_api_cors: bool,
 }
 
+// Alt+Space opens the window menu on Windows, so the hotkey never reaches us.
 fn default_smart_shortcut() -> String {
-    "Control+Space".to_string()
+    if cfg!(target_os = "windows") {
+        "Control+Shift+Space".to_string()
+    } else {
+        "Alt+Space".to_string()
+    }
 }
 
 fn default_hold_shortcut() -> String {
-    "Control+Shift+Space".to_string()
+    if cfg!(target_os = "windows") {
+        "Control+Alt+Space".to_string()
+    } else {
+        "Control+Shift+Space".to_string()
+    }
 }
 
 fn default_toggle_shortcut() -> String {
-    "Control+Alt+Space".to_string()
+    if cfg!(target_os = "windows") {
+        "Control+Shift+Alt+Space".to_string()
+    } else {
+        "Control+Alt+Space".to_string()
+    }
 }
 
 pub fn default_shortcut_bindings() -> ShortcutBindings {

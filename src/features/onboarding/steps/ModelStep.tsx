@@ -5,9 +5,16 @@ import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ModelPickerModal from "../../../shared/ui/ModelPickerModal";
 import ModelStatCard from "../../settings/components/ModelStatCard";
-import { isBuiltInModel } from "../../../shared/lib/modelStats";
+import {
+  isBuiltInModel,
+  formatModelSize,
+} from "../../../shared/lib/modelStats";
+import {
+  hasModelCapability,
+  MODEL_CAPABILITY_DICTIONARY,
+  MODEL_CAPABILITY_TIMESTAMPS,
+} from "../../../shared/lib/modelCapabilities";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../../types";
-import type { OnboardingModelPriority } from "../machine";
 import {
   OnboardingHeader,
   OnboardingStep,
@@ -15,10 +22,14 @@ import {
   type StepMotionProps,
 } from "./shared";
 
+// The Core ML encoder is a separate download, so fold it into the shown size.
+const totalSizeMb = (model: ModelInfo) =>
+  model.size_mb + (model.ane_size_mb ?? 0);
+
 interface ModelStepProps {
   stepMotionProps: StepMotionProps;
-  modelPriority: OnboardingModelPriority | null;
-  recommendedModel: ModelInfo | null;
+  options: ModelInfo[];
+  selectedModel: ModelInfo | null;
   catalog: ModelInfo[];
   modelStatus: Record<string, ModelStatus>;
   displayStateByModel: Record<string, DownloadEvent>;
@@ -29,7 +40,6 @@ interface ModelStepProps {
   displayState: DownloadEvent;
   selectedModelReady: boolean;
   showLocalConfirm: boolean;
-  onSelectPriority: (priority: OnboardingModelPriority) => void;
   onShowConfirm: (show: boolean) => void;
   onDownload: (key: string, ane?: boolean) => void;
   onDelete: (key: string) => void;
@@ -39,8 +49,8 @@ interface ModelStepProps {
 
 export function ModelStep({
   stepMotionProps,
-  modelPriority,
-  recommendedModel,
+  options,
+  selectedModel,
   catalog,
   modelStatus: modelStatusByKey,
   displayStateByModel,
@@ -51,7 +61,6 @@ export function ModelStep({
   displayState,
   selectedModelReady,
   showLocalConfirm,
-  onSelectPriority,
   onShowConfirm,
   onDownload,
   onDelete,
@@ -62,63 +71,12 @@ export function ModelStep({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [confirmDismissed, setConfirmDismissed] = useState(false);
 
-  const priorityOptions: Array<{
-    value: OnboardingModelPriority;
-    label: string;
-    helper: string;
-  }> = [
-    {
-      value: "quality",
-      label: t({
-        id: "onboarding.model.priority.quality",
-        message: "Accurate",
-      }),
-      helper: t({
-        id: "onboarding.model.priority.quality.helper",
-        message: "Best results",
-      }),
-    },
-    {
-      value: "balanced",
-      label: t({
-        id: "onboarding.model.priority.balanced",
-        message: "Balanced",
-      }),
-      helper: t({
-        id: "onboarding.model.priority.balanced.helper",
-        message: "Accuracy & size",
-      }),
-    },
-    {
-      value: "compact",
-      label: t({ id: "onboarding.model.priority.compact", message: "Small" }),
-      helper: t({
-        id: "onboarding.model.priority.compact.helper",
-        message: "Less space",
-      }),
-    },
-  ];
-
-  if (catalog.some(isBuiltInModel)) {
-    priorityOptions.push({
-      value: "builtin",
-      label: t({
-        id: "onboarding.model.priority.builtin",
-        message: "Built in",
-      }),
-      helper: t({
-        id: "onboarding.model.priority.builtin.helper",
-        message: "No download",
-      }),
-    });
-  }
-
-  const realStatus = recommendedModel
-    ? modelStatusByKey[recommendedModel.key]
+  const realStatus = selectedModel
+    ? modelStatusByKey[selectedModel.key]
     : undefined;
-  const status: ModelStatus | undefined = recommendedModel
+  const status: ModelStatus | undefined = selectedModel
     ? {
-        key: recommendedModel.key,
+        key: selectedModel.key,
         installed:
           Boolean(realStatus?.installed) || displayState.status === "complete",
         ane_installed: Boolean(realStatus?.ane_installed),
@@ -131,13 +89,23 @@ export function ModelStep({
     displayState.status !== "idle" && displayState.status !== "complete"
       ? displayState
       : undefined;
-  const displayModel =
-    recommendedModel?.ane_size_mb != null
-      ? {
-          ...recommendedModel,
-          size_mb: recommendedModel.size_mb + recommendedModel.ane_size_mb,
-        }
-      : recommendedModel;
+
+  const capabilityRow = [
+    {
+      key: MODEL_CAPABILITY_DICTIONARY,
+      label: t({
+        id: "onboarding.model.capability.dictionary",
+        message: "Custom words",
+      }),
+    },
+    {
+      key: MODEL_CAPABILITY_TIMESTAMPS,
+      label: t({
+        id: "onboarding.model.capability.timestamps",
+        message: "Timestamps",
+      }),
+    },
+  ];
 
   const handleContinue = () => {
     if (isLoading) return;
@@ -181,20 +149,16 @@ export function ModelStep({
     >
       <OnboardingHeader
         title={t({ id: "onboarding.model.title", message: "Choose a model" })}
-        subtitle={t({
-          id: "onboarding.model.subtitle",
-          message: "Bigger models are more accurate. Smaller ones are faster.",
-        })}
       />
 
       <div className="mb-6 flex items-center justify-center gap-1.5">
-        {priorityOptions.map((option) => {
-          const selected = modelPriority === option.value;
+        {options.map((option) => {
+          const selected = selectedModel?.key === option.key;
           return (
             <button
-              key={option.value}
+              key={option.key}
               type="button"
-              onClick={() => onSelectPriority(option.value)}
+              onClick={() => onUse(option.key)}
               aria-pressed={selected}
               className={`flex flex-col items-center gap-0.5 rounded-lg px-5 py-2 transition-colors ${
                 selected
@@ -208,7 +172,12 @@ export function ModelStep({
                   selected ? "text-cloud" : "text-content-disabled"
                 }`}
               >
-                {option.helper}
+                {isBuiltInModel(option)
+                  ? t({
+                      id: "onboarding.model.option.no_download",
+                      message: "No download",
+                    })
+                  : formatModelSize(totalSizeMb(option))}
               </span>
             </button>
           );
@@ -224,7 +193,7 @@ export function ModelStep({
             })}
           </p>
         </div>
-      ) : !recommendedModel ? (
+      ) : !selectedModel ? (
         <div className="w-full overflow-hidden rounded-xl border border-border-secondary bg-surface-surface text-left">
           <p className="p-4 ui-text-body-sm text-content-muted">
             {unavailable
@@ -241,14 +210,34 @@ export function ModelStep({
           </p>
         </div>
       ) : (
-        <ModelStatCard
-          model={displayModel ?? recommendedModel}
-          status={status}
-          progress={progress}
-          onDownload={() => onDownload(recommendedModel.key)}
-          onDelete={() => onDelete(recommendedModel.key)}
-          onCancel={() => onCancelDownload(recommendedModel.key)}
-        />
+        <>
+          <ModelStatCard
+            model={{ ...selectedModel, size_mb: totalSizeMb(selectedModel) }}
+            status={status}
+            progress={progress}
+            onDownload={() => onDownload(selectedModel.key)}
+            onDelete={() => onDelete(selectedModel.key)}
+            onCancel={() => onCancelDownload(selectedModel.key)}
+          />
+          <div className="mt-3 flex items-center justify-center gap-4">
+            {capabilityRow.map((capability) => {
+              const supported = hasModelCapability(
+                selectedModel,
+                capability.key,
+              );
+              return (
+                <span
+                  key={capability.key}
+                  className={`ui-text-meta ${
+                    supported ? "text-content-muted" : "text-content-disabled"
+                  }`}
+                >
+                  {supported ? "✓" : "○"} {capability.label}
+                </span>
+              );
+            })}
+          </div>
+        </>
       )}
 
       <ModelPickerModal
@@ -276,7 +265,7 @@ export function ModelStep({
               onDownload={() => {
                 setConfirmDismissed(true);
                 onShowConfirm(false);
-                if (recommendedModel) onDownload(recommendedModel.key);
+                if (selectedModel) onDownload(selectedModel.key);
                 onNext();
               }}
               onContinue={() => {

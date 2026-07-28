@@ -253,7 +253,13 @@ pub(crate) fn complete_onboarding(
 
     state.emit_settings_changed(app, &next);
 
-    analytics::track_onboarding_completed(app);
+    let smart_shortcut = next
+        .shortcut_bindings
+        .smart
+        .first()
+        .map(|binding| analytics::canonical_shortcut(&binding.shortcut))
+        .unwrap_or_else(|| "none".to_string());
+    analytics::track_onboarding_completed(app, &smart_shortcut);
     Ok(())
 }
 
@@ -604,6 +610,7 @@ mod tests {
     fn rejects_shortcut_collisions_after_normalization() {
         let mut args = base_args();
         args.hold_enabled = true;
+        set_primary_shortcut(&mut args, "Smart", "Control+Space");
         set_primary_shortcut(&mut args, "Hold", "Ctrl+Space");
 
         let err = validate_update_settings_args(&args).unwrap_err();

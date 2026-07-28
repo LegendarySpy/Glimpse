@@ -78,8 +78,12 @@ pub fn warm(app: &AppHandle<AppRuntime>, settings: &UserSettings) {
         return;
     }
 
+    warm_model(app, settings.local_model.clone());
+}
+
+/// Loads a model off-thread. The idle monitor unloads it again if it goes unused.
+pub fn warm_model(app: &AppHandle<AppRuntime>, model_key: String) {
     let app_handle = app.clone();
-    let model_key = settings.local_model.clone();
     std::thread::spawn(move || {
         let ready = match install::ensure_model_ready(&app_handle, &model_key) {
             Ok(model) => model,

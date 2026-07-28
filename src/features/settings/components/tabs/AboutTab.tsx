@@ -661,7 +661,7 @@ const AboutTab = ({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.15 }}
-                        className="ui-surface-menu absolute end-0 top-full z-20 mt-1 w-64"
+                        className="ui-surface-menu absolute start-0 top-full z-20 mt-1 w-64"
                       >
                         <div className="space-y-3 p-3">
                           <div className="flex items-start justify-between gap-3">
