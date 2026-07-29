@@ -357,6 +357,19 @@ export function useSettingsForm({
   const downloadResetTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(
     new Set(),
   );
+  const scheduleDownloadStateReset = useCallback(
+    (modelKey: string, from: DownloadEvent["status"], delayMs: number) => {
+      const timeout = setTimeout(() => {
+        downloadResetTimeoutsRef.current.delete(timeout);
+        setDownloadState((prev) => {
+          if (prev[modelKey]?.status !== from) return prev;
+          return { ...prev, [modelKey]: { status: "idle", percent: 0 } };
+        });
+      }, delayMs);
+      downloadResetTimeoutsRef.current.add(timeout);
+    },
+    [],
+  );
   const queryClient = useQueryClient();
   const settingsQuery = useSettings(undefined, isOpen);
   const licenseStateQuery = useLicenseState();
@@ -1611,10 +1624,16 @@ export function useSettingsForm({
           ...prev,
           [modelKey]: {
             status: "error",
-            message: String(err),
-            percent: prev[modelKey]?.percent ?? 0,
+            message: i18n._(
+              msg({
+                id: "settings.models.delete_failed",
+                message: "Delete failed",
+              }),
+            ),
+            percent: 0,
           },
         }));
+        scheduleDownloadStateReset(modelKey, "error", 4000);
       }
     },
     [
@@ -1627,39 +1646,28 @@ export function useSettingsForm({
       modelStatus,
       remoteSpeechActive,
       saveSettingsNow,
+      scheduleDownloadStateReset,
     ],
   );
 
-  const handleCancelDownload = useCallback(async (modelKey: string) => {
-    try {
-      await invoke("cancel_download", { model: modelKey });
-      setDownloadState((prev) => ({
-        ...prev,
-        [modelKey]: {
-          status: "cancelled",
-          percent: 0,
-        },
-      }));
-      const resetTimeout = setTimeout(() => {
-        downloadResetTimeoutsRef.current.delete(resetTimeout);
-        setDownloadState((prev) => {
-          if (prev[modelKey]?.status === "cancelled") {
-            return {
-              ...prev,
-              [modelKey]: {
-                status: "idle",
-                percent: 0,
-              },
-            };
-          }
-          return prev;
-        });
-      }, 1500);
-      downloadResetTimeoutsRef.current.add(resetTimeout);
-    } catch (err) {
-      console.error("Failed to cancel download:", err);
-    }
-  }, []);
+  const handleCancelDownload = useCallback(
+    async (modelKey: string) => {
+      try {
+        await invoke("cancel_download", { model: modelKey });
+        setDownloadState((prev) => ({
+          ...prev,
+          [modelKey]: {
+            status: "cancelled",
+            percent: 0,
+          },
+        }));
+        scheduleDownloadStateReset(modelKey, "cancelled", 1500);
+      } catch (err) {
+        console.error("Failed to cancel download:", err);
+      }
+    },
+    [scheduleDownloadStateReset],
+  );
 
   const handleStartLocalApi = useCallback(async () => {
     flushPendingSettingsSave();

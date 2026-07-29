@@ -71,8 +71,8 @@ const ProvidersTab = ({
       exit="exit"
       className="space-y-5"
     >
-      <div className="grid grid-cols-2 items-start gap-x-4 gap-y-8">
-        <div className="space-y-2">
+      <div className="grid grid-cols-2 items-stretch gap-x-4 gap-y-3">
+        <div className="grid row-span-5 [grid-template-rows:subgrid]">
           <SectionLabel>
             {t({
               id: "settings.providers.speech_label",
@@ -95,7 +95,7 @@ const ProvidersTab = ({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="grid row-span-5 [grid-template-rows:subgrid]">
           <SectionLabel>
             {t({
               id: "settings.providers.language_label",

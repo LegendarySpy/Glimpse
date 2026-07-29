@@ -1,3 +1,26 @@
+1.0.7
+
+### Improvements
+
+- New Personalization setups now start with app suggestions tailored to Windows or macOS.
+
+### Changes
+
+- Simplified the Home header by removing the date.
+- Home asks once, after you have been using Glimpse for a while, whether you will answer a few questions about how you use it. The questions open on the website, your answers are anonymous, and answering or declining removes the line for good. Anonymous analytics record only that the line appeared and which button you pressed, never anything you write on the form.
+
+
+### Fixes
+
+- Fixed deleting a model in the Microsoft Store version, where it left a red error across the row and kept the model. The same problem could stop library items from deleting.
+- Fixed translated auto-delete controls overflowing their settings card on Windows in languages other than English.
+- Moved the dataset export options beside the Export button so the full menu stays visible without scrolling.
+- Speech and language model provider settings now stay aligned when translated descriptions wrap onto different numbers of lines.
+- Personalization modes and their app and website icons now preload before opening the screen, especially on Windows.
+- Windows app icons in Personalization now match the size of the fallback placeholders instead of appearing larger.
+
+---
+
 1.0.6
 
 ### Improvements

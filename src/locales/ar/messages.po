@@ -1483,6 +1483,11 @@ msgid "settings.app.analytics.body"
 msgstr "مجهول الهوية، لا تتم مشاركة أي نصوص أو ملفات صوتية."
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.answer"
+msgstr "إجابة"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.any"
 msgstr "في أي وقت"
@@ -2346,6 +2351,11 @@ msgstr "حذف جميع البيانات. اضغط مع الاستمرار لع�
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.full_add_prompt"
 msgstr "احذف إدخالاً قبل إضافة آخر."
+
+#. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "فشل الحذف"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -3781,6 +3791,11 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "لا توجد علامات بعد"
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.dismiss"
+msgstr "لا، شكرًا"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.count_zero"
 msgstr "لا يوجد صوت مُفرَّغ بعد"
@@ -4801,6 +4816,11 @@ msgstr "ذكي"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "اختصار ذكي"
+
+#. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.title"
+msgstr "بعض الأسئلة حول طريقة استخدامك لـ Glimpse؟"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

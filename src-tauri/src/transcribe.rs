@@ -1132,6 +1132,7 @@ fn emit_transcription_complete_with_cleanup(
     if !update_checker::maybe_show_update_toast(app, &update_state) {
         crate::notifications::evaluate_after_use(app);
     }
+    crate::survey::evaluate_after_use(app);
 
     persisted
 }

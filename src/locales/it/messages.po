@@ -1483,6 +1483,11 @@ msgid "settings.app.analytics.body"
 msgstr "anonimo, nessuna trascrizione o audio condiviso."
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.answer"
+msgstr "Rispondi"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.any"
 msgstr "In qualsiasi momento"
@@ -2346,6 +2351,11 @@ msgstr "Elimina tutti i dati. Tieni premuto per dieci secondi per confermare."
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.full_add_prompt"
 msgstr "Elimina una voce prima di aggiungerne un'altra."
+
+#. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "Eliminazione non riuscita"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -3781,6 +3791,11 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "Nessun tag ancora"
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.dismiss"
+msgstr "No, grazie"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.count_zero"
 msgstr "Nessun audio trascritto ancora"
@@ -4801,6 +4816,11 @@ msgstr "Smart"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "Scorciatoia intelligente"
+
+#. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.title"
+msgstr "Alcune domande su come usi Glimpse?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

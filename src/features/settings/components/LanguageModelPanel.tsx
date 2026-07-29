@@ -100,7 +100,7 @@ const LanguageModelPanel = ({
               });
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-surface-surface p-2.5">
+    <div className="grid row-span-4 [grid-template-rows:subgrid] gap-3 rounded-lg bg-surface-surface p-2.5">
       <div className="px-2 py-1.5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">

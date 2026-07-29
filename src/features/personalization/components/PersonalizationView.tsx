@@ -44,8 +44,8 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
   const mountedRef = useRef(true);
   const shiftHeld = useShiftHeld(isActive);
 
-  const personalitiesQuery = usePersonalities(isActive);
-  const installedAppsQuery = useInstalledApps(isActive);
+  const personalitiesQuery = usePersonalities();
+  const installedAppsQuery = useInstalledApps();
   const personalities = personalitiesQuery.data ?? [];
   const installedApps = installedAppsQuery.data ?? [];
   const loading = isActive && personalitiesQuery.isLoading;
@@ -66,7 +66,7 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
     return Array.from(seen).sort();
   }, [personalities]);
 
-  const websiteIconsQuery = useWebsiteIconMap(websiteDomains, isActive);
+  const websiteIconsQuery = useWebsiteIconMap(websiteDomains);
   const websiteIconBySite = websiteIconsQuery.data ?? {};
 
   useEffect(() => {

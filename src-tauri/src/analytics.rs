@@ -320,6 +320,31 @@ pub fn track_onboarding_step_viewed(app: tauri::AppHandle<AppRuntime>, step: Str
     capture_event(&app, "onboarding_step_viewed", json!({ "step": step }));
 }
 
+/// Records that the one-time feedback prompt appeared, with usage as coarse
+/// buckets rather than exact counts. Never records any answer.
+pub fn track_survey_prompt_shown(
+    app: &tauri::AppHandle<AppRuntime>,
+    dictations: &str,
+    days_installed: &str,
+) {
+    capture_event(
+        app,
+        "survey_prompt_shown",
+        json!({ "dictations": dictations, "days_installed": days_installed }),
+    );
+}
+
+/// Records that the feedback prompt sent someone to the form. The form itself
+/// is anonymous and carries nothing from the app.
+pub fn track_survey_prompt_opened(app: &tauri::AppHandle<AppRuntime>) {
+    capture_event(app, "survey_prompt_opened", json!({}));
+}
+
+/// Records that the feedback prompt was declined.
+pub fn track_survey_prompt_dismissed(app: &tauri::AppHandle<AppRuntime>) {
+    capture_event(app, "survey_prompt_dismissed", json!({}));
+}
+
 /// Records selected product-setting toggles after settings persist.
 pub fn track_setting_changed(
     app: &tauri::AppHandle<AppRuntime>,

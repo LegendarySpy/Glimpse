@@ -151,10 +151,8 @@ pub fn delete_library_item(
             }
         }
         LibraryDeleteScope::DeleteDirectory(path) => {
-            if path.exists() {
-                fs::remove_dir_all(&path)
-                    .map_err(|err| format!("Failed to delete library files: {err}"))?;
-            }
+            crate::platform::remove_dir_all_compat(&path)
+                .map_err(|err| format!("Failed to delete library files: {err}"))?;
         }
         LibraryDeleteScope::SkipFilesystemDeletion => {}
     }

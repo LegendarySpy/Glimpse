@@ -1483,6 +1483,11 @@ msgid "settings.app.analytics.body"
 msgstr "anoniem, zonder transcripties of audio te delen."
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.answer"
+msgstr "Beantwoorden"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.any"
 msgstr "Altijd"
@@ -2346,6 +2351,11 @@ msgstr "Verwijder alle gegevens. Houd tien seconden ingedrukt om te bevestigen."
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.full_add_prompt"
 msgstr "Verwijder een item voordat je een ander toevoegt."
+
+#. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "Verwijderen mislukt"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -3781,6 +3791,11 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "Nog geen tags"
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.dismiss"
+msgstr "Nee, bedankt"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.count_zero"
 msgstr "Nog geen getranscribeerde audio"
@@ -4801,6 +4816,11 @@ msgstr "Slim"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "Slimme sneltoets"
+
+#. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.title"
+msgstr "Een paar vragen over hoe je Glimpse gebruikt?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

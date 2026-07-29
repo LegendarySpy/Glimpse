@@ -586,7 +586,7 @@ function ModelRow({
 
         {isBusy ? (
           <>
-            <div className="flex min-w-[140px] flex-col items-end justify-center">
+            <div className="flex w-[140px] flex-col items-end justify-center">
               <ModelProgressDots percent={percent} status={progress!.status} />
               <div className="mt-1 flex h-3 w-full items-center justify-end">
                 {isVerifying ? (
