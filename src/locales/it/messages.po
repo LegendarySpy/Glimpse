@@ -4820,7 +4820,7 @@ msgstr "Scorciatoia intelligente"
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.title"
-msgstr "Alcune domande su come usi Glimpse?"
+msgstr "Alcune domande su come utilizzi Glimpse?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

@@ -1485,7 +1485,7 @@ msgstr "anonym, keine Transkripte oder Audiodaten werden geteilt."
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.answer"
-msgstr "Antworten"
+msgstr "Antwort"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -3793,7 +3793,7 @@ msgstr "Noch keine Tags"
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.dismiss"
-msgstr "Nein, danke"
+msgstr "Nein danke"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4820,7 +4820,7 @@ msgstr "Intelligente Kurzbefehle"
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.title"
-msgstr "Ein paar Fragen dazu, wie Sie Glimpse nutzen?"
+msgstr "Einige Fragen dazu, wie du Glimpse verwendest?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

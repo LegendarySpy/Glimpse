@@ -1485,7 +1485,7 @@ msgstr "anoniem, zonder transcripties of audio te delen."
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.answer"
-msgstr "Beantwoorden"
+msgstr "Antwoord"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

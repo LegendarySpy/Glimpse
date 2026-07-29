@@ -468,7 +468,7 @@ msgstr "anónimo, no se comparten transcripciones ni audio."
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.answer"
-msgstr "Responder"
+msgstr "Respuesta"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -1338,7 +1338,7 @@ msgstr "Elimina una entrada antes de añadir otra."
 #. js-lingui-explicit-id
 #: src/features/settings/useSettingsForm.ts
 msgid "settings.models.delete_failed"
-msgstr "No se pudo eliminar"
+msgstr "Error al eliminar"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx

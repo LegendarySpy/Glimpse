@@ -4820,7 +4820,7 @@ msgstr "اختصار ذكي"
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.title"
-msgstr "بعض الأسئلة حول طريقة استخدامك لـ Glimpse؟"
+msgstr "بعض الأسئلة حول كيفية استخدامك لـ Glimpse؟"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

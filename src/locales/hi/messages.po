@@ -1485,7 +1485,7 @@ msgstr "गुमनाम, कोई लिप्यंतरण या ऑड�
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.answer"
-msgstr "जवाब दें"
+msgstr "उत्तर"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -2355,7 +2355,7 @@ msgstr "दूसरी जोड़ने से पहले कोई प्�
 #. js-lingui-explicit-id
 #: src/features/settings/useSettingsForm.ts
 msgid "settings.models.delete_failed"
-msgstr "हटाना असफल रहा"
+msgstr "हटाना विफल हुआ"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -4820,7 +4820,7 @@ msgstr "स्मार्ट शॉर्टकट"
 #. js-lingui-explicit-id
 #: src/features/survey/components/SurveyPrompt.tsx
 msgid "home.survey.title"
-msgstr "आप Glimpse का उपयोग कैसे करते हैं, इस पर कुछ सवाल?"
+msgstr "आप Glimpse का उपयोग कैसे करते हैं, इस बारे में कुछ प्रश्न?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
