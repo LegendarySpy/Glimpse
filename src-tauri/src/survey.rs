@@ -194,15 +194,17 @@ pub fn resolve_survey_prompt(app: AppHandle<AppRuntime>, action: String) -> Resu
         return Ok(());
     }
 
-    if outcome == OUTCOME_ANSWERED {
-        app.opener()
-            .open_url(SURVEY_URL, None::<&str>)
-            .map_err(|err| format!("Failed to open the form: {err}"))?;
-    }
-
+    let unresolved = state.clone();
     state.outcome = Some(outcome.to_string());
     state.resolved_at = Some(Utc::now().to_rfc3339());
     state.save(&store)?;
+
+    if outcome == OUTCOME_ANSWERED
+        && let Err(err) = app.opener().open_url(SURVEY_URL, None::<&str>)
+    {
+        let _ = unresolved.save(&store);
+        return Err(format!("Failed to open the form: {err}"));
+    }
 
     if outcome == OUTCOME_ANSWERED {
         crate::analytics::track_survey_prompt_opened(&app);
