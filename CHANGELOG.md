@@ -1,3 +1,11 @@
+1.0.7
+
+### Fixes
+
+- Fixed deleting a model in the Microsoft Store version, where it left a red error across the row and kept the model. The same problem could stop library items from deleting.
+
+---
+
 1.0.6
 
 ### Improvements

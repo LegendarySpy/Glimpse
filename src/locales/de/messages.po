@@ -2348,6 +2348,11 @@ msgid "dictionary.full_add_prompt"
 msgstr "Lösche einen Eintrag, bevor du einen weiteren hinzufügst."
 
 #. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "Löschen fehlgeschlagen"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
 msgid "onboarding.delete.failed"
 msgstr "Löschen fehlgeschlagen"

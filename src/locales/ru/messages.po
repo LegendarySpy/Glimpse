@@ -2348,6 +2348,11 @@ msgid "dictionary.full_add_prompt"
 msgstr "Удалите запись перед добавлением новой."
 
 #. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "Ошибка удаления"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
 msgid "onboarding.delete.failed"
 msgstr "Ошибка удаления"

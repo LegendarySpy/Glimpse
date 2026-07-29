@@ -2348,6 +2348,11 @@ msgid "dictionary.full_add_prompt"
 msgstr "Verwijder een item voordat je een ander toevoegt."
 
 #. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "Verwijderen mislukt"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
 msgid "onboarding.delete.failed"
 msgstr "Verwijderen mislukt"

@@ -1413,6 +1413,11 @@ msgid "dictionary.full_add_prompt"
 msgstr "Delete an entry before adding another."
 
 #. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "Delete failed"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
 msgid "onboarding.delete.failed"
 msgstr "Delete failed"

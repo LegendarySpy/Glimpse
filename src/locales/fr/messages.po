@@ -2348,6 +2348,11 @@ msgid "dictionary.full_add_prompt"
 msgstr "Supprimez une entrée avant d'en ajouter une autre."
 
 #. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "Échec de la suppression"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
 msgid "onboarding.delete.failed"
 msgstr "Échec de la suppression"

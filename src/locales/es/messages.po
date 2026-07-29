@@ -1331,6 +1331,11 @@ msgid "dictionary.full_add_prompt"
 msgstr "Elimina una entrada antes de añadir otra."
 
 #. js-lingui-explicit-id
+#: src/features/settings/useSettingsForm.ts
+msgid "settings.models.delete_failed"
+msgstr "No se pudo eliminar"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
 msgid "onboarding.delete.failed"
 msgstr "No se pudo eliminar"

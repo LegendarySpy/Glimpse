@@ -377,13 +377,64 @@ fn track_download_error(
     message
 }
 
+/// The manager deletes with `remove_dir_all`, so clear the tree first.
+fn delete_model_dir(
+    manager: &speech_models::ModelInstallManager,
+    model: &str,
+) -> Result<speech_models::ModelStatus> {
+    let dir = manager.model_dir(model);
+    crate::platform::remove_dir_all_compat(&dir)
+        .with_context(|| format!("remove model directory {}", dir.display()))?;
+    manager.delete(model)
+}
+
+/// Windows can hold a file open for a moment after it closes (antivirus,
+/// indexer), so retry before reporting failure.
+fn delete_with_retry(
+    manager: &speech_models::ModelInstallManager,
+    model: &str,
+) -> Result<speech_models::ModelStatus> {
+    let mut attempts = 0;
+    loop {
+        match delete_model_dir(manager, model) {
+            Ok(status) => return Ok(status),
+            Err(err) => {
+                attempts += 1;
+                if attempts == 3 {
+                    return Err(err);
+                }
+                tracing::warn!("[speech] delete {model} retrying after: {err:#}");
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
+        }
+    }
+}
+
 #[tauri::command]
-pub fn delete_model(app: AppHandle<AppRuntime>, model: String) -> Result<ModelStatus, String> {
-    let manager = model_manager(&app).map_err(|err| err.to_string())?;
-    let status = manager
-        .delete(&model)
-        .map(|status| map_status(status, &manager))
-        .map_err(|err| err.to_string())?;
+pub async fn delete_model(
+    app: AppHandle<AppRuntime>,
+    model: String,
+) -> Result<ModelStatus, String> {
+    let handle = app.clone();
+    let status = tauri::async_runtime::spawn_blocking(move || {
+        let manager = model_manager(&handle).map_err(|err| err.to_string())?;
+
+        if let Some(state) = handle.try_state::<crate::AppState>() {
+            let transcriber = state.local_transcriber();
+            if transcriber.loaded_model_id().as_deref() == Some(model.as_str()) {
+                transcriber.unload();
+            }
+        }
+
+        delete_with_retry(&manager, &model)
+            .map(|status| map_status(status, &manager))
+            .map_err(|err| {
+                tracing::error!("[speech] delete {model} failed: {err:#}");
+                format!("{err:#}")
+            })
+    })
+    .await
+    .map_err(|err| err.to_string())??;
 
     if let Some(state) = app.try_state::<crate::AppState>() {
         let settings = state.current_settings();
