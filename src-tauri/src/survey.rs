@@ -75,10 +75,13 @@ impl SurveyState {
         }
     }
 
-    fn save(&self, store: &SettingsStore) {
-        if let Err(err) = store.write_app_value(KEY_SURVEY_STATE, self) {
-            tracing::error!("Failed to persist survey state: {err}");
-        }
+    fn save(&self, store: &SettingsStore) -> Result<(), String> {
+        store
+            .write_app_value(KEY_SURVEY_STATE, self)
+            .map_err(|err| {
+                tracing::error!("Failed to persist survey state: {err}");
+                format!("Failed to save your choice: {err}")
+            })
     }
 
     fn resolved(&self) -> bool {
@@ -105,7 +108,9 @@ pub fn evaluate_after_use(app: &AppHandle<AppRuntime>) {
     }
 
     state.eligible_at = Some(now.to_rfc3339());
-    state.save(&store);
+    if state.save(&store).is_err() {
+        return;
+    }
     crate::emit_event(app, EVENT_SURVEY_ELIGIBLE, ());
 }
 
@@ -165,7 +170,9 @@ pub fn mark_survey_prompt_seen(app: AppHandle<AppRuntime>) {
 
     let now = Utc::now();
     state.shown_at = Some(now.to_rfc3339());
-    state.save(&store);
+    if state.save(&store).is_err() {
+        return;
+    }
     crate::analytics::track_survey_prompt_shown(
         &app,
         dictation_bucket(&app),
@@ -195,7 +202,7 @@ pub fn resolve_survey_prompt(app: AppHandle<AppRuntime>, action: String) -> Resu
 
     state.outcome = Some(outcome.to_string());
     state.resolved_at = Some(Utc::now().to_rfc3339());
-    state.save(&store);
+    state.save(&store)?;
 
     if outcome == OUTCOME_ANSWERED {
         crate::analytics::track_survey_prompt_opened(&app);
