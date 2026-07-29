@@ -1,5 +1,9 @@
 1.0.7
 
+### Improvements
+
+- New Personalization setups now start with app suggestions tailored to Windows or macOS.
+
 ### Changes
 
 - Simplified the Home header by removing the date.
