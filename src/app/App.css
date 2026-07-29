@@ -519,6 +519,14 @@
     color: var(--color-text-disabled);
   }
 
+  .ui-color-quiet {
+    color: var(--color-text-disabled);
+  }
+
+  :root[data-theme="light"] .ui-color-quiet {
+    color: var(--color-text-muted);
+  }
+
   .ui-color-api-log {
     color: var(--color-text-muted);
     color: color-mix(

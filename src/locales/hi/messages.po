@@ -1483,6 +1483,11 @@ msgid "settings.app.analytics.body"
 msgstr "गुमनाम, कोई लिप्यंतरण या ऑडियो साझा नहीं किया जाता।"
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.answer"
+msgstr "जवाब दें"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.any"
 msgstr "कभी भी"
@@ -3786,6 +3791,11 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "अभी तक कोई टैग नहीं"
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.dismiss"
+msgstr "नहीं, धन्यवाद"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.count_zero"
 msgstr "अभी तक कोई ऑडियो लिप्यांतरित नहीं हुआ"
@@ -4806,6 +4816,11 @@ msgstr "स्मार्ट"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "स्मार्ट शॉर्टकट"
+
+#. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.title"
+msgstr "आप Glimpse का उपयोग कैसे करते हैं, इस पर कुछ सवाल?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

@@ -78,6 +78,10 @@ fn parse_timestamp(raw: &str) -> Option<DateTime<Utc>> {
         .map(|ts| ts.with_timezone(&Utc))
 }
 
+pub fn last_notice_shown_at(store: &SettingsStore) -> Option<DateTime<Utc>> {
+    NoticeState::load(store).last_shown_any()
+}
+
 pub fn evaluate_after_use(app: &AppHandle<AppRuntime>) {
     if license::developer_license_bypass_active() {
         return;

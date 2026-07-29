@@ -1483,6 +1483,11 @@ msgid "settings.app.analytics.body"
 msgstr "анонимно, без передачи расшифровок или аудио."
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.answer"
+msgstr "Ответить"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.any"
 msgstr "Любое время"
@@ -3786,6 +3791,11 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "Тегов пока нет"
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.dismiss"
+msgstr "Нет, спасибо"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.count_zero"
 msgstr "Расшифрованных записей пока нет"
@@ -4806,6 +4816,11 @@ msgstr "Умный"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "Умное сочетание клавиш"
+
+#. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.title"
+msgstr "Несколько вопросов о том, как вы используете Glimpse?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx

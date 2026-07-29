@@ -30,6 +30,7 @@ mod settings;
 mod speech;
 mod storage;
 mod streaming_transcription;
+mod survey;
 mod toast;
 mod transcribe;
 mod transcription_api;
@@ -691,6 +692,9 @@ pub fn run() {
             fetch_remote_speech_models,
             open_about_page,
             open_account_page,
+            survey::get_survey_prompt,
+            survey::mark_survey_prompt_seen,
+            survey::resolve_survey_prompt,
             reveal_logs,
             update_checker::get_update_status,
             update_checker::check_for_updates,
@@ -1048,7 +1052,7 @@ impl AppState {
         Arc::clone(&self.local_transcriber)
     }
 
-    fn storage(&self) -> Arc<storage::StorageManager> {
+    pub(crate) fn storage(&self) -> Arc<storage::StorageManager> {
         Arc::clone(&self.storage)
     }
 

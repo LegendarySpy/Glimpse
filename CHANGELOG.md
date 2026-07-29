@@ -7,6 +7,7 @@
 ### Changes
 
 - Simplified the Home header by removing the date.
+- Home asks once, after you have been using Glimpse for a while, whether you will answer a few questions about how you use it. The questions open on the website, your answers are anonymous, and answering or declining removes the line for good. Anonymous analytics record only that the line appeared and which button you pressed, never anything you write on the form.
 
 
 ### Fixes

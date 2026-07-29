@@ -1483,6 +1483,11 @@ msgid "settings.app.analytics.body"
 msgstr "anonym, keine Transkripte oder Audiodaten werden geteilt."
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.answer"
+msgstr "Antworten"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
 msgid "transcriptions.time.any"
 msgstr "Jederzeit"
@@ -3786,6 +3791,11 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "Noch keine Tags"
 
 #. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.dismiss"
+msgstr "Nein, danke"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.count_zero"
 msgstr "Noch keine transkribierte Audiodatei"
@@ -4806,6 +4816,11 @@ msgstr "Intelligent"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "Intelligente Kurzbefehle"
+
+#. js-lingui-explicit-id
+#: src/features/survey/components/SurveyPrompt.tsx
+msgid "home.survey.title"
+msgstr "Ein paar Fragen dazu, wie Sie Glimpse nutzen?"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
