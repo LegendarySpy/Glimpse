@@ -3,6 +3,9 @@
 ### Fixes
 
 - Fixed deleting a model in the Microsoft Store version, where it left a red error across the row and kept the model. The same problem could stop library items from deleting.
+- Fixed translated auto-delete controls overflowing their settings card on Windows in languages other than English.
+- Moved the dataset export options beside the Export button so the full menu stays visible without scrolling.
+- Speech and language model provider settings now stay aligned when translated descriptions wrap onto different numbers of lines.
 
 ---
 

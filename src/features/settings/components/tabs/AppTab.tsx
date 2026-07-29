@@ -935,13 +935,7 @@ const AppTab = ({
                 </div>
               </ToggleRow>
               <div className="relative px-2 py-1.5 overflow-visible">
-                <div
-                  className={
-                    textSizeMode === "large"
-                      ? "flex flex-wrap items-center gap-x-1 gap-y-1"
-                      : "flex items-center gap-x-1 whitespace-nowrap"
-                  }
-                >
+                <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
                   <span className="ui-text-label-strong ui-color-primary shrink-0">
                     {t({
                       id: "settings.app.auto_delete",
