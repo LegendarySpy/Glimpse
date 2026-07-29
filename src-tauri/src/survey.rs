@@ -92,10 +92,6 @@ pub struct SurveyPrompt {
 }
 
 pub fn evaluate_after_use(app: &AppHandle<AppRuntime>) {
-    if license::developer_license_bypass_active() && !forced() {
-        return;
-    }
-
     let store = app.state::<AppState>().settings_store.clone();
     let mut state = SurveyState::load(&store);
 
@@ -104,17 +100,13 @@ pub fn evaluate_after_use(app: &AppHandle<AppRuntime>) {
     }
 
     let now = Utc::now();
-    if !forced() && !thresholds_met(app, &store, now) {
+    if !thresholds_met(app, &store, now) {
         return;
     }
 
     state.eligible_at = Some(now.to_rfc3339());
     state.save(&store);
     crate::emit_event(app, EVENT_SURVEY_ELIGIBLE, ());
-}
-
-fn forced() -> bool {
-    std::env::var("GLIMPSE_FORCE_SURVEY").is_ok_and(|value| value == "1")
 }
 
 fn thresholds_met(app: &AppHandle<AppRuntime>, store: &SettingsStore, now: DateTime<Utc>) -> bool {
@@ -156,10 +148,6 @@ fn installed_at(store: &SettingsStore) -> Option<DateTime<Utc>> {
 
 #[tauri::command]
 pub fn get_survey_prompt(app: AppHandle<AppRuntime>) -> SurveyPrompt {
-    if forced() {
-        return SurveyPrompt { show: true };
-    }
-
     let store = app.state::<AppState>().settings_store.clone();
     let state = SurveyState::load(&store);
     SurveyPrompt {
@@ -169,10 +157,6 @@ pub fn get_survey_prompt(app: AppHandle<AppRuntime>) -> SurveyPrompt {
 
 #[tauri::command]
 pub fn mark_survey_prompt_seen(app: AppHandle<AppRuntime>) {
-    if forced() {
-        return;
-    }
-
     let store = app.state::<AppState>().settings_store.clone();
     let mut state = SurveyState::load(&store);
     if state.eligible_at.is_none() || state.resolved() || state.shown_at.is_some() {
@@ -199,7 +183,7 @@ pub fn resolve_survey_prompt(app: AppHandle<AppRuntime>, action: String) -> Resu
 
     let store = app.state::<AppState>().settings_store.clone();
     let mut state = SurveyState::load(&store);
-    if state.resolved() && !forced() {
+    if state.resolved() {
         return Ok(());
     }
 
@@ -207,10 +191,6 @@ pub fn resolve_survey_prompt(app: AppHandle<AppRuntime>, action: String) -> Resu
         app.opener()
             .open_url(SURVEY_URL, None::<&str>)
             .map_err(|err| format!("Failed to open the form: {err}"))?;
-    }
-
-    if forced() {
-        return Ok(());
     }
 
     state.outcome = Some(outcome.to_string());
