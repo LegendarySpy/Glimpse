@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import DotMatrix from "../../../shared/ui/DotMatrix";
 import { useClickOutside } from "../../../shared/hooks/useClickOutside";
+import { detectAppPlatform } from "../../../platform/service";
 import type { Personality } from "../../../types";
 import {
   clampInstructionsHeight,
@@ -41,6 +42,8 @@ type AppIconBadgeProps = {
   size?: "chip" | "list" | "option";
 };
 
+const useWindowsAppIconSizing = detectAppPlatform() === "windows";
+
 const AppIconBadge = ({
   appName,
   iconPath,
@@ -58,7 +61,11 @@ const AppIconBadge = ({
         <img
           src={iconUrl}
           alt=""
-          className="h-full w-full object-contain scale-[1.18]"
+          className={
+            useWindowsAppIconSizing
+              ? "h-full w-full object-contain"
+              : "h-full w-full object-contain scale-[1.18]"
+          }
           loading="lazy"
         />
       </span>

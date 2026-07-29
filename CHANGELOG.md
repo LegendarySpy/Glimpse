@@ -12,6 +12,7 @@
 - Moved the dataset export options beside the Export button so the full menu stays visible without scrolling.
 - Speech and language model provider settings now stay aligned when translated descriptions wrap onto different numbers of lines.
 - Personalization modes and their app and website icons now preload before opening the screen, especially on Windows.
+- Windows app icons in Personalization now match the size of the fallback placeholders instead of appearing larger.
 
 ---
 
