@@ -304,7 +304,7 @@ struct MessageContent {
 
 impl MessageContent {
     fn text(self) -> String {
-        match self.content {
+        let raw = match self.content {
             Some(ResponseContent::Text(text)) => text,
             Some(ResponseContent::Parts(parts)) => parts
                 .into_iter()
@@ -312,8 +312,34 @@ impl MessageContent {
                 .collect::<Vec<_>>()
                 .join(""),
             None => String::new(),
+        };
+        strip_reasoning(&raw)
+    }
+}
+
+const REASONING_TAGS: [&str; 5] = ["think", "thinking", "reason", "reasoning", "scratchpad"];
+
+/// Reasoning models emit their working before the answer. Pasting that into the
+/// user's document is worse than returning nothing, so it is removed here rather
+/// than in any one caller.
+pub fn strip_reasoning(raw: &str) -> String {
+    let mut out = raw.to_string();
+
+    for tag in REASONING_TAGS {
+        let close = format!("</{tag}>");
+        // Answer follows the final close tag; nested blocks collapse with it.
+        if let Some(at) = out.to_lowercase().rfind(&close) {
+            out = out[at + close.len()..].to_string();
+            continue;
+        }
+        // Truncated block with no close: keep only what came before it.
+        let open = format!("<{tag}>");
+        if let Some(at) = out.to_lowercase().find(&open) {
+            out.truncate(at);
         }
     }
+
+    out.trim().to_string()
 }
 
 #[derive(Debug, Deserialize)]
