@@ -86,6 +86,12 @@ msgid "import.subtitle"
 msgstr "{0, plural, one {Abbiamo trovato un'altra app di dettatura. Scegli cosa importare.} other {Abbiamo trovato altre app di dettatura. Scegli cosa importare.}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} copia"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: entries.length
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.entry_count.multiple"
@@ -1316,6 +1322,11 @@ msgstr "Elimina"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
+msgstr "Elimina"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.delete"
 msgstr "Elimina"
 
@@ -1509,6 +1520,11 @@ msgstr "Il dizionario funziona solo con i modelli che supportano questa funzione
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "Disattiva"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.disable_mode"
 msgstr "Disabilita modalità"
 
@@ -1588,6 +1604,11 @@ msgid "home.drag_import.title"
 msgstr "Trascina i file per trascrivere"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "Duplica"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Modifica"
@@ -1611,6 +1632,11 @@ msgstr "E-mail"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "Trascrizione vuota"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "Attiva"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3290,6 +3316,11 @@ msgstr "Rimuovi scorciatoia"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
 msgstr "Rimuove registrazioni, trascrizioni, modelli e impostazioni, poi esce"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "Rinomina"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx

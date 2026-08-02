@@ -86,6 +86,12 @@ msgid "import.subtitle"
 msgstr "{0, plural, one {We found another dictation app. Choose what to import.} other {We found other dictation apps. Choose what to import.}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} copy"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: entries.length
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.entry_count.multiple"
@@ -1316,6 +1322,11 @@ msgstr "Delete"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
+msgstr "Delete"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.delete"
 msgstr "Delete"
 
@@ -1509,6 +1520,11 @@ msgstr "Dictionary works only for models with dictionary support. Current model 
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "Disable"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.disable_mode"
 msgstr "Disable mode"
 
@@ -1588,6 +1604,11 @@ msgid "home.drag_import.title"
 msgstr "Drop files to transcribe"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "Duplicate"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Edit"
@@ -1611,6 +1632,11 @@ msgstr "Email"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "Empty transcription"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "Enable"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3290,6 +3316,11 @@ msgstr "Remove shortcut"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
 msgstr "Removes recordings, transcripts, models, and settings, then quits"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "Rename"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx

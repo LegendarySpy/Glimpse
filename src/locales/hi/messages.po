@@ -86,6 +86,12 @@ msgid "import.subtitle"
 msgstr "{0, plural, one {हमें एक और डिक्टेशन ऐप मिला। क्या आयात करना है, चुनें।} other {हमें और डिक्टेशन ऐप मिले। क्या आयात करना है, चुनें।}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} प्रति"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: entries.length
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.entry_count.multiple"
@@ -1316,6 +1322,11 @@ msgstr "हटाएँ"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
+msgstr "हटाएँ"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.delete"
 msgstr "हटाएँ"
 
@@ -1509,6 +1520,11 @@ msgstr "शब्दकोश केवल उन्हीं मॉडलों
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "बंद करें"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.disable_mode"
 msgstr "मोड बंद करें"
 
@@ -1588,6 +1604,11 @@ msgid "home.drag_import.title"
 msgstr "ट्रांसक्राइब करने के लिए फ़ाइलें यहाँ छोड़ें"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "डुप्लिकेट"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "संपादित करें"
@@ -1611,6 +1632,11 @@ msgstr "ईमेल"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "खाली ट्रांसक्रिप्शन"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "चालू करें"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3290,6 +3316,11 @@ msgstr "शॉर्टकट हटाएँ"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
 msgstr "रिकॉर्डिंग, लिप्यंतरण, मॉडल और सेटिंग्स हटाकर ऐप बंद करता है"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "नाम बदलें"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx

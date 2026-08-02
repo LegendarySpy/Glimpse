@@ -86,6 +86,12 @@ msgid "import.subtitle"
 msgstr "{0, plural, one {Encontramos otra app de dictado. Elige qué importar.} other {Encontramos otras apps de dictado. Elige qué importar.}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} copia"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: entries.length
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.entry_count.multiple"
@@ -1316,6 +1322,11 @@ msgstr "Eliminar"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
+msgstr "Eliminar"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.delete"
 msgstr "Eliminar"
 
@@ -1509,6 +1520,11 @@ msgstr "El diccionario solo funciona con modelos que lo admiten. El modelo actua
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "Desactivar"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.disable_mode"
 msgstr "Desactivar modo"
 
@@ -1588,6 +1604,11 @@ msgid "home.drag_import.title"
 msgstr "Suelta archivos para transcribir"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "Duplicar"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Editar"
@@ -1611,6 +1632,11 @@ msgstr "Correo electrónico"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "Transcripción vacía"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "Activar"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3290,6 +3316,11 @@ msgstr "Eliminar atajo"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
 msgstr "Elimina grabaciones, transcripciones, modelos y ajustes, y luego sale"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "Renombrar"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx

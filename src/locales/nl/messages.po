@@ -86,6 +86,12 @@ msgid "import.subtitle"
 msgstr "{0, plural, one {We hebben een andere dictee-app gevonden. Kies wat je wilt importeren.} other {We hebben andere dictee-apps gevonden. Kies wat je wilt importeren.}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} kopie"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: entries.length
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.entry_count.multiple"
@@ -1316,6 +1322,11 @@ msgstr "Verwijder"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
+msgstr "Verwijderen"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.delete"
 msgstr "Verwijderen"
 
@@ -1509,6 +1520,11 @@ msgstr "Woordenboek werkt alleen voor modellen met woordenboekondersteuning. Het
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "Uitschakelen"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.disable_mode"
 msgstr "Modus uitschakelen"
 
@@ -1588,6 +1604,11 @@ msgid "home.drag_import.title"
 msgstr "Zet bestanden hier neer om te transcriberen"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "Dupliceren"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Wijzig"
@@ -1611,6 +1632,11 @@ msgstr "E-mail"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "Lege transcriptie"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "Inschakelen"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3290,6 +3316,11 @@ msgstr "Snelkoppeling verwijderen"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
 msgstr "Verwijdert opnamen, transcripties, modellen en instellingen en stopt vervolgens"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "Naam wijzigen"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx

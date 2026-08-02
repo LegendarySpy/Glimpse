@@ -86,6 +86,12 @@ msgid "import.subtitle"
 msgstr "{0, plural, one {عثرنا على تطبيق إملاء آخر. اختر ما تريد استيراده.} other {عثرنا على تطبيقات إملاء أخرى. اختر ما تريد استيراده.}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} نسخة"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: entries.length
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.entry_count.multiple"
@@ -1316,6 +1322,11 @@ msgstr "حذف"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
+msgstr "حذف"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.delete"
 msgstr "حذف"
 
@@ -1509,6 +1520,11 @@ msgstr "يعمل القاموس فقط مع النماذج التي تدعمه. 
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "تعطيل"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.disable_mode"
 msgstr "تعطيل الوضع"
 
@@ -1588,6 +1604,11 @@ msgid "home.drag_import.title"
 msgstr "أفلت الملفات لنسخها"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "تكرار"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "تحرير"
@@ -1611,6 +1632,11 @@ msgstr "البريد الإلكتروني"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "نص مكتوب فارغ"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "تفعيل"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3290,6 +3316,11 @@ msgstr "إزالة الاختصار"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
 msgstr "يحذف التسجيلات والنصوص والنماذج والإعدادات، ثم يُغلق التطبيق"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "إعادة تسمية"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx

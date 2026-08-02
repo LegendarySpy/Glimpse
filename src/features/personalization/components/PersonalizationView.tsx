@@ -1,8 +1,16 @@
 import { useLingui } from "@lingui/react/macro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus } from "@phosphor-icons/react";
+import {
+  CopySimple,
+  Eye,
+  EyeSlash,
+  Pencil,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { useShiftHeld } from "../../../shared/hooks/useShiftHeld";
 import ToggleSwitch from "../../../shared/ui/ToggleSwitch";
 import DotMatrix from "../../../shared/ui/DotMatrix";
@@ -27,10 +35,39 @@ import PersonalityModal, {
   type PendingDeletePersonality,
 } from "./PersonalityModal";
 
+const ModeMenuItem = ({
+  icon,
+  label,
+  onClick,
+  destructive = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+}) => (
+  <button
+    type="button"
+    role="menuitem"
+    onClick={onClick}
+    className={`flex w-full items-center gap-2.5 px-3 py-2 ui-text-menu-item transition-colors hover:bg-surface-elevated ${
+      destructive ? "ui-color-error" : "ui-color-secondary"
+    }`}
+  >
+    {icon}
+    <span>{label}</span>
+  </button>
+);
+
 const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
   const { t } = useLingui();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [modeMenu, setModeMenu] = useState<{
+    personality: Personality;
+    x: number;
+    y: number;
+  } | null>(null);
   const [activePersonalityId, setActivePersonalityId] = useState<string | null>(
     null,
   );
@@ -229,6 +266,25 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
     [updatePersonalities],
   );
 
+  const duplicateMode = useCallback(
+    (personality: Personality) => {
+      const copy: Personality = {
+        ...personality,
+        id: createId(),
+        name: t({
+          id: "personalization.mode.copy_name",
+          message: `${personality.name} copy`,
+        }),
+      };
+      updatePersonalities((prev) => {
+        const at = prev.findIndex((mode) => mode.id === personality.id);
+        if (at < 0) return [...prev, copy];
+        return [...prev.slice(0, at + 1), copy, ...prev.slice(at + 1)];
+      });
+    },
+    [t, updatePersonalities],
+  );
+
   const handleAddMode = () => {
     const id = createId();
     const nextMode: Personality = {
@@ -298,6 +354,12 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
         return;
       }
 
+      if (modeMenu) {
+        event.preventDefault();
+        setModeMenu(null);
+        return;
+      }
+
       if (pendingDeletePersonality) {
         event.preventDefault();
         setPendingDeletePersonality(null);
@@ -312,7 +374,7 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activePersonalityId, isActive, pendingDeletePersonality]);
+  }, [activePersonalityId, isActive, modeMenu, pendingDeletePersonality]);
 
   return (
     <div className="flex h-full min-h-0 w-full max-w-7xl flex-col text-left mx-auto px-0">
@@ -402,6 +464,14 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
               return (
                 <div
                   key={personality.id || `personality-${index}`}
+                  onContextMenu={(event) => {
+                    event.preventDefault();
+                    setModeMenu({
+                      personality,
+                      x: event.clientX,
+                      y: event.clientY,
+                    });
+                  }}
                   onClick={() => {
                     if (shiftHeld) {
                       requestDeleteModeConfirm(personality);
@@ -580,6 +650,91 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
           </div>
         </div>
       )}
+
+      {modeMenu &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-[110]"
+              onClick={() => setModeMenu(null)}
+              onContextMenu={(event) => {
+                event.preventDefault();
+                setModeMenu(null);
+              }}
+            />
+            <div
+              role="menu"
+              className="ui-surface-menu fixed z-[120] min-w-[168px] py-1"
+              style={{
+                left: Math.min(modeMenu.x, window.innerWidth - 184),
+                top: Math.min(modeMenu.y, window.innerHeight - 172),
+              }}
+            >
+              <ModeMenuItem
+                icon={<Pencil size={12} className="ui-color-muted" />}
+                label={t({
+                  id: "personalization.mode.rename",
+                  message: "Rename",
+                })}
+                onClick={() => {
+                  setActivePersonalityId(modeMenu.personality.id);
+                  setModeMenu(null);
+                }}
+              />
+              <ModeMenuItem
+                icon={<CopySimple size={12} className="ui-color-muted" />}
+                label={t({
+                  id: "personalization.mode.duplicate",
+                  message: "Duplicate",
+                })}
+                onClick={() => {
+                  duplicateMode(modeMenu.personality);
+                  setModeMenu(null);
+                }}
+              />
+              <ModeMenuItem
+                icon={
+                  modeMenu.personality.enabled ? (
+                    <EyeSlash size={12} className="ui-color-muted" />
+                  ) : (
+                    <Eye size={12} className="ui-color-muted" />
+                  )
+                }
+                label={
+                  modeMenu.personality.enabled
+                    ? t({
+                        id: "personalization.mode.disable",
+                        message: "Disable",
+                      })
+                    : t({
+                        id: "personalization.mode.enable",
+                        message: "Enable",
+                      })
+                }
+                onClick={() => {
+                  updatePersonality(modeMenu.personality.id, {
+                    enabled: !modeMenu.personality.enabled,
+                  });
+                  setModeMenu(null);
+                }}
+              />
+              <div className="my-1 h-px bg-[var(--border-subtle)]" />
+              <ModeMenuItem
+                icon={<Trash size={12} className="ui-color-error" />}
+                label={t({
+                  id: "personalization.mode.delete",
+                  message: "Delete",
+                })}
+                destructive
+                onClick={() => {
+                  requestDeleteModeConfirm(modeMenu.personality);
+                  setModeMenu(null);
+                }}
+              />
+            </div>
+          </>,
+          document.body,
+        )}
 
       {errorMessage && (
         <div className="mt-4 ui-text-body-sm ui-color-error-soft">

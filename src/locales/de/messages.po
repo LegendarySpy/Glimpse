@@ -86,6 +86,12 @@ msgid "import.subtitle"
 msgstr "{0, plural, one {Wir haben eine andere Diktier-App gefunden. Wähle aus, was importiert werden soll.} other {Wir haben andere Diktier-Apps gefunden. Wähle aus, was importiert werden soll.}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} Kopie"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: entries.length
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.entry_count.multiple"
@@ -1316,6 +1322,11 @@ msgstr "Löschen"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
+msgstr "Löschen"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.delete"
 msgstr "Löschen"
 
@@ -1509,6 +1520,11 @@ msgstr "Das Wörterbuch funktioniert nur mit Modellen, die Wörterbuchunterstüt
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "Deaktivieren"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.disable_mode"
 msgstr "Modus deaktivieren"
 
@@ -1588,6 +1604,11 @@ msgid "home.drag_import.title"
 msgstr "Dateien zum Transkribieren hier ablegen"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "Duplizieren"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Bearbeiten"
@@ -1611,6 +1632,11 @@ msgstr "E-Mail"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "Leere Transkription"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "Aktivieren"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -3290,6 +3316,11 @@ msgstr "Tastenkürzel entfernen"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.delete_all_description"
 msgstr "Entfernt Aufnahmen, Transkripte, Modelle und Einstellungen und beendet anschließend das Programm"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "Umbenennen"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
