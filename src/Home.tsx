@@ -9,7 +9,6 @@ import {
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  GearSix as Settings,
   CaretLeft as ChevronLeft,
   House as HomeIcon,
   BookBookmark as Book,
@@ -22,11 +21,16 @@ import {
   X,
   ArrowCircleUp as ArrowUpCircle,
   Books as Library,
-  Lock,
-  type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import WindowControls from "./shared/ui/WindowControls";
+import SidebarItem from "./shared/ui/SidebarItem";
+import SettingsNavToggle from "./features/settings/components/SettingsNavToggle";
+import {
+  SETTINGS_PANE_GROUPS,
+  type SettingsPane,
+} from "./features/settings/settingsPanes";
+import { i18n } from "./i18n";
 import { detectAppPlatform } from "./platform/service";
 import { useClickOutside } from "./shared/hooks/useClickOutside";
 import { useCopyToClipboard } from "./shared/hooks/useCopyToClipboard";
@@ -43,15 +47,15 @@ import NewsMenu from "./features/news/components/NewsMenu";
 import AccountPill from "./features/license/components/AccountPill";
 import { getLocalApiStatus } from "./features/settings/models-api";
 import type { LocalApiStatus } from "./types";
-import { useLicenseGate } from "./features/license/queries";
+import { useLicenseGate, useLicenseState } from "./features/license/queries";
 import type { PurchaseSource } from "./features/license/purchaseConfig";
 import { useSettings, useAppInfo } from "./features/settings/queries";
 import { useUpdateStatus } from "./features/updates/queries";
 import type { TranscriptionMode } from "./types";
 
-const SettingsModal = lazy(
-  () => import("./features/settings/components/SettingsModal"),
-);
+const importSettingsScreen = () =>
+  import("./features/settings/components/SettingsScreen");
+const SettingsScreen = lazy(importSettingsScreen);
 const FAQModal = lazy(() => import("./shared/ui/FAQModal"));
 
 type ActiveView = "home" | "dictionary" | "brain" | "library";
@@ -120,66 +124,18 @@ const StaticGlimpseLogo = ({
   );
 };
 
-const SidebarItem = ({
-  icon: Icon,
-  label,
-  active = false,
-  collapsed,
-  locked = false,
-  lockedHint,
-  onClick,
-}: {
-  icon: PhosphorIcon;
-  label: string;
-  active?: boolean;
-  collapsed: boolean;
-  locked?: boolean;
-  lockedHint?: string;
-  onClick?: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    title={locked ? lockedHint : undefined}
-    data-active={active ? "true" : "false"}
-    className={`ui-nav-item group h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 mb-[2px] ${
-      collapsed ? "gap-0" : "gap-3"
-    } ${locked ? "opacity-45 hover:opacity-75" : ""}`}
-  >
-    <div className="flex items-center justify-center w-[20px] shrink-0">
-      <Icon size={20} weight={active ? "fill" : "regular"} />
-    </div>
-    <span
-      style={{ width: collapsed ? 0 : "auto", opacity: collapsed ? 0 : 1 }}
-      className={`ui-text-nav-item whitespace-nowrap overflow-hidden transition-[width,opacity] duration-200 ease-out ${
-        active ? "font-medium" : "font-normal"
-      }`}
-    >
-      {label}
-    </span>
-    {locked && !collapsed ? (
-      <Lock size={12} className="ml-auto shrink-0" aria-hidden="true" />
-    ) : null}
-  </button>
-);
-
 const Home = () => {
   const { t } = useLingui();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settingsOpened, setSettingsOpened] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<
-    | "general"
-    | "account"
-    | "models"
-    | "providers"
-    | "local-api"
-    | "about"
-    | "app"
-  >("general");
+  const [settingsMounted, setSettingsMounted] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsPane>("account");
   const [accountSource, setAccountSource] =
     useState<PurchaseSource>("settings_account");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeView, setActiveView] = useState<ActiveView>("home");
   const licenseGateActive = useLicenseGate();
+  const { data: licenseState } = useLicenseState();
+  const activeLicense = licenseState?.status === "active";
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const {
     copied: supportEmailCopied,
@@ -211,8 +167,32 @@ const Home = () => {
   const updateAvailable = updateStatus?.available ?? false;
 
   useEffect(() => {
-    if (isSettingsOpen) setSettingsOpened(true);
+    if (isSettingsOpen) setSettingsMounted(true);
   }, [isSettingsOpen]);
+
+  // Mount settings hidden while the app is idle so its queries are already
+  // warm and the first click has nothing to wait for.
+  useEffect(() => {
+    const warm = () => {
+      void importSettingsScreen().then(() => setSettingsMounted(true));
+    };
+    const idle = window.requestIdleCallback?.(warm);
+    if (idle === undefined) {
+      const timer = window.setTimeout(warm, 1500);
+      return () => window.clearTimeout(timer);
+    }
+    return () => window.cancelIdleCallback?.(idle);
+  }, []);
+
+  const closeSettings = useCallback(() => {
+    setIsSettingsOpen(false);
+    setSettingsTab("account");
+    setAccountSource("settings_account");
+  }, []);
+
+  const toggleSidebarCollapsed = useCallback(() => {
+    setIsSidebarCollapsed((collapsed) => !collapsed);
+  }, []);
 
   useEffect(() => {
     if (showFAQ) setFaqOpened(true);
@@ -250,9 +230,9 @@ const Home = () => {
   );
 
   const openLocalApiSettings = useCallback(() => {
-    setSettingsTab(licenseGateActive ? "local-api" : "general");
+    setSettingsTab(activeLicense ? "api" : "account");
     setIsSettingsOpen(true);
-  }, [licenseGateActive]);
+  }, [activeLicense]);
 
   useEffect(() => {
     let cancelled = false;
@@ -374,6 +354,7 @@ const Home = () => {
       if (event.payload?.paths?.length) {
         setPendingImportPaths(Array.from(new Set(event.payload.paths)));
         setActiveView("library");
+        setIsSettingsOpen(false);
       }
     })
       .then((fn) => {
@@ -387,6 +368,7 @@ const Home = () => {
       if (event.payload?.length) {
         setPendingImportPaths(Array.from(new Set(event.payload)));
         setActiveView("library");
+        setIsSettingsOpen(false);
       }
     })
       .then((fn) => {
@@ -467,25 +449,24 @@ const Home = () => {
     return () => document.removeEventListener("keydown", handleCopy);
   }, []);
 
-  const isCloudMode = transcriptionMode === "cloud";
-
-  const showCleanupButtons = isCloudMode || (llmEnabled && licenseGateActive);
-  const currentModeLabel = isCloudMode
-    ? t({
-        id: "home.mode.cloud",
-        message: "Cloud",
-      })
-    : t({
-        id: "home.mode.local",
-        message: "Local",
-      });
+  const showCleanupButtons = llmEnabled && licenseGateActive;
+  const currentModeLabel = t({
+    id: "home.mode.local",
+    message: "Local",
+  });
 
   const lockedHint = t({
     id: "home.sidebar.locked_hint",
     message: "Needs a Glimpse license. Opens Account.",
   });
 
-  const homeViewActive = activeView === "home";
+  const homeViewActive = activeView === "home" && !isSettingsOpen;
+  const returnIcon = {
+    home: HomeIcon,
+    dictionary: Book,
+    brain: Brain,
+    library: Library,
+  }[activeView];
   useTimeOfDayPeriodTick(homeViewActive);
   const {
     data: todayStats = EMPTY_TODAY_DICTATION_STATS,
@@ -513,10 +494,8 @@ const Home = () => {
           >
             <div className="flex w-[20px] shrink-0 items-center justify-center">
               <StaticGlimpseLogo
-                cloudActive={isCloudMode || remoteSpeechEnabled || llmEnabled}
-                localActive={
-                  transcriptionMode === "local" && !remoteSpeechEnabled
-                }
+                cloudActive={remoteSpeechEnabled || llmEnabled}
+                localActive={!remoteSpeechEnabled}
               />
             </div>
             <span
@@ -532,59 +511,106 @@ const Home = () => {
         </div>
 
         <nav className="flex-1 flex flex-col px-2">
-          <div className="space-y-1">
-            <SidebarItem
-              icon={HomeIcon}
-              label={t({
-                id: "home.sidebar.home",
-                message: "Home",
-              })}
-              active={activeView === "home"}
-              collapsed={isSidebarCollapsed}
-              onClick={() => setActiveView("home")}
-            />
-            <SidebarItem
-              icon={Book}
-              label={t({
-                id: "home.sidebar.dictionary",
-                message: "Dictionary",
-              })}
-              active={activeView === "dictionary"}
-              collapsed={isSidebarCollapsed}
-              onClick={() => setActiveView("dictionary")}
-            />
-            <SidebarItem
-              icon={Brain}
-              label={t({
-                id: "home.sidebar.personalization",
-                message: "Personalization",
-              })}
-              active={activeView === "brain"}
-              collapsed={isSidebarCollapsed}
-              locked={!licenseGateActive}
-              lockedHint={lockedHint}
-              onClick={() =>
-                licenseGateActive
-                  ? setActiveView("brain")
-                  : openAccountSettings("sidebar_lock")
-              }
-            />
-            <SidebarItem
-              icon={Library}
-              label={t({
-                id: "home.sidebar.library",
-                message: "Library",
-              })}
-              active={activeView === "library"}
-              collapsed={isSidebarCollapsed}
-              locked={!licenseGateActive}
-              lockedHint={lockedHint}
-              onClick={() =>
-                licenseGateActive
-                  ? setActiveView("library")
-                  : openAccountSettings("sidebar_lock")
-              }
-            />
+          <div
+            key={isSettingsOpen ? "settings-nav" : "app-nav"}
+            className="nav-swap space-y-1"
+          >
+            {isSettingsOpen ? (
+              SETTINGS_PANE_GROUPS.map((group, groupIndex) => {
+                const panes = group.panes;
+                if (panes.length === 0) return null;
+                return (
+                  <div key={groupIndex} className="space-y-1">
+                    {groupIndex > 0 && (
+                      <div className="flex h-5 items-center overflow-hidden px-2.5">
+                        {group.caption ? (
+                          <span className="ui-text-uppercase-meta ui-color-disabled font-semibold whitespace-nowrap">
+                            {i18n._(group.caption)}
+                          </span>
+                        ) : (
+                          <div className="h-px w-full bg-[var(--border-subtle)]" />
+                        )}
+                      </div>
+                    )}
+                    {panes.map((paneDef) => {
+                      const locked =
+                        paneDef.licensed === true && !activeLicense;
+                      return (
+                        <SidebarItem
+                          key={paneDef.id}
+                          icon={paneDef.icon}
+                          label={i18n._(paneDef.label)}
+                          active={settingsTab === paneDef.id}
+                          collapsed={isSidebarCollapsed}
+                          locked={locked}
+                          lockedHint={lockedHint}
+                          onClick={() =>
+                            locked
+                              ? openAccountSettings("sidebar_lock")
+                              : setSettingsTab(paneDef.id)
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                <SidebarItem
+                  icon={HomeIcon}
+                  label={t({
+                    id: "home.sidebar.home",
+                    message: "Home",
+                  })}
+                  active={activeView === "home"}
+                  collapsed={isSidebarCollapsed}
+                  onClick={() => setActiveView("home")}
+                />
+                <SidebarItem
+                  icon={Book}
+                  label={t({
+                    id: "home.sidebar.dictionary",
+                    message: "Dictionary",
+                  })}
+                  active={activeView === "dictionary"}
+                  collapsed={isSidebarCollapsed}
+                  onClick={() => setActiveView("dictionary")}
+                />
+                <SidebarItem
+                  icon={Brain}
+                  label={t({
+                    id: "home.sidebar.personalization",
+                    message: "Personalization",
+                  })}
+                  active={activeView === "brain"}
+                  collapsed={isSidebarCollapsed}
+                  locked={!licenseGateActive}
+                  lockedHint={lockedHint}
+                  onClick={() =>
+                    licenseGateActive
+                      ? setActiveView("brain")
+                      : openAccountSettings("sidebar_lock")
+                  }
+                />
+                <SidebarItem
+                  icon={Library}
+                  label={t({
+                    id: "home.sidebar.library",
+                    message: "Library",
+                  })}
+                  active={activeView === "library"}
+                  collapsed={isSidebarCollapsed}
+                  locked={!licenseGateActive}
+                  lockedHint={lockedHint}
+                  onClick={() =>
+                    licenseGateActive
+                      ? setActiveView("library")
+                      : openAccountSettings("sidebar_lock")
+                  }
+                />
+              </>
+            )}
           </div>
           <div className="flex-1" />
         </nav>
@@ -602,8 +628,10 @@ const Home = () => {
 
           <div className="space-y-1 border-t border-border-primary p-2">
             <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="flex w-full items-center rounded-lg h-9 pl-[var(--sidebar-icon-pl,17px)] text-content-disabled hover:text-content-muted"
+              onClick={toggleSidebarCollapsed}
+              className={`ui-nav-item group h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 mb-[2px] ${
+                isSidebarCollapsed ? "gap-0" : "gap-3"
+              }`}
               aria-label={
                 isSidebarCollapsed
                   ? t({
@@ -621,15 +649,25 @@ const Home = () => {
                   animate={{ rotate: isSidebarCollapsed ? 180 : 0 }}
                   transition={{ type: "tween", duration: 0.2 }}
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={18} />
                 </motion.div>
               </div>
+              <span
+                style={{
+                  width: isSidebarCollapsed ? 0 : "auto",
+                  opacity: isSidebarCollapsed ? 0 : 1,
+                }}
+                className="ui-text-nav-item whitespace-nowrap overflow-hidden transition-[width,opacity] duration-200 ease-out"
+              >
+                {t({ id: "home.sidebar.collapse_label", message: "Collapse" })}
+              </span>
             </button>
 
             <div className="relative" ref={supportMenuRef}>
               <button
                 onClick={() => setShowSupportPopup(!showSupportPopup)}
-                className={`group flex w-full items-center rounded-lg h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 text-content-muted hover:text-content-secondary transition-colors ${
+                data-active={showSupportPopup ? "true" : "false"}
+                className={`ui-nav-item group h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 mb-[2px] ${
                   isSidebarCollapsed ? "gap-0" : "gap-3"
                 }`}
                 aria-expanded={showSupportPopup}
@@ -799,7 +837,7 @@ const Home = () => {
                   setSettingsTab("about");
                   setIsSettingsOpen(true);
                 }}
-                className={`group flex w-full items-center rounded-lg h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 ${isSidebarCollapsed ? "gap-0" : "gap-3"} transition-colors`}
+                className={`ui-nav-item group h-9 pl-[var(--sidebar-icon-pl,17px)] pr-3 mb-[2px] ${isSidebarCollapsed ? "gap-0" : "gap-3"}`}
                 style={{ color: "var(--color-accent)" }}
               >
                 <div className="flex items-center justify-center w-[20px] shrink-0">
@@ -820,14 +858,21 @@ const Home = () => {
               </button>
             )}
 
-            <SidebarItem
-              icon={Settings}
-              label={t({
+            <SettingsNavToggle
+              open={isSettingsOpen}
+              collapsed={isSidebarCollapsed}
+              openLabel={t({
                 id: "home.sidebar.settings",
                 message: "Settings",
               })}
-              collapsed={isSidebarCollapsed}
-              onClick={() => setIsSettingsOpen(true)}
+              returnIcon={returnIcon}
+              closeLabel={t({
+                id: "home.sidebar.back",
+                message: "Back",
+              })}
+              onClick={() =>
+                isSettingsOpen ? closeSettings() : setIsSettingsOpen(true)
+              }
             />
           </div>
         </div>
@@ -843,8 +888,29 @@ const Home = () => {
           </div>
         )}
 
+        {settingsMounted && (
+          <div
+            className={`flex flex-1 flex-col min-h-0 ${
+              isSettingsOpen ? "view-enter" : "hidden"
+            }`}
+          >
+            <Suspense fallback={null}>
+              <SettingsScreen
+                active={isSettingsOpen}
+                pane={settingsTab}
+                onPaneChange={setSettingsTab}
+                onClose={closeSettings}
+                accountSource={accountSource}
+                transcriptionMode={transcriptionMode}
+              />
+            </Suspense>
+          </div>
+        )}
+
         <div
-          className={`flex-1 flex flex-col px-8 min-h-0 ${activeView === "home" ? "pb-3" : "pb-6"}`}
+          className={`flex-1 flex flex-col px-8 min-h-0 ${
+            isSettingsOpen ? "hidden" : activeView === "home" ? "pb-3" : "pb-6"
+          }`}
         >
           <div
             className={`w-full max-w-[680px] mx-auto pt-5 flex-1 flex flex-col min-h-0 ${activeView === "home" ? "" : "hidden"}`}
@@ -927,20 +993,6 @@ const Home = () => {
       </AnimatePresence>
 
       <Suspense fallback={null}>
-        {settingsOpened && (
-          <SettingsModal
-            isOpen={isSettingsOpen}
-            onClose={() => {
-              setIsSettingsOpen(false);
-              setSettingsTab("general");
-              setAccountSource("settings_account");
-            }}
-            initialTab={settingsTab}
-            accountSource={accountSource}
-            transcriptionMode={transcriptionMode}
-          />
-        )}
-
         {faqOpened && (
           <FAQModal isOpen={showFAQ} onClose={() => setShowFAQ(false)} />
         )}

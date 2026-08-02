@@ -1480,3 +1480,83 @@ body {
   mask-image: linear-gradient(to right, black 85%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
 }
+
+/* Settings fills the window now, so its type sits one rung up the scale. */
+.settings-typescale {
+  --ui-text-size-micro: 0.625rem;
+  --ui-text-line-micro: 1.125rem;
+  --ui-text-size-meta: 0.6875rem;
+  --ui-text-line-meta: 1.25rem;
+  --ui-text-size-label: 0.75rem;
+  --ui-text-line-label: 1.125rem;
+  --ui-text-size-body-sm: 0.8125rem;
+  --ui-text-line-body-sm: 1.25rem;
+  --ui-text-size-body: 0.875rem;
+  --ui-text-line-body: 1.25rem;
+  --ui-text-size-body-lg: 0.9375rem;
+  --ui-text-line-body-lg: 1.375rem;
+  --ui-text-size-title: 1rem;
+  --ui-text-line-title: 1.5rem;
+}
+
+/* The busiest days breathe so the year does not read as a static chart. */
+@keyframes activity-shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.68;
+  }
+}
+
+.activity-shimmer {
+  animation: activity-shimmer 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activity-shimmer {
+    animation: none;
+  }
+}
+
+/* Entering settings should read as a move, not a hard cut. */
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.view-enter {
+  animation: view-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes nav-swap {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.nav-swap {
+  animation: nav-swap 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-enter,
+  .nav-swap {
+    animation: none;
+  }
+}
