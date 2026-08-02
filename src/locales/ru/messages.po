@@ -14,1062 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#~ msgid "dictionary.saving_suffix"
-#~ msgstr " · Сохранение..."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.shortcut.capture_placeholder"
-#~ msgstr "..."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.language_model.endpoint.autofilled"
-#~ msgstr "(заполнено автоматически)"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.search_count"
-#~ msgstr "{0} из {1}"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.results.multiple"
-#~ msgstr "{0} результатов"
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.applications.selected"
-#~ msgstr "{0} выбрано"
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.websites.count"
-#~ msgstr "{0} сайтов"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.monthly_transcriptions"
-#~ msgstr "{0} транскрипций"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.word_count.multiple"
-#~ msgstr "{0} слов"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.location"
-#~ msgstr "{0}, {1}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.percent_used"
-#~ msgstr "{0}% использовано"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.seconds"
-#~ msgstr "{0} с аудио"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.engine.generic.description"
-#~ msgstr "Движок транскрипции {engineLabel}."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.installed_count"
-#~ msgstr "{installedCount} установлено"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.minutes_seconds"
-#~ msgstr "{minutes} мин {remaining} с аудио"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.minutes"
-#~ msgstr "{minutes} мин аудио"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.count.multiple"
-#~ msgstr "{totalCount} транскрипций"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cta.cloud"
-#~ msgstr "> Облако"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cta.local"
-#~ msgstr "> Локальный"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.zero"
-#~ msgstr "0 с аудио"
-
-#. js-lingui-explicit-id
-#~ msgid "library.import.summary.single"
-#~ msgstr "1 файл"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.results.single"
-#~ msgstr "1 результат"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.count.single"
-#~ msgstr "1 транскрипция"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.word_count.single"
-#~ msgstr "1 слово"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.prune.three_months"
-#~ msgstr "3 месяца"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.modal.section.account"
-#~ msgstr "Учётная запись"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.title"
-#~ msgstr "Учётная запись"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.section.title"
-#~ msgstr "Настройки учётной записи"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.active"
-#~ msgstr "Активна"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subscription.cloud_plan"
-#~ msgstr "Активный облачный план"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.active_sessions"
-#~ msgstr "Активные сеансы"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.add"
-#~ msgstr "Добавить"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.word_dictionary.description"
-#~ msgstr "Добавьте слова или фразы, которых нет в словаре по умолчанию."
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.add_entry_aria"
-#~ msgstr "Добавить запись"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.add_aria"
-#~ msgstr "Добавить замену"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.all"
-#~ msgstr "Все"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.tags.all"
-#~ msgstr "Все теги"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.date.all_time"
-#~ msgstr "За всё время"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.cloud.answer"
-#~ msgstr "Необязательное платное обновление с синхронизацией между устройствами, ускоренной облачной обработкой и улучшенными моделями ИИ."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.app_info"
-#~ msgstr "Сведения о приложении"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.audio"
-#~ msgstr "Аудио"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.audio_processed"
-#~ msgstr "Обработано аудио"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_delete_recordings.body"
-#~ msgstr "Автоматически удаляет локальные аудиофайлы."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_delete_recordings"
-#~ msgstr "Автоудаление записей"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.description"
-#~ msgstr "Автоматически заменяйте слова в транскрипциях."
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.timestamps.available_later"
-#~ msgstr "Доступно после транскрипции"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.language_info.badges"
-#~ msgstr "Значки показывают, какой установленный движок поддерживает каждый язык."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.description"
-#~ msgstr "Оптимально для сессий с приоритетом конфиденциальности или без подключения к сети. Облако остаётся опциональным, если вам нужна синхронизация и более быстрые ответы."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.feature.models"
-#~ msgstr "Более мощные модели"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.subtitle"
-#~ msgstr "Создавайте со скоростью речи."
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.cancel"
-#~ msgstr "Отменить"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cancel"
-#~ msgstr "Отменить"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.cancel"
-#~ msgstr "Отменить"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.cancel_download"
-#~ msgstr "Отменить загрузку"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.canceled"
-#~ msgstr "Отменено"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.canceling"
-#~ msgstr "Отмена..."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.cancelled"
-#~ msgstr "Отменено"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.cancelled"
-#~ msgstr "Отменено"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.change"
-#~ msgstr "Изменить пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.modal_title"
-#~ msgstr "Изменить пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.status.checking"
-#~ msgstr "Проверка..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.title"
-#~ msgstr "Выберите локальную модель"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.help"
-#~ msgstr "Приводит транскрипты в порядок после расшифровки, сохраняя исходный смысл."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup"
-#~ msgstr "Очистка"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.clear_all"
-#~ msgstr "Очистить всё"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.clearing"
-#~ msgstr "Очистка..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.accessibility.instructions"
-#~ msgstr "Нажмите ниже, чтобы открыть Системные настройки, затем включите {appName}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_help_idle"
-#~ msgstr "Нажмите на сочетание клавиш, чтобы изменить его."
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.click_to_edit"
-#~ msgstr "Нажмите для редактирования"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.close"
-#~ msgstr "Закрыть"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.cloud"
-#~ msgstr "Облако"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud.body"
-#~ msgstr "Облачные аккаунты, подписки и синхронизация сейчас {status}."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync.cloud_feature"
-#~ msgstr "Облачная функция"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.subtitle"
-#~ msgstr "Облачная синхронизация сейчас {status}."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage"
-#~ msgstr "Использование облака"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.faq_help_description"
-#~ msgstr "часто задаваемые вопросы"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.confirm"
-#~ msgstr "Подтвердить"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.confirm"
-#~ msgstr "Подтвердить"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.confirm_placeholder"
-#~ msgstr "Подтвердите новый пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.confirm_aria"
-#~ msgstr "Подтвердите новый пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.continue"
-#~ msgstr "Продолжить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.microphone.continue"
-#~ msgstr "Продолжить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.accessibility.continue"
-#~ msgstr "Продолжить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.continue"
-#~ msgstr "Продолжить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.continue"
-#~ msgstr "Продолжить в любом случае"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.title"
-#~ msgstr "Продолжить без модели?"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.converting"
-#~ msgstr "Конвертация"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.converting"
-#~ msgstr "Конвертация"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.converting_progress"
-#~ msgstr "Конвертация {percent}%"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.copy_error"
-#~ msgstr "Копировать ошибку"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.feature.sync"
-#~ msgstr "Синхронизация между устройствами"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.current"
-#~ msgstr "Текущий"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.current_placeholder"
-#~ msgstr "Текущий пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.current_aria"
-#~ msgstr "Текущий пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.data_location"
-#~ msgstr "Расположение данных"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.badge"
-#~ msgstr "По умолчанию"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.delete"
-#~ msgstr "Удалить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.action.delete_aria"
-#~ msgstr "Удалить {modelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.delete_model"
-#~ msgstr "Удалить модель"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.page.dictionary"
-#~ msgstr "Словарь"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.title"
-#~ msgstr "Прямые замены"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.done"
-#~ msgstr "Готово"
-
-#. js-lingui-explicit-id
-#~ msgid "library.card.done"
-#~ msgstr "Готово"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.done"
-#~ msgstr "Готово"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.download"
-#~ msgstr "Загрузить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.download"
-#~ msgstr "Загрузить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.action.download_aria"
-#~ msgstr "Загрузить {modelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.download_failed"
-#~ msgstr "Ошибка загрузки"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.download_model"
-#~ msgstr "Загрузить модель"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.downloaded"
-#~ msgstr "Загружено"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.edit"
-#~ msgstr "Редактировать"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.edit_entry"
-#~ msgstr "Изменить {entry}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.name.edit_aria"
-#~ msgstr "Изменить название"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.edit"
-#~ msgstr "Изменить замену для {0}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.status.enabled"
-#~ msgstr "Включено"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.language_model.endpoint"
-#~ msgstr "Конечная точка"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.language.english"
-#~ msgstr "Английский"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.enhanced"
-#~ msgstr "Улучшенный"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.feature.privacy"
-#~ msgstr "Всё остаётся на устройстве для защиты конфиденциальности"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.failed"
-#~ msgstr "Ошибка"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.failed"
-#~ msgstr "Ошибка"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.update_failed"
-#~ msgstr "Не удалось обновить пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.faq_help"
-#~ msgstr "Вопросы и ответы и помощь"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.engine.parakeet.description"
-#~ msgstr "Быстрая, многоязычная и точная. Основана на ONNX для повседневной локальной расшифровки."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.loading_body"
-#~ msgstr "Получение доступных локальных движков транскрипции для этой сборки."
-
-#. js-lingui-explicit-id
-#~ msgid "library.card.ffmpeg_help"
-#~ msgstr "Справка FFmpeg"
-
-#. js-lingui-explicit-id
-#~ msgid "library.import.files"
-#~ msgstr "Файлы"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.feature.sync"
-#~ msgstr "Бесплатная облачная синхронизация транскрипций (необязательно)"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subscription.free_plan"
-#~ msgstr "Бесплатный план"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.language.french"
-#~ msgstr "Французский"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.modal.section.general"
-#~ msgstr "Основные"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.description"
-#~ msgstr "Получите улучшенные модели и более умные инструменты для письма (5,99 $/мес.) с облаком."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.get_started"
-#~ msgstr "Начать"
-
-#. js-lingui-explicit-id
-#~ msgid "home.support.github.title"
-#~ msgstr "GitHub Issues"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.brand"
-#~ msgstr "Glimpse"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.brand"
-#~ msgstr "Glimpse"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud.title"
-#~ msgstr "Glimpse Cloud"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.title"
-#~ msgstr "Glimpse Cloud"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.unavailable_body"
-#~ msgstr "Glimpse не удалось загрузить список локальных моделей. Вы можете продолжить настройку с движком по умолчанию и управлять загрузками позже в разделе «Настройки»."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.title"
-#~ msgstr "Glimpse Local"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.analytics_notice"
-#~ msgstr "Glimpse отправляет анонимную аналитику использования для улучшения приложения. Вы можете отключить это в любое время в разделе «Настройки» → «Приложение»."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.name.default"
-#~ msgstr "Пользователь Glimpse"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.confirm"
-#~ msgstr "Понятно"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.hide"
-#~ msgstr "Скрыть пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync"
-#~ msgstr "Синхронизация истории"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.data_use.question"
-#~ msgstr "Как используются мои данные?"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.hours_unit"
-#~ msgstr "ч"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.in_development"
-#~ msgstr "В разработке"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.badge"
-#~ msgstr "В разработке"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.language_info.installed"
-#~ msgstr "Список языков отфильтрован по установленным моделям."
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.date.last30"
-#~ msgstr "Последние 30 дней"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.date.last7"
-#~ msgstr "Последние 7 дней"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.lifetime"
-#~ msgstr "Навсегда"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.llm_model"
-#~ msgstr "LLM: {llmModelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.loading_title"
-#~ msgstr "Загрузка локальных моделей"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.loading"
-#~ msgstr "Загрузка..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.loading_cta"
-#~ msgstr "Загрузка..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.feature.models"
-#~ msgstr "Локальные модели"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.description"
-#~ msgstr "Управление движками транскрипции и настройками поставщика ИИ."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subtitle"
-#~ msgstr "Управление профилем, сеансами и подпиской."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.minutes_unit"
-#~ msgstr "мин"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.mode"
-#~ msgstr "Режим: {modeLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.unavailable_title"
-#~ msgstr "Список моделей недоступен"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.models_tab"
-#~ msgstr "Модели"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.title"
-#~ msgstr "Модели"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.info_aria"
-#~ msgstr "Подробнее об очистке"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.subtitle"
-#~ msgstr "Дополнительные модели и настройка языковой модели доступны в разделе «Настройки» после завершения установки."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.new_placeholder"
-#~ msgstr "Новый пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.new_aria"
-#~ msgstr "Новый пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.empty_title"
-#~ msgstr "Локальные модели не найдены"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.tags.none"
-#~ msgstr "Нет"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.status.not_enabled"
-#~ msgstr "Не включено"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.timestamps.unsupported"
-#~ msgstr "Не поддерживается"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.engine.whisper.description"
-#~ msgstr "Распознавание речи от OpenAI с поддержкой пользовательского словаря."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.too_short"
-#~ msgstr "Пароль должен содержать не менее 8 символов"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.success"
-#~ msgstr "Пароль успешно обновлён"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.mismatch"
-#~ msgstr "Пароли не совпадают"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_pause_media.body"
-#~ msgstr "приостанавливает музыку во время записи и возобновляет воспроизведение по завершении."
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.header"
-#~ msgstr "Персонализация"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.press_enter_to_save"
-#~ msgstr "Нажмите Enter для сохранения"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_prompt"
-#~ msgstr "Нажмите новое сочетание клавиш…"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_help_active"
-#~ msgstr "Нажмите новое сочетание клавиш или Esc для отмены."
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.queued"
-#~ msgstr "В очереди"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.queued_fallback"
-#~ msgstr "В очереди"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.queued"
-#~ msgstr "В очереди"
-
-#. js-lingui-explicit-id
-#~ msgid "home.ready_subtitle"
-#~ msgstr "Готово к работе"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.title"
-#~ msgstr "Недавние транскрипции"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.recommended"
-#~ msgstr "Рекомендуется"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.shortcut.record_aria"
-#~ msgstr "Запись нового сочетания клавиш для {label}, текущее: {shortcut}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_aria"
-#~ msgstr "Запишите новое сочетание клавиш для Smart, текущее: {shortcut}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.refresh"
-#~ msgstr "Обновить"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.refresh_title"
-#~ msgstr "Обновить статистику использования"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.refreshing"
-#~ msgstr "Обновление…"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.body"
-#~ msgstr "удалять слова-паразиты и улучшать транскрипции"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.page.replacements"
-#~ msgstr "Замены"
-
-#. js-lingui-explicit-id
-#~ msgid "home.support.github.subtitle"
-#~ msgstr "Сообщить об ошибке или предложить функцию"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.help_requirement"
-#~ msgstr "Требуется включённая и настроенная языковая модель на вкладке «Модели»."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.revoke"
-#~ msgstr "Отозвать"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.save"
-#~ msgstr "Сохранить и обновить"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.name.save_aria"
-#~ msgstr "Сохранить имя"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.saving"
-#~ msgstr "Сохранение..."
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.applications.search"
-#~ msgstr "Поиск приложений..."
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.search_aria"
-#~ msgstr "Поиск в библиотеке"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.search.placeholder"
-#~ msgstr "Поиск..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.select_aria"
-#~ msgstr "Выбрать {modelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.tags.select_existing"
-#~ msgstr "Выбрать существующий тег"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.aria"
-#~ msgstr "Выбрать локальный режим (конфиденциальность прежде всего, на устройстве)"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.settings"
-#~ msgstr "Настройки"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.shortcuts.invalid_non_modifier"
-#~ msgstr "Сочетание клавиш должно включать немодифицирующую клавишу (например, Control+Пробел)."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.show"
-#~ msgstr "Показать пароль"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sign_out"
-#~ msgstr "Выйти"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.active_sessions.sign_out_all"
-#~ msgstr "Выйти на всех устройствах"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud.disabled"
-#~ msgstr "Вход отключён."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.microphone.skip"
-#~ msgstr "Пропустить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.accessibility.skip"
-#~ msgstr "Пропустить"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.label"
-#~ msgstr "Умный"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.subtitle"
-#~ msgstr "Режим «Умный» включён по умолчанию; другие режимы доступны в настройках."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.feature.tools"
-#~ msgstr "Умные инструменты для письма и доставки"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.speech_model"
-#~ msgstr "Речь: {speechModelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.starting"
-#~ msgstr "Запуск..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.stay"
-#~ msgstr "Остаться здесь"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.action.stop_download_aria"
-#~ msgstr "Остановить загрузку {modelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.storage_used"
-#~ msgstr "Использовано места"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subscription"
-#~ msgstr "Подписка"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.timestamps.supported"
-#~ msgstr "Поддерживается"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync.cloud_description"
-#~ msgstr "Синхронизировать транскрипции между устройствами"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.tags"
-#~ msgstr "Теги"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.description"
-#~ msgstr "нажмите для переключения, удерживайте для разговора"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.empty_body"
-#~ msgstr "Эта сборка не обнаружила локальных моделей. Вы можете продолжить настройку и управлять моделями позже в разделе «Настройки»."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.this_month"
-#~ msgstr "В этом месяце"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.models_suffix"
-#~ msgstr "чтобы использовать функцию «Очистка»."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_pause_media.toggle_aria"
-#~ msgstr "Приостанавливать медиа автоматически во время записи"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.toggle_aria"
-#~ msgstr "Включить/отключить очистку"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync.toggle"
-#~ msgstr "Включить синхронизацию истории"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.transcribing"
-#~ msgstr "Транскрибирование"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.transcribing_progress"
-#~ msgstr "Транскрибирование {percent}%"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.transcription_engines"
-#~ msgstr "Движки транскрибирования"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.title"
-#~ msgstr "Синхронизация транскрипций"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.transcriptions"
-#~ msgstr "Транскрипции"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.unknown_device"
-#~ msgstr "Неизвестное устройство"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.unknown_location"
-#~ msgstr "Неизвестное местоположение"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.unknown_model"
-#~ msgstr "Неизвестная модель"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.use"
-#~ msgstr "Использовать"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.cloud.question"
-#~ msgstr "Что такое Glimpse Cloud?"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.word_dictionary.title"
-#~ msgstr "Словарь слов"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.body"
-#~ msgstr "Вы можете продолжать использовать Glimpse локально. Этот экран будет доступен в одном из следующих обновлений."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.body"
-#~ msgstr "Вы ещё не загрузили локальную модель. Транскрибирование в офлайн-режиме будет недоступно, пока вы не добавите её в разделе «Настройки»."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.title"
-#~ msgstr "Всё готово!"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.data_use.answer"
-#~ msgstr "Ваши данные принадлежат только вам. Мы никогда не продаём и не передаём их третьим лицам."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-#~ msgid "settings.about.version"
-#~ msgstr "Версия"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.balanced.helper"
-#~ msgstr "Точность и размер"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.quality"
-#~ msgstr "Точный"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.balanced"
-#~ msgstr "Сбалансированный"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.quality.helper"
-#~ msgstr "Наилучшие результаты"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.subtitle"
-#~ msgstr "Более крупные модели точнее. Меньшие работают быстрее."
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.builtin"
-#~ msgstr "Встроенный"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.compact.helper"
-#~ msgstr "Меньше места"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.builtin.helper"
-#~ msgstr "Без загрузки"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.compact"
-#~ msgstr "Маленький"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.subtitle.languages"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: src/shared/lib/nativeMenuStrings.ts
-#~ msgid "native.toast.recovered_saved"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(если требуется)"
@@ -1084,12 +28,6 @@ msgstr "(если требуется)"
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.llm_cleaned"
 msgstr "{0, plural, one {# диктовка улучшена с помощью ИИ сегодня} other {# диктовок улучшено с помощью ИИ сегодня}}"
-
-#~ msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
-#~ msgstr "{0, plural, one {# диктовка улучшена с помощью ИИ сегодня} other {# диктовок улучшено с помощью ИИ сегодня}}"
-
-#~ msgid "{0, plural, one {# dictation} other {# dictations}}"
-#~ msgstr "{0, plural, one {# диктовка} other {# диктовок}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.count
@@ -1128,17 +66,18 @@ msgstr "{0} транскрипций"
 msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# слово} other {# слов}}"
 
-#~ msgid "{0, plural, one {# word} other {# words}}"
-#~ msgstr "{0, plural, one {# слово} other {# слов}}"
+#. js-lingui-explicit-id
+#. placeholder {0}: hovered.cell.words
+#. placeholder {1}: hovered.cell.count
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.v2"
+msgstr "{0, plural, one {# слово} few {# слова} many {# слов} other {# слова}} в {1, plural, one {# диктовке} few {# диктовках} many {# диктовках} other {# диктовках}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.longest_words"
 msgstr "{0, plural, one {Самая длинная диктовка сегодня: # слово} other {Самая длинная диктовка сегодня: # слов}}"
-
-#~ msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
-#~ msgstr "{0, plural, one {Самая длинная диктовка сегодня: # слово} other {Самая длинная диктовка сегодня: # слов}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: apps.length
@@ -1165,6 +104,12 @@ msgid "library.import.summary.multiple"
 msgstr "{0} файлов"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: formatDuration(minutesSaved(totalWords, totalDurationMs))
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.8.v2"
+msgstr "{0}, которые я так и не потратил на набор текста. @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: model.label
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.aria"
@@ -1184,12 +129,15 @@ msgid "dictionary.replacements.count.multiple"
 msgstr "{0} замен"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: formatCompact(totalWords)
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.6"
+msgstr "{0} слов продиктовано и ни одного набрано. @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.avg_words"
 msgstr "{avg, plural, one {Около # слова на диктовку сегодня} other {Около # слов на диктовку сегодня}}"
-
-#~ msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
-#~ msgstr "{avg, plural, one {Около # слова на диктовку сегодня} other {Около # слов на диктовку сегодня}}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
@@ -1197,12 +145,40 @@ msgid "member_card.coverage_with_devices"
 msgstr "{coverageBase} · {activeDevices} из {deviceLimit} устройств активно"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.headline.v2"
+msgstr "{daysDictated, plural, one {# день диктовки за последний год} few {# дня диктовки за последний год} many {# дней диктовки за последний год} other {# дня диктовки за последний год}}"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.days_headline.v2"
+msgstr "{daysDictated, plural, one {# день} few {# дня} many {# дней} other {# дня}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: formatCompact(totalWords)
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.4.v2"
+msgstr "{daysDictated} дней речи вместо набора за последний год и {0} слов продиктовано за всё время. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.9"
+msgstr "{daysDictated} дней, когда я проговаривал свою работу. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.faster_value"
+msgstr "на {fasterPercent}% быстрее"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.faster_inline"
+msgstr "на {fasterPercent}% быстрее набора текста"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.minutes_spoken"
 msgstr "{minutes, plural, one {# минута наговорено сегодня} other {# минут наговорено сегодня}}"
-
-#~ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
-#~ msgstr "{minutes, plural, one {# минута наговорено сегодня} other {# минут наговорено сегодня}}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -1224,13 +200,15 @@ msgstr "{providerLabel} облачная модель"
 msgid "home.today.stats.seconds_spoken"
 msgstr "{seconds, plural, one {# секунда наговорена сегодня} other {# секунд наговорено сегодня}}"
 
-#~ msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
-#~ msgstr "{seconds, plural, one {# секунда наговорена сегодня} other {# секунд наговорено сегодня}}"
-
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.pace_wpm"
 msgstr "{wpm, plural, one {Около # слова в минуту сегодня} other {Около # слов в минуту сегодня}}"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.2"
+msgstr "{wpm} слов в минуту вслух. Руки мне только спасибо скажут. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -1298,7 +276,7 @@ msgid "home.support.about.title"
 msgstr "О программе"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.about"
 msgstr "О программе"
 
@@ -1318,14 +296,14 @@ msgid "onboarding.accessibility.title"
 msgstr "Специальные возможности"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.account"
 msgstr "Учётная запись"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.account_tab"
-msgstr "Учётная запись"
+msgid "settings.general.shortcuts.cleanup_locked.account_link"
+msgstr "Аккаунт"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/AccountPill.tsx
@@ -1341,11 +319,6 @@ msgstr "Активировать"
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.activate"
 msgstr "Активировать"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.license_prefix"
-msgstr "Активируйте лицензию Glimpse в"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -1386,6 +359,11 @@ msgstr "Добавьте сайт, например gmail.com"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.applications.add"
 msgstr "Добавить приложение"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud.unconfigured"
+msgstr "Сначала укажите адрес и модель в разделе «Провайдеры»"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -1508,17 +486,12 @@ msgid "settings.speech_model.api_key"
 msgstr "Ключ API"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.api_server"
 msgstr "Сервер API"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.api_server.full_license_required"
-msgstr "Для сервера API требуется полная активная лицензия."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.app"
 msgstr "Приложение"
 
@@ -1630,6 +603,11 @@ msgid "settings.app.automation"
 msgstr "Автоматизация"
 
 #. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.back"
+msgstr "Назад"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.back"
 msgstr "Назад"
@@ -1653,6 +631,11 @@ msgstr "Фоновый визуализатор аудио"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.behavior"
 msgstr "Поведение"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.best_streak"
+msgstr "Лучшая серия"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -1825,6 +808,16 @@ msgid "settings.general.shortcuts.cleanup"
 msgstr "Очистка"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.cleanup_locked.license_prefix"
+msgstr "Для Cleanup нужна лицензия. Активируйте её в разделе"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.cleanup_locked.provider_prefix"
+msgstr "Для Cleanup нужна модель письма. Настройте её в разделе"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.logs.clear"
 msgstr "Очистить"
@@ -1875,6 +868,11 @@ msgid "onboarding.license.close"
 msgstr "Закрыть"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.close"
+msgstr "Закрыть"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.close"
 msgstr "Закрыть"
@@ -1900,28 +898,13 @@ msgid "toast.close"
 msgstr "Закрыть уведомление"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.close_button"
-msgstr "Закрыть настройки"
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.close_window"
 msgstr "Закрыть окно"
 
 #. js-lingui-explicit-id
-#: src/Home.tsx
-msgid "home.mode.cloud"
-msgstr "Облако"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.mode.cloud"
-msgstr "Облако"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.label"
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud"
 msgstr "Облако"
 
 #. js-lingui-explicit-id
@@ -1935,24 +918,19 @@ msgid "settings.speech_model.provider.cloud"
 msgstr "Облако (ключ API)"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.aria"
-msgstr "Облачная обработка (скоро)"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/CloudModelCard.tsx
 msgid "models.cloud_card.transcribing"
 msgstr "Транскрипция в облаке"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
-msgid "home.sidebar.collapse"
-msgstr "Свернуть боковую панель"
+msgid "home.sidebar.collapse_label"
+msgstr "Свернуть"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.badge"
-msgstr "скоро"
+#: src/Home.tsx
+msgid "home.sidebar.collapse"
+msgstr "Свернуть боковую панель"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -1978,6 +956,11 @@ msgstr "Частые вопросы"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.configuration"
 msgstr "Конфигурация"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.subtitle"
+msgstr "Данные подключения для облачной расшифровки. Выберите её в разделе «Модели»."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -2067,6 +1050,11 @@ msgid "settings.local_api.logs.copy"
 msgstr "Копировать"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.copy"
+msgstr "Копировать"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.copy"
 msgstr "Копировать"
@@ -2077,7 +1065,7 @@ msgid "home.local_api.copy_url"
 msgstr "Копировать базовый URL"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/components/SettingsScreen.tsx
 msgid "settings.error.copy"
 msgstr "Ошибка копирования"
 
@@ -2102,14 +1090,19 @@ msgid "transcriptions.item.copy_transcription"
 msgstr "Копировать транскрипцию"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.copy_failed"
+msgstr "Копирование изображений здесь недоступно. Сохраните файл."
+
+#. js-lingui-explicit-id
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.core"
 msgstr "Ядро"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.free.answer"
-msgstr "Glimpse использует локальные модели ИИ с открытым исходным кодом для транскрипции, поэтому основные функции не требуют регулярных затрат."
+msgid "faq.free.answer.v2"
+msgstr "Базовая диктовка бесплатна: локальная расшифровка, словарь, замены и история. Ни поминутной оплаты, ни подписки за это нет. Библиотека, Cleanup, персонализация с LLM, локальный API-сервер и командная строка входят в Glimpse Personal. Сначала даётся 14 дней пробного периода; затем активируйте лицензию Personal (разовая покупка) или Commercial (оплата раз в год) в «Настройки → Аккаунт»."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -2252,6 +1245,11 @@ msgid "native.menu.cut"
 msgstr "Вырезать"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria"
+msgstr "Ежедневная активность диктовки за последний год"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.dark"
 msgstr "Тёмная"
@@ -2265,6 +1263,11 @@ msgstr "Данные"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.database"
 msgstr "База данных"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.streak"
+msgstr "Дней подряд"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -2439,9 +1442,14 @@ msgid "library.retranscribe.detect_speakers.aria"
 msgstr "Определять говорящих"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.developer"
 msgstr "Разработчик"
+
+#. js-lingui-explicit-id
+#: src/features/settings/settingsPanes.ts
+msgid "settings.modal.section.dictation"
+msgstr "Диктовка"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
@@ -2452,6 +1460,16 @@ msgstr "Диктовка бесплатна навсегда"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.free_title"
 msgstr "Диктовка бесплатна навсегда"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.dictations"
+msgstr "диктовок"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.dictations"
+msgstr "Диктовки"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2530,11 +1548,6 @@ msgid "model_picker.ane.download"
 msgstr "Загрузить энкодер Neural Engine"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.download_one"
-msgstr "Загрузить одну"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.downloading"
 msgstr "Загрузка"
@@ -2563,11 +1576,6 @@ msgstr "Перетащите файлы для расшифровки"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Правка"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode"
-msgstr "Режим редактирования"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -2850,7 +1858,7 @@ msgid "personalization.modal.snippets.full_list"
 msgstr "Полный список фрагментов"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.general"
 msgstr "Основные"
 
@@ -3015,6 +2023,16 @@ msgid "settings.speech_model.endpoint.placeholder"
 msgstr "https://your-speech-endpoint.com"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.speak_at"
+msgstr "Я говорю со скоростью"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.1"
+msgstr "Я говорю со скоростью {wpm} слов в минуту. Речь быстрее набора. Продиктовано в @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.confirm"
 msgstr "Импортировать"
@@ -3073,11 +2091,6 @@ msgstr "Импорт…"
 #: src/features/import/components/ImportStep.tsx
 msgid "import.importing"
 msgstr "Импорт…"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.description"
-msgstr "В разработке"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -3222,6 +2235,11 @@ msgid "settings.models.installed.legacy"
 msgstr "Устаревший"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.less"
+msgstr "Меньше"
+
+#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "Библиотека"
@@ -3322,11 +2340,6 @@ msgid "settings.language_model.provider.local"
 msgstr "Локальный"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.section.local"
-msgstr "Локальный"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/SpeechModelPanel.tsx
 msgid "settings.speech_model.provider.local"
 msgstr "Локальный"
@@ -3334,11 +2347,6 @@ msgstr "Локальный"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.mode.local"
-msgstr "Локальный"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.label"
 msgstr "Локальный"
 
 #. js-lingui-explicit-id
@@ -3424,8 +2432,8 @@ msgstr "Доступ к микрофону"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.permissions.answer"
-msgstr "Доступ к микрофону для записи голоса и доступ к функциям специальных возможностей для вставки текста и чтения выделенного текста в режиме редактирования. Glimpse использует эти разрешения только во время активной диктовки."
+msgid "faq.permissions.answer.v2"
+msgstr "Доступ к микрофону для записи голоса и доступ к универсальному доступу, чтобы вставлять текст и читать выделенный текст, когда сочетание клавиш его переписывает. Glimpse использует их только во время диктовки."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -3515,7 +2523,7 @@ msgid "native.menu.models"
 msgstr "Модели"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.models"
 msgstr "Модели"
 
@@ -3523,6 +2531,11 @@ msgstr "Модели"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.models"
 msgstr "Модели"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.more"
+msgstr "Больше"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3538,11 +2551,6 @@ msgstr "Подробнее"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.command_line.info_aria"
 msgstr "Подробнее об инструментах командной строки"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.info_aria"
-msgstr "Подробнее о режиме редактирования"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -3583,6 +2591,11 @@ msgstr "Многоязычный"
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.multilingual"
 msgstr "Многоязычный"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.5"
+msgstr "Клавиатура начинает ревновать. {wpm} слов в минуту с @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -3661,6 +2674,11 @@ msgid "updates.whats_new.no_changelog"
 msgstr "Журнал изменений недоступен."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip_empty"
+msgstr "Нет диктовок"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
 msgstr "Без загрузки"
@@ -3699,11 +2717,6 @@ msgstr "Микрофон не найден."
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.model.none_held"
 msgstr "модель не хранится в памяти между запросами"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.no_model"
-msgstr "Модель не установлена."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3871,6 +2884,11 @@ msgid "import.empty"
 msgstr "Нечего переносить из этого приложения."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.of_dictating"
+msgstr "диктовки в этом году"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.permission.off"
 msgstr "выкл."
@@ -3902,8 +2920,8 @@ msgstr "На устройстве"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.ai_writing.answer"
-msgstr "Только если вы включите ИИ-редактирование и настроите провайдера в разделе Настройки → Провайдеры. После этого функции «Очистка», «Режим редактирования» и «Персонализация» будут отправлять соответствующий текст напрямую этому провайдеру. Ваш API-ключ хранится локально в Glimpse."
+msgid "faq.ai_writing.answer.v2"
+msgstr "Только если вы настроите модель письма в «Настройки → Провайдеры». Тогда сочетания клавиш с включённым Cleanup и персонализация отправят соответствующий текст напрямую этому провайдеру. Ключ API хранится локально в Glimpse. Аудио покидает устройство, только если вы выберете облачную речевую модель в «Настройки → Модели»."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4031,6 +3049,11 @@ msgid "settings.local_api.port"
 msgstr "Порт"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.post"
+msgstr "Опубликовать"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.preloaded_model"
 msgstr "Предзагруженная модель"
@@ -4092,21 +3115,6 @@ msgid "faq.privacy.link"
 msgstr "Политика конфиденциальности"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.badge"
-msgstr "частный"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.processing"
-msgstr "Обработка"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.processing_mode"
-msgstr "Режим обработки"
-
-#. js-lingui-explicit-id
 #: src/features/pill/PillOverlay.tsx
 msgid "pill.status.processing"
 msgstr "Обработка…"
@@ -4122,13 +3130,13 @@ msgid "settings.speech_model.provider"
 msgstr "Сервис"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.providers"
 msgstr "Провайдеры"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.providers_tab"
+msgid "settings.general.shortcuts.cleanup_locked.providers_link"
 msgstr "Провайдеры"
 
 #. js-lingui-explicit-id
@@ -4349,18 +3357,8 @@ msgstr "Требуется активная лицензия"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help_license_requirement"
-msgstr "Требуется лицензия Glimpse."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.auto_dictionary.unsupported_body"
 msgstr "требуется модель с поддержкой словаря"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help_requirement"
-msgstr "Требуется включённая и настроенная языковая модель на вкладке «Модели»."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -4493,16 +3491,6 @@ msgid "settings.local_api.status.running"
 msgstr "Выполняется"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.shortcuts.help_cleanup"
-msgstr "Запускает очистку только для этого сочетания клавиш."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.description"
-msgstr "Работает полностью на вашем устройстве"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding_description"
 msgstr "запустить мастер настройки повторно"
@@ -4513,9 +3501,19 @@ msgid "model_picker.ane.info"
 msgstr "Добавляет энкодер Core ML, работающий на Apple Neural Engine, для более быстрой и энергоэффективной транскрипции. При первой загрузке потребуется больше времени, пока macOS оптимизирует его для вашего чипа."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.save"
+msgstr "Сохранить"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.save_name"
 msgstr "Сохранить имя"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.saved"
+msgstr "сэкономлено"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
@@ -4668,11 +3666,6 @@ msgid "settings.speech_model.provider.select"
 msgstr "Выбрать провайдера..."
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help"
-msgstr "Выделите текст в любом приложении и произнесите команду, например «сделай текст официальным» или «исправь грамматику»."
-
-#. js-lingui-explicit-id
 #: src/shared/ui/Dropdown.tsx
 msgid "dropdown.placeholder"
 msgstr "Выбрать..."
@@ -4698,9 +3691,9 @@ msgid "native.menu.services"
 msgstr "Службы"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.configure_prefix"
-msgstr "Настроить ИИ-помощник для письма в"
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud.set_up"
+msgstr "Настроить"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -4708,19 +3701,14 @@ msgid "home.sidebar.settings"
 msgstr "Настройки"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.dialog_label"
-msgstr "Настройки"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.title"
-msgstr "Настройки"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.setup"
 msgstr "Настройка"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.share.open"
+msgstr "Поделиться"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -4888,6 +3876,11 @@ msgid "onboarding.download.starting"
 msgstr "запуск..."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.title"
+msgstr "Статистика"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.stop"
 msgstr "Остановить"
@@ -4906,6 +3899,11 @@ msgstr "Остановить транскрипцию"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.status.stopped"
 msgstr "Остановлено"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.3"
+msgstr "Перестал печатать, начал говорить. {wpm} слов в минуту. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -5018,6 +4016,11 @@ msgid "settings.app.text_size.label"
 msgstr "Размер текста"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.than_typing"
+msgstr "чем набор текста"
+
+#. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.edition_blurb_contributor"
 msgstr "Спасибо за ваш вклад. До 5 устройств."
@@ -5089,6 +4092,11 @@ msgid "library.modal.delete_confirm.description"
 msgstr "Это удалит транскрипцию и аудио из вашей библиотеки."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.saved"
+msgstr "Сэкономлено"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.include_timestamps"
 msgstr "Временные метки"
@@ -5102,16 +4110,6 @@ msgstr "Временные метки"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.timestamps"
 msgstr "Метки времени"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.models_suffix"
-msgstr "чтобы использовать режим редактирования."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.to_use_local"
-msgstr "чтобы использовать локальную модель."
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -5149,11 +4147,6 @@ msgid "settings.app.auto_update.toggle_aria"
 msgstr "Включить автообновление"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.toggle_aria"
-msgstr "Включить/отключить режим редактирования"
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.fullscreen"
 msgstr "Полноэкранный режим"
@@ -5182,11 +4175,6 @@ msgstr "Включить аналитику использования"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.total"
 msgstr "Итого"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SpeechModelPanel.tsx
-msgid "settings.speech_model.description"
-msgstr "Транскрибируйте записи через облачные или локальные API, совместимые с OpenAI."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -5243,11 +4231,6 @@ msgstr "Транскрипты"
 msgid "settings.about.data.verbatim_text_hint"
 msgstr "Транскрипты до очистки"
 
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.body"
-msgstr "преобразовать выделенный текст голосом"
-
 #: src/features/settings/components/AccountView.tsx
 msgid "Trial · {trialDaysRemaining} of {TRIAL_TOTAL_DAYS} days left"
 msgstr "Пробный период · осталось {trialDaysRemaining} из {TRIAL_TOTAL_DAYS} дней"
@@ -5261,6 +4244,11 @@ msgstr "Пробный период · остался 1 день"
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_enabled"
 msgstr "Включите Apple Intelligence в Системных настройках, чтобы использовать эту функцию."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.7"
+msgstr "Оказывается, я думаю быстрее, чем печатаю. {wpm} слов в минуту. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -5294,8 +4282,8 @@ msgstr "Разблокируйте ИИ-очистку, голосовое ре�
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_adds"
-msgstr "Разблокируйте «Очистку», «Режим редактирования», «Персонажей», «Транскрипцию файлов» и многое другое."
+msgid "onboarding.done.license_adds.v2"
+msgstr "Откройте Cleanup, персоны, расшифровку файлов и другое."
 
 #. js-lingui-explicit-id
 #: src/features/settings/useSettingsForm.ts
@@ -5384,18 +4372,13 @@ msgstr "Использовать исходные транскрипты до о
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
-msgid "settings.language_model.toggle"
-msgstr "Включить/отключить функции ИИ"
+msgid "settings.language_model.subtitle"
+msgstr "Используется сочетаниями клавиш с включённой моделью письма и персонализацией."
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SpeechModelPanel.tsx
-msgid "settings.speech_model.toggle"
-msgstr "Использовать этого провайдера для распознавания речи"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/LanguageModelPanel.tsx
-msgid "settings.language_model.description"
-msgstr "Используется совместно функциями «Очистка», «Режим редактирования» и «Персонализация»."
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.help_writing"
+msgstr "Использует модель письма только для этого сочетания. Приводит продиктованное в порядок и переписывает выделенный текст, когда вы произносите указание."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -5432,6 +4415,11 @@ msgstr "Все выпуски на GitHub"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.view_history"
 msgstr "Открыть историю"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.10"
+msgstr "Голос — самая быстрая клавиатура из всех, что у меня есть. {wpm} слов в минуту. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -5517,6 +4505,21 @@ msgstr "Временны́е метки на уровне слов"
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.capability.timestamps"
 msgstr "Временны́е метки на уровне слов"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.words"
+msgstr "слов"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.words_a_minute"
+msgstr "слов в минуту"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.wpm"
+msgstr "Слов в минуту"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx

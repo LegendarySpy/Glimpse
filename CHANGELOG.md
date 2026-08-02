@@ -1,3 +1,31 @@
+1.1.0
+
+### Improvements
+
+- Settings now opens inside the main window instead of a floating panel.
+- The Account screen shows your dictation statistics.
+- You can share those statistics as a picture.
+- Auto-update is now on by default. If you already turned it off, it stays off.
+
+### Changes
+
+- Edit Mode is gone as a separate setting. The Cleanup button on a shortcut now does both: it tidies what you dictate, and rewrites selected text when you speak an instruction over it.
+- Setting up a writing model is all it takes to use one. The provider no longer has its own on switch.
+- Cloud transcription is now chosen in Models, beside the downloaded ones. Providers still holds the endpoint, key and model.
+
+### Fixes
+
+- Member since and Words spoken no longer slide back in each time you open the Account screen.
+- Settings opens straight away instead of showing an empty panel first.
+- Dialogs now dim the whole window instead of leaving the sidebar bright.
+- Fixed the fade above and below the model list showing as white in light mode.
+- Fixed the API Server section appearing during a trial and then showing nothing.
+- Fixed dropping files to import while Settings was open appearing to do nothing.
+- Escape now closes What's New, the FAQ or a confirmation without closing all of Settings.
+- The Microsoft Store now lists every interface language included with Glimpse instead of only English.
+
+---
+
 1.0.7
 
 ### Improvements

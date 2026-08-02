@@ -14,1062 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#~ msgid "dictionary.saving_suffix"
-#~ msgstr " · Opslaan…"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.shortcut.capture_placeholder"
-#~ msgstr "..."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.language_model.endpoint.autofilled"
-#~ msgstr "(automatisch ingevuld)"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.search_count"
-#~ msgstr "{0} van {1}"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.results.multiple"
-#~ msgstr "{0} resultaten"
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.applications.selected"
-#~ msgstr "{0} geselecteerd"
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.websites.count"
-#~ msgstr "{0} sites"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.monthly_transcriptions"
-#~ msgstr "{0} transcripties"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.word_count.multiple"
-#~ msgstr "{0} woorden"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.location"
-#~ msgstr "{0}, {1}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.percent_used"
-#~ msgstr "{0}% gebruikt"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.seconds"
-#~ msgstr "{0}s audio"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.engine.generic.description"
-#~ msgstr "{engineLabel} -transcriptie-engine."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.installed_count"
-#~ msgstr "{installedCount} geïnstalleerd"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.minutes_seconds"
-#~ msgstr "{minutes} m {remaining} s audio"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.minutes"
-#~ msgstr "{minutes} min audio"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.count.multiple"
-#~ msgstr "{totalCount} transcripties"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cta.cloud"
-#~ msgstr "> Cloud"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cta.local"
-#~ msgstr "> Lokaal"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.audio_duration.zero"
-#~ msgstr "0s audio"
-
-#. js-lingui-explicit-id
-#~ msgid "library.import.summary.single"
-#~ msgstr "1 bestand"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.results.single"
-#~ msgstr "1 resultaat"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.count.single"
-#~ msgstr "1 transcriptie"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.word_count.single"
-#~ msgstr "1 woord"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.prune.three_months"
-#~ msgstr "3 maanden"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.modal.section.account"
-#~ msgstr "Account"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.title"
-#~ msgstr "Account"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.section.title"
-#~ msgstr "Accountinstellingen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.active"
-#~ msgstr "Actief"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subscription.cloud_plan"
-#~ msgstr "Actief cloudabonnement"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.active_sessions"
-#~ msgstr "Actieve sessies"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.add"
-#~ msgstr "Toevoegen"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.word_dictionary.description"
-#~ msgstr "Voeg aangepaste woorden of zinnen toe die niet in het standaardwoordenboek staan."
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.add_entry_aria"
-#~ msgstr "Item toevoegen"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.add_aria"
-#~ msgstr "Vervanging toevoegen"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.all"
-#~ msgstr "Alles"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.tags.all"
-#~ msgstr "Alle tags"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.date.all_time"
-#~ msgstr "Altijd"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.cloud.answer"
-#~ msgstr "Een optionele betaalde upgrade met synchronisatie tussen apparaten, snellere cloudverwerking en betere AI‑modellen."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.app_info"
-#~ msgstr "App-info"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.audio"
-#~ msgstr "Audio"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.audio_processed"
-#~ msgstr "Verwerkte audio"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_delete_recordings.body"
-#~ msgstr "Verwijdert lokale audiobestanden automatisch."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_delete_recordings"
-#~ msgstr "Opnamen automatisch verwijderen"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.description"
-#~ msgstr "Vervang automatisch woorden in je transcripties."
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.timestamps.available_later"
-#~ msgstr "Beschikbaar na transcriptie"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.language_info.badges"
-#~ msgstr "Badges geven aan welke geïnstalleerde engine elke taal ondersteunt."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.description"
-#~ msgstr "Het meest geschikt voor privacygerichte of offline sessies. De cloud blijft optioneel als je synchronisatie en snellere antwoorden wilt."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.feature.models"
-#~ msgstr "Grotere en betere modellen"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.subtitle"
-#~ msgstr "Bouw op het tempo van spraak."
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.cancel"
-#~ msgstr "Annuleer"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cancel"
-#~ msgstr "Annuleer"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.cancel"
-#~ msgstr "Annuleren"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.cancel_download"
-#~ msgstr "Download annuleren"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.canceled"
-#~ msgstr "Geannuleerd"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.canceling"
-#~ msgstr "Annuleren…"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.cancelled"
-#~ msgstr "Geannuleerd"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.cancelled"
-#~ msgstr "Geannuleerd"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.change"
-#~ msgstr "Wachtwoord wijzigen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.modal_title"
-#~ msgstr "Wachtwoord wijzigen"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.status.checking"
-#~ msgstr "Controleren…"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.title"
-#~ msgstr "Kies je lokale model"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.help"
-#~ msgstr "Maakt transcripties na het transcriberen netjes, terwijl de oorspronkelijke betekenis behouden blijft."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup"
-#~ msgstr "Opschonen"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.clear_all"
-#~ msgstr "Alles wissen"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.clearing"
-#~ msgstr "Bezig met wissen…"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.accessibility.instructions"
-#~ msgstr "Klik hieronder om Systeeminstellingen te openen en schakel daarna {appName} in"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_help_idle"
-#~ msgstr "Klik op de sneltoets om deze te wijzigen."
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.click_to_edit"
-#~ msgstr "Klik om te bewerken"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.close"
-#~ msgstr "Sluit"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.cloud"
-#~ msgstr "Cloud"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud.body"
-#~ msgstr "Cloudaccounts, abonnementen en synchronisatie zijn momenteel {status}."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync.cloud_feature"
-#~ msgstr "Cloud-functie"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.subtitle"
-#~ msgstr "Cloud-synchronisatie is momenteel {status}."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage"
-#~ msgstr "Cloud-gebruik"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.faq_help_description"
-#~ msgstr "veelgestelde vragen"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.confirm"
-#~ msgstr "Bevestigen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.confirm"
-#~ msgstr "Bevestigen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.confirm_placeholder"
-#~ msgstr "Nieuw wachtwoord bevestigen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.confirm_aria"
-#~ msgstr "Nieuw wachtwoord bevestigen"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.continue"
-#~ msgstr "Doorgaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.microphone.continue"
-#~ msgstr "Doorgaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.accessibility.continue"
-#~ msgstr "Doorgaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.continue"
-#~ msgstr "Doorgaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.continue"
-#~ msgstr "Toch doorgaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.title"
-#~ msgstr "Doorgaan zonder model?"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.converting"
-#~ msgstr "Bezig met converteren"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.converting"
-#~ msgstr "Bezig met converteren"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.converting_progress"
-#~ msgstr "Bezig met converteren: {percent}%"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.copy_error"
-#~ msgstr "Kopieerfout"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.feature.sync"
-#~ msgstr "Synchronisatie tussen apparaten"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.current"
-#~ msgstr "Huidig"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.current_placeholder"
-#~ msgstr "Huidig wachtwoord"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.current_aria"
-#~ msgstr "Huidig wachtwoord"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.data_location"
-#~ msgstr "Gegevenslocatie"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.badge"
-#~ msgstr "Standaard"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.delete"
-#~ msgstr "Verwijderen"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.action.delete_aria"
-#~ msgstr "{modelLabel} verwijderen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.delete_model"
-#~ msgstr "Model verwijderen"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.page.dictionary"
-#~ msgstr "Woordenboek"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.title"
-#~ msgstr "Directe vervangingen"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.done"
-#~ msgstr "Gereed"
-
-#. js-lingui-explicit-id
-#~ msgid "library.card.done"
-#~ msgstr "Gereed"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.done"
-#~ msgstr "Gereed"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.download"
-#~ msgstr "Downloaden"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.download"
-#~ msgstr "Download"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.action.download_aria"
-#~ msgstr "{modelLabel} downloaden"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.download_failed"
-#~ msgstr "Downloaden mislukt"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.download_model"
-#~ msgstr "Model downloaden"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.downloaded"
-#~ msgstr "Gedownload"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.edit"
-#~ msgstr "Bewerken"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.edit_entry"
-#~ msgstr "{entry} bewerken"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.name.edit_aria"
-#~ msgstr "Naam bewerken"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.replacements.edit"
-#~ msgstr "Vervanging voor {0} bewerken"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.status.enabled"
-#~ msgstr "Ingeschakeld"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.language_model.endpoint"
-#~ msgstr "Eindpunt"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.language.english"
-#~ msgstr "Engels"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.enhanced"
-#~ msgstr "Verbeterd"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.feature.privacy"
-#~ msgstr "Alles blijft op je apparaat voor je privacy"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.failed"
-#~ msgstr "Mislukt"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.failed"
-#~ msgstr "Mislukt"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.update_failed"
-#~ msgstr "Kan wachtwoord niet bijwerken"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.faq_help"
-#~ msgstr "FAQ en hulp"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.engine.parakeet.description"
-#~ msgstr "Snel, meertalig en nauwkeurig. Gebaseerd op ONNX voor dagelijkse lokale transcriptie."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.loading_body"
-#~ msgstr "Beschikbare lokale transcriptie-engines voor deze build ophalen."
-
-#. js-lingui-explicit-id
-#~ msgid "library.card.ffmpeg_help"
-#~ msgstr "FFmpeg-hulp"
-
-#. js-lingui-explicit-id
-#~ msgid "library.import.files"
-#~ msgstr "Bestanden"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.feature.sync"
-#~ msgstr "Gratis optionele cloud-synchronisatie voor transcripties"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subscription.free_plan"
-#~ msgstr "Gratis abonnement"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.language.french"
-#~ msgstr "Frans"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.modal.section.general"
-#~ msgstr "Algemeen"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.description"
-#~ msgstr "Krijg betere modellen en slimmere schrijfhulpen ($5,99/mnd) met de cloud."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.get_started"
-#~ msgstr "Aan de slag"
-
-#. js-lingui-explicit-id
-#~ msgid "home.support.github.title"
-#~ msgstr "GitHub-issues"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.brand"
-#~ msgstr "Glimpse"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.brand"
-#~ msgstr "Glimpse"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud.title"
-#~ msgstr "Glimpse Cloud"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.title"
-#~ msgstr "Glimpse Cloud"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.unavailable_body"
-#~ msgstr "Glimpse kon de lijst met lokale modellen niet laden. De installatie kan doorgaan met de standaard lokale engine; je kunt downloads later beheren in Instellingen."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.title"
-#~ msgstr "Glimpse Local"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.analytics_notice"
-#~ msgstr "Glimpse stuurt anonieme gebruiksstatistieken om de app te verbeteren. Je kunt dit op elk moment uitschakelen in Instellingen -> App."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.name.default"
-#~ msgstr "Glimpse-gebruiker"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.confirm"
-#~ msgstr "Begrepen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.hide"
-#~ msgstr "Wachtwoord verbergen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync"
-#~ msgstr "Geschiedenis synchroniseren"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.data_use.question"
-#~ msgstr "Hoe wordt mijn data gebruikt?"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.hours_unit"
-#~ msgstr "uur"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.in_development"
-#~ msgstr "In ontwikkeling"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.badge"
-#~ msgstr "In ontwikkeling"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.language_info.installed"
-#~ msgstr "De taallijst is gefilterd op de modellen die je hebt geïnstalleerd."
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.date.last30"
-#~ msgstr "Afgelopen 30 dagen"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.date.last7"
-#~ msgstr "Afgelopen 7 dagen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.lifetime"
-#~ msgstr "Levenslang"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.llm_model"
-#~ msgstr "LLM: {llmModelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.loading_title"
-#~ msgstr "Lokale modellen laden"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.loading"
-#~ msgstr "Laden…"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.loading_cta"
-#~ msgstr "Laden…"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.feature.models"
-#~ msgstr "Lokale modellen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.description"
-#~ msgstr "Beheer transcriptie-engines en AI-providerinstellingen."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subtitle"
-#~ msgstr "Beheer je profiel, sessies en abonnement."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.minutes_unit"
-#~ msgstr "min"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.mode"
-#~ msgstr "Modus: {modeLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.unavailable_title"
-#~ msgstr "Modellenlijst niet beschikbaar"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.models_tab"
-#~ msgstr "Modellen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.title"
-#~ msgstr "Modellen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.info_aria"
-#~ msgstr "Meer informatie over opschonen"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.subtitle"
-#~ msgstr "Meer modellen en taalmodelconfiguratie beschikbaar in Instellingen na de eerste configuratie."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.new_placeholder"
-#~ msgstr "Nieuw wachtwoord"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.new_aria"
-#~ msgstr "Nieuw wachtwoord"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.empty_title"
-#~ msgstr "Geen lokale modellen gevonden"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.tags.none"
-#~ msgstr "Geen"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.status.not_enabled"
-#~ msgstr "Niet ingeschakeld"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.timestamps.unsupported"
-#~ msgstr "Niet ondersteund"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.engine.whisper.description"
-#~ msgstr "Spraakherkenning van OpenAI met ondersteuning voor aangepaste woordenschat."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.too_short"
-#~ msgstr "Wachtwoord moet minimaal 8 tekens lang zijn"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.success"
-#~ msgstr "Wachtwoord is bijgewerkt"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.mismatch"
-#~ msgstr "Wachtwoorden komen niet overeen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_pause_media.body"
-#~ msgstr "pauzeert muziek tijdens de opname en hervat na afloop."
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.header"
-#~ msgstr "Personalisatie"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.press_enter_to_save"
-#~ msgstr "Druk op Enter om op te slaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_prompt"
-#~ msgstr "Druk op nieuwe sneltoets..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_help_active"
-#~ msgstr "Druk op je nieuwe sneltoets of druk op Esc om te annuleren."
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.queued"
-#~ msgstr "In de wachtrij"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.queued_fallback"
-#~ msgstr "In de wachtrij"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.queued"
-#~ msgstr "In de wachtrij"
-
-#. js-lingui-explicit-id
-#~ msgid "home.ready_subtitle"
-#~ msgstr "Klaar wanneer jij dat bent"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.title"
-#~ msgstr "Recente transcripties"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.recommended"
-#~ msgstr "Aanbevolen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.shortcut.record_aria"
-#~ msgstr "Nieuwe sneltoets opnemen voor {label}, momenteel {shortcut}"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.capture_aria"
-#~ msgstr "Neem een nieuwe sneltoets op voor Smart, nu {shortcut}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.refresh"
-#~ msgstr "Vernieuw"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.refresh_title"
-#~ msgstr "Gebruiksstatistieken vernieuwen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.refreshing"
-#~ msgstr "Bezig met vernieuwen..."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.body"
-#~ msgstr "vulwoorden verwijderen en transcripties bijwerken"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.page.replacements"
-#~ msgstr "Vervangingen"
-
-#. js-lingui-explicit-id
-#~ msgid "home.support.github.subtitle"
-#~ msgstr "Problemen melden en functies aanvragen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.help_requirement"
-#~ msgstr "Hiervoor moet in het tabblad Modellen een taalmodel zijn ingeschakeld en geconfigureerd."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.revoke"
-#~ msgstr "Intrekken"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.save"
-#~ msgstr "Opslaan en bijwerken"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.name.save_aria"
-#~ msgstr "Naam opslaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.saving"
-#~ msgstr "Bezig met opslaan…"
-
-#. js-lingui-explicit-id
-#~ msgid "personalization.modal.applications.search"
-#~ msgstr "Apps zoeken…"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.search_aria"
-#~ msgstr "Bibliotheek doorzoeken"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.list.search.placeholder"
-#~ msgstr "Zoeken..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.select_aria"
-#~ msgstr "{modelLabel} selecteren"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.tags.select_existing"
-#~ msgstr "Bestaand label selecteren"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.local.aria"
-#~ msgstr "Modus Lokaal selecteren (privacy-eerst, op het apparaat)"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.settings"
-#~ msgstr "Instellingen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.shortcuts.invalid_non_modifier"
-#~ msgstr "De sneltoets moet een niet-modifiertoets bevatten (bijvoorbeeld Control+Spatie)."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.password.show"
-#~ msgstr "Toon wachtwoord"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sign_out"
-#~ msgstr "Afmelden"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.active_sessions.sign_out_all"
-#~ msgstr "Log uit op alle apparaten"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud.disabled"
-#~ msgstr "Aanmelden is uitgeschakeld."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.microphone.skip"
-#~ msgstr "Overslaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.accessibility.skip"
-#~ msgstr "Overslaan"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.label"
-#~ msgstr "Slim"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.subtitle"
-#~ msgstr "Slim staat standaard aan, andere opties zijn beschikbaar in Instellingen."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.welcome.cloud.feature.tools"
-#~ msgstr "Slimmere schrijftools en bezorging"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.speech_model"
-#~ msgstr "Spraak: {speechModelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.starting"
-#~ msgstr "Bezig met starten..."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.stay"
-#~ msgstr "Hier blijven"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.action.stop_download_aria"
-#~ msgstr "Stop met downloaden van {modelLabel}"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.about.storage_used"
-#~ msgstr "Gebruikte opslag"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.subscription"
-#~ msgstr "Abonnement"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.timestamps.supported"
-#~ msgstr "Ondersteund"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync.cloud_description"
-#~ msgstr "Transcripties synchroniseren tussen apparaten"
-
-#. js-lingui-explicit-id
-#~ msgid "library.modal.tags"
-#~ msgstr "Tags"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.smart.description"
-#~ msgstr "tik om te wisselen, houd ingedrukt om te praten"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.empty_body"
-#~ msgstr "Deze build heeft geen lokale modellen gevonden. Je kunt de installatie afronden en modellen later beheren in Instellingen."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.this_month"
-#~ msgstr "Deze maand"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.models_suffix"
-#~ msgstr "om Opschonen te gebruiken."
-
-#. js-lingui-explicit-id
-#~ msgid "settings.app.auto_pause_media.toggle_aria"
-#~ msgstr "Automatisch pauzeren van media tijdens opnemen in-/uitschakelen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.general.cleanup.toggle_aria"
-#~ msgstr "Cleanup schakelen"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.history_sync.toggle"
-#~ msgstr "Geschiedenissynchronisatie in-/uitschakelen"
-
-#. js-lingui-explicit-id
-#~ msgid "library.view.filter.status.transcribing"
-#~ msgstr "Bezig met transcriberen"
-
-#. js-lingui-explicit-id
-#~ msgid "library.status.transcribing_progress"
-#~ msgstr "Bezig met transcriberen: {percent}%"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.transcription_engines"
-#~ msgstr "Transcriptie-engines"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.title"
-#~ msgstr "Transcriptiesynchronisatie"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.cloud_usage.transcriptions"
-#~ msgstr "Transcripties"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.unknown_device"
-#~ msgstr "Onbekend apparaat"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.account.sessions.unknown_location"
-#~ msgstr "Onbekende locatie"
-
-#. js-lingui-explicit-id
-#~ msgid "transcriptions.item.unknown_model"
-#~ msgstr "Onbekend model"
-
-#. js-lingui-explicit-id
-#~ msgid "settings.models.use"
-#~ msgstr "Gebruiken"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.cloud.question"
-#~ msgstr "Wat is Glimpse Cloud?"
-
-#. js-lingui-explicit-id
-#~ msgid "dictionary.word_dictionary.title"
-#~ msgstr "Woordenboek"
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.signin.body"
-#~ msgstr "Je kunt Glimpse lokaal blijven gebruiken. Dit scherm wordt ingeschakeld in een toekomstige update."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.models.confirm_without_model.body"
-#~ msgstr "Je hebt nog geen lokaal model gedownload. Transcriptie werkt niet offline totdat je er een toevoegt in Instellingen."
-
-#. js-lingui-explicit-id
-#~ msgid "onboarding.ready.title"
-#~ msgstr "Je bent klaar!"
-
-#. js-lingui-explicit-id
-#~ msgid "faq.data_use.answer"
-#~ msgstr "Jouw gegevens zijn jouw gegevens. Niet van ons om te delen. We zullen je gegevens nooit verkopen of delen met derden."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-#~ msgid "settings.about.version"
-#~ msgstr "Versie"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.balanced.helper"
-#~ msgstr "Nauwkeurigheid en grootte"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.quality"
-#~ msgstr "Nauwkeurig"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.balanced"
-#~ msgstr "Gebalanceerd"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.quality.helper"
-#~ msgstr "Beste resultaten"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.subtitle"
-#~ msgstr "Grotere modellen zijn nauwkeuriger, kleinere zijn sneller."
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.builtin"
-#~ msgstr "Ingebouwd"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.compact.helper"
-#~ msgstr "Minder ruimte"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.builtin.helper"
-#~ msgstr "Geen download"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.compact"
-#~ msgstr "Klein"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.subtitle.languages"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: src/shared/lib/nativeMenuStrings.ts
-#~ msgid "native.toast.recovered_saved"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(indien nodig)"
@@ -1084,12 +28,6 @@ msgstr "(indien nodig)"
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.llm_cleaned"
 msgstr "{0, plural, one {# dictaat vandaag met AI bijgeschaafd} other {# dictaten vandaag met AI bijgeschaafd}}"
-
-#~ msgid "{0, plural, one {# dictation polished with AI today} other {# dictations polished with AI today}}"
-#~ msgstr "{0, plural, one {# dictee vandaag bijgewerkt met AI} other {# dictees vandaag bijgewerkt met AI}}"
-
-#~ msgid "{0, plural, one {# dictation} other {# dictations}}"
-#~ msgstr "{0, plural, one {# dictee} other {# dictees}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.count
@@ -1128,17 +66,18 @@ msgstr "{0} transcripties"
 msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# woord} other {# woorden}}"
 
-#~ msgid "{0, plural, one {# word} other {# words}}"
-#~ msgstr "{0, plural, one {# woord} other {# woorden}}"
+#. js-lingui-explicit-id
+#. placeholder {0}: hovered.cell.words
+#. placeholder {1}: hovered.cell.count
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.v2"
+msgstr "{0, plural, one {# woord} other {# woorden}} in {1, plural, one {# dictaat} other {# dictaten}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.longest_words"
 msgstr "{0, plural, one {Langste dictaat vandaag: # woord} other {Langste dictaat vandaag: # woorden}}"
-
-#~ msgid "{0, plural, one {Longest dictation today: # word} other {Longest dictation today: # words}}"
-#~ msgstr "{0, plural, one {Langste dictee vandaag: # woord} other {Langste dictee vandaag: # woorden}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: apps.length
@@ -1165,6 +104,12 @@ msgid "library.import.summary.multiple"
 msgstr "{0} bestanden"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: formatDuration(minutesSaved(totalWords, totalDurationMs))
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.8.v2"
+msgstr "{0} die ik nooit typend heb doorgebracht. @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: model.label
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.aria"
@@ -1184,12 +129,15 @@ msgid "dictionary.replacements.count.multiple"
 msgstr "{0} vervangingen"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: formatCompact(totalWords)
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.6"
+msgstr "{0} woorden gedicteerd, geen enkele getypt. @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.avg_words"
 msgstr "{avg, plural, one {Ongeveer # woord per dictaat vandaag} other {Ongeveer # woorden per dictaat vandaag}}"
-
-#~ msgid "{avg, plural, one {About # word per dictation today} other {About # words per dictation today}}"
-#~ msgstr "{avg, plural, one {Ongeveer # woord per dictee vandaag} other {Ongeveer # woorden per dictee vandaag}}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
@@ -1197,12 +145,40 @@ msgid "member_card.coverage_with_devices"
 msgstr "{coverageBase} · {activeDevices} van {deviceLimit} apparaten actief"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.headline.v2"
+msgstr "{daysDictated, plural, one {# dag gedicteerd het afgelopen jaar} other {# dagen gedicteerd het afgelopen jaar}}"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.days_headline.v2"
+msgstr "{daysDictated, plural, one {# dag} other {# dagen}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: formatCompact(totalWords)
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.4.v2"
+msgstr "{daysDictated} dagen praten in plaats van typen het afgelopen jaar, {0} woorden in totaal gedicteerd. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.9"
+msgstr "{daysDictated} dagen mezelf door het werk heen gepraat. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.faster_value"
+msgstr "{fasterPercent}% sneller"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.faster_inline"
+msgstr "{fasterPercent}% sneller dan typen"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.minutes_spoken"
 msgstr "{minutes, plural, one {# minuut vandaag gesproken} other {# minuten vandaag gesproken}}"
-
-#~ msgid "{minutes, plural, one {# minute spoken today} other {# minutes spoken today}}"
-#~ msgstr "{minutes, plural, one {# minuut vandaag gesproken} other {# minuten vandaag gesproken}}"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -1224,13 +200,15 @@ msgstr "{providerLabel}-cloudmodel"
 msgid "home.today.stats.seconds_spoken"
 msgstr "{seconds, plural, one {# seconde vandaag gesproken} other {# seconden vandaag gesproken}}"
 
-#~ msgid "{seconds, plural, one {# second spoken today} other {# seconds spoken today}}"
-#~ msgstr "{seconds, plural, one {# seconde vandaag gesproken} other {# seconden vandaag gesproken}}"
-
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.pace_wpm"
 msgstr "{wpm, plural, one {Ongeveer # woord per minuut vandaag} other {Ongeveer # woorden per minuut vandaag}}"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.2"
+msgstr "{wpm} woorden per minuut hardop. Mijn handen zijn dolblij. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -1298,7 +276,7 @@ msgid "home.support.about.title"
 msgstr "Info"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.about"
 msgstr "Info"
 
@@ -1318,13 +296,13 @@ msgid "onboarding.accessibility.title"
 msgstr "Toegankelijkheid"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.account"
 msgstr "Account"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.account_tab"
+msgid "settings.general.shortcuts.cleanup_locked.account_link"
 msgstr "Account"
 
 #. js-lingui-explicit-id
@@ -1341,11 +319,6 @@ msgstr "Activeren"
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.activate"
 msgstr "Activeren"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.license_prefix"
-msgstr "Activeer je Glimpse-licentie in"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -1386,6 +359,11 @@ msgstr "Voeg een site toe, zoals gmail.com"
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.applications.add"
 msgstr "Programma toevoegen"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud.unconfigured"
+msgstr "Voeg eerst een endpoint en model toe bij Providers"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -1508,17 +486,12 @@ msgid "settings.speech_model.api_key"
 msgstr "API-sleutel"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.api_server"
 msgstr "API-server"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.api_server.full_license_required"
-msgstr "API-server vereist een volledig actieve licentie."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.app"
 msgstr "App"
 
@@ -1630,6 +603,11 @@ msgid "settings.app.automation"
 msgstr "Automatisering"
 
 #. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.back"
+msgstr "Terug"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.back"
 msgstr "Terug"
@@ -1653,6 +631,11 @@ msgstr "Achtergrond‑audiovisualisatie"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.behavior"
 msgstr "Gedrag"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.best_streak"
+msgstr "Beste reeks"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -1825,6 +808,16 @@ msgid "settings.general.shortcuts.cleanup"
 msgstr "Opschonen"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.cleanup_locked.license_prefix"
+msgstr "Cleanup heeft een licentie nodig. Activeer die bij"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.cleanup_locked.provider_prefix"
+msgstr "Cleanup heeft een schrijfmodel nodig. Stel er een in bij"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.logs.clear"
 msgstr "Wis"
@@ -1875,6 +868,11 @@ msgid "onboarding.license.close"
 msgstr "Sluit"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.close"
+msgstr "Sluiten"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.close"
 msgstr "Sluit"
@@ -1900,28 +898,13 @@ msgid "toast.close"
 msgstr "Melding sluiten"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.close_button"
-msgstr "Instellingen sluiten"
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.close_window"
 msgstr "Sluit venster"
 
 #. js-lingui-explicit-id
-#: src/Home.tsx
-msgid "home.mode.cloud"
-msgstr "Cloud"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.mode.cloud"
-msgstr "Cloud"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.label"
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud"
 msgstr "Cloud"
 
 #. js-lingui-explicit-id
@@ -1935,24 +918,19 @@ msgid "settings.speech_model.provider.cloud"
 msgstr "Cloud (API-sleutel)"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.aria"
-msgstr "Cloud-verwerking (binnenkort beschikbaar)"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/CloudModelCard.tsx
 msgid "models.cloud_card.transcribing"
 msgstr "Cloudtranscriptie"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
-msgid "home.sidebar.collapse"
-msgstr "Zijbalk inklappen"
+msgid "home.sidebar.collapse_label"
+msgstr "Inklappen"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.badge"
-msgstr "binnenkort beschikbaar"
+#: src/Home.tsx
+msgid "home.sidebar.collapse"
+msgstr "Zijbalk inklappen"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -1978,6 +956,11 @@ msgstr "Veelgestelde vragen"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.configuration"
 msgstr "Configuratie"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.subtitle"
+msgstr "Verbindingsgegevens voor transcriptie in de cloud. Selecteer het bij Modellen."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -2067,6 +1050,11 @@ msgid "settings.local_api.logs.copy"
 msgstr "Kopiëren"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.copy"
+msgstr "Kopiëren"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.copy"
 msgstr "Kopiëren"
@@ -2077,7 +1065,7 @@ msgid "home.local_api.copy_url"
 msgstr "Basis-URL kopiëren"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/components/SettingsScreen.tsx
 msgid "settings.error.copy"
 msgstr "Kopieerfout"
 
@@ -2102,14 +1090,19 @@ msgid "transcriptions.item.copy_transcription"
 msgstr "Transcriptie kopiëren"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.copy_failed"
+msgstr "Afbeeldingen kopiëren kan hier niet. Bewaar hem in plaats daarvan."
+
+#. js-lingui-explicit-id
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.core"
 msgstr "Kern"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.free.answer"
-msgstr "Glimpse gebruikt OSS‑AI‑modellen op je apparaat voor transcriptie, waardoor er geen doorlopende kosten zijn voor de kernervaring."
+msgid "faq.free.answer.v2"
+msgstr "Basisdictaat is gratis: lokale transcriptie, woordenboek, vervangingen en geschiedenis. Daarvoor zijn er geen kosten per minuut of abonnementen. Bibliotheek, Cleanup, personalisatie met een LLM, de lokale API-server en de opdrachtregel horen bij Glimpse Personal. Je krijgt eerst 14 dagen proef; daarna activeer je bij Instellingen → Account een Personal-licentie (eenmalige aankoop) of een Commercial-licentie (jaarlijks gefactureerd)."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -2252,6 +1245,11 @@ msgid "native.menu.cut"
 msgstr "Knip"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria"
+msgstr "Dagelijkse dicteeractiviteit van het afgelopen jaar"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.dark"
 msgstr "Donker"
@@ -2265,6 +1263,11 @@ msgstr "Gegevens"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.database"
 msgstr "Database"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.streak"
+msgstr "Dagen op rij"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -2439,9 +1442,14 @@ msgid "library.retranscribe.detect_speakers.aria"
 msgstr "Sprekers detecteren"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.developer"
 msgstr "Ontwikkelaar"
+
+#. js-lingui-explicit-id
+#: src/features/settings/settingsPanes.ts
+msgid "settings.modal.section.dictation"
+msgstr "Dicteren"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
@@ -2452,6 +1460,16 @@ msgstr "Dicteren blijft altijd gratis"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.free_title"
 msgstr "Dicteren blijft voor altijd gratis"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.dictations"
+msgstr "dictaten"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.dictations"
+msgstr "Dictaten"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2530,11 +1548,6 @@ msgid "model_picker.ane.download"
 msgstr "Neural Engine-encoder downloaden"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.download_one"
-msgstr "Download er één"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.downloading"
 msgstr "Downloaden"
@@ -2563,11 +1576,6 @@ msgstr "Zet bestanden hier neer om te transcriberen"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Wijzig"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode"
-msgstr "Bewerkingsmodus"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -2850,7 +1858,7 @@ msgid "personalization.modal.snippets.full_list"
 msgstr "Volledige snippetlijst"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.general"
 msgstr "Algemeen"
 
@@ -3015,6 +2023,16 @@ msgid "settings.speech_model.endpoint.placeholder"
 msgstr "https://your-speech-endpoint.com"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.speak_at"
+msgstr "Ik spreek met"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.1"
+msgstr "Ik spreek met {wpm} woorden per minuut. Praten wint van typen. Gedicteerd met @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.confirm"
 msgstr "Importeren"
@@ -3073,11 +2091,6 @@ msgstr "Bezig met importeren…"
 #: src/features/import/components/ImportStep.tsx
 msgid "import.importing"
 msgstr "Bezig met importeren…"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.description"
-msgstr "In ontwikkeling"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -3222,6 +2235,11 @@ msgid "settings.models.installed.legacy"
 msgstr "Oudere versie"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.less"
+msgstr "Minder"
+
+#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "Bibliotheek"
@@ -3322,11 +2340,6 @@ msgid "settings.language_model.provider.local"
 msgstr "Lokaal"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.section.local"
-msgstr "Lokaal"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/SpeechModelPanel.tsx
 msgid "settings.speech_model.provider.local"
 msgstr "Lokaal"
@@ -3334,11 +2347,6 @@ msgstr "Lokaal"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.mode.local"
-msgstr "Lokaal"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.label"
 msgstr "Lokaal"
 
 #. js-lingui-explicit-id
@@ -3424,8 +2432,8 @@ msgstr "Microfoontoegang"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.permissions.answer"
-msgstr "Microfoontoegang om je stem op te nemen en Toegankelijkheidstoegang om tekst in te voegen en geselecteerde tekst voor Bewerkmodus voor te lezen. Glimpse gebruikt deze alleen terwijl je actief dicteert."
+msgid "faq.permissions.answer.v2"
+msgstr "Microfoontoegang om je stem op te nemen, en toegankelijkheidstoegang om tekst in te voegen en geselecteerde tekst te lezen wanneer een sneltoets die herschrijft. Glimpse gebruikt ze alleen terwijl je dicteert."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -3515,7 +2523,7 @@ msgid "native.menu.models"
 msgstr "Modellen"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.models"
 msgstr "Modellen"
 
@@ -3523,6 +2531,11 @@ msgstr "Modellen"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.models"
 msgstr "Modellen"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.more"
+msgstr "Meer"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3538,11 +2551,6 @@ msgstr "Meer info"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.command_line.info_aria"
 msgstr "Meer informatie over opdrachtregeltools"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.info_aria"
-msgstr "Meer informatie over de bewerkingsmodus"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -3583,6 +2591,11 @@ msgstr "Meertalig"
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.multilingual"
 msgstr "Meertalig"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.5"
+msgstr "Mijn toetsenbord wordt jaloers. {wpm} woorden per minuut met @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -3661,6 +2674,11 @@ msgid "updates.whats_new.no_changelog"
 msgstr "Geen changelog beschikbaar."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip_empty"
+msgstr "Geen dictaat"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
 msgstr "Geen download"
@@ -3699,11 +2717,6 @@ msgstr "Geen microfoon gevonden."
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.model.none_held"
 msgstr "geen model in het geheugen tussen aanvragen"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.no_model"
-msgstr "Geen model geïnstalleerd."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -3871,6 +2884,11 @@ msgid "import.empty"
 msgstr "Niets om uit deze app over te nemen."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.of_dictating"
+msgstr "dicteren dit jaar"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.permission.off"
 msgstr "uit"
@@ -3902,8 +2920,8 @@ msgstr "Op het apparaat"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.ai_writing.answer"
-msgstr "Alleen als je AI-schrijven inschakelt en een provider instelt onder Instellingen → Providers. Opschonen, Bewerkmodus en Personalisatie sturen de betreffende tekst dan rechtstreeks naar die provider. Je API-sleutel blijft lokaal opgeslagen in Glimpse."
+msgid "faq.ai_writing.answer.v2"
+msgstr "Alleen als je een schrijfmodel instelt bij Instellingen → Providers. Sneltoetsen met Cleanup aan, en personalisatie, sturen de betreffende tekst dan rechtstreeks naar die provider. Je API-sleutel blijft lokaal in Glimpse opgeslagen. Audio verlaat je apparaat alleen als je bij Instellingen → Modellen een spraakmodel in de cloud kiest."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4031,6 +3049,11 @@ msgid "settings.local_api.port"
 msgstr "Poort"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.post"
+msgstr "Posten"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.preloaded_model"
 msgstr "Vooraf geladen model"
@@ -4092,21 +3115,6 @@ msgid "faq.privacy.link"
 msgstr "Privacybeleid"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.badge"
-msgstr "privé"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.processing"
-msgstr "Verwerken"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.processing_mode"
-msgstr "Verwerkingsmodus"
-
-#. js-lingui-explicit-id
 #: src/features/pill/PillOverlay.tsx
 msgid "pill.status.processing"
 msgstr "Bezig met verwerken..."
@@ -4122,13 +3130,13 @@ msgid "settings.speech_model.provider"
 msgstr "Aanbieder"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.providers"
 msgstr "Providers"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.providers_tab"
+msgid "settings.general.shortcuts.cleanup_locked.providers_link"
 msgstr "Providers"
 
 #. js-lingui-explicit-id
@@ -4349,18 +3357,8 @@ msgstr "Vereist een actieve licentie"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help_license_requirement"
-msgstr "Vereist een Glimpse-licentie."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.auto_dictionary.unsupported_body"
 msgstr "vereist een model met woordenboekondersteuning"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help_requirement"
-msgstr "Hiervoor moet in het tabblad Modellen een taalmodel zijn ingeschakeld en geconfigureerd."
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -4493,16 +3491,6 @@ msgid "settings.local_api.status.running"
 msgstr "Actief"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.shortcuts.help_cleanup"
-msgstr "Voert alleen voor die snelle koppeling een opschoning uit."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.description"
-msgstr "Wordt volledig op je apparaat uitgevoerd"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding_description"
 msgstr "installatiewizard opnieuw uitvoeren"
@@ -4513,9 +3501,19 @@ msgid "model_picker.ane.info"
 msgstr "Voegt een Core ML-encoder toe die op de Apple Neural Engine draait voor snellere, energiezuinigere transcriptie. De eerste keer laden duurt langer terwijl macOS deze optimaliseert voor je chip."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.save"
+msgstr "Bewaren"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.save_name"
 msgstr "Naam opslaan"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.saved"
+msgstr "bespaard"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
@@ -4668,11 +3666,6 @@ msgid "settings.speech_model.provider.select"
 msgstr "Provider selecteren..."
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help"
-msgstr "Selecteer tekst in een app en spreek een commando uit, zoals \"maak dit formeel\" of \"corrigeer mijn grammatica\"."
-
-#. js-lingui-explicit-id
 #: src/shared/ui/Dropdown.tsx
 msgid "dropdown.placeholder"
 msgstr "Selecteren…"
@@ -4698,9 +3691,9 @@ msgid "native.menu.services"
 msgstr "Services"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.configure_prefix"
-msgstr "AI-schrijven instellen in"
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud.set_up"
+msgstr "Instellen"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -4708,19 +3701,14 @@ msgid "home.sidebar.settings"
 msgstr "Instellingen"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.dialog_label"
-msgstr "Instellingen"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.title"
-msgstr "Instellingen"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.setup"
 msgstr "Installatie"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.share.open"
+msgstr "Delen"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -4888,6 +3876,11 @@ msgid "onboarding.download.starting"
 msgstr "bezig met starten..."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.title"
+msgstr "Statistieken"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.stop"
 msgstr "Stop"
@@ -4906,6 +3899,11 @@ msgstr "Stop transcriptie"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.status.stopped"
 msgstr "Gestopt"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.3"
+msgstr "Gestopt met typen, begonnen met praten. {wpm} woorden per minuut. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -5018,6 +4016,11 @@ msgid "settings.app.text_size.label"
 msgstr "Tekstgrootte"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.than_typing"
+msgstr "dan typen"
+
+#. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.edition_blurb_contributor"
 msgstr "Bedankt voor je bijdrage. Tot 5 apparaten."
@@ -5089,6 +4092,11 @@ msgid "library.modal.delete_confirm.description"
 msgstr "Hiermee verwijder je de transcriptie en audio uit je bibliotheek."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.saved"
+msgstr "Tijd bespaard"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.include_timestamps"
 msgstr "Tijdstempels"
@@ -5102,16 +4110,6 @@ msgstr "Tijdstempels"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.timestamps"
 msgstr "Tijdstempels"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.models_suffix"
-msgstr "om de Bewerkmodus te gebruiken."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.to_use_local"
-msgstr "om Lokaal te gebruiken."
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -5149,11 +4147,6 @@ msgid "settings.app.auto_update.toggle_aria"
 msgstr "Automatisch bijwerken in-/uitschakelen"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.toggle_aria"
-msgstr "Bewerkmodus schakelen"
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.fullscreen"
 msgstr "Schakel volledig scherm in/uit"
@@ -5182,11 +4175,6 @@ msgstr "Gebruiksstatistieken in-/uitschakelen"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.total"
 msgstr "Totaal"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SpeechModelPanel.tsx
-msgid "settings.speech_model.description"
-msgstr "Opnamen transcriberen via OpenAI-compatibele cloud- of zelfgehoste API’s."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -5243,11 +4231,6 @@ msgstr "Transcripties"
 msgid "settings.about.data.verbatim_text_hint"
 msgstr "Transcripts vóór opschonen"
 
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.body"
-msgstr "geselecteerde tekst met je stem bewerken"
-
 #: src/features/settings/components/AccountView.tsx
 msgid "Trial · {trialDaysRemaining} of {TRIAL_TOTAL_DAYS} days left"
 msgstr "Proefperiode · {trialDaysRemaining} van {TRIAL_TOTAL_DAYS} dagen resterend"
@@ -5261,6 +4244,11 @@ msgstr "Proefversie · 1 dag resterend"
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_enabled"
 msgstr "Schakel Apple Intelligence in bij Systeeminstellingen om dit te gebruiken."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.7"
+msgstr "Ik denk sneller dan ik typ. {wpm} woorden per minuut. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -5294,8 +4282,8 @@ msgstr "Ontgrendel AI‑opschoning, stem­bewerking, app-specifieke persoonlijkh
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_adds"
-msgstr "Ontgrendel Opschonen, Bewerken-modus, Persoonlijkheden, Bestandstranscriptie en meer."
+msgid "onboarding.done.license_adds.v2"
+msgstr "Ontgrendel Cleanup, persoonlijkheden, bestandstranscriptie en meer."
 
 #. js-lingui-explicit-id
 #: src/features/settings/useSettingsForm.ts
@@ -5384,18 +4372,13 @@ msgstr "De oorspronkelijke transcripts gebruiken vóór opschonen"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
-msgid "settings.language_model.toggle"
-msgstr "AI-functies schakelen"
+msgid "settings.language_model.subtitle"
+msgstr "Gebruikt door sneltoetsen met het schrijfmodel aan, en door personalisatie."
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SpeechModelPanel.tsx
-msgid "settings.speech_model.toggle"
-msgstr "Deze provider gebruiken voor spraak-naar-tekst"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/LanguageModelPanel.tsx
-msgid "settings.language_model.description"
-msgstr "Gedeeld door Opschonen, Bewerkmodus en Personalisatie."
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.help_writing"
+msgstr "Gebruikt het schrijfmodel alleen voor die sneltoets. Het ruimt op wat je dicteert en herschrijft geselecteerde tekst als je een instructie inspreekt."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -5432,6 +4415,11 @@ msgstr "Alle releases op GitHub bekijken"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.view_history"
 msgstr "Geschiedenis bekijken"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.10"
+msgstr "Mijn stem is het snelste toetsenbord dat ik heb. {wpm} woorden per minuut. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -5517,6 +4505,21 @@ msgstr "Tijdstempels op woordniveau"
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.capability.timestamps"
 msgstr "Tijdstempels per woord"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.words"
+msgstr "woorden"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.words_a_minute"
+msgstr "woorden per minuut"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.wpm"
+msgstr "Woorden per minuut"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
