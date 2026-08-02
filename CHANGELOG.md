@@ -20,6 +20,9 @@
 - A rate limited writing model is waited out and retried instead of quietly giving up, and one busy moment no longer switches the model off for the next few minutes.
 - Glimpse now says what went wrong with the writing model, rather than calling every failure unreachable.
 - Renaming or editing a personalization mode no longer reverts a moment later.
+- Settings changed while another part of the app reloaded them, such as the Cleanup button on a shortcut, no longer revert.
+- Editing a transcript no longer loses the words typed while it was saving.
+- Clearing a transcript no longer locks the editor until the recording is transcribed again.
 - The personalization list scrolls, so modes past the first few are reachable.
 - Member since and Words spoken no longer slide back in each time you open the Account screen.
 - Settings opens straight away instead of showing an empty panel first.

@@ -1123,7 +1123,8 @@ export function useSettingsForm({
       return;
     }
 
-    if (!settingsQuery.data || isSavingRef.current) return;
+    if (!settingsQuery.data) return;
+    if (isSavingRef.current || saveTimeoutRef.current !== null) return;
 
     hydrateFromSettings(settingsQuery.data);
   }, [

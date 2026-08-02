@@ -370,11 +370,10 @@ pub fn track_settings_changes(
     next: &UserSettings,
 ) {
     for (setting, from_value, to_value) in [
-        ("llm_enabled", previous.llm_enabled, next.llm_enabled),
         (
-            "cleanup_enabled",
-            previous.cleanup_enabled,
-            next.cleanup_enabled,
+            "shortcut_cleanup_enabled",
+            previous.shortcut_bindings.any_cleanup_enabled(),
+            next.shortcut_bindings.any_cleanup_enabled(),
         ),
         (
             "remote_speech_enabled",

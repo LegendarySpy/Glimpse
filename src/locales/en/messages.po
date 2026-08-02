@@ -1196,6 +1196,11 @@ msgid "settings.about.data.count_error"
 msgstr "Couldn't read your recordings"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.transcript.save_failed"
+msgstr "Couldn't save this transcript. Your changes are still here."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.generic_error"
 msgstr "Couldn't start microphone test."

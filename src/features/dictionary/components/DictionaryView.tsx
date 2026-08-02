@@ -56,8 +56,8 @@ function useQueuedPersist<T>({
   const queuedRef = useRef<T | null>(null);
   const isPersistingRef = useRef(false);
 
-  currentRef.current = value;
   if (!isPersistingRef.current && queuedRef.current === null) {
+    currentRef.current = value;
     persistedRef.current = value;
   }
 

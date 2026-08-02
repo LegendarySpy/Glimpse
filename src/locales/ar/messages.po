@@ -1196,6 +1196,11 @@ msgid "settings.about.data.count_error"
 msgstr "تعذّر قراءة تسجيلاتك"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.transcript.save_failed"
+msgstr "تعذّر حفظ هذه النسخة النصية. تغييراتك ما زالت موجودة."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.generic_error"
 msgstr "تعذّر بدء اختبار الميكروفون."

@@ -1196,6 +1196,11 @@ msgid "settings.about.data.count_error"
 msgstr "No se pudieron leer tus grabaciones"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.transcript.save_failed"
+msgstr "No se pudo guardar esta transcripción. Tus cambios siguen aquí."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.generic_error"
 msgstr "No se pudo iniciar la prueba del micrófono."

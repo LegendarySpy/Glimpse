@@ -96,6 +96,16 @@ pub struct ShortcutBindings {
     pub toggle: Vec<ShortcutBinding>,
 }
 
+impl ShortcutBindings {
+    pub fn any_cleanup_enabled(&self) -> bool {
+        self.smart
+            .iter()
+            .chain(self.hold.iter())
+            .chain(self.toggle.iter())
+            .any(|binding| binding.cleanup_enabled)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSettings {
     #[serde(default)]

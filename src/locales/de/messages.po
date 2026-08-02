@@ -1196,6 +1196,11 @@ msgid "settings.about.data.count_error"
 msgstr "Deine Aufnahmen konnten nicht gelesen werden."
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.transcript.save_failed"
+msgstr "Dieses Transkript konnte nicht gespeichert werden. Ihre Änderungen sind noch vorhanden."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.generic_error"
 msgstr "Mikrofontest konnte nicht gestartet werden."

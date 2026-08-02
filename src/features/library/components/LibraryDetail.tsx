@@ -70,6 +70,8 @@ const SPEAKER_COLORS = [
   "#7dcfff",
 ];
 
+const MAX_SPEAKERS = 16;
+
 const SegmentWordsRow = ({
   tokens,
   activePosition,
@@ -194,6 +196,13 @@ const LibraryDetail = ({
   const [speakerFilter, setSpeakerFilter] = useState<string | null>(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const transcriptTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transcriptPending = useRef<string | null>(null);
+  const transcriptSent = useRef<string | null>(null);
+  const transcriptSaves = useRef(0);
+  const transcriptSaveFailed = useRef(false);
+  const transcriptChain = useRef<Promise<unknown>>(Promise.resolve());
+  const onUpdateRef = useRef(onUpdate);
+  onUpdateRef.current = onUpdate;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const tagMenuRef = useRef<HTMLDivElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -217,9 +226,9 @@ const LibraryDetail = ({
 
   const modelLabel =
     resolveSpeechModelLabel(models, item.speech_model) ?? item.speech_model;
+  const transcriptEditable = item.status.type === "complete";
   const transcriptAvailable =
-    item.status.type === "complete" &&
-    (item.transcript ?? "").trim().length > 0;
+    transcriptEditable && (item.transcript ?? "").trim().length > 0;
   const canShowTimestamps = !!item.segments && item.segments.length > 0;
   const speakers = useMemo(
     () =>
@@ -229,6 +238,7 @@ const LibraryDetail = ({
       })),
     [item.speakers],
   );
+  const canAddSpeaker = speakers.length < MAX_SPEAKERS;
   const isBusy =
     item.status.type === "transcribing" ||
     item.status.type === "cancelling" ||
@@ -493,6 +503,8 @@ const LibraryDetail = ({
   );
 
   useEffect(() => {
+    if (transcriptPending.current !== null || transcriptSaves.current > 0)
+      return;
     setTranscriptDraft(item.transcript ?? "");
   }, [item.transcript]);
 
@@ -525,22 +537,66 @@ const LibraryDetail = ({
     streamTranscriptRef.current = nextTranscript;
   }, [item.status.type, item.transcript]);
 
+  const writeTranscript = useCallback(() => {
+    const written = transcriptPending.current;
+    if (written === null) return;
+    transcriptPending.current = null;
+    transcriptSent.current = written;
+    transcriptSaves.current += 1;
+    transcriptChain.current = transcriptChain.current
+      .then(() => onUpdateRef.current({ transcript: written }))
+      .then(() => {
+        transcriptSaveFailed.current = false;
+      })
+      .catch((err) => {
+        console.error("failed to save transcript:", err);
+        if (
+          transcriptPending.current === null &&
+          transcriptSent.current === written
+        ) {
+          transcriptPending.current = written;
+        }
+        if (transcriptSaveFailed.current) return;
+        transcriptSaveFailed.current = true;
+        invoke("debug_show_toast", {
+          toastType: "error",
+          message: t({
+            id: "library.detail.transcript.save_failed",
+            message:
+              "Couldn't save this transcript. Your changes are still here.",
+          }),
+        }).catch(() => {});
+      })
+      .finally(() => {
+        transcriptSaves.current -= 1;
+        if (transcriptSaves.current === 0) transcriptSent.current = null;
+      });
+  }, []);
+
   useEffect(() => {
-    if (!transcriptAvailable) return;
-    if (transcriptTimer.current) clearTimeout(transcriptTimer.current);
+    if (!transcriptEditable) {
+      transcriptPending.current = null;
+      return;
+    }
+    const stored =
+      transcriptSaves.current > 0 && transcriptSent.current !== null
+        ? transcriptSent.current
+        : (item.transcript ?? "");
+    if (transcriptDraft === stored) {
+      transcriptPending.current = null;
+      return;
+    }
+    transcriptPending.current = transcriptDraft;
     transcriptTimer.current = setTimeout(() => {
-      if (transcriptDraft !== (item.transcript ?? "")) {
-        Promise.resolve(onUpdate({ transcript: transcriptDraft })).catch(
-          (err) => {
-            console.error("failed to save transcript:", err);
-          },
-        );
-      }
+      transcriptTimer.current = null;
+      writeTranscript();
     }, 600);
     return () => {
       if (transcriptTimer.current) clearTimeout(transcriptTimer.current);
     };
-  }, [transcriptDraft, transcriptAvailable, item.transcript, onUpdate]);
+  }, [transcriptDraft, transcriptEditable, item.transcript, writeTranscript]);
+
+  useEffect(() => writeTranscript, [writeTranscript]);
   useClickOutside(tagMenuRef, () => setTagMenuOpen(false), tagMenuOpen);
   useClickOutside(exportMenuRef, () => setExportOpen(false), exportOpen);
   useClickOutside(overflowMenuRef, () => setOverflowOpen(false), overflowOpen);
@@ -601,6 +657,7 @@ const LibraryDetail = ({
   };
 
   const handleAddSpeaker = async () => {
+    if (!canAddSpeaker) return null;
     const nextIndex = speakers.length + 1;
     const speaker: Speaker = {
       id: crypto.randomUUID(),
@@ -1325,9 +1382,10 @@ const LibraryDetail = ({
                 onClick={async (event) => {
                   event.stopPropagation();
                   const created = await handleAddSpeaker();
-                  await handleAssignSpeaker(idx, created.id);
+                  if (created) await handleAssignSpeaker(idx, created.id);
                 }}
-                className="w-full flex items-center gap-2 text-left px-2.5 py-1.5 ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary"
+                disabled={!canAddSpeaker}
+                className="w-full flex items-center gap-2 text-left px-2.5 py-1.5 ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-content-muted"
               >
                 <UserPlus size={11} />
                 {t({
@@ -1538,7 +1596,7 @@ const LibraryDetail = ({
           <div className="col-start-3 row-start-1 flex items-center justify-end gap-1">
             <button
               onClick={handleCopy}
-              disabled={!transcriptAvailable}
+              disabled={!transcriptDraft.trim()}
               className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 ui-text-meta disabled:opacity-50 transition-colors ${
                 copyConfirmed
                   ? "ui-color-success bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]"
@@ -1950,7 +2008,8 @@ const LibraryDetail = ({
                     <button
                       type="button"
                       onClick={() => handleAddSpeaker()}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary"
+                      disabled={!canAddSpeaker}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-content-muted"
                     >
                       <UserPlus size={11} />
                       {t({
@@ -2133,7 +2192,7 @@ const LibraryDetail = ({
                 ref={transcriptAreaRef}
                 value={transcriptDraft}
                 onChange={(event) => setTranscriptDraft(event.target.value)}
-                disabled={!transcriptAvailable}
+                disabled={!transcriptEditable}
                 placeholder={t({
                   id: "library.modal.transcript_placeholder",
                   message: "Transcript will appear here.",
@@ -2281,7 +2340,11 @@ const LibraryDetail = ({
                 if (!nextValue) {
                   onFollowTimestampsChange(false);
                 }
-                onUpdate({ show_timestamps: nextValue });
+                Promise.resolve(onUpdate({ show_timestamps: nextValue })).catch(
+                  (err) => {
+                    console.error("failed to save timestamps setting:", err);
+                  },
+                );
               }}
               ariaLabel={t({
                 id: "library.modal.timestamps",
