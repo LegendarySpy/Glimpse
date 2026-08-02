@@ -1,6 +1,6 @@
 import { plural } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react/macro";
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ShareNetwork } from "@phosphor-icons/react";
@@ -41,6 +41,24 @@ const DictationStatsPanel = () => {
   const today = useMemo(() => new Date(), []);
   const startMs = useMemo(() => activityStart(today).getTime(), [today]);
   const [hovered, setHovered] = useState<HoveredCell | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltipLeft, setTooltipLeft] = useState(0);
+
+  // Measured before paint so a cell near the right edge flips the tooltip to
+  // the other side of the cursor instead of running off screen.
+  useLayoutEffect(() => {
+    const element = tooltipRef.current;
+    if (!hovered || !element) return;
+    const width = element.offsetWidth;
+    const gap = 9;
+    const margin = 8;
+    const right = hovered.x + gap;
+    setTooltipLeft(
+      right + width > window.innerWidth - margin
+        ? Math.max(margin, hovered.x - gap - width)
+        : right,
+    );
+  }, [hovered]);
   const [sharing, setSharing] = useState(false);
 
   const { data: totals } = useDictationStats();
@@ -298,8 +316,9 @@ const DictationStatsPanel = () => {
       {hovered &&
         createPortal(
           <div
+            ref={tooltipRef}
             className="settings-typescale ui-surface-menu pointer-events-none fixed z-tooltip -translate-y-full px-2.5 py-1.5"
-            style={{ left: hovered.x + 9, top: hovered.y - 7 }}
+            style={{ left: tooltipLeft, top: hovered.y - 7 }}
           >
             <div className="ui-text-micro ui-color-primary whitespace-nowrap">
               {hovered.cell.count > 0
