@@ -17,6 +17,7 @@
 ### Fixes
 
 - Models that show their reasoning no longer paste it in with your words.
+- Renaming or editing a personalization mode no longer reverts a moment later.
 - The personalization list scrolls, so modes past the first few are reachable.
 - Member since and Words spoken no longer slide back in each time you open the Account screen.
 - Settings opens straight away instead of showing an empty panel first.

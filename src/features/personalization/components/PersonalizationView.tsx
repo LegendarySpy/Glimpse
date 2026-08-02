@@ -63,6 +63,8 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
   const { t } = useLingui();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState("");
   const [modeMenu, setModeMenu] = useState<{
     personality: Personality;
     x: number;
@@ -182,6 +184,11 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
       const persistVersion = persistVersionRef.current + 1;
       persistVersionRef.current = persistVersion;
       lastPendingPersonalitiesRef.current = next;
+      // A fetch already in flight would otherwise resolve with the pre edit
+      // value and overwrite this.
+      void queryClient.cancelQueries({
+        queryKey: personalizationKeys.personalities(),
+      });
       setPersonalitiesCache(queryClient, next);
 
       if (saveTimeoutRef.current !== null) {
@@ -285,6 +292,18 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
     [t, updatePersonalities],
   );
 
+  const startRename = useCallback((personality: Personality) => {
+    setRenamingId(personality.id);
+    setRenameDraft(personality.name);
+  }, []);
+
+  const commitRename = useCallback(() => {
+    if (!renamingId) return;
+    const name = renameDraft.trim();
+    if (name) updatePersonality(renamingId, { name });
+    setRenamingId(null);
+  }, [renameDraft, renamingId, updatePersonality]);
+
   const handleAddMode = () => {
     const id = createId();
     const nextMode: Personality = {
@@ -354,6 +373,12 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
         return;
       }
 
+      if (renamingId) {
+        event.preventDefault();
+        setRenamingId(null);
+        return;
+      }
+
       if (modeMenu) {
         event.preventDefault();
         setModeMenu(null);
@@ -374,7 +399,13 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activePersonalityId, isActive, modeMenu, pendingDeletePersonality]);
+  }, [
+    activePersonalityId,
+    isActive,
+    modeMenu,
+    pendingDeletePersonality,
+    renamingId,
+  ]);
 
   return (
     <div className="flex h-full min-h-0 w-full max-w-7xl flex-col text-left mx-auto px-0">
@@ -499,10 +530,36 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
                 >
                   <div className="relative space-y-2">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="ui-text-body-lg-strong ui-color-primary">
-                          {personality.name}
-                        </p>
+                      <div className="min-w-0 flex-1">
+                        {renamingId === personality.id ? (
+                          <input
+                            data-no-press
+                            autoFocus
+                            value={renameDraft}
+                            onChange={(event) =>
+                              setRenameDraft(event.target.value)
+                            }
+                            onClick={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onBlur={commitRename}
+                            onKeyDown={(event) => {
+                              event.stopPropagation();
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                commitRename();
+                              }
+                              if (event.key === "Escape") {
+                                event.preventDefault();
+                                setRenamingId(null);
+                              }
+                            }}
+                            className="ui-text-body-lg-strong ui-color-primary block w-full min-w-0 border-0 bg-transparent p-0 shadow-[inset_0_-1px_0_0_var(--color-border-hover)] outline-hidden"
+                          />
+                        ) : (
+                          <p className="ui-text-body-lg-strong ui-color-primary">
+                            {personality.name}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-start gap-2">
                         <div
@@ -677,7 +734,7 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
                   message: "Rename",
                 })}
                 onClick={() => {
-                  setActivePersonalityId(modeMenu.personality.id);
+                  startRename(modeMenu.personality);
                   setModeMenu(null);
                 }}
               />
