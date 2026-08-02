@@ -5,6 +5,7 @@
 - Settings now opens inside the main window instead of a floating panel.
 - The Account screen shows your dictation statistics.
 - You can share those statistics as a picture.
+- Right click a personalization mode to rename, duplicate, enable or delete it.
 - Auto-update is now on by default. If you already turned it off, it stays off.
 
 ### Changes
@@ -15,6 +16,8 @@
 
 ### Fixes
 
+- Models that show their reasoning no longer paste it in with your words.
+- The personalization list scrolls, so modes past the first few are reachable.
 - Member since and Words spoken no longer slide back in each time you open the Account screen.
 - Settings opens straight away instead of showing an empty panel first.
 - Dialogs now dim the whole window instead of leaving the sidebar bright.
