@@ -6,6 +6,7 @@ import {
   CaretRight as ChevronRight,
   Check,
   Clock,
+  Cloud,
   Trash as Trash2,
   Waveform,
 } from "@phosphor-icons/react";
@@ -27,6 +28,7 @@ import {
 } from "../../../../shared/lib/modelCapabilities";
 import {
   getSpeechProviderPreset,
+  isRemoteSpeechConfigured,
   resolvedSpeechModel,
 } from "../../../../shared/lib/speechProviders";
 import { useShiftHeld } from "../../../../shared/hooks/useShiftHeld";
@@ -45,7 +47,9 @@ type ModelsTabProps = {
   downloadState: Record<string, DownloadEvent>;
   localModel: string;
   remoteSpeechEnabled: boolean;
+  setRemoteSpeechEnabled: (value: boolean) => void;
   remoteSpeechProvider: RemoteSpeechProvider;
+  remoteSpeechEndpoint: string;
   remoteSpeechModel: string;
   setLocalModel: (value: string) => void;
   handleDownload: (modelKey: string, ane?: boolean) => void;
@@ -208,6 +212,74 @@ const InstalledModelRow = ({
   );
 };
 
+const CloudModelRow = ({
+  providerLabel,
+  modelLabel,
+  configured,
+  onUse,
+  onOpenProvidersTab,
+}: {
+  providerLabel: string;
+  modelLabel: string | null;
+  configured: boolean;
+  onUse: () => void;
+  onOpenProvidersTab: () => void;
+}) => {
+  const { t } = useLingui();
+
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-surface-elevated/40">
+      <button
+        type="button"
+        onClick={configured ? onUse : onOpenProvidersTab}
+        className="min-w-0 text-left"
+      >
+        <span
+          className={`flex min-w-0 items-center gap-1.5 ui-text-body-sm-strong ${
+            configured ? "text-content-primary" : "text-content-disabled"
+          }`}
+        >
+          <Cloud
+            size={13}
+            weight="fill"
+            className="shrink-0 ui-color-cloud"
+            aria-hidden="true"
+          />
+          <span className="truncate">{providerLabel}</span>
+        </span>
+        <span className="mt-0.5 block truncate ui-text-meta text-content-muted">
+          {configured
+            ? modelLabel
+            : t({
+                id: "settings.models.cloud.unconfigured",
+                message: "Add an endpoint and model in Providers first",
+              })}
+        </span>
+      </button>
+
+      <div className="flex items-center justify-end gap-2">
+        {configured ? (
+          <button
+            type="button"
+            onClick={onUse}
+            className="ui-text-meta font-medium text-content-secondary transition-colors hover:text-content-primary"
+          >
+            {t({ id: "settings.models.installed.use", message: "Use" })}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onOpenProvidersTab}
+            className="ui-text-meta font-medium text-content-secondary transition-colors hover:text-content-primary"
+          >
+            {t({ id: "settings.models.cloud.set_up", message: "Set up" })}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const ModelsTab = ({
   variants,
   modelCatalog,
@@ -215,7 +287,9 @@ const ModelsTab = ({
   downloadState,
   localModel,
   remoteSpeechEnabled,
+  setRemoteSpeechEnabled,
   remoteSpeechProvider,
+  remoteSpeechEndpoint,
   remoteSpeechModel,
   setLocalModel,
   handleDownload,
@@ -247,6 +321,13 @@ const ModelsTab = ({
   const installedModels = sortInstalledModels(
     modelCatalog.filter((m) => modelStatus[m.key]?.installed),
   );
+
+  const cloudConfigured = isRemoteSpeechConfigured({
+    enabled: true,
+    provider: remoteSpeechProvider,
+    endpoint: remoteSpeechEndpoint,
+    model: remoteSpeechModel,
+  });
 
   const renderLocalCard = (width?: number, compact?: boolean) =>
     installedModel ? (
@@ -283,7 +364,6 @@ const ModelsTab = ({
           </button>
           <ModelPickerPanel
             className="w-full min-h-0 flex-1"
-            fadeColor="var(--color-bg-overlay)"
             catalog={modelCatalog}
             activeKey={localModel}
             isInstalled={(key) => Boolean(modelStatus[key]?.installed)}
@@ -341,6 +421,21 @@ const ModelsTab = ({
             )
           )}
 
+          {!remoteSpeechEnabled && (
+            <div className="flex shrink-0 flex-col gap-2">
+              <SectionLabel>
+                {t({ id: "settings.models.cloud", message: "Cloud" })}
+              </SectionLabel>
+              <CloudModelRow
+                providerLabel={providerLabel}
+                modelLabel={activeModel ?? null}
+                configured={cloudConfigured}
+                onUse={() => setRemoteSpeechEnabled(true)}
+                onOpenProvidersTab={onOpenProvidersTab}
+              />
+            </div>
+          )}
+
           <div className="flex min-h-0 flex-1 flex-col gap-2">
             <div className="flex shrink-0 items-center gap-3">
               <SectionLabel className="flex-1">
@@ -372,7 +467,7 @@ const ModelsTab = ({
                 <InstalledModelRow
                   key={model.key}
                   model={model}
-                  active={model.key === localModel}
+                  active={!remoteSpeechEnabled && model.key === localModel}
                   aneInstalled={Boolean(modelStatus[model.key]?.ane_installed)}
                   shiftHeld={shiftHeld}
                   onUse={() => setLocalModel(model.key)}

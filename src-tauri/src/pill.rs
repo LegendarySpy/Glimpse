@@ -428,7 +428,7 @@ impl PillController {
     ) {
         let state = app.state::<AppState>();
 
-        if !settings.edit_mode_enabled {
+        if !settings.cleanup_enabled || !crate::llm_cleanup::is_llm_available(settings) {
             state.set_pending_selected_text(None);
             return;
         }

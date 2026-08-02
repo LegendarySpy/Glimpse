@@ -17,13 +17,7 @@ import SectionLabel from "../../../../shared/ui/SectionLabel";
 import ToggleSwitch from "../../../../shared/ui/ToggleSwitch";
 import { Dropdown } from "../../../../shared/ui/Dropdown";
 import { formatShortcutForDisplay } from "../../../../shared/lib/shortcuts";
-import { isRemoteSpeechConfigured } from "../../../../shared/lib/speechProviders";
-import type {
-  DeviceInfo,
-  ModelStatus,
-  RemoteSpeechProvider,
-  TranscriptionMode,
-} from "../../../../types";
+import type { DeviceInfo } from "../../../../types";
 import type { TranscriptionLanguageOption } from "../../../../shared/lib/transcriptionLanguages";
 import type { ShortcutBinding, ShortcutBindings } from "../../../../types";
 
@@ -32,7 +26,7 @@ type CaptureMode = { mode: ShortcutMode; index: number } | null;
 type InvalidShortcutDrafts = Partial<
   Record<ShortcutMode, Record<number, string>>
 >;
-type HelpTooltipId = "shortcuts" | "edit-mode";
+type HelpTooltipId = "shortcuts";
 type MicrophoneTestStatus = "idle" | "starting" | "listening" | "error";
 type MicrophoneTestLevels = {
   left: number;
@@ -41,17 +35,6 @@ type MicrophoneTestLevels = {
 
 type GeneralTabProps = {
   variants: Variants;
-  transcriptionMode: TranscriptionMode;
-  onTranscriptionModeChange: (mode: TranscriptionMode) => void;
-  modelStatus: Record<string, ModelStatus>;
-  localModel: string;
-  remoteSpeechEnabled: boolean;
-  remoteSpeechProvider: RemoteSpeechProvider;
-  remoteSpeechEndpoint: string;
-  remoteSpeechModel: string;
-  onOpenModelsTab: () => void;
-  onOpenProvidersTab: () => void;
-  onOpenAccountTab: () => void;
   inputDevices: DeviceInfo[];
   microphoneDevice: string | null;
   onMicrophoneDeviceChange: (deviceId: string | null) => void;
@@ -76,28 +59,17 @@ type GeneralTabProps = {
   ) => void;
   addShortcutBinding: (mode: ShortcutMode) => void;
   removeShortcutBinding: (mode: ShortcutMode, index: number) => void;
-  editModeEnabled: boolean;
-  setEditModeEnabled: (value: boolean) => void;
   autoDictionaryEnabled: boolean;
   autoDictionarySupported: boolean;
   setAutoDictionaryEnabled: (value: boolean) => void;
   aiFeaturesReady: boolean;
   licenseGateActive: boolean;
+  onOpenAccountTab: () => void;
+  onOpenProvidersTab: () => void;
 };
 
 const GeneralTab = ({
   variants,
-  transcriptionMode,
-  onTranscriptionModeChange,
-  modelStatus,
-  localModel,
-  remoteSpeechEnabled,
-  remoteSpeechProvider,
-  remoteSpeechEndpoint,
-  remoteSpeechModel,
-  onOpenModelsTab,
-  onOpenProvidersTab,
-  onOpenAccountTab,
   inputDevices,
   microphoneDevice,
   onMicrophoneDeviceChange,
@@ -118,13 +90,13 @@ const GeneralTab = ({
   updateShortcutBinding,
   addShortcutBinding,
   removeShortcutBinding,
-  editModeEnabled,
-  setEditModeEnabled,
   autoDictionaryEnabled,
   autoDictionarySupported,
   setAutoDictionaryEnabled,
   aiFeaturesReady,
   licenseGateActive,
+  onOpenAccountTab,
+  onOpenProvidersTab,
 }: GeneralTabProps) => {
   const { t } = useLingui();
   const [openHelpTooltip, setOpenHelpTooltip] = useState<HelpTooltipId | null>(
@@ -145,8 +117,7 @@ const GeneralTab = ({
     status: microphoneTestStatus,
   } = useMicrophoneTest(inputDevices, microphoneDevice);
   const aiFeaturesDisabled = !aiFeaturesReady;
-  const aiFeaturesRequireLicense = !licenseGateActive;
-  const localModelStatus = localModel ? modelStatus[localModel] : undefined;
+  const cleanupNeedsLicense = !licenseGateActive;
   const autoDictionaryBody = autoDictionarySupported
     ? t({
         id: "settings.general.auto_dictionary.body",
@@ -160,18 +131,6 @@ const GeneralTab = ({
     id: "settings.general.system_default",
     message: "System Default",
   });
-  const remoteSpeechActive = isRemoteSpeechConfigured({
-    enabled: remoteSpeechEnabled,
-    provider: remoteSpeechProvider,
-    endpoint: remoteSpeechEndpoint,
-    model: remoteSpeechModel,
-  });
-  const shouldShowMissingModelWarning =
-    transcriptionMode === "local" &&
-    !remoteSpeechActive &&
-    Boolean(localModel) &&
-    localModelStatus !== undefined &&
-    !localModelStatus.installed;
 
   const showHelpTooltip = (tooltip: HelpTooltipId) => {
     setOpenHelpTooltip(tooltip);
@@ -206,156 +165,6 @@ const GeneralTab = ({
       exit="exit"
       className="space-y-6"
     >
-      <div className="space-y-2">
-        <SectionLabel>
-          {t({
-            id: "settings.general.processing",
-            message: "Processing",
-          })}
-        </SectionLabel>
-        <div
-          className="grid grid-cols-2 gap-3"
-          role="radiogroup"
-          aria-label={t({
-            id: "settings.general.processing_mode",
-            message: "Processing Mode",
-          })}
-        >
-          <button
-            onClick={() => {}}
-            disabled
-            role="radio"
-            aria-checked={transcriptionMode === "cloud"}
-            aria-label={t({
-              id: "settings.general.cloud.aria",
-              message: "Cloud processing (Coming soon)",
-            })}
-            className={`py-3 px-3.5 rounded-lg border text-left transition-all duration-100 opacity-60 cursor-not-allowed ${
-              transcriptionMode === "cloud"
-                ? "border-cloud-30 bg-cloud-5 shadow-[0_3px_0_-1px_rgba(251,191,36,0.4),inset_0_1px_0_0_rgba(251,191,36,0.1)]"
-                : "border-border-primary bg-surface-surface shadow-[0_3px_0_-1px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)]"
-            }`}
-            aria-disabled="true"
-          >
-            <div className="flex items-baseline gap-1.5">
-              <span
-                className={`ui-text-body-strong ${
-                  transcriptionMode === "cloud"
-                    ? "ui-color-cloud"
-                    : "ui-color-secondary"
-                }`}
-              >
-                {t({
-                  id: "settings.general.cloud.label",
-                  message: "Cloud",
-                })}
-              </span>
-              <span
-                className={`ui-text-label ${
-                  transcriptionMode === "cloud"
-                    ? "text-cloud-50"
-                    : "ui-color-disabled"
-                }`}
-              >
-                {t({
-                  id: "settings.general.cloud.badge",
-                  message: "coming soon",
-                })}
-              </span>
-            </div>
-            <p
-              className={`ui-text-label mt-1 ${
-                transcriptionMode === "cloud"
-                  ? "text-cloud-50"
-                  : "ui-color-disabled"
-              }`}
-            >
-              {t({
-                id: "settings.general.cloud.description",
-                message: "In development",
-              })}
-            </p>
-          </button>
-          <button
-            onClick={() => onTranscriptionModeChange("local")}
-            role="radio"
-            aria-checked={transcriptionMode === "local"}
-            className={`py-3 px-3.5 rounded-lg border text-left transition-all duration-100 ${
-              transcriptionMode === "local"
-                ? "border-local-30 bg-local-5 shadow-[0_3px_0_-1px_rgba(165,179,254,0.4),inset_0_1px_0_0_rgba(165,179,254,0.1)]"
-                : "border-border-primary bg-surface-surface shadow-[0_3px_0_-1px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-local-30 hover:bg-local-5 hover:shadow-[0_2px_0_-1px_rgba(165,179,254,0.4),inset_0_1px_0_0_rgba(165,179,254,0.1)] hover:translate-y-[1px]"
-            } active:translate-y-[2px] active:shadow-none`}
-          >
-            <div className="flex items-baseline gap-1.5">
-              <span
-                className={`ui-text-body-strong ${
-                  transcriptionMode === "local"
-                    ? "ui-color-local"
-                    : "ui-color-secondary"
-                }`}
-              >
-                {t({
-                  id: "settings.general.local.label",
-                  message: "Local",
-                })}
-              </span>
-              <span
-                className={`ui-text-label ${
-                  transcriptionMode === "local"
-                    ? "text-local-50"
-                    : "ui-color-disabled"
-                }`}
-              >
-                {t({
-                  id: "settings.general.local.badge",
-                  message: "private",
-                })}
-              </span>
-            </div>
-            <p
-              className={`ui-text-label mt-1 ${
-                transcriptionMode === "local"
-                  ? "text-local-50"
-                  : "ui-color-disabled"
-              }`}
-            >
-              {t({
-                id: "settings.general.local.description",
-                message: "Runs entirely on your device",
-              })}
-            </p>
-          </button>
-        </div>
-        <AnimatePresence>
-          {shouldShowMissingModelWarning && (
-            <motion.p
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="ui-text-label ui-color-warning"
-            >
-              {t({
-                id: "settings.general.no_model",
-                message: "No model installed.",
-              })}{" "}
-              <button
-                onClick={onOpenModelsTab}
-                className="underline hover:text-cloud transition-colors"
-              >
-                {t({
-                  id: "settings.general.download_one",
-                  message: "Download one",
-                })}
-              </button>{" "}
-              {t({
-                id: "settings.general.to_use_local",
-                message: "to use local.",
-              })}
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
-
       <div
         className={`grid grid-cols-2 gap-3${deviceRowElevated ? " relative z-dropdown-open" : ""}`}
       >
@@ -465,7 +274,7 @@ const GeneralTab = ({
                 >
                   <Info size={10} aria-hidden="true" />
                 </button>
-                <div className="absolute right-0 bottom-full mb-1 hidden group-hover:block group-focus-within:block z-tooltip">
+                <div className="absolute right-0 top-full mt-1.5 hidden group-hover:block group-focus-within:block z-tooltip">
                   <div className="ui-surface-menu w-56 px-2.5 py-1.5 ui-text-micro ui-color-secondary leading-tight">
                     <p>
                       {t({
@@ -539,11 +348,11 @@ const GeneralTab = ({
                 <div
                   id="shortcuts-help-tooltip"
                   role="tooltip"
-                  className={`absolute left-0 bottom-full mb-1 z-tooltip ${
+                  className={`absolute left-0 top-full mt-1.5 z-tooltip ${
                     openHelpTooltip === "shortcuts" ? "block" : "hidden"
                   }`}
                 >
-                  <div className="w-56 rounded-lg border border-border-secondary bg-surface-overlay px-2.5 py-1.5 ui-text-micro ui-color-secondary shadow-lg leading-tight">
+                  <div className="w-64 rounded-lg border border-border-secondary bg-surface-overlay px-2.5 py-2 ui-text-micro ui-color-secondary shadow-lg leading-snug">
                     <p>
                       <Ghost
                         size={10}
@@ -563,8 +372,9 @@ const GeneralTab = ({
                         aria-hidden="true"
                       />
                       {t({
-                        id: "settings.general.shortcuts.help_cleanup",
-                        message: "Runs Cleanup for that shortcut only.",
+                        id: "settings.general.shortcuts.help_writing",
+                        message:
+                          "Uses the writing model for that shortcut only. It tidies what you dictate, and rewrites selected text when you speak an instruction.",
                       })}
                     </p>
                   </div>
@@ -683,6 +493,42 @@ const GeneralTab = ({
               cleanupDisabled={aiFeaturesDisabled}
             />
           </div>
+
+          {aiFeaturesDisabled && (
+            <p className="ui-text-meta ui-color-muted px-0.5">
+              <BrushCleaning
+                size={10}
+                className="me-1 inline-block align-[-1px]"
+                aria-hidden="true"
+              />
+              {cleanupNeedsLicense
+                ? t({
+                    id: "settings.general.shortcuts.cleanup_locked.license_prefix",
+                    message: "Cleanup needs a license. Activate it in",
+                  })
+                : t({
+                    id: "settings.general.shortcuts.cleanup_locked.provider_prefix",
+                    message: "Cleanup needs a writing model. Set one up in",
+                  })}{" "}
+              <button
+                type="button"
+                onClick={
+                  cleanupNeedsLicense ? onOpenAccountTab : onOpenProvidersTab
+                }
+                className="ui-color-primary underline underline-offset-2 decoration-[var(--color-border-secondary)] hover:decoration-[var(--color-text-primary)] transition-colors"
+              >
+                {cleanupNeedsLicense
+                  ? t({
+                      id: "settings.general.shortcuts.cleanup_locked.account_link",
+                      message: "Account",
+                    })
+                  : t({
+                      id: "settings.general.shortcuts.cleanup_locked.providers_link",
+                      message: "Providers",
+                    })}
+              </button>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -694,150 +540,6 @@ const GeneralTab = ({
           </SectionLabel>
 
           <div className="space-y-3">
-            <div
-              className={`rounded-lg bg-surface-surface transition-opacity ${
-                aiFeaturesDisabled ? "opacity-55" : "opacity-100"
-              }`}
-            >
-              <div className="py-2 px-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="ui-text-label-strong ui-color-primary">
-                    {t({
-                      id: "settings.general.edit_mode",
-                      message: "Edit Mode",
-                    })}
-                  </span>
-                  <ToggleSwitch
-                    enabled={editModeEnabled}
-                    onToggle={() =>
-                      aiFeaturesReady && setEditModeEnabled(!editModeEnabled)
-                    }
-                    ariaLabel={t({
-                      id: "settings.general.edit_mode.toggle_aria",
-                      message: "Toggle Edit Mode",
-                    })}
-                    disabled={aiFeaturesDisabled}
-                  />
-                </div>
-                <div className="flex items-center justify-between mt-0.5">
-                  <span className="ui-text-meta ui-color-muted">
-                    {aiFeaturesDisabled ? (
-                      <>
-                        {aiFeaturesRequireLicense
-                          ? t({
-                              id: "settings.general.edit_mode.license_prefix",
-                              message: "Activate your Glimpse license in",
-                            })
-                          : t({
-                              id: "settings.general.edit_mode.configure_prefix",
-                              message: "Set up AI writing in",
-                            })}{" "}
-                        <button
-                          type="button"
-                          onClick={
-                            aiFeaturesRequireLicense
-                              ? onOpenAccountTab
-                              : onOpenProvidersTab
-                          }
-                          className="ui-color-primary underline underline-offset-2 decoration-[var(--color-border-secondary)] hover:decoration-[var(--color-text-primary)] transition-colors"
-                        >
-                          {aiFeaturesRequireLicense
-                            ? t({
-                                id: "settings.general.account_tab",
-                                message: "Account",
-                              })
-                            : t({
-                                id: "settings.general.providers_tab",
-                                message: "Providers",
-                              })}
-                        </button>{" "}
-                        {t({
-                          id: "settings.general.edit_mode.models_suffix",
-                          message: "to use Edit Mode.",
-                        })}
-                      </>
-                    ) : (
-                      t({
-                        id: "settings.general.edit_mode.body",
-                        message: "transform selected text with voice",
-                      })
-                    )}
-                  </span>
-                  <div
-                    className="relative"
-                    onMouseEnter={() => {
-                      if (!aiFeaturesDisabled) showHelpTooltip("edit-mode");
-                    }}
-                    onMouseLeave={() => hideHelpTooltip("edit-mode")}
-                  >
-                    <button
-                      type="button"
-                      disabled={aiFeaturesDisabled}
-                      className="p-0.5 text-content-disabled transition-colors enabled:hover:text-content-muted disabled:pointer-events-none"
-                      aria-label={t({
-                        id: "settings.general.edit_mode.info_aria",
-                        message: "More information about Edit Mode",
-                      })}
-                      aria-expanded={
-                        !aiFeaturesDisabled && openHelpTooltip === "edit-mode"
-                      }
-                      aria-controls="edit-mode-help-tooltip"
-                      onFocus={() => {
-                        if (!aiFeaturesDisabled) showHelpTooltip("edit-mode");
-                      }}
-                      onBlur={() => hideHelpTooltip("edit-mode")}
-                      onKeyDown={(event) => {
-                        if (aiFeaturesDisabled) return;
-                        if (event.key === "Escape") {
-                          event.preventDefault();
-                          hideHelpTooltip("edit-mode");
-                        }
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          toggleHelpTooltip("edit-mode");
-                        }
-                      }}
-                    >
-                      <Info size={10} aria-hidden="true" />
-                    </button>
-                    <div
-                      id="edit-mode-help-tooltip"
-                      role="tooltip"
-                      className={`absolute right-0 bottom-full mb-1 z-tooltip ${
-                        !aiFeaturesDisabled && openHelpTooltip === "edit-mode"
-                          ? "block"
-                          : "hidden"
-                      }`}
-                    >
-                      <div className="bg-surface-overlay border border-border-secondary rounded-lg px-2.5 py-1.5 ui-text-micro ui-color-secondary w-44 shadow-lg leading-tight">
-                        <p>
-                          {t({
-                            id: "settings.general.edit_mode.help",
-                            message:
-                              'Select text in any app, and speak a command like "make this formal" or "fix my grammar".',
-                          })}
-                        </p>
-                        {!aiFeaturesReady && (
-                          <p className="text-warning mt-1">
-                            {aiFeaturesRequireLicense
-                              ? t({
-                                  id: "settings.general.edit_mode.help_license_requirement",
-                                  message: "Requires a Glimpse license.",
-                                })
-                              : t({
-                                  id: "settings.general.edit_mode.help_requirement",
-                                  message:
-                                    "Requires an enabled and configured writing provider.",
-                                })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div className="rounded-lg bg-surface-surface">
               <div className="py-2 px-2.5">
                 <div className="flex items-center justify-between">
@@ -1418,6 +1120,7 @@ const ShortcutBindingsList = ({
           >
             <span className="flex w-5 items-center justify-center">
               <motion.span
+                initial={false}
                 animate={{ x: alternateCount > 0 ? -2 : 0 }}
                 transition={{ duration: 0.14, ease: "easeOut" }}
               >
@@ -1427,6 +1130,7 @@ const ShortcutBindingsList = ({
                 {[1, 2].map((count) => (
                   <motion.span
                     key={count}
+                    initial={false}
                     className="absolute inset-0 flex items-center justify-start"
                     animate={{
                       opacity: alternateCount === count ? 1 : 0,
@@ -1445,6 +1149,7 @@ const ShortcutBindingsList = ({
               </span>
             </span>
             <motion.span
+              initial={false}
               animate={{ rotate: isExpanded ? 90 : 0 }}
               transition={{ duration: 0.15 }}
               className="flex items-center"

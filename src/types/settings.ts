@@ -102,7 +102,6 @@ export type StoredSettings = {
   auto_dictionary_ignored: string[];
   replacements: Replacement[];
   personalities: Personality[];
-  edit_mode_enabled: boolean;
   media_action: MediaAction;
   auto_update_enabled: boolean;
   auto_launch_enabled: boolean;

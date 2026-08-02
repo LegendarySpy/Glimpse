@@ -136,7 +136,6 @@ const buildSettingsArgs = (
     llmEndpoint: latest.llm_endpoint ?? "",
     llmApiKey: latest.llm_api_key ?? "",
     llmModel: latest.llm_model ?? "",
-    editModeEnabled: false,
     autoDictionaryEnabled: false,
     mediaAction: "pause",
     autoUpdateEnabled: true,

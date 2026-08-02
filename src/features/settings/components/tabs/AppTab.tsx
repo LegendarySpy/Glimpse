@@ -1,5 +1,5 @@
 import { useLingui } from "@lingui/react/macro";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
@@ -133,6 +133,7 @@ const PermissionStatus = ({ granted }: { granted: boolean | null }) => {
 
 type AppTabProps = {
   variants: Variants;
+  active: boolean;
   micPermission: boolean | null;
   accessibilityPermission: boolean | null;
   inputMonitoringPermission: boolean | null;
@@ -163,6 +164,7 @@ type AppTabProps = {
 
 const AppTab = ({
   variants,
+  active,
   micPermission,
   accessibilityPermission,
   inputMonitoringPermission,
@@ -552,6 +554,23 @@ const AppTab = ({
   const handleClosePruneConfirmation = () => {
     setPendingPruneConfirmation(null);
   };
+
+  useEffect(() => {
+    if (active) return;
+    setPendingPruneConfirmation(null);
+  }, [active]);
+
+  useEffect(() => {
+    if (!pendingPruneConfirmation) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPendingPruneConfirmation(null);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [pendingPruneConfirmation]);
 
   const pruneConfirmationMessage = pendingPruneConfirmation
     ? buildPruneConfirmationMessage(

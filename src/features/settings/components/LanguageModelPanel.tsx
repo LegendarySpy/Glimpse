@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useLingui } from "@lingui/react/macro";
-import ToggleSwitch from "../../../shared/ui/ToggleSwitch";
 import {
   CLOUD_PROVIDERS,
   getProviderPreset,
@@ -15,8 +14,6 @@ type AppleLlmAvailability =
   "available" | "not_enabled" | "not_ready" | "unsupported";
 
 type LanguageModelPanelProps = {
-  llmEnabled: boolean;
-  setLlmEnabled: (value: boolean) => void;
   llmProvider: LlmProvider;
   setLlmProvider: (value: LlmProvider) => void;
   llmEndpoint: string;
@@ -30,8 +27,6 @@ type LanguageModelPanelProps = {
 };
 
 const LanguageModelPanel = ({
-  llmEnabled,
-  setLlmEnabled,
   llmProvider,
   setLlmProvider,
   llmEndpoint,
@@ -112,21 +107,11 @@ const LanguageModelPanel = ({
             </h3>
             <p className="mt-0.5 ui-text-meta ui-color-muted">
               {t({
-                id: "settings.language_model.description",
-                message: "Used by Cleanup, Edit Mode, and Personalization.",
+                id: "settings.language_model.subtitle",
+                message:
+                  "Used by shortcuts with the writing model turned on, and by Personalization.",
               })}
             </p>
-          </div>
-          <div className="flex shrink-0 items-center">
-            <ToggleSwitch
-              enabled={llmEnabled}
-              onToggle={() => setLlmEnabled(!llmEnabled)}
-              ariaLabel={t({
-                id: "settings.language_model.toggle",
-                message: "Use this provider for AI writing features",
-              })}
-              size="md"
-            />
           </div>
         </div>
       </div>

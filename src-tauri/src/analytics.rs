@@ -377,11 +377,6 @@ pub fn track_settings_changes(
             next.cleanup_enabled,
         ),
         (
-            "edit_mode_enabled",
-            previous.edit_mode_enabled,
-            next.edit_mode_enabled,
-        ),
-        (
             "remote_speech_enabled",
             previous.remote_speech_enabled,
             next.remote_speech_enabled,

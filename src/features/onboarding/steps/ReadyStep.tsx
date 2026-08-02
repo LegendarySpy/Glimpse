@@ -211,9 +211,9 @@ export function ReadyStep({
                   message: "Every feature is unlocked.",
                 })
               : t({
-                  id: "onboarding.done.license_adds",
+                  id: "onboarding.done.license_adds.v2",
                   message:
-                    "Unlock Cleanup, Edit Mode, Personalities, File Transcription, and more.",
+                    "Unlock Cleanup, Personalities, File Transcription, and more.",
                 })}
           </span>
         </span>

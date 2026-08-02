@@ -299,16 +299,10 @@ const AboutTab = ({
               message: `${pairCount} audio and text pairs`,
             });
 
-  const isCloudMode = transcriptionMode === "cloud";
-  const modeLabel = isCloudMode
-    ? t({
-        id: "settings.about.mode.cloud",
-        message: "Cloud",
-      })
-    : t({
-        id: "settings.about.mode.local",
-        message: "Local",
-      });
+  const modeLabel = t({
+    id: "settings.about.mode.local",
+    message: "Local",
+  });
 
   const recordingsBytes = appInfo?.storage_breakdown?.recordings_bytes ?? 0;
   const libraryBytes = appInfo?.storage_breakdown?.library_bytes ?? 0;

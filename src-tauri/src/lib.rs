@@ -642,6 +642,8 @@ pub fn run() {
             data_export::delete_all_data,
             get_transcriptions_page,
             get_today_dictation_stats,
+            get_dictation_activity,
+            save_share_image,
             delete_transcription,
             retry_transcription,
             retry_llm_cleanup,
@@ -1265,7 +1267,6 @@ impl AppState {
 fn disable_license_gated_settings(settings: &mut UserSettings) {
     settings.llm_enabled = false;
     settings.cleanup_enabled = false;
-    settings.edit_mode_enabled = false;
     for binding in settings
         .shortcut_bindings
         .smart
@@ -1702,6 +1703,22 @@ fn get_today_dictation_stats(
         .storage()
         .today_dictation_stats(start_ms, end_ms)
         .map_err(|err| format!("Failed to get today's dictation stats: {err}"))
+}
+
+#[tauri::command]
+fn save_share_image(path: String, bytes: Vec<u8>) -> Result<(), String> {
+    std::fs::write(&path, bytes).map_err(|err| format!("Failed to save image: {err}"))
+}
+
+#[tauri::command]
+fn get_dictation_activity(
+    start_ms: i64,
+    state: tauri::State<AppState>,
+) -> Result<Vec<storage::DictationDay>, String> {
+    state
+        .storage()
+        .dictation_activity(start_ms)
+        .map_err(|err| format!("Failed to get dictation activity: {err}"))
 }
 
 #[tauri::command]

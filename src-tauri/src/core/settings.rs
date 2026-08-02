@@ -43,7 +43,6 @@ pub(crate) struct UpdateSettingsArgs {
     pub llm_endpoint: String,
     pub llm_api_key: String,
     pub llm_model: String,
-    pub edit_mode_enabled: bool,
     pub auto_dictionary_enabled: bool,
     #[serde(default)]
     pub media_action: MediaAction,
@@ -291,10 +290,8 @@ pub(crate) fn update_settings(
         .chain(args.shortcut_bindings.hold.iter())
         .chain(args.shortcut_bindings.toggle.iter())
         .any(|binding| binding.cleanup_enabled);
-    let license_gated_requested = args.llm_enabled
-        || args.cleanup_enabled
-        || shortcut_cleanup_enabled
-        || args.edit_mode_enabled;
+    let license_gated_requested =
+        args.llm_enabled || args.cleanup_enabled || shortcut_cleanup_enabled;
     if license_gated_requested {
         crate::license::require_license_gate(&state.settings_store, "AI writing and Edit Mode")?;
     }
@@ -349,7 +346,6 @@ pub(crate) fn update_settings(
         if license_active {
             next.llm_enabled = args.llm_enabled;
             next.cleanup_enabled = args.cleanup_enabled;
-            next.edit_mode_enabled = args.edit_mode_enabled;
         } else {
             for (next_bindings, prev_bindings) in [
                 (
@@ -492,7 +488,6 @@ mod tests {
             llm_endpoint: String::new(),
             llm_api_key: String::new(),
             llm_model: String::new(),
-            edit_mode_enabled: false,
             auto_dictionary_enabled: false,
             media_action: MediaAction::Pause,
             auto_update_enabled: true,

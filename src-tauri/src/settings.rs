@@ -40,7 +40,6 @@ const KEY_AUTO_DICTIONARY_ENABLED: &str = "auto_dictionary_enabled";
 const KEY_AUTO_DICTIONARY_IGNORED: &str = "auto_dictionary_ignored";
 const KEY_REPLACEMENTS: &str = "replacements";
 const KEY_PERSONALITIES: &str = "personalities";
-const KEY_EDIT_MODE_ENABLED: &str = "edit_mode_enabled";
 const KEY_MEDIA_ACTION: &str = "media_action";
 const LEGACY_KEY_MEDIA_CONTROL_ENABLED: &str = "media_control_enabled";
 const KEY_AUTO_UPDATE_ENABLED: &str = "auto_update_enabled";
@@ -163,8 +162,6 @@ pub struct UserSettings {
     pub replacements: Vec<Replacement>,
     #[serde(default = "default_personalities")]
     pub personalities: Vec<Personality>,
-    #[serde(default)]
-    pub edit_mode_enabled: bool,
     #[serde(default)]
     pub media_action: MediaAction,
     #[serde(default)]
@@ -470,9 +467,8 @@ impl Default for UserSettings {
             auto_dictionary_ignored: Vec::new(),
             replacements: Vec::new(),
             personalities: default_personalities(),
-            edit_mode_enabled: false,
             media_action: MediaAction::Off,
-            auto_update_enabled: false,
+            auto_update_enabled: true,
             auto_launch_enabled: false,
             start_in_background: true,
             auto_delete_target: default_auto_delete_target(),
@@ -883,8 +879,6 @@ impl SettingsStore {
                 self.read_value(&conn, KEY_REPLACEMENTS, settings.replacements.clone())?;
             settings.personalities =
                 self.read_value(&conn, KEY_PERSONALITIES, settings.personalities.clone())?;
-            settings.edit_mode_enabled =
-                self.read_value(&conn, KEY_EDIT_MODE_ENABLED, settings.edit_mode_enabled)?;
             if let Some(media_action) =
                 self.read_optional_value::<MediaAction>(&conn, KEY_MEDIA_ACTION)?
             {
@@ -1277,7 +1271,6 @@ impl SettingsStore {
         )?;
         self.write_value(&conn, KEY_REPLACEMENTS, &settings.replacements)?;
         self.write_value(&conn, KEY_PERSONALITIES, &settings.personalities)?;
-        self.write_value(&conn, KEY_EDIT_MODE_ENABLED, &settings.edit_mode_enabled)?;
         self.write_value(&conn, KEY_MEDIA_ACTION, &settings.media_action)?;
         self.write_value(
             &conn,

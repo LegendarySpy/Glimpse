@@ -101,6 +101,7 @@ type InvalidShortcutDraft = { target: ShortcutTarget; message: string } | null;
 
 type SaveSettingsOverrides = ShortcutOverrides & {
   localModel?: string;
+  remoteSpeechEnabled?: boolean;
   localApiModel?: string;
   language?: string;
   appLocale?: AppLocaleSetting;
@@ -222,6 +223,7 @@ const sanitizeInvalidShortcutDraft = (
 
 interface UseSettingsFormOptions {
   isOpen: boolean;
+  active: boolean;
   onClose: () => void;
   initialTab?: ActiveTab;
   transcriptionMode: TranscriptionMode;
@@ -229,6 +231,7 @@ interface UseSettingsFormOptions {
 
 export function useSettingsForm({
   isOpen,
+  active,
   onClose,
   initialTab = "general",
   transcriptionMode: initialTranscriptionMode,
@@ -275,7 +278,6 @@ export function useSettingsForm({
   const [capturePreview, setCapturePreview] = useState<string>("");
   const captureActiveRef = useRef<CaptureTarget>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
-  const [llmEnabled, setLlmEnabledRaw] = useState(false);
   const [llmProvider, setLlmProviderRaw] = useState<LlmProvider>("none");
   const [llmEndpoint, setLlmEndpointRaw] = useState("");
   const [llmApiKey, setLlmApiKeyRaw] = useState("");
@@ -316,7 +318,6 @@ export function useSettingsForm({
     setSpeechModelDiscoveryState(next.state);
     return next.requestSeq;
   }, []);
-  const [editModeEnabled, setEditModeEnabled] = useState(false);
   const [autoDictionaryEnabled, setAutoDictionaryEnabled] = useState(false);
   const [mediaAction, setMediaAction] = useState<MediaAction>("off");
   const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(false);
@@ -486,30 +487,6 @@ export function useSettingsForm({
     clearInvalidShortcutDraft();
   }, [clearInvalidShortcutDraft, holdShortcut, smartShortcut, toggleShortcut]);
 
-  const setLlmEnabled = useCallback(
-    (value: boolean) => {
-      setLlmEnabledRaw(value);
-      if (!value) {
-        setEditModeEnabled(false);
-        clearSettingsErrorIfNoInvalidDrafts();
-      }
-    },
-    [clearSettingsErrorIfNoInvalidDrafts],
-  );
-
-  const setTranscriptionMode = useCallback(
-    (mode: TranscriptionMode) => {
-      setTranscriptionModeRaw(mode);
-      if (
-        mode === "cloud" &&
-        (activeTab === "models" || activeTab === "providers")
-      ) {
-        setActiveTab("general");
-      }
-    },
-    [activeTab],
-  );
-
   const setTextSizeMode = useCallback((mode: TextSizeMode) => {
     setTextSizeModeRaw(mode);
     localStorage.setItem(TEXT_SIZE_MODE_STORAGE_KEY, mode);
@@ -596,12 +573,10 @@ export function useSettingsForm({
       setLanguage(s.language);
       setAppLocale(s.app_locale ?? "system");
 
-      setLlmEnabledRaw(s.llm_enabled ?? false);
       setLlmProviderRaw(s.llm_provider ?? "none");
       setLlmEndpointRaw(s.llm_endpoint ?? "");
       setLlmApiKeyRaw(s.llm_api_key ?? "");
       setLlmModel(s.llm_model ?? "");
-      setEditModeEnabled(s.edit_mode_enabled ?? false);
       setAutoDictionaryEnabled(s.auto_dictionary_enabled ?? false);
       setMediaAction(s.media_action ?? "off");
       setAutoUpdateEnabled(s.auto_update_enabled ?? false);
@@ -706,7 +681,7 @@ export function useSettingsForm({
   );
   const autoDictionarySupported =
     remoteSpeechActive || localModelSupportsDictionary;
-  const aiFeaturesReady = licenseGateActive && llmEnabled && llmConfigReady;
+  const aiFeaturesReady = licenseGateActive && llmConfigReady;
 
   useEffect(() => {
     if (!isOpen || loading || !language) return;
@@ -772,7 +747,8 @@ export function useSettingsForm({
         shortcutBindings: savedShortcutBindings,
         transcriptionMode,
         localModel: overrides.localModel ?? localModel,
-        remoteSpeechEnabled,
+        remoteSpeechEnabled:
+          overrides.remoteSpeechEnabled ?? remoteSpeechEnabled,
         remoteSpeechProvider,
         remoteSpeechEndpoint: persistedRemoteEndpoint,
         remoteSpeechApiKey,
@@ -782,13 +758,12 @@ export function useSettingsForm({
         appLocale: overrides.appLocale ?? appLocale,
         themeMode,
 
-        llmEnabled: licenseGateActive && llmEnabled && llmConfigReady,
+        llmEnabled: aiFeaturesReady,
         cleanupEnabled: false,
         llmProvider,
         llmEndpoint: persistedLlmEndpoint,
         llmApiKey,
         llmModel,
-        editModeEnabled: aiFeaturesReady ? editModeEnabled : false,
         autoDictionaryEnabled: autoDictionarySupported
           ? autoDictionaryEnabled
           : false,
@@ -832,12 +807,10 @@ export function useSettingsForm({
       aiFeaturesReady,
       licenseGateActive,
       activeLicense,
-      llmEnabled,
       llmProvider,
       llmEndpoint,
       llmApiKey,
       llmModel,
-      editModeEnabled,
       autoDictionarySupported,
       autoDictionaryEnabled,
       mediaAction,
@@ -1008,7 +981,6 @@ export function useSettingsForm({
 
   useEffect(() => {
     if (aiFeaturesReady) return;
-    setEditModeEnabled(false);
     setShortcutBindings((current) => {
       const next = withoutShortcutCleanup(current);
       shortcutBindingsRef.current = next;
@@ -1023,7 +995,7 @@ export function useSettingsForm({
   }, [isOpen, initialTab]);
 
   useEffect(() => {
-    if (isOpen) return;
+    if (active) return;
     flushPendingSettingsSave();
     didHydrateRef.current = false;
     if (captureActive) {
@@ -1031,10 +1003,10 @@ export function useSettingsForm({
       resetCaptureState();
     }
   }, [
+    active,
     captureActive,
     finalizeCapture,
     flushPendingSettingsSave,
-    isOpen,
     resetCaptureState,
   ]);
 
@@ -1270,7 +1242,7 @@ export function useSettingsForm({
   });
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!active) return;
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (e.defaultPrevented) return;
@@ -1281,20 +1253,28 @@ export function useSettingsForm({
         resetCaptureState();
         return;
       }
+      // A modal opened from within settings owns Escape first.
+      if (showFAQModal || whatsNewOpen) {
+        setShowFAQModal(false);
+        setWhatsNewOpen(false);
+        return;
+      }
       onClose();
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [
+    active,
     discardEmptyCaptureDraft,
     finalizeCapture,
-    isOpen,
     onClose,
     resetCaptureState,
+    showFAQModal,
+    whatsNewOpen,
   ]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!active) return;
     if (loading) return;
     if (captureActiveRef.current) return;
     if (!didHydrateRef.current) {
@@ -1309,7 +1289,7 @@ export function useSettingsForm({
       saveTimeoutRef.current = null;
       void saveSettingsNow();
     }, 500);
-  }, [isOpen, loading, saveSettingsNow]);
+  }, [active, loading, saveSettingsNow]);
 
   const handleOpenDataDir = useCallback(async () => {
     if (!appInfo?.data_dir_path) return;
@@ -1450,13 +1430,17 @@ export function useSettingsForm({
     (modelKey: string) => {
       clearPendingSettingsSave();
       const nextModel = modelCatalog.find((model) => model.key === modelKey);
-      const nextLanguage =
-        remoteSpeechActive || languageSupportedByModel(nextModel, language)
-          ? language
-          : "";
+      const nextLanguage = languageSupportedByModel(nextModel, language)
+        ? language
+        : "";
+      setRemoteSpeechEnabled(false);
       setLocalModel(modelKey);
       setLanguage(nextLanguage);
-      void saveSettingsNow({ localModel: modelKey, language: nextLanguage });
+      void saveSettingsNow({
+        localModel: modelKey,
+        language: nextLanguage,
+        remoteSpeechEnabled: false,
+      });
     },
     [
       clearPendingSettingsSave,
@@ -1807,7 +1791,6 @@ export function useSettingsForm({
     toggleEnabled,
     setToggleEnabled,
     transcriptionMode,
-    setTranscriptionMode,
     localModel,
     setLocalModel: handleLocalModelChange,
     remoteSpeechEnabled,
@@ -1841,8 +1824,6 @@ export function useSettingsForm({
     addShortcutBinding,
     removeShortcutBinding,
 
-    llmEnabled,
-    setLlmEnabled,
     llmProvider,
     setLlmProvider,
     llmEndpoint,
@@ -1859,8 +1840,6 @@ export function useSettingsForm({
     fetchAvailableModels,
     availableSpeechModels,
     fetchAvailableSpeechModels,
-    editModeEnabled,
-    setEditModeEnabled,
     autoDictionaryEnabled,
     autoDictionarySupported,
     setAutoDictionaryEnabled,

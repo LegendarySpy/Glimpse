@@ -811,8 +811,7 @@ pub async fn run_preflight(client: Client, settings: UserSettings) {
         personality.enabled
             && mode_context::format_cleanup_style_guidance_for_personality(personality).is_some()
     });
-    let llm_is_needed =
-        settings.edit_mode_enabled || settings.cleanup_enabled || has_personalization;
+    let llm_is_needed = settings.cleanup_enabled || has_personalization;
 
     if settings.transcription_mode != TranscriptionMode::Local
         || !is_llm_available(&settings)

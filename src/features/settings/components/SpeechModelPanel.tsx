@@ -1,5 +1,4 @@
 import { useLingui } from "@lingui/react/macro";
-import ToggleSwitch from "../../../shared/ui/ToggleSwitch";
 import {
   CLOUD_SPEECH_PROVIDERS,
   getSpeechProviderPreset,
@@ -10,8 +9,6 @@ import { Dropdown } from "../../../shared/ui/Dropdown";
 import type { RemoteSpeechProvider } from "../../../types";
 
 type SpeechModelPanelProps = {
-  enabled: boolean;
-  setEnabled: (value: boolean) => void;
   provider: RemoteSpeechProvider;
   setProvider: (value: RemoteSpeechProvider) => void;
   endpoint: string;
@@ -25,8 +22,6 @@ type SpeechModelPanelProps = {
 };
 
 const SpeechModelPanel = ({
-  enabled,
-  setEnabled,
   provider,
   setProvider,
   endpoint,
@@ -50,34 +45,19 @@ const SpeechModelPanel = ({
   return (
     <div className="grid row-span-4 [grid-template-rows:subgrid] gap-3 rounded-lg bg-surface-surface p-2.5">
       <div className="px-2 py-1.5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h3 className="ui-text-label-strong ui-color-primary">
-              {t({
-                id: "settings.speech_model.title",
-                message: "Remote Speech Provider",
-              })}
-            </h3>
-            <p className="mt-0.5 ui-text-meta ui-color-muted">
-              {t({
-                id: "settings.speech_model.description",
-                message:
-                  "Transcribe recordings through OpenAI-compatible cloud or self-hosted APIs.",
-              })}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center">
-            <ToggleSwitch
-              enabled={enabled}
-              onToggle={() => setEnabled(!enabled)}
-              ariaLabel={t({
-                id: "settings.speech_model.toggle",
-                message: "Use this provider for speech-to-text",
-              })}
-              size="md"
-            />
-          </div>
-        </div>
+        <h3 className="ui-text-label-strong ui-color-primary">
+          {t({
+            id: "settings.speech_model.title",
+            message: "Remote Speech Provider",
+          })}
+        </h3>
+        <p className="mt-0.5 ui-text-meta ui-color-muted">
+          {t({
+            id: "settings.speech_model.subtitle",
+            message:
+              "Connection details for cloud transcription. Select it in Models.",
+          })}
+        </p>
       </div>
 
       <div className="px-2">
