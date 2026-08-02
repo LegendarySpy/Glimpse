@@ -1,4 +1,5 @@
 import { useLingui } from "@lingui/react/macro";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   WarningCircle as AlertCircle,
@@ -351,7 +352,7 @@ export default function ModelPickerModal({
 }: ModelPickerModalProps) {
   const { t } = useLingui();
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -399,7 +400,8 @@ export default function ModelPickerModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 
