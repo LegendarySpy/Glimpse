@@ -321,6 +321,11 @@ msgid "onboarding.license.activate"
 msgstr "تفعيل"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.input_aria"
+msgstr "رمز التفعيل"
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.active"
 msgstr "نشط"
@@ -346,24 +351,19 @@ msgid "personalization.modal.add"
 msgstr "إضافة"
 
 #. js-lingui-explicit-id
-#: src/features/dictionary/components/DictionaryView.tsx
-msgid "dictionary.replacements.none_description"
-msgstr "أضف أزواج كلمات لاستبدالها تلقائيًا في النصوص المُحوَّلة. التطابق غير حساس لحالة الأحرف."
-
-#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.websites.placeholder"
 msgstr "أضف موقعاً مثل gmail.com"
 
 #. js-lingui-explicit-id
-#: src/features/personalization/components/PersonalityModal.tsx
-msgid "personalization.modal.applications.add"
-msgstr "إضافة تطبيق"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.unconfigured"
 msgstr "أضف نقطة نهاية ونموذجًا في «المزوّدون» أولًا"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.applications.add"
+msgstr "إضافة تطبيق"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -407,8 +407,18 @@ msgstr "إضافة نطاق موقع ويب"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.none_description"
+msgstr "أضف أزواج كلمات لاستبدالها تلقائيًا في النصوص المُحوَّلة. التطابق غير حساس لحالة الأحرف."
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.no_entries.description"
 msgstr "أضف كلمات أو عبارات أو أسماء غير موجودة في القاموس الافتراضي."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.info"
+msgstr "يُضيف مشفِّر Core ML يعمل على Apple Neural Engine لتحويل أسرع وأكثر كفاءةً في استهلاك الطاقة. يستغرق التحميل الأول وقتاً أطول بينما يُحسِّنه macOS لمعالجك."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -444,6 +454,11 @@ msgstr "السماح بطلبات المتصفح"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.allow_browser_requests_aria"
 msgstr "السماح بطلبات المتصفح عبر الأصول"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.section.activate"
+msgstr "اشتريت مسبقاً؟"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
@@ -517,13 +532,13 @@ msgstr "التطبيقات"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
-msgid "library.detail.assign_new_speaker"
-msgstr "تعيين متحدث جديد"
+msgid "library.detail.speaker.unassigned"
+msgstr "تعيين"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
-msgid "library.detail.speaker.unassigned"
-msgstr "تعيين"
+msgid "library.detail.assign_new_speaker"
+msgstr "تعيين متحدث جديد"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -836,16 +851,6 @@ msgstr "مسح البحث"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.detail.speaker.clear"
 msgstr "مسح المتحدث"
-
-#. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.dropzone"
-msgstr "أسقط الملفات للاستيراد"
-
-#. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.empty_state"
-msgstr "اسحب الملفات إلى هنا لإنشاء مكتبتك."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1563,9 +1568,19 @@ msgid "member_card.draft_aria"
 msgstr "مسودة بطاقة عضو Glimpse"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.empty_state"
+msgstr "اسحب الملفات إلى هنا لإنشاء مكتبتك."
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.custom_instructions.drag"
 msgstr "اسحب لتغيير الحجم"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.dropzone"
+msgstr "أسقط الملفات للاستيراد"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2048,6 +2063,11 @@ msgid "import.cta"
 msgstr "استيراد"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.description"
+msgstr "استورد ملفات الصوت والفيديو للنسخ."
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_failed"
 msgstr "فشل الاستيراد"
@@ -2270,11 +2290,6 @@ msgid "onboarding.done.license_active_title"
 msgstr "الترخيص نشط"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/AccountView.tsx
-msgid "settings.account.activate.input_aria"
-msgstr "رمز التفعيل"
-
-#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.input_aria"
 msgstr "مفتاح الترخيص"
@@ -2394,11 +2409,6 @@ msgstr "إصدار رئيسي"
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.help_temporary"
 msgstr "يجعل الاختصار مؤقتاً. لن يتم حفظ الصوت أو النص المُفرَّغ أو السجل."
-
-#. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.description"
-msgstr "استورد ملفات الصوت والفيديو للنسخ."
 
 #. js-lingui-explicit-id
 #: src/shared/ui/WindowControls.tsx
@@ -2721,12 +2731,12 @@ msgstr "لا يُحتفظ بأي نموذج في الذاكرة بين الطل�
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.no_models"
-msgstr "لم يتم تثبيت أي نماذج محلية. قم بتنزيل نموذج من الإعدادات ← النماذج قبل الاستيراد."
+msgstr "لا توجد نماذج متاحة. أعدّ مزوّدًا بعيدًا أو نزّل نموذجًا محليًا من الإعدادات -> النماذج قبل الاستيراد."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryRetranscribeModal.tsx
 msgid "library.retranscribe.no_models"
-msgstr "لا توجد نماذج محلية مثبَّتة. نزّل نموذجًا من الإعدادات ← النماذج قبل إعادة النسخ."
+msgstr "لا توجد نماذج متاحة. أعدّ مزوّدًا بعيدًا أو نزّل نموذجًا محليًا من الإعدادات -> النماذج قبل إعادة التفريغ."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -2982,11 +2992,6 @@ msgstr "آخر 7 أيام"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.paste"
 msgstr "لصق"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/AccountView.tsx
-msgid "settings.account.section.activate"
-msgstr "اشتريت مسبقاً؟"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3351,14 +3356,14 @@ msgid "settings.local_api.api_key.lan_required"
 msgstr "مطلوب عند الاستماع عبر الشبكة المحلية"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.cli.locked_subtitle"
-msgstr "يتطلب ترخيصًا نشطًا"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.auto_dictionary.unsupported_body"
 msgstr "يتطلب نموذجًا يدعم القاموس"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.locked_subtitle"
+msgstr "يتطلب ترخيصًا نشطًا"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -3494,11 +3499,6 @@ msgstr "قيد التشغيل"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding_description"
 msgstr "إعادة تشغيل معالج الإعداد"
-
-#. js-lingui-explicit-id
-#: src/shared/ui/ModelPickerModal.tsx
-msgid "model_picker.ane.info"
-msgstr "يُضيف مشفِّر Core ML يعمل على Apple Neural Engine لتحويل أسرع وأكثر كفاءةً في استهلاك الطاقة. يستغرق التحميل الأول وقتاً أطول بينما يُحسِّنه macOS لمعالجك."
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ShareCardModal.tsx
@@ -4308,7 +4308,7 @@ msgstr "تنسيق الملف غير مدعوم."
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.language_info.active_model"
-msgstr "تمت تصفية قائمة اللغات وفقًا لنموذج النسخ النشط."
+msgstr "اللغات غير المدعومة غير متاحة في نموذجك النشط. بدّل إلى نموذج يدعمها لاستخدامها."
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx

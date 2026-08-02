@@ -321,6 +321,11 @@ msgid "onboarding.license.activate"
 msgstr "सक्रिय करें"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.input_aria"
+msgstr "सक्रियण कोड"
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.active"
 msgstr "सक्रिय"
@@ -346,24 +351,19 @@ msgid "personalization.modal.add"
 msgstr "जोड़ें"
 
 #. js-lingui-explicit-id
-#: src/features/dictionary/components/DictionaryView.tsx
-msgid "dictionary.replacements.none_description"
-msgstr "ट्रांसक्रिप्शनों में अपने आप बदलने के लिए शब्दों की युग्म जोड़ें। मिलान में छोटे-बड़े अक्षरों का फ़र्क नहीं माना जाएगा।"
-
-#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.websites.placeholder"
 msgstr "gmail.com जैसा साइट जोड़ें"
 
 #. js-lingui-explicit-id
-#: src/features/personalization/components/PersonalityModal.tsx
-msgid "personalization.modal.applications.add"
-msgstr "अनुप्रयोग जोड़ें"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.unconfigured"
 msgstr "पहले प्रोवाइडर में एंडपॉइंट और मॉडल जोड़ें"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalityModal.tsx
+msgid "personalization.modal.applications.add"
+msgstr "अनुप्रयोग जोड़ें"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -407,8 +407,18 @@ msgstr "वेबसाइट डोमेन जोड़ें"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.none_description"
+msgstr "ट्रांसक्रिप्शनों में अपने आप बदलने के लिए शब्दों की युग्म जोड़ें। मिलान में छोटे-बड़े अक्षरों का फ़र्क नहीं माना जाएगा।"
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.no_entries.description"
 msgstr "ऐसे शब्द, वाक्यांश या नाम जोड़ें जो डिफ़ॉल्ट शब्दकोश में नहीं हैं।"
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.info"
+msgstr "एक Core ML एन्कोडर जोड़ता है जो तेज़ और ज़्यादा ऊर्जा-कुशल ट्रांसक्रिप्शन के लिए Apple Neural Engine पर चलता है। पहली बार लोड होने में ज़्यादा समय लगेगा, जब तक macOS इसे आपके चिप के लिए अनुकूलित करता है।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -444,6 +454,11 @@ msgstr "ब्राउज़र अनुरोधों की अनुमत
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.allow_browser_requests_aria"
 msgstr "क्रॉस‑ओरिजिन ब्राउज़र अनुरोधों की अनुमति दें"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.section.activate"
+msgstr "पहले ही ख़रीद लिया?"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
@@ -517,13 +532,13 @@ msgstr "ऐप्स"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
-msgid "library.detail.assign_new_speaker"
-msgstr "नए वक्ता को असाइन करें"
+msgid "library.detail.speaker.unassigned"
+msgstr "असाइन करें"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
-msgid "library.detail.speaker.unassigned"
-msgstr "असाइन करें"
+msgid "library.detail.assign_new_speaker"
+msgstr "नए वक्ता को असाइन करें"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -836,16 +851,6 @@ msgstr "खोज मिटाएँ"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.detail.speaker.clear"
 msgstr "वक्ता साफ़ करें"
-
-#. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.dropzone"
-msgstr "आयात करने के लिए फ़ाइलें छोड़ें"
-
-#. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.empty_state"
-msgstr "अपनी लाइब्रेरी बनाने के लिए फ़ाइलें यहाँ खींचकर छोड़ें।"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -1563,9 +1568,19 @@ msgid "member_card.draft_aria"
 msgstr "Glimpse सदस्य कार्ड का ड्राफ़्ट"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.empty_state"
+msgstr "अपनी लाइब्रेरी बनाने के लिए फ़ाइलें यहाँ खींचकर छोड़ें।"
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.custom_instructions.drag"
 msgstr "आकार बदलने के लिए ड्रैग करें"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.dropzone"
+msgstr "आयात करने के लिए फ़ाइलें छोड़ें"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2048,6 +2063,11 @@ msgid "import.cta"
 msgstr "आयात करें"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.description"
+msgstr "ट्रांसक्रिप्शन के लिए ऑडियो और वीडियो फ़ाइलें आयात करें।"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.import_failed"
 msgstr "इम्पोर्ट विफल"
@@ -2270,11 +2290,6 @@ msgid "onboarding.done.license_active_title"
 msgstr "लाइसेंस सक्रिय है"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/AccountView.tsx
-msgid "settings.account.activate.input_aria"
-msgstr "सक्रियण कोड"
-
-#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.input_aria"
 msgstr "लाइसेंस कुंजी"
@@ -2394,11 +2409,6 @@ msgstr "मुख्य रिलीज़"
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.help_temporary"
 msgstr "शॉर्टकट को अस्थायी बना देता है। यह ऑडियो, लिप्यंतरण या इतिहास सहेजेगा नहीं।"
-
-#. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.description"
-msgstr "ट्रांसक्रिप्शन के लिए ऑडियो और वीडियो फ़ाइलें आयात करें।"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/WindowControls.tsx
@@ -2721,12 +2731,12 @@ msgstr "अनुरोधों के बीच कोई मॉडल मे�
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.no_models"
-msgstr "कोई लोकल मॉडल इंस्टॉल नहीं है। इम्पोर्ट करने से पहले सेटिंग्स -> मॉडल्स में एक मॉडल डाउनलोड करें।"
+msgstr "कोई मॉडल उपलब्ध नहीं। इंपोर्ट करने से पहले सेटिंग्स -> मॉडल में कोई रिमोट प्रोवाइडर सेट करें या लोकल मॉडल डाउनलोड करें।"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryRetranscribeModal.tsx
 msgid "library.retranscribe.no_models"
-msgstr "कोई लोकल मॉडल इंस्टॉल नहीं हैं। दोबारा ट्रांसक्राइब करने से पहले सेटिंग्स -> मॉडल में कोई मॉडल डाउनलोड करें।"
+msgstr "कोई मॉडल उपलब्ध नहीं। दोबारा ट्रांसक्राइब करने से पहले सेटिंग्स -> मॉडल में कोई रिमोट प्रोवाइडर सेट करें या लोकल मॉडल डाउनलोड करें।"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -2982,11 +2992,6 @@ msgstr "पिछले 7 दिन"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.paste"
 msgstr "पेस्ट"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/AccountView.tsx
-msgid "settings.account.section.activate"
-msgstr "पहले ही ख़रीद लिया?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3351,14 +3356,14 @@ msgid "settings.local_api.api_key.lan_required"
 msgstr "LAN पर सुनने के लिए आवश्यक"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.cli.locked_subtitle"
-msgstr "सक्रिय लाइसेंस आवश्यक"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.auto_dictionary.unsupported_body"
 msgstr "शब्दकोश समर्थन वाले मॉडल की आवश्यकता"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.locked_subtitle"
+msgstr "सक्रिय लाइसेंस आवश्यक"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -3494,11 +3499,6 @@ msgstr "चल रहा है"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding_description"
 msgstr "सेटअप विज़ार्ड फिर से चलाएँ"
-
-#. js-lingui-explicit-id
-#: src/shared/ui/ModelPickerModal.tsx
-msgid "model_picker.ane.info"
-msgstr "एक Core ML एन्कोडर जोड़ता है जो तेज़ और ज़्यादा ऊर्जा-कुशल ट्रांसक्रिप्शन के लिए Apple Neural Engine पर चलता है। पहली बार लोड होने में ज़्यादा समय लगेगा, जब तक macOS इसे आपके चिप के लिए अनुकूलित करता है।"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ShareCardModal.tsx
@@ -4308,7 +4308,7 @@ msgstr "फ़ाइल फ़ॉर्मेट समर्थित नही
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.language_info.active_model"
-msgstr "भाषा सूची को सक्रिय लिप्यंतरण मॉडल के अनुसार फ़िल्टर किया गया है।"
+msgstr "असमर्थित भाषाएँ आपके सक्रिय मॉडल पर उपलब्ध नहीं हैं। उन्हें उपयोग करने के लिए किसी समर्थित मॉडल पर जाएँ।"
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx

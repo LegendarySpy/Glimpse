@@ -774,7 +774,7 @@ function AneCheckbox({
               {t({
                 id: "model_picker.ane.info",
                 message:
-                  "Runs the audio encoder on the Apple Neural Engine instead of the GPU. Uses far less power and keeps the GPU open. Installing takes a few minutes while macOS optimizes it.",
+                  "Adds a Core ML encoder that runs on the Apple Neural Engine for faster, more power-efficient transcription. The first load takes longer while macOS optimizes it for your chip.",
               })}
             </p>
           </motion.div>

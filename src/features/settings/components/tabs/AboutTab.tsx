@@ -326,7 +326,7 @@ const AboutTab = ({
     : cliInstallLocked
       ? t({
           id: "settings.about.cli.locked_info",
-          message: "Command line install requires a full active license.",
+          message: "Command line install requires an active license.",
         })
       : cliInstalled && !cliManagedByApp
         ? t({
@@ -355,7 +355,7 @@ const AboutTab = ({
     : cliInstallLocked
       ? t({
           id: "settings.about.cli.locked_subtitle",
-          message: "Requires a full active license",
+          message: "Requires an active license",
         })
       : cliInstalled
         ? t({

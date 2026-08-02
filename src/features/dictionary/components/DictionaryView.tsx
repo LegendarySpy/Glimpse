@@ -743,7 +743,7 @@ const DictionaryView = ({ isActive = true }: { isActive?: boolean }) => {
                     {t({
                       id: "dictionary.replacements.none_description",
                       message:
-                        "Add a find and replace pair above, then press Enter to save it here.",
+                        "Add word pairs to automatically swap in transcriptions. Matches are case-insensitive.",
                     })}
                   </p>
                 </div>

@@ -91,7 +91,7 @@ export function PermissionsStep({
             checking={isCheckingMic}
             actionLabel={t({
               id: "onboarding.microphone.grant",
-              message: "Grant",
+              message: "Grant Access",
             })}
             onRequest={onRequestMic}
           />

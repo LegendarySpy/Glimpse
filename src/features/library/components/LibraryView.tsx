@@ -330,8 +330,7 @@ const LibraryView = ({
                 title={t({ id: "library.view.title", message: "Library" })}
                 description={t({
                   id: "library.view.description",
-                  message:
-                    "Manage and search your transcribed audio and documents.",
+                  message: "Import audio and video files for transcription.",
                 })}
               />
 
@@ -353,7 +352,7 @@ const LibraryView = ({
                     type="text"
                     placeholder={t({
                       id: "library.view.search_placeholder",
-                      message: "Search library... or use #tag",
+                      message: "Search library...",
                     })}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -412,8 +411,7 @@ const LibraryView = ({
                       <p className="mt-3 ui-text-body ui-color-muted">
                         {t({
                           id: "library.view.empty_state",
-                          message:
-                            "Click to import files and build your Library.",
+                          message: "Drag files here to build your Library.",
                         })}
                       </p>
                     </button>
@@ -462,7 +460,7 @@ const LibraryView = ({
                       <span className="mt-2 ui-text-body-sm">
                         {t({
                           id: "library.view.dropzone",
-                          message: "Click to import files",
+                          message: "Drop files to import",
                         })}
                       </span>
                     </button>

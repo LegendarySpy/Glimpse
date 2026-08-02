@@ -662,11 +662,11 @@ const PersonalityModal = ({
                       onKeyDown={handleAppInputKeyDown}
                       placeholder={t({
                         id: "personalization.modal.applications.add",
-                        message: "Add an application",
+                        message: "Add application",
                       })}
                       aria-label={t({
                         id: "personalization.modal.applications.add",
-                        message: "Add an application",
+                        message: "Add application",
                       })}
                       role="combobox"
                       aria-expanded={isAppMenuOpen}

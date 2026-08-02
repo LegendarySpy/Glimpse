@@ -769,7 +769,7 @@ const Home = () => {
                               <Bug size={10} aria-hidden="true" />
                               {t({
                                 id: "home.support.feedback.github",
-                                message: "GitHub issue",
+                                message: "GitHub Issue",
                               })}
                             </a>
                             <span aria-hidden="true">·</span>

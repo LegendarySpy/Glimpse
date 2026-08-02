@@ -244,7 +244,7 @@ const AccountView = ({
           <h2 className="ui-text-label-strong ui-color-primary">
             {t({
               id: "settings.account.section.activate",
-              message: "Paste your license below",
+              message: "Already bought?",
             })}
           </h2>
           <form
@@ -260,7 +260,7 @@ const AccountView = ({
               })}
               aria-label={t({
                 id: "settings.account.activate.input_aria",
-                message: "License key",
+                message: "Activation code",
               })}
               className="min-w-0 flex-1 bg-transparent px-0.5 py-2 font-mono ui-text-body-sm ui-color-primary placeholder-content-disabled outline-none"
             />

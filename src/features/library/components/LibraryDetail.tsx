@@ -1248,7 +1248,7 @@ const LibraryDetail = ({
               ? speaker.name
               : t({
                   id: "library.detail.speaker.unassigned",
-                  message: "Assign speaker",
+                  message: "Assign",
                 })
           }
           aria-label={
@@ -1256,7 +1256,7 @@ const LibraryDetail = ({
               ? speaker.name
               : t({
                   id: "library.detail.speaker.unassigned",
-                  message: "Assign speaker",
+                  message: "Assign",
                 })
           }
           className={`flex items-center justify-center p-1 -m-1 transition-opacity hover:opacity-80 ${
@@ -2216,7 +2216,7 @@ const LibraryDetail = ({
               disabled={!audioReady || !!audioError || !canDecreasePlaybackRate}
               aria-label={t({
                 id: "library.modal.playback.decrease",
-                message: "Decrease speed",
+                message: "Decrease playback speed",
               })}
               className={`transition-colors p-0.5 ${
                 !audioReady || audioError || !canDecreasePlaybackRate
@@ -2246,7 +2246,7 @@ const LibraryDetail = ({
               disabled={!audioReady || !!audioError || !canIncreasePlaybackRate}
               aria-label={t({
                 id: "library.modal.playback.increase",
-                message: "Increase speed",
+                message: "Increase playback speed",
               })}
               className={`transition-colors p-0.5 ${
                 !audioReady || audioError || !canIncreasePlaybackRate
