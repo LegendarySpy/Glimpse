@@ -522,7 +522,19 @@ const Home = () => {
                 return (
                   <div key={groupIndex} className="space-y-1">
                     {groupIndex > 0 && (
-                      <div className="flex h-5 items-center overflow-hidden px-2.5">
+                      <div
+                        className="flex h-5 items-center overflow-hidden px-2.5"
+                        style={
+                          isSidebarCollapsed
+                            ? {
+                                maskImage:
+                                  "linear-gradient(to right, #000 78%, transparent 100%)",
+                                WebkitMaskImage:
+                                  "linear-gradient(to right, #000 78%, transparent 100%)",
+                              }
+                            : undefined
+                        }
+                      >
                         {group.caption ? (
                           <span className="ui-text-uppercase-meta ui-color-disabled font-semibold whitespace-nowrap">
                             {i18n._(group.caption)}
@@ -934,7 +946,7 @@ const Home = () => {
           </div>
 
           <div
-            className={`w-full max-w-5xl mx-auto pt-8 ${activeView === "brain" ? "" : "hidden"}`}
+            className={`w-full max-w-5xl mx-auto pt-8 min-h-0 flex-1 ${activeView === "brain" ? "flex flex-col" : "hidden"}`}
           >
             <PersonalizationView
               isActive={activeView === "brain" && licenseGateActive}
