@@ -292,13 +292,16 @@ jobs:
             Copy-Item "src-tauri\icons\$logo.*-*.png" $assets
           }
 
-          $manifest = Get-Content "src-tauri\msix\AppxManifest.xml" -Raw
+          $manifestPath = Join-Path $staging "AppxManifest.xml"
+          bun .\scripts\generate-msix-manifest.mjs $manifestPath
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $manifest = Get-Content $manifestPath -Raw
           $manifest = $manifest.Replace("GLIMPSE_MSIX_IDENTITY_NAME", $env:MSIX_IDENTITY_NAME)
           $publisherDisplayName = if ($env:MSIX_PUBLISHER_DISPLAY_NAME) { $env:MSIX_PUBLISHER_DISPLAY_NAME } else { "Glimpse" }
           $manifest = $manifest.Replace("GLIMPSE_MSIX_PUBLISHER_DISPLAY_NAME", $publisherDisplayName)
           $manifest = $manifest.Replace("GLIMPSE_MSIX_PUBLISHER", $env:MSIX_PUBLISHER)
           $manifest = $manifest.Replace("GLIMPSE_MSIX_VERSION", "$env:VERSION.0")
-          Set-Content -Path (Join-Path $staging "AppxManifest.xml") -Value $manifest -Encoding utf8
+          Set-Content -Path $manifestPath -Value $manifest -Encoding utf8
 
           $sdkBin = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.*\x64" -Directory |
             Sort-Object FullName -Descending | Select-Object -First 1
@@ -318,7 +321,8 @@ jobs:
           # colored plate behind a shrunken icon.
           $priConfig = Join-Path $env:RUNNER_TEMP "priconfig.xml"
           $pri = Join-Path $env:RUNNER_TEMP "resources.pri"
-          & $makepri createconfig /cf $priConfig /dq en-US /o
+          $defaultLanguage = (Get-Content "supported-app-locales.json" -Raw | ConvertFrom-Json)[0]
+          & $makepri createconfig /cf $priConfig /dq $defaultLanguage /o
           if ($LASTEXITCODE -ne 0) { exit 1 }
           # The packaging section splits resources into separate .pri files we do not ship.
           $config = [xml](Get-Content $priConfig)
