@@ -522,25 +522,15 @@ const Home = () => {
                 return (
                   <div key={groupIndex} className="space-y-1">
                     {groupIndex > 0 && (
-                      <div
-                        className="flex h-5 items-center overflow-hidden px-2.5"
-                        style={
-                          isSidebarCollapsed
-                            ? {
-                                maskImage:
-                                  "linear-gradient(to right, #000 78%, transparent 100%)",
-                                WebkitMaskImage:
-                                  "linear-gradient(to right, #000 78%, transparent 100%)",
-                              }
-                            : undefined
-                        }
-                      >
-                        {group.caption ? (
+                      <div className="flex h-5 items-center pr-3 pl-[var(--sidebar-icon-pl,17px)]">
+                        {isSidebarCollapsed || !group.caption ? (
+                          <div className="flex w-[20px] shrink-0 justify-center">
+                            <div className="h-px w-3.5 bg-[var(--border-strong)]" />
+                          </div>
+                        ) : (
                           <span className="ui-text-uppercase-meta ui-color-disabled font-semibold whitespace-nowrap">
                             {i18n._(group.caption)}
                           </span>
-                        ) : (
-                          <div className="h-px w-full bg-[var(--border-subtle)]" />
                         )}
                       </div>
                     )}
