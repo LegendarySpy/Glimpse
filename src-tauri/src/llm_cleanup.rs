@@ -216,6 +216,25 @@ pub async fn fetch_available_models(
     Ok(data.data.into_iter().map(|m| m.id).collect())
 }
 
+/// A rate limit means try again shortly, not that the endpoint is down, so it
+/// must not be allowed to switch the feature off for the next five minutes.
+pub fn is_transient_llm_error(error: &RemoteError) -> bool {
+    matches!(
+        error.kind,
+        RemoteErrorKind::RateLimited | RemoteErrorKind::UpstreamUnavailable
+    )
+}
+
+/// Providers hand back a retry hint; waiting it out beats handing the user
+/// their raw words back.
+pub fn short_retry_delay(error: &RemoteError) -> Option<Duration> {
+    if !matches!(error.kind, RemoteErrorKind::RateLimited) {
+        return None;
+    }
+    let after = error.retry_after.unwrap_or(Duration::from_secs(2));
+    (after <= Duration::from_secs(8)).then(|| after.max(Duration::from_millis(500)))
+}
+
 pub fn llm_issue_message(error: &RemoteError) -> String {
     match error.kind {
         RemoteErrorKind::RateLimited => {
@@ -397,7 +416,23 @@ async fn run_text_task(
         max_tokens: Some(task.max_tokens()),
     };
 
-    let raw = send_chat_request(client, settings, &body).await?;
+    let raw = match send_chat_request(client, settings, &body).await {
+        Ok(raw) => raw,
+        Err(err) => {
+            // Providers routinely ask for a couple of seconds. Waiting beats
+            // handing back the raw words as though the model had refused.
+            let Some(delay) = short_retry_delay(&err) else {
+                return Err(err);
+            };
+            tracing::warn!(
+                "[LLM] rate limited, retrying in {:?}: {}",
+                delay,
+                llm_issue_message(&err)
+            );
+            tokio::time::sleep(delay).await;
+            send_chat_request(client, settings, &body).await?
+        }
+    };
 
     Ok(extract_plain_text(&raw).unwrap_or_else(|| fallback_text.to_string()))
 }
@@ -779,7 +814,7 @@ fn personality_has_style_guidance(mode: Option<&Personality>) -> bool {
 }
 
 pub const PREFLIGHT_TTL: Duration = Duration::from_secs(300);
-const PREFLIGHT_NOTICE_COOLDOWN: Duration = Duration::from_secs(120);
+const PREFLIGHT_NOTICE_COOLDOWN: Duration = Duration::from_secs(45);
 
 #[derive(Default)]
 struct PreflightState {

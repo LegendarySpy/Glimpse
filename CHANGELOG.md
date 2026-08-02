@@ -17,6 +17,8 @@
 ### Fixes
 
 - Models that show their reasoning no longer paste it in with your words.
+- A rate limited writing model is waited out and retried instead of quietly giving up, and one busy moment no longer switches the model off for the next few minutes.
+- Glimpse now says what went wrong with the writing model, rather than calling every failure unreachable.
 - Renaming or editing a personalization mode no longer reverts a moment later.
 - The personalization list scrolls, so modes past the first few are reachable.
 - Member since and Words spoken no longer slide back in each time you open the Account screen.
