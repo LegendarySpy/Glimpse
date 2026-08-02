@@ -59,6 +59,14 @@ pub struct LifetimeStats {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DictationDay {
+    pub day: String,
+    pub count: u64,
+    pub words: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TodayDictationStats {
     pub count: u64,
     pub words: u64,
@@ -604,6 +612,29 @@ impl StorageManager {
             },
         )
         .map_err(Into::into)
+    }
+
+    // Grouped in SQLite's localtime so a day boundary matches the user's clock.
+    pub fn dictation_activity(&self, start_ms: i64) -> Result<Vec<DictationDay>> {
+        let conn = self.connection.lock();
+        let mut stmt = conn.prepare(
+            "SELECT date(timestamp / 1000, 'unixepoch', 'localtime') AS day,
+                    COUNT(*),
+                    COALESCE(SUM(word_count), 0)
+             FROM transcriptions
+             WHERE status = 'success' AND timestamp >= ?1
+             GROUP BY day
+             ORDER BY day",
+        )?;
+        let rows = stmt.query_map(params![start_ms], |row| {
+            Ok(DictationDay {
+                day: row.get::<_, String>(0)?,
+                count: row.get::<_, i64>(1)?.max(0) as u64,
+                words: row.get::<_, i64>(2)?.max(0) as u64,
+            })
+        })?;
+        rows.collect::<std::result::Result<Vec<_>, _>>()
+            .map_err(Into::into)
     }
 
     fn record_dictation(

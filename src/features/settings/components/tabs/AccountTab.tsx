@@ -13,6 +13,7 @@ import {
   useRefreshLicense,
 } from "../../../license/queries";
 import AccountView from "../AccountView";
+import DictationStatsPanel from "../../../license/components/DictationStatsPanel";
 
 type AccountTabProps = {
   variants: Variants;
@@ -71,6 +72,7 @@ const AccountTab = ({
       initial="hidden"
       animate="visible"
       exit="exit"
+      className="space-y-6"
     >
       <AccountView
         licenseState={licenseQuery.data ?? null}
@@ -97,6 +99,7 @@ const AccountTab = ({
         onActivateLicense={(key) => activateLicense.mutate(key)}
         onDeactivateLicense={() => deactivateLicense.mutate()}
       />
+      <DictationStatsPanel />
     </motion.div>
   );
 };
