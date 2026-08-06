@@ -7,9 +7,10 @@ export type DictationDay = {
 };
 
 export const ACTIVITY_WEEKS = 53;
+export const ACTIVITY_ROWS = 7;
 
-// Words per minute a typical typist sustains, used only for the saved-time
-// estimate. Stated under the figures so the number stays auditable.
+export type ActivityMode = "daily" | "weekly" | "cumulative";
+
 export const ASSUMED_TYPING_WPM = 40;
 
 export async function getDictationActivity(
@@ -70,6 +71,38 @@ export function buildActivityGrid(
   return columns;
 }
 
+export type ActivityWeek = {
+  key: string;
+  start: Date;
+  count: number;
+  words: number;
+  cumulativeWords: number;
+};
+
+export function buildActivityWeeks(grid: ActivityCell[][]): ActivityWeek[] {
+  let running = 0;
+  return grid.map((column) => {
+    const past = column.filter((cell) => !cell.future);
+    const words = past.reduce((sum, cell) => sum + cell.words, 0);
+    const count = past.reduce((sum, cell) => sum + cell.count, 0);
+    running += words;
+    return {
+      key: column[0].key,
+      start: column[0].date,
+      count,
+      words,
+      cumulativeWords: running,
+    };
+  });
+}
+
+export function columnDots(value: number, max: number): number {
+  if (value <= 0) return 0;
+  if (max <= 0) return 1;
+  const dots = Math.round((value / max) * ACTIVITY_ROWS);
+  return Math.min(ACTIVITY_ROWS, Math.max(1, dots));
+}
+
 export function activityLevel(words: number, busiest: number): number {
   if (words <= 0) return 0;
   if (busiest <= 0) return 1;
@@ -85,7 +118,6 @@ export function currentStreak(days: DictationDay[], today: Date): number {
   const cursor = new Date(today);
   cursor.setHours(0, 0, 0, 0);
 
-  // Today not being done yet should not read as a broken streak.
   if (!dictated.has(localDayKey(cursor))) {
     cursor.setDate(cursor.getDate() - 1);
   }
@@ -120,7 +152,6 @@ export function monthLabels(grid: ActivityCell[][]) {
       previous = month;
     }
   });
-  // The first column usually shows only a sliver of its month.
   return labels.filter((label, index) =>
     index === 0
       ? labels.length === 1 || labels[1].column > 1

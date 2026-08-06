@@ -15,7 +15,7 @@ import ProvidersTab from "./tabs/ProvidersTab";
 import type { PurchaseSource } from "../../license/purchaseConfig";
 import type { TranscriptionMode } from "../../../types";
 import { useSettingsForm } from "../useSettingsForm";
-import type { SettingsPane } from "../settingsPanes";
+import { SETTINGS_PANE_LABELS, type SettingsPane } from "../settingsPanes";
 
 type LegacyTab =
   | "general"
@@ -62,6 +62,7 @@ const SettingsScreen = ({
   accountSource = "settings_account",
   transcriptionMode: initialTranscriptionMode,
 }: SettingsScreenProps) => {
+  const { i18n } = useLingui();
   const form = useSettingsForm({
     isOpen: true,
     active,
@@ -83,6 +84,12 @@ const SettingsScreen = ({
 
   return (
     <div className="settings-typescale flex flex-1 flex-col min-h-0">
+      <header className="shrink-0 px-8 pb-4">
+        <h1 className="ui-text-screen-title ui-color-primary tracking-tight">
+          {i18n._(SETTINGS_PANE_LABELS[pane])}
+        </h1>
+      </header>
+
       {form.error && (
         <div className="px-8 pt-2">
           <SettingsErrorBanner

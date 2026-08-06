@@ -5,18 +5,19 @@ import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ShareNetwork } from "@phosphor-icons/react";
 import SectionLabel from "../../../shared/ui/SectionLabel";
-import ActivityGrid, { LEVEL_OPACITY } from "./ActivityGrid";
+import ActivityGrid, { type ActivityTarget } from "./ActivityGrid";
 import ShareCardModal from "./ShareCardModal";
 import { useDictationStats } from "../queries";
 import {
   activityStart,
   buildActivityGrid,
+  buildActivityWeeks,
   currentStreak,
   getDictationActivity,
   longestStreak,
   minutesSaved,
   speakingWpm,
-  type ActivityCell,
+  type ActivityMode,
   type DictationDay,
 } from "../../transcriptions/dictationActivity";
 
@@ -34,18 +35,17 @@ const formatDuration = (minutes: number) => {
   return `${Math.round(hours)}h`;
 };
 
-type HoveredCell = { cell: ActivityCell; x: number; y: number };
+type Hovered = { target: ActivityTarget; x: number; y: number };
 
 const DictationStatsPanel = () => {
   const { t, i18n } = useLingui();
   const today = useMemo(() => new Date(), []);
   const startMs = useMemo(() => activityStart(today).getTime(), [today]);
-  const [hovered, setHovered] = useState<HoveredCell | null>(null);
+  const [mode, setMode] = useState<ActivityMode>("daily");
+  const [hovered, setHovered] = useState<Hovered | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltipLeft, setTooltipLeft] = useState(0);
 
-  // Measured before paint so a cell near the right edge flips the tooltip to
-  // the other side of the cursor instead of running off screen.
   useLayoutEffect(() => {
     const element = tooltipRef.current;
     if (!hovered || !element) return;
@@ -70,6 +70,7 @@ const DictationStatsPanel = () => {
 
   const days: DictationDay[] = useMemo(() => activity ?? [], [activity]);
   const grid = useMemo(() => buildActivityGrid(days, today), [days, today]);
+  const weeks = useMemo(() => buildActivityWeeks(grid), [grid]);
   const busiest = useMemo(
     () => days.reduce((max, day) => Math.max(max, day.words), 0),
     [days],
@@ -117,6 +118,24 @@ const DictationStatsPanel = () => {
       key: "best_streak",
       value: `${longestStreak(days)}`,
       label: t({ id: "settings.stats.best_streak", message: "Best streak" }),
+    },
+  ];
+
+  const modeOptions = [
+    {
+      value: "daily" as const,
+      label: t({ id: "settings.stats.mode.daily", message: "Daily" }),
+    },
+    {
+      value: "weekly" as const,
+      label: t({ id: "settings.stats.mode.weekly", message: "Weekly" }),
+    },
+    {
+      value: "cumulative" as const,
+      label: t({
+        id: "settings.stats.mode.cumulative",
+        message: "Cumulative",
+      }),
     },
   ];
 
@@ -270,34 +289,44 @@ const DictationStatsPanel = () => {
             }),
           })}
         </span>
-        <div className="flex shrink-0 items-center gap-1">
-          <span className="ui-text-micro ui-color-disabled">
-            {t({ id: "settings.stats.less", message: "Less" })}
-          </span>
-          {LEVEL_OPACITY.map((opacity, level) => (
-            <div
-              key={level}
-              className="size-[9px] rounded-[2px]"
-              style={{
-                backgroundColor:
-                  level === 0
-                    ? "var(--surface-interactive-strong)"
-                    : "var(--color-local)",
-                opacity: level === 0 ? 1 : opacity,
-              }}
-            />
-          ))}
-          <span className="ui-text-micro ui-color-disabled">
-            {t({ id: "settings.stats.more", message: "More" })}
-          </span>
+        <div
+          role="radiogroup"
+          aria-label={t({
+            id: "settings.stats.mode.aria",
+            message: "Choose how activity is charted",
+          })}
+          className="flex shrink-0 items-center gap-3"
+        >
+          {modeOptions.map((option) => {
+            const isActive = option.value === mode;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={isActive}
+                onClick={() => setMode(option.value)}
+                data-label={option.label}
+                className={`ui-text-weight-stable ui-text-body-sm transition-colors duration-200 ${
+                  isActive
+                    ? "ui-color-primary font-medium"
+                    : "ui-color-disabled hover:ui-color-secondary"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <ActivityGrid
         grid={grid}
+        weeks={weeks}
         busiest={busiest}
+        mode={mode}
         monthFormatter={monthFormatter}
-        onHover={(cell, x, y) => setHovered(cell ? { cell, x, y } : null)}
+        onHover={(target, x, y) => setHovered(target ? { target, x, y } : null)}
       />
 
       <div className="grid grid-cols-5 gap-3 pt-1">
@@ -321,24 +350,58 @@ const DictationStatsPanel = () => {
             style={{ left: tooltipLeft, top: hovered.y - 7 }}
           >
             <div className="ui-text-micro ui-color-primary whitespace-nowrap">
-              {hovered.cell.count > 0
-                ? t({
-                    id: "settings.stats.tooltip.v2",
-                    message: `${plural(hovered.cell.words, {
-                      one: "# word",
-                      other: "# words",
-                    })} in ${plural(hovered.cell.count, {
-                      one: "# dictation",
-                      other: "# dictations",
-                    })}`,
-                  })
-                : t({
-                    id: "settings.stats.tooltip_empty",
-                    message: "No dictation",
-                  })}
+              {hovered.target.kind === "day"
+                ? hovered.target.cell.count > 0
+                  ? t({
+                      id: "settings.stats.tooltip.v2",
+                      message: `${plural(hovered.target.cell.words, {
+                        one: "# word",
+                        other: "# words",
+                      })} in ${plural(hovered.target.cell.count, {
+                        one: "# dictation",
+                        other: "# dictations",
+                      })}`,
+                    })
+                  : t({
+                      id: "settings.stats.tooltip_empty",
+                      message: "No dictation",
+                    })
+                : mode === "cumulative"
+                  ? t({
+                      id: "settings.stats.tooltip.cumulative",
+                      message: `${plural(hovered.target.week.cumulativeWords, {
+                        one: "# word",
+                        other: "# words",
+                      })} in total`,
+                    })
+                  : hovered.target.week.count > 0
+                    ? t({
+                        id: "settings.stats.tooltip.v2",
+                        message: `${plural(hovered.target.week.words, {
+                          one: "# word",
+                          other: "# words",
+                        })} in ${plural(hovered.target.week.count, {
+                          one: "# dictation",
+                          other: "# dictations",
+                        })}`,
+                      })
+                    : t({
+                        id: "settings.stats.tooltip_empty",
+                        message: "No dictation",
+                      })}
             </div>
             <div className="ui-text-micro ui-color-disabled whitespace-nowrap">
-              {dayFormatter.format(hovered.cell.date)}
+              {hovered.target.kind === "day"
+                ? dayFormatter.format(hovered.target.cell.date)
+                : mode === "cumulative"
+                  ? t({
+                      id: "settings.stats.tooltip.through",
+                      message: `Through ${{ date: dayFormatter.format(hovered.target.week.start) }}`,
+                    })
+                  : t({
+                      id: "settings.stats.tooltip.week_of",
+                      message: `Week of ${{ date: dayFormatter.format(hovered.target.week.start) }}`,
+                    })}
             </div>
           </div>,
           document.body,

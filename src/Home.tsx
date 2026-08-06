@@ -170,8 +170,6 @@ const Home = () => {
     if (isSettingsOpen) setSettingsMounted(true);
   }, [isSettingsOpen]);
 
-  // Mount settings hidden while the app is idle so its queries are already
-  // warm and the first click has nothing to wait for.
   useEffect(() => {
     const warm = () => {
       void importSettingsScreen().then(() => setSettingsMounted(true));
@@ -484,7 +482,9 @@ const Home = () => {
             "--sidebar-icon-pl": `${sidebarIconPl}px`,
           } as React.CSSProperties
         }
-        className="relative z-30 flex flex-col border-r border-border-primary bg-[var(--color-bg-primary)]/85 backdrop-blur-2xl shrink-0 transition-[width] duration-200 ease-out will-change-[width]"
+        className={`relative z-30 flex flex-col border-r bg-[var(--color-bg-primary)]/85 backdrop-blur-2xl shrink-0 transition-[width] duration-200 ease-out will-change-[width] ${
+          isSettingsOpen ? "border-transparent" : "border-border-primary"
+        }`}
       >
         <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
@@ -880,7 +880,13 @@ const Home = () => {
         </div>
       </aside>
 
-      <main className="flex flex-1 flex-col min-w-0 bg-surface-tertiary overflow-hidden relative will-change-contents">
+      <main
+        className={`flex flex-1 flex-col min-w-0 overflow-hidden relative will-change-contents ${
+          isSettingsOpen
+            ? "bg-[var(--color-bg-primary)]/85 backdrop-blur-2xl"
+            : "bg-surface-tertiary"
+        }`}
+      >
         <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
         {homeViewActive && (
@@ -891,11 +897,7 @@ const Home = () => {
         )}
 
         {settingsMounted && (
-          <div
-            className={`flex flex-1 flex-col min-h-0 ${
-              isSettingsOpen ? "view-enter" : "hidden"
-            }`}
-          >
+          <div className={`settings-layer ${isSettingsOpen ? "is-open" : ""}`}>
             <Suspense fallback={null}>
               <SettingsScreen
                 active={isSettingsOpen}

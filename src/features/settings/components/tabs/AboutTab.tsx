@@ -439,12 +439,12 @@ const AboutTab = ({
       className="space-y-5"
     >
       <header>
-        <h1 className="ui-text-title-lg font-medium ui-color-primary">
+        <h2 className="ui-text-title-lg font-medium ui-color-primary">
           {t({
             id: "settings.about.version_label",
             message: "Glimpse",
           })}
-        </h1>
+        </h2>
         <p className="mt-1 ui-text-body-sm ui-color-muted">
           {t({
             id: "settings.about.version_mode",

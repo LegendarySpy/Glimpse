@@ -95,3 +95,10 @@ export const SETTINGS_PANE_GROUPS: SettingsPaneGroup[] = [
     ],
   },
 ];
+
+export const SETTINGS_PANE_LABELS = Object.fromEntries(
+  SETTINGS_PANE_GROUPS.flatMap((group) => group.panes).map((pane) => [
+    pane.id,
+    pane.label,
+  ]),
+) as Record<SettingsPane, MessageDescriptor>;
