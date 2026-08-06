@@ -81,16 +81,18 @@ Start with the 14-day trial, then buy or paste a license key in **Settings → A
 
 Transcription stays on-device by default.
 
-Glimpse sends anonymous usage telemetry via [PostHog EU](https://posthog.com/) to help prioritize development. It's tied to a random install ID, not your identity, and stored in the EU.
+The app sends anonymous usage telemetry via [PostHog EU](https://posthog.com/) to help prioritize development. It's tied to a random install ID, not your identity, and stored in the EU.
 
 - **Collected:** app version and platform, launches and uptime, durations and counts, country, and bounded error/crash categories. A crash also records a code location (source file and line, or module and offset) so we can find the bug.
-- **Never sent:** transcripts, audio, API keys, prompts, raw error text or stacks, file paths or names, microphone names, provider endpoints, your IP, or anything personally identifiable.
+- **Never in the telemetry payload:** transcripts, audio, API keys, prompts, raw error text or stacks, file paths or names, microphone names, provider endpoints, your IP address, or anything personally identifiable.
 
 Opt out anytime in **Settings → App**; opting out sends one final ping, then nothing, ever.
 
 Enabling an external speech or LLM provider sends audio or text directly to that provider. Your API keys stay local.
 
-For the full picture, see the [analytics wiki](https://github.com/glimpse-hq/Glimpse/wiki/Analytics) or [`analytics.rs`](src-tauri/src/analytics.rs).
+The above is about this app. The website, tryglimpse.cc, is a separate system: it uses Cloudflare Web Analytics for aggregate page views, and Cloudflare's edge processes ordinary request logs (including IP addresses) to serve and protect it. Neither can see anything about your app usage. The [privacy policy](https://tryglimpse.cc/privacy) covers all three.
+
+For the full picture on app telemetry, see the [analytics wiki](https://github.com/glimpse-hq/Glimpse/wiki/Analytics) or [`analytics.rs`](src-tauri/src/analytics.rs).
 
 ## License
 
