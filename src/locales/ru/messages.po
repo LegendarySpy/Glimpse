@@ -67,11 +67,19 @@ msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# слово} other {# слов}}"
 
 #. js-lingui-explicit-id
-#. placeholder {0}: hovered.cell.words
-#. placeholder {1}: hovered.cell.count
+#. placeholder {0}: hovered.target.cell.words
+#. placeholder {0}: hovered.target.week.words
+#. placeholder {1}: hovered.target.cell.count
+#. placeholder {1}: hovered.target.week.count
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.v2"
 msgstr "{0, plural, one {# слово} few {# слова} many {# слов} other {# слова}} в {1, plural, one {# диктовке} few {# диктовках} many {# диктовках} other {# диктовках}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: hovered.target.week.cumulativeWords
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.cumulative"
+msgstr ""
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
@@ -468,8 +476,8 @@ msgstr "Уже приобрели?"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
-msgid "onboarding.license.placeholder"
-msgstr "Уже купили? Вставьте ключ"
+msgid "onboarding.license.already_bought"
+msgstr "Уже приобрели?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -812,6 +820,11 @@ msgstr "Выбрать модель"
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.title"
 msgstr "Выбрать модель"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.aria"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -1226,6 +1239,16 @@ msgid "personalization.empty.description"
 msgstr "Создайте режим, чтобы настроить приложения и веб-сайты."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.model.currently_loaded"
 msgstr "загружено: {loadedModelLabel}"
@@ -1259,6 +1282,11 @@ msgstr "Портал клиента"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.cut"
 msgstr "Вырезать"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.daily"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
@@ -1969,6 +1997,11 @@ msgid "settings.account.activate.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.placeholder"
+msgstr "GLIMPSE_…"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeGreeting.ts
 msgid "home.greeting.afternoon"
 msgstr "Добрый день"
@@ -2286,11 +2319,6 @@ msgid "settings.models.installed.legacy"
 msgstr "Устаревший"
 
 #. js-lingui-explicit-id
-#: src/features/license/components/DictationStatsPanel.tsx
-msgid "settings.stats.less"
-msgstr "Меньше"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "Библиотека"
@@ -2572,11 +2600,6 @@ msgstr "Модели"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.models"
 msgstr "Модели"
-
-#. js-lingui-explicit-id
-#: src/features/license/components/DictationStatsPanel.tsx
-msgid "settings.stats.more"
-msgstr "Больше"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3072,7 +3095,7 @@ msgstr "Персонализация"
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.draft_idle"
-msgstr "Выбрать лицензию"
+msgstr "Купить лицензию"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4067,6 +4090,16 @@ msgid "personalization.modal.website.duplicate"
 msgstr "Этот домен уже добавлен"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.discount_code_error"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.discount_code_error"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.busy_error"
 msgstr "Этот микрофон уже используется."
@@ -4126,6 +4159,11 @@ msgstr "Будут удалены только сохранённые аудио
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.delete_confirm.description"
 msgstr "Это удалит транскрипцию и аудио из вашей библиотеки."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.through"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
@@ -4491,6 +4529,21 @@ msgstr "Веб-сайты"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.websites"
 msgstr "Веб-сайты"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.week_of"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.weekly"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_weekly"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx

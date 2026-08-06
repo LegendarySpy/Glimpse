@@ -67,11 +67,19 @@ msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# woord} other {# woorden}}"
 
 #. js-lingui-explicit-id
-#. placeholder {0}: hovered.cell.words
-#. placeholder {1}: hovered.cell.count
+#. placeholder {0}: hovered.target.cell.words
+#. placeholder {0}: hovered.target.week.words
+#. placeholder {1}: hovered.target.cell.count
+#. placeholder {1}: hovered.target.week.count
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.v2"
 msgstr "{0, plural, one {# woord} other {# woorden}} in {1, plural, one {# dictaat} other {# dictaten}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: hovered.target.week.cumulativeWords
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.cumulative"
+msgstr ""
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
@@ -468,8 +476,8 @@ msgstr "Al gekocht?"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
-msgid "onboarding.license.placeholder"
-msgstr "Al gekocht? Plak je sleutel"
+msgid "onboarding.license.already_bought"
+msgstr "Al gekocht?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -812,6 +820,11 @@ msgstr "Kies een model"
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.title"
 msgstr "Kies een model"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.aria"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -1226,6 +1239,16 @@ msgid "personalization.empty.description"
 msgstr "Maak een modus om je apps en websites te gaan aanpassen."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.model.currently_loaded"
 msgstr "momenteel geladen: {loadedModelLabel}"
@@ -1259,6 +1282,11 @@ msgstr "Klantportaal"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.cut"
 msgstr "Knip"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.daily"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
@@ -1969,6 +1997,11 @@ msgid "settings.account.activate.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.placeholder"
+msgstr "GLIMPSE_…"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeGreeting.ts
 msgid "home.greeting.afternoon"
 msgstr "Goedemiddag"
@@ -2286,11 +2319,6 @@ msgid "settings.models.installed.legacy"
 msgstr "Oudere versie"
 
 #. js-lingui-explicit-id
-#: src/features/license/components/DictationStatsPanel.tsx
-msgid "settings.stats.less"
-msgstr "Minder"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "Bibliotheek"
@@ -2572,11 +2600,6 @@ msgstr "Modellen"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.models"
 msgstr "Modellen"
-
-#. js-lingui-explicit-id
-#: src/features/license/components/DictationStatsPanel.tsx
-msgid "settings.stats.more"
-msgstr "Meer"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3072,7 +3095,7 @@ msgstr "Personalisatie"
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.draft_idle"
-msgstr "Kies een licentie"
+msgstr "Licentie kopen"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4067,6 +4090,16 @@ msgid "personalization.modal.website.duplicate"
 msgstr "Dat domein is al toegevoegd"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.discount_code_error"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.discount_code_error"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.busy_error"
 msgstr "Die microfoon is al in gebruik."
@@ -4126,6 +4159,11 @@ msgstr "Hiermee verwijder je alleen opgeslagen audiobestanden, niet je transcrip
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.delete_confirm.description"
 msgstr "Hiermee verwijder je de transcriptie en audio uit je bibliotheek."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.through"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
@@ -4491,6 +4529,21 @@ msgstr "Websites"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.websites"
 msgstr "Websites"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.week_of"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.weekly"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_weekly"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx

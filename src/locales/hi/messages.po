@@ -67,11 +67,19 @@ msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
 
 #. js-lingui-explicit-id
-#. placeholder {0}: hovered.cell.words
-#. placeholder {1}: hovered.cell.count
+#. placeholder {0}: hovered.target.cell.words
+#. placeholder {0}: hovered.target.week.words
+#. placeholder {1}: hovered.target.cell.count
+#. placeholder {1}: hovered.target.week.count
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.v2"
 msgstr "{1, plural, one {# डिक्टेशन} other {# डिक्टेशन}} में {0, plural, one {# शब्द} other {# शब्द}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: hovered.target.week.cumulativeWords
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.cumulative"
+msgstr ""
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
@@ -468,8 +476,8 @@ msgstr "पहले ही ख़रीद लिया?"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
-msgid "onboarding.license.placeholder"
-msgstr "पहले ही खरीद लिया? अपनी कुंजी पेस्ट करें"
+msgid "onboarding.license.already_bought"
+msgstr "पहले ही ख़रीद लिया?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -812,6 +820,11 @@ msgstr "कोई मॉडल चुनें"
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.title"
 msgstr "किसी मॉडल का चयन करें"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.aria"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -1226,6 +1239,16 @@ msgid "personalization.empty.description"
 msgstr "अपनी ऐप्स और वेबसाइटों को अनुकूलित करना शुरू करने के लिए एक मोड बनाएं।"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.model.currently_loaded"
 msgstr "वर्तमान में लोडेड: {loadedModelLabel}"
@@ -1259,6 +1282,11 @@ msgstr "ग्राहक पोर्टल"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.cut"
 msgstr "कट"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.daily"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
@@ -1969,6 +1997,11 @@ msgid "settings.account.activate.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.placeholder"
+msgstr "GLIMPSE_…"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeGreeting.ts
 msgid "home.greeting.afternoon"
 msgstr "नमस्कार"
@@ -2286,11 +2319,6 @@ msgid "settings.models.installed.legacy"
 msgstr "पुराना (लेगेसी)"
 
 #. js-lingui-explicit-id
-#: src/features/license/components/DictationStatsPanel.tsx
-msgid "settings.stats.less"
-msgstr "कम"
-
-#. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.library"
 msgstr "लाइब्रेरी"
@@ -2572,11 +2600,6 @@ msgstr "मॉडल्स"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.models"
 msgstr "मॉडल"
-
-#. js-lingui-explicit-id
-#: src/features/license/components/DictationStatsPanel.tsx
-msgid "settings.stats.more"
-msgstr "अधिक"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3072,7 +3095,7 @@ msgstr "व्यक्तिकरण"
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.draft_idle"
-msgstr "लाइसेंस चुनें"
+msgstr "लाइसेंस खरीदें"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4067,6 +4090,16 @@ msgid "personalization.modal.website.duplicate"
 msgstr "यह डोमेन पहले से जोड़ा जा चुका है"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.discount_code_error"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.discount_code_error"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.busy_error"
 msgstr "यह माइक्रोफ़ोन पहले से उपयोग में है।"
@@ -4126,6 +4159,11 @@ msgstr "यह केवल सहेजी गई ऑडियो फ़ाइ�
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.delete_confirm.description"
 msgstr "यह आपके संग्रह से ट्रांसक्रिप्ट और ऑडियो हटा देगा।"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.through"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
@@ -4491,6 +4529,21 @@ msgstr "वेबसाइटें"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.websites"
 msgstr "वेबसाइटें"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.week_of"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.weekly"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_weekly"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
