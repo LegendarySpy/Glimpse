@@ -30,6 +30,17 @@ const CRASH_PHASES: [&str; 13] = [
 ];
 static CRASH_PHASE: AtomicU8 = AtomicU8::new(0);
 
+/// Debug builds stay out of the production project, so `tauri dev` never reports.
+fn credentials() -> Option<(&'static str, &'static str)> {
+    if cfg!(debug_assertions) {
+        return None;
+    }
+    match (POSTHOG_API_KEY, POSTHOG_HOST) {
+        (Some(key), Some(host)) if !key.is_empty() && !host.is_empty() => Some((key, host)),
+        _ => None,
+    }
+}
+
 pub fn set_crash_phase(phase: &'static str) {
     let Some(next) = CRASH_PHASES
         .iter()
@@ -57,9 +68,8 @@ pub(crate) fn crash_phase() -> &'static str {
 
 /// Starts analytics and records your app version, OS, install type, and (once) install date.
 pub async fn init(app: &tauri::AppHandle<AppRuntime>) {
-    let (api_key, host) = match (POSTHOG_API_KEY, POSTHOG_HOST) {
-        (Some(k), Some(h)) if !k.is_empty() && !h.is_empty() => (k, h),
-        _ => return,
+    let Some((api_key, host)) = credentials() else {
+        return;
     };
 
     let (enabled, distinct_id) = app.state::<AppState>().analytics_state();
@@ -107,9 +117,7 @@ fn build_event(
     props: serde_json::Value,
     require_enabled: bool,
 ) -> Option<posthog_rs::Event> {
-    if POSTHOG_API_KEY.is_none_or(|k| k.is_empty()) || POSTHOG_HOST.is_none_or(|h| h.is_empty()) {
-        return None;
-    }
+    credentials()?;
 
     let (enabled, distinct_id) = app.state::<AppState>().analytics_state();
     if (require_enabled && !enabled) || distinct_id.is_empty() {
