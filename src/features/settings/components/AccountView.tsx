@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import CustomerPortalLink from "../../license/components/CustomerPortalLink";
 import MemberCard from "../../license/components/MemberCard";
+import { looksLikeDiscountCode } from "../../license/licenseKeyShape";
 import type { LicenseState } from "../../license/api";
 import type { PurchaseTier } from "../../license/purchaseConfig";
 
@@ -46,6 +47,7 @@ const AccountView = ({
 }: AccountViewProps) => {
   const { t } = useLingui();
   const [licenseKey, setLicenseKey] = useState("");
+  const [attemptedKey, setAttemptedKey] = useState("");
   const [activationAttempt, setActivationAttempt] = useState(0);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
   const confirmTimeoutRef = useRef<number | null>(null);
@@ -70,9 +72,19 @@ const AccountView = ({
     event.preventDefault();
     const trimmedKey = licenseKey.trim();
     if (trimmedKey.length === 0) return;
+    setAttemptedKey(trimmedKey);
     setActivationAttempt((attempt) => attempt + 1);
     onActivateLicense(trimmedKey);
   };
+
+  const activationErrorText =
+    activationError && looksLikeDiscountCode(attemptedKey)
+      ? t({
+          id: "settings.account.activate.discount_code_error",
+          message:
+            "That looks like a discount code. Enter it at checkout, then paste the license key from your receipt.",
+        })
+      : activationError;
 
   const handleDeactivateClick = () => {
     if (confirmDeactivate) {
@@ -279,9 +291,9 @@ const AccountView = ({
               {!activating && <ArrowRight size={12} aria-hidden="true" />}
             </button>
           </form>
-          {activationError && (
-            <p className="mt-2 ui-text-meta text-error">{activationError}</p>
-          )}
+          <p className="mt-2 min-h-10 ui-text-meta text-error text-pretty">
+            {activationErrorText}
+          </p>
         </section>
       )}
     </div>

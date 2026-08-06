@@ -37,7 +37,6 @@ import FAQModal from "../../shared/ui/FAQModal";
 import WindowControls from "../../shared/ui/WindowControls";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../types";
 
-// Whisper leads because it is the only family with dictionary support.
 const ONBOARDING_MODEL_KEYS = [
   "whisper_large_v3_turbo_q8",
   "parakeet_tdt_int8",
@@ -712,7 +711,11 @@ export default function OnboardingScreen({
               send({ type: "SET_AUTO_LAUNCH", value })
             }
             licenseActive={licenseQuery.data?.status === "active"}
-            onOpenLicense={() => setShowLicenseModal(true)}
+            onOpenLicense={() => {
+              activateLicense.reset();
+              setLicenseOpenError(null);
+              setShowLicenseModal(true);
+            }}
             isCompleting={ctx.isCompleting}
             completionError={ctx.completionError}
             onComplete={handleComplete}

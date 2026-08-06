@@ -6,6 +6,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { CircleNotch as Loader2, ArrowRight, X } from "@phosphor-icons/react";
 import MemberCard from "../../license/components/MemberCard";
 import CustomerPortalLink from "../../license/components/CustomerPortalLink";
+import { looksLikeDiscountCode } from "../../license/licenseKeyShape";
 import type { LicenseState } from "../../license/api";
 import type { PurchaseTier } from "../../license/purchaseConfig";
 
@@ -41,6 +42,7 @@ export function LicenseModal({
 }: LicenseModalProps) {
   const { t } = useLingui();
   const [licenseKey, setLicenseKey] = useState("");
+  const [attemptedKey, setAttemptedKey] = useState("");
   const [activationAttempt, setActivationAttempt] = useState(0);
   const isActive = licenseState?.status === "active";
   const dismissTimerRef = useRef<number | null>(null);
@@ -65,9 +67,19 @@ export function LicenseModal({
     event.preventDefault();
     const trimmed = licenseKey.trim();
     if (trimmed.length === 0) return;
+    setAttemptedKey(trimmed);
     setActivationAttempt((attempt) => attempt + 1);
     onActivateLicense(trimmed);
   };
+
+  const errorText =
+    activationError && looksLikeDiscountCode(attemptedKey)
+      ? t({
+          id: "onboarding.license.discount_code_error",
+          message:
+            "That looks like a discount code. Enter it at checkout, then paste the license key from your receipt.",
+        })
+      : (activationError ?? openError);
 
   return createPortal(
     <motion.div
@@ -164,52 +176,65 @@ export function LicenseModal({
 
         <AnimatePresence mode="popLayout">
           {!isActive ? (
-            <motion.form
+            <motion.div
               key="activate-form"
               layout
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              onSubmit={submitActivation}
-              className="flex w-full max-w-[340px] items-center gap-2 border-b border-white/15 transition-colors focus-within:border-white/40"
+              className="w-full max-w-[340px]"
             >
-              <input
-                value={licenseKey}
-                onChange={(event) => setLicenseKey(event.target.value)}
-                placeholder={t({
-                  id: "onboarding.license.placeholder",
-                  message: "Already bought? Paste your key",
-                })}
-                aria-label={t({
-                  id: "onboarding.license.input_aria",
-                  message: "License key",
-                })}
-                className="min-w-0 flex-1 bg-transparent px-0.5 py-2 font-mono ui-text-body-sm text-white placeholder-white/35 outline-none"
-              />
-              <button
-                type="submit"
-                disabled={activating || licenseKey.trim().length === 0}
-                className="inline-flex h-7 items-center gap-1 px-1 ui-text-button-sm text-white/65 transition-colors hover:text-white disabled:opacity-40"
+              <div className="flex items-center gap-3">
+                <span className="h-px flex-1 bg-white/12" />
+                <span className="ui-text-meta text-white/45">
+                  {t({
+                    id: "onboarding.license.already_bought",
+                    message: "Already bought?",
+                  })}
+                </span>
+                <span className="h-px flex-1 bg-white/12" />
+              </div>
+
+              <form
+                onSubmit={submitActivation}
+                className="mt-3 flex items-center gap-2 border-b border-white/15 transition-colors focus-within:border-white/40"
               >
-                {activating ? (
-                  <Loader2 size={12} className="animate-spin" />
-                ) : null}
-                {t({ id: "onboarding.license.activate", message: "Activate" })}
-                {!activating && <ArrowRight size={12} aria-hidden="true" />}
-              </button>
-            </motion.form>
+                <input
+                  value={licenseKey}
+                  onChange={(event) => setLicenseKey(event.target.value)}
+                  placeholder={t({
+                    id: "onboarding.license.placeholder",
+                    message: "GLIMPSE_…",
+                  })}
+                  aria-label={t({
+                    id: "onboarding.license.input_aria",
+                    message: "License key",
+                  })}
+                  className="min-w-0 flex-1 bg-transparent px-0.5 py-2 font-mono ui-text-body-sm text-white placeholder-white/35 outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={activating || licenseKey.trim().length === 0}
+                  className="inline-flex h-7 items-center gap-1 px-1 ui-text-button-sm text-white/65 transition-colors hover:text-white disabled:opacity-40"
+                >
+                  {activating ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : null}
+                  {t({
+                    id: "onboarding.license.activate",
+                    message: "Activate",
+                  })}
+                  {!activating && <ArrowRight size={12} aria-hidden="true" />}
+                </button>
+              </form>
+
+              <p className="mt-2 min-h-10 ui-text-meta text-red-400 text-pretty">
+                {errorText}
+              </p>
+            </motion.div>
           ) : null}
         </AnimatePresence>
-
-        {activationError || openError ? (
-          <motion.p
-            layout
-            className="w-full max-w-[340px] ui-text-meta text-red-400"
-          >
-            {activationError ?? openError}
-          </motion.p>
-        ) : null}
 
         <motion.div layout transition={layoutTransition}>
           <CustomerPortalLink
