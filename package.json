@@ -11,6 +11,7 @@
     "typecheck": "tsc --project tsconfig.json",
     "lingui:extract": "lingui extract",
     "lingui:compile": "lingui compile",
+    "locale:pull-task": "bun ./scripts/pull-lokalise-task.mjs",
     "preview": "bun ./node_modules/vite/bin/vite.js preview",
     "tauri": "bun ./scripts/tauri.mjs",
     "lint": "bun ./node_modules/eslint/bin/eslint.js src/",
