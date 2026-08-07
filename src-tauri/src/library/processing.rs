@@ -506,8 +506,8 @@ fn decode_with_native_then_ffmpeg(
         None => decode_audio_to_wav(input, output, token, duration_ms, None),
     };
     match native_result {
-        Ok(()) => return Ok(()),
-        Err(err) if is_cancelled_error(&err) => return Err(err),
+        Ok(()) => Ok(()),
+        Err(err) if is_cancelled_error(&err) => Err(err),
         Err(native_err) => {
             let _ = fs::remove_file(output);
             let Some(ffmpeg) = find_ffmpeg_in_path() else {
@@ -1156,46 +1156,6 @@ fn parse_ffmpeg_time_to_ms(value: &str) -> Option<u64> {
     }
 }
 
-#[cfg(test)]
-mod native_media_tests {
-    use super::*;
-
-    fn assert_native_video_audio_decode(file_name: &str) {
-        let input = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("src")
-            .join("library")
-            .join("testdata")
-            .join(file_name);
-        let output = env::temp_dir().join(format!(
-            "glimpse-native-media-{}-{}.wav",
-            file_name.replace('.', "-"),
-            Uuid::new_v4()
-        ));
-
-        decode_audio_to_wav(&input, &output, None, None, None)
-            .unwrap_or_else(|err| panic!("failed to decode {file_name} natively: {err}"));
-        let info = read_wav_info(&output).expect("converted WAV should be readable");
-        assert_eq!(info.sample_rate, TARGET_SAMPLE_RATE);
-        assert!(info.total_samples > 0);
-        fs::remove_file(output).expect("test output should be removable");
-    }
-
-    #[test]
-    fn decodes_mp4_aac_audio_without_ffmpeg() {
-        assert_native_video_audio_decode("aac.mp4");
-    }
-
-    #[test]
-    fn decodes_mov_aac_audio_without_ffmpeg() {
-        assert_native_video_audio_decode("aac.mov");
-    }
-
-    #[test]
-    fn decodes_webm_vorbis_audio_without_ffmpeg() {
-        assert_native_video_audio_decode("vorbis.webm");
-    }
-}
-
 fn wav_duration_seconds(path: &Path) -> Result<f32> {
     let file = fs::File::open(path)
         .with_context(|| format!("Failed to open WAV file at {}", path.display()))?;
@@ -1452,5 +1412,45 @@ fn format_duration(seconds: f32) -> String {
         format!("{}:{:02}:{:02}", hours, minutes, secs)
     } else {
         format!("{}:{:02}", minutes, secs)
+    }
+}
+
+#[cfg(test)]
+mod native_media_tests {
+    use super::*;
+
+    fn assert_native_video_audio_decode(file_name: &str) {
+        let input = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("src")
+            .join("library")
+            .join("testdata")
+            .join(file_name);
+        let output = env::temp_dir().join(format!(
+            "glimpse-native-media-{}-{}.wav",
+            file_name.replace('.', "-"),
+            Uuid::new_v4()
+        ));
+
+        decode_audio_to_wav(&input, &output, None, None, None)
+            .unwrap_or_else(|err| panic!("failed to decode {file_name} natively: {err}"));
+        let info = read_wav_info(&output).expect("converted WAV should be readable");
+        assert_eq!(info.sample_rate, TARGET_SAMPLE_RATE);
+        assert!(info.total_samples > 0);
+        fs::remove_file(output).expect("test output should be removable");
+    }
+
+    #[test]
+    fn decodes_mp4_aac_audio_without_ffmpeg() {
+        assert_native_video_audio_decode("aac.mp4");
+    }
+
+    #[test]
+    fn decodes_mov_aac_audio_without_ffmpeg() {
+        assert_native_video_audio_decode("aac.mov");
+    }
+
+    #[test]
+    fn decodes_webm_vorbis_audio_without_ffmpeg() {
+        assert_native_video_audio_decode("vorbis.webm");
     }
 }
