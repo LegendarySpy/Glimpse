@@ -48,6 +48,7 @@ import AccountPill from "./features/license/components/AccountPill";
 import { getLocalApiStatus } from "./features/settings/models-api";
 import type { LocalApiStatus } from "./types";
 import { useLicenseGate, useLicenseState } from "./features/license/queries";
+import { invoke } from "@tauri-apps/api/core";
 import type { PurchaseSource } from "./features/license/purchaseConfig";
 import { useSettings, useAppInfo } from "./features/settings/queries";
 import { useUpdateStatus } from "./features/updates/queries";
@@ -196,6 +197,16 @@ const Home = () => {
     if (showFAQ) setFaqOpened(true);
   }, [showFAQ]);
 
+  const paywallShownRef = useRef(false);
+  useEffect(() => {
+    if (licenseState && !licenseGateActive && !paywallShownRef.current) {
+      paywallShownRef.current = true;
+      void invoke("track_paywall_shown", { source: "sidebar_lock" }).catch(
+        () => {},
+      );
+    }
+  }, [licenseGateActive, licenseState]);
+
   useEffect(() => {
     licenseGateActiveRef.current = licenseGateActive;
     if (
@@ -220,6 +231,9 @@ const Home = () => {
 
   const openAccountSettings = useCallback(
     (source: PurchaseSource = "settings_account") => {
+      if (source !== "settings_account") {
+        void invoke("track_paywall_clicked", { source }).catch(() => {});
+      }
       setAccountSource(source);
       setSettingsTab("account");
       setIsSettingsOpen(true);

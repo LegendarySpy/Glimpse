@@ -128,6 +128,12 @@ fn build_event(
     let _ = event.insert_prop("app_version", APP_VERSION);
     let _ = event.insert_prop("platform", std::env::consts::OS);
     let _ = event.insert_prop("install_type", crate::platform::install_type());
+    if let Some(license) = app.state::<AppState>().license_snapshot() {
+        let _ = event.insert_prop("license_status", license.status);
+        if let Some(edition) = license.edition {
+            let _ = event.insert_prop("license_edition", edition);
+        }
+    }
     if let Some(obj) = props.as_object() {
         for (key, value) in obj {
             let _ = event.insert_prop(key.as_str(), value.clone());
@@ -352,6 +358,66 @@ pub fn track_ask_prompt_opened(app: &tauri::AppHandle<AppRuntime>, kind: &str) {
 /// Records that an ask was declined.
 pub fn track_ask_prompt_dismissed(app: &tauri::AppHandle<AppRuntime>, kind: &str) {
     capture_event(app, &format!("{kind}_prompt_dismissed"), json!({}));
+}
+
+/// Records that the trial ran out, once per install.
+pub fn track_trial_expired(app: &tauri::AppHandle<AppRuntime>) {
+    capture_event(app, "trial_expired", json!({}));
+}
+
+/// Records that a license was activated, and which edition it granted.
+/// The key itself is never recorded.
+pub fn track_license_activated(app: &tauri::AppHandle<AppRuntime>, edition: Option<&str>) {
+    capture_event(
+        app,
+        "license_activated",
+        json!({ "edition": edition.unwrap_or("unknown") }),
+    );
+}
+
+/// Records that an activation attempt failed, as a bounded reason.
+/// The key that was typed is never recorded.
+pub fn track_license_activation_failed(app: &tauri::AppHandle<AppRuntime>, message: &str) {
+    capture_event(
+        app,
+        "license_activation_failed",
+        json!({ "reason": classify_activation_failure(message) }),
+    );
+}
+
+/// Maps an activation error onto a fixed set, so a typed key can never
+/// reach analytics through the message.
+fn classify_activation_failure(message: &str) -> &'static str {
+    let lower = message.to_lowercase();
+    if lower.contains("device limit") {
+        "device_limit"
+    } else if lower.contains("was not found") {
+        "not_found"
+    } else if lower.contains("not valid for this app") {
+        "wrong_product"
+    } else if lower.contains("no longer active") {
+        "revoked"
+    } else if lower.contains("could not reach") {
+        "network"
+    } else if lower.contains("unreadable") {
+        "bad_response"
+    } else if lower.contains("enter your glimpse activation code") {
+        "empty_key"
+    } else {
+        "other"
+    }
+}
+
+/// Records that a locked feature was shown, and where.
+#[tauri::command]
+pub fn track_paywall_shown(app: tauri::AppHandle<AppRuntime>, source: String) {
+    capture_event(&app, "paywall_shown", json!({ "source": source }));
+}
+
+/// Records that a locked feature was clicked, and where.
+#[tauri::command]
+pub fn track_paywall_clicked(app: tauri::AppHandle<AppRuntime>, source: String) {
+    capture_event(&app, "paywall_clicked", json!({ "source": source }));
 }
 
 /// Records selected product-setting toggles after settings persist.
