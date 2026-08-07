@@ -7,6 +7,8 @@
 - You can share those statistics as a picture.
 - Right click a personalization mode to rename, duplicate, enable or delete it.
 - Auto-update is now on by default. If you already turned it off, it stays off.
+- Home can also ask you to rate Glimpse or star it on GitHub, in the same place it asks about the survey. Only one ask appears at a time, and answering or declining removes it for good.
+- Entering a license key is clearer, on the setup screen and in Account.
 
 ### Changes
 
@@ -32,6 +34,9 @@
 - Fixed dropping files to import while Settings was open appearing to do nothing.
 - Escape now closes What's New, the FAQ or a confirmation without closing all of Settings.
 - The Microsoft Store now lists every interface language included with Glimpse instead of only English.
+- A shortcut no longer stops working until you restart Glimpse. If a key release was missed, such as while the screen was locked or another window took over, the modifier stayed stuck.
+- Shortcuts on the arrow keys, the navigation keys and F1 to F20 now work on macOS. They could fail if the shortcut was typed in, imported or saved by an older version.
+- Pasting no longer leaves Command held down for other apps on macOS.
 
 ---
 
