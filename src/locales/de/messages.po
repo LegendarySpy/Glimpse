@@ -79,7 +79,7 @@ msgstr "{0, plural, one {# Wort} other {# Wörter}} in {1, plural, one {# Diktat
 #. placeholder {0}: hovered.target.week.cumulativeWords
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.cumulative"
-msgstr ""
+msgstr "{0, plural, one {# Wort} other {# Wörter}} insgesamt"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
@@ -121,7 +121,7 @@ msgstr "{0} Dateien"
 #. placeholder {0}: formatDuration(minutesSaved(totalWords, totalDurationMs))
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.8.v2"
-msgstr "{0}, die ich nie mit Tippen verbracht habe. @try_glimpse_app"
+msgstr "{0} Zeit, die ich nie mit Tippen verbracht habe. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: model.label
@@ -146,7 +146,7 @@ msgstr "{0} Ersetzungen"
 #. placeholder {0}: formatCompact(totalWords)
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.6"
-msgstr "{0} Wörter diktiert, kein einziges getippt. @try_glimpse_app"
+msgstr "{0} Wörter diktiert, keines davon getippt. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
@@ -161,7 +161,7 @@ msgstr "{coverageBase} · {activeDevices} von {deviceLimit} Geräten aktiv"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.headline.v2"
-msgstr "{daysDictated, plural, one {# Tag im letzten Jahr diktiert} other {# Tage im letzten Jahr diktiert}}"
+msgstr "{daysDictated, plural, one {# Tag diktiert im letzten Jahr} other {# Tage diktiert im letzten Jahr}}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
@@ -172,12 +172,12 @@ msgstr "{daysDictated, plural, one {# Tag} other {# Tage}}"
 #. placeholder {0}: formatCompact(totalWords)
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.4.v2"
-msgstr "{daysDictated} Tage reden statt tippen im letzten Jahr, {0} Wörter insgesamt diktiert. @try_glimpse_app"
+msgstr "{daysDictated} Tage Sprechen statt Tippen im letzten Jahr, {0} Wörter insgesamt diktiert. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.9"
-msgstr "{daysDictated} Tage, an denen ich mich durch die Arbeit geredet habe. @try_glimpse_app"
+msgstr "{daysDictated} Tage, an denen ich mich durchs Arbeiten gesprochen habe. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
@@ -222,7 +222,7 @@ msgstr "{wpm, plural, one {Etwa # Wort pro Minute heute} other {Etwa # Wörter p
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.2"
-msgstr "{wpm} Wörter pro Minute, laut gesprochen. Meine Hände sind glücklich. @try_glimpse_app"
+msgstr "{wpm} Wörter pro Minute laut gesprochen. Meine Hände waren noch nie so glücklich. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -317,7 +317,7 @@ msgstr "Account"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup_locked.account_link"
-msgstr "Konto"
+msgstr "Account"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/AccountPill.tsx
@@ -372,7 +372,7 @@ msgstr "Füge eine Website wie gmail.com hinzu"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.unconfigured"
-msgstr "Zuerst Endpunkt und Modell unter Anbieter eintragen"
+msgstr "Fügen Sie zuerst in Anbieter einen Endpunkt und ein Modell hinzu"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -477,7 +477,7 @@ msgstr "Bereits gekauft?"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.already_bought"
-msgstr "Bereits gekauft?"
+msgstr "Schon gekauft?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -829,7 +829,7 @@ msgstr "Modell auswählen"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.aria"
-msgstr ""
+msgstr "Wählen Sie, wie die Aktivität dargestellt wird"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -849,12 +849,12 @@ msgstr "Bereinigung"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup_locked.license_prefix"
-msgstr "Cleanup braucht eine Lizenz. Aktiviere sie unter"
+msgstr "Cleanup benötigt eine Lizenz. Aktivieren Sie sie in"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup_locked.provider_prefix"
-msgstr "Cleanup braucht ein Schreibmodell. Richte eines ein unter"
+msgstr "Cleanup benötigt ein Schreibmodell. Richten Sie eines ein in"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -954,7 +954,7 @@ msgstr "Cloud-Transkription"
 #. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.collapse_label"
-msgstr "Einklappen"
+msgstr "Ausblenden"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -989,7 +989,7 @@ msgstr "Konfiguration"
 #. js-lingui-explicit-id
 #: src/features/settings/components/SpeechModelPanel.tsx
 msgid "settings.speech_model.subtitle"
-msgstr "Verbindungsdaten für Transkription in der Cloud. Auswählen unter Modelle."
+msgstr "Verbindungsdetails für Cloud-Transkription. Wählen Sie sie in Modelle aus."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -1121,7 +1121,7 @@ msgstr "Transkription kopieren"
 #. js-lingui-explicit-id
 #: src/features/license/components/ShareCardModal.tsx
 msgid "settings.stats.share.copy_failed"
-msgstr "Bilder lassen sich hier nicht kopieren. Sichere es stattdessen."
+msgstr "Bilder können hier nicht kopiert werden. Speichern Sie sie stattdessen."
 
 #. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
@@ -1131,7 +1131,7 @@ msgstr "Core"
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.free.answer.v2"
-msgstr "Kerndiktat ist kostenlos: lokale Transkription, Wörterbuch, Ersetzungen und Verlauf. Dafür gibt es keine Minutenpreise oder Abos. Bibliothek, Cleanup, Personalisierung mit einem LLM, der lokale API-Server und die Kommandozeile gehören zu Glimpse Personal. Du bekommst zuerst 14 Tage zum Testen; danach aktivierst du unter Einstellungen → Konto eine Personal-Lizenz (Einmalkauf) oder eine Commercial-Lizenz (jährliche Abrechnung)."
+msgstr "Die grundlegende Diktierfunktion ist kostenlos: lokale Transkription, Wörterbuch, Ersetzungen und Verlauf. Dafür gibt es keine Minutenpreise oder Abonnements. Mediathek, Cleanup, Personalisierung mit einem LLM, der lokale API-Server und das CLI sind Teil von Glimpse Personal. Zuerst erhalten Sie eine 14-tägige Testversion; danach aktivieren Sie in Einstellungen → Account eine Personal-Lizenz (ein einmaliger Kauf) oder eine Commercial-Lizenz (jährliche Abrechnung)."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -1216,7 +1216,7 @@ msgstr "Deine Aufnahmen konnten nicht gelesen werden."
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.detail.transcript.save_failed"
-msgstr "Dieses Transkript konnte nicht gespeichert werden. Ihre Änderungen sind noch vorhanden."
+msgstr "Dieses Transkript konnte nicht gespeichert werden. Ihre Änderungen sind weiterhin vorhanden."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -1246,12 +1246,12 @@ msgstr "Erstellen Sie einen Modus, um Ihre Apps und Websites anzupassen."
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.cumulative"
-msgstr ""
+msgstr "Kumulativ"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
 msgid "settings.stats.activity_grid.aria_cumulative"
-msgstr ""
+msgstr "Kumulative Diktieraktivität im letzten Jahr"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -1291,12 +1291,12 @@ msgstr "Ausschneiden"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.daily"
-msgstr ""
+msgstr "Täglich"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
 msgid "settings.stats.activity_grid.aria"
-msgstr "Tägliche Diktataktivität im letzten Jahr"
+msgstr "Tägliche Diktieraktivität im letzten Jahr"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -1316,7 +1316,7 @@ msgstr "Datenbank"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.streak"
-msgstr "Tage in Folge"
+msgstr "Tage-Serie"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -2114,7 +2114,7 @@ msgstr "Ich spreche mit"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.1"
-msgstr "Ich spreche mit {wpm} Wörtern pro Minute. Reden schlägt Tippen. Diktiert mit @try_glimpse_app"
+msgstr "Ich spreche mit {wpm} Wörtern pro Minute. Am Ende schlägt Sprechen doch Tippen. Diktiert mit @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -2507,7 +2507,7 @@ msgstr "Mikrofonzugriff"
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.permissions.answer.v2"
-msgstr "Mikrofonzugriff zum Aufnehmen deiner Stimme und Bedienungshilfen-Zugriff, um Text einzufügen und markierten Text zu lesen, wenn ein Kurzbefehl ihn umschreibt. Glimpse nutzt beides nur, während du aktiv diktierst."
+msgstr "Mikrofonzugriff, um Ihre Stimme aufzunehmen, und Bedienungshilfen-Zugriff, um Text einzufügen und ausgewählten Text vorzulesen, wenn ein Kurzbefehl ihn umschreibt. Glimpse nutzt diese Zugriffe nur, während Sie aktiv diktieren."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2955,7 +2955,7 @@ msgstr "Aus dieser App gibt es nichts zu übernehmen."
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.card.of_dictating"
-msgstr "Diktieren in diesem Jahr"
+msgstr "an Diktierzeit in diesem Jahr"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -2990,7 +2990,7 @@ msgstr "Auf dem Gerät"
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.ai_writing.answer.v2"
-msgstr "Nur wenn du unter Einstellungen → Anbieter ein Schreibmodell einrichtest. Kurzbefehle mit aktiviertem Cleanup und die Personalisierung senden den betreffenden Text dann direkt an diesen Anbieter. Dein API-Schlüssel bleibt lokal in Glimpse gespeichert. Audio verlässt dein Gerät nur, wenn du unter Einstellungen → Modelle ein Cloud-Sprachmodell wählst."
+msgstr "Nur, wenn Sie unter Einstellungen → Anbieter ein Schreibmodell einrichten. Kurzbefehle mit aktiviertem Cleanup und Personalisierung senden den betreffenden Text dann direkt an diesen Anbieter. Ihr API-Schlüssel bleibt lokal in Glimpse gespeichert. Audio verlässt Ihr Gerät nur, wenn Sie unter Einstellungen → Modelle ein Cloud-Sprachmodell auswählen."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3010,7 +3010,7 @@ msgstr "Beim Anmelden öffnen"
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.star.answer"
-msgstr ""
+msgstr "GitHub öffnen"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3231,12 +3231,12 @@ msgstr "{app} beenden"
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.review.answer"
-msgstr ""
+msgstr "Bewerten"
 
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.review.title"
-msgstr ""
+msgstr "Glimpse im Microsoft Store bewerten?"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3587,7 +3587,7 @@ msgstr "Namen speichern"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.card.saved"
-msgstr "gespart"
+msgstr "gespeichert"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
@@ -3917,7 +3917,7 @@ msgstr "Standard"
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.star.title"
-msgstr ""
+msgstr "Glimpse auf GitHub mit einem Stern markieren?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3957,7 +3957,7 @@ msgstr "wird gestartet …"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.title"
-msgstr "Statistiken"
+msgstr "Statistik"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -3982,7 +3982,7 @@ msgstr "Angehalten"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.3"
-msgstr "Nicht mehr tippen, einfach reden. {wpm} Wörter pro Minute. @try_glimpse_app"
+msgstr "Nicht mehr tippen, sondern sprechen. {wpm} Wörter pro Minute und es werden mehr. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4112,12 +4112,12 @@ msgstr "Diese Domain wurde bereits hinzugefügt."
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
 msgid "settings.account.activate.discount_code_error"
-msgstr ""
+msgstr "Das sieht wie ein Rabattcode aus. Gib ihn an der Kasse ein und füge dann den Lizenzschlüssel aus deiner Quittung ein."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.discount_code_error"
-msgstr ""
+msgstr "Das sieht wie ein Rabattcode aus. Gib ihn an der Kasse ein und füge dann den Lizenzschlüssel aus deiner Quittung ein."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -4183,12 +4183,12 @@ msgstr "Dadurch werden Transkript und Audio aus Ihrer Mediathek entfernt."
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.through"
-msgstr ""
+msgstr "Bis {date}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.saved"
-msgstr "Zeit gespart"
+msgstr "Gesparte Zeit"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4342,7 +4342,7 @@ msgstr "Aktiviere Apple Intelligence in den Systemeinstellungen, um dies zu verw
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.7"
-msgstr "Ich denke offenbar schneller als ich tippe. {wpm} Wörter pro Minute. @try_glimpse_app"
+msgstr "Stellt sich heraus: Ich denke schneller, als ich tippe. {wpm} Wörter pro Minute. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4467,12 +4467,12 @@ msgstr "Die ursprünglichen Transkripte vor der Bereinigung verwenden"
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.subtitle"
-msgstr "Wird von Kurzbefehlen mit aktiviertem Schreibmodell und von Personalisierung genutzt."
+msgstr "Wird von Kurzbefehlen mit aktiviertem Schreibmodell und von Personalisierung verwendet."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.help_writing"
-msgstr "Nutzt das Schreibmodell nur für diesen Kurzbefehl. Es räumt das Diktierte auf und schreibt markierten Text um, wenn du eine Anweisung sprichst."
+msgstr "Verwendet das Schreibmodell nur für diesen Kurzbefehl. Es bereinigt, was du diktierst, und schreibt ausgewählten Text um, wenn du eine Anweisung sprichst."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -4513,7 +4513,7 @@ msgstr "Verlauf anzeigen"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.10"
-msgstr "Die Stimme ist die schnellste Tastatur, die ich habe. {wpm} Wörter pro Minute. @try_glimpse_app"
+msgstr "Meine Stimme ist die schnellste Tastatur, die ich besitze. {wpm} Wörter pro Minute. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4553,17 +4553,17 @@ msgstr "Websites"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.week_of"
-msgstr ""
+msgstr "Woche vom {date}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.weekly"
-msgstr ""
+msgstr "Wöchentlich"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
 msgid "settings.stats.activity_grid.aria_weekly"
-msgstr ""
+msgstr "Wöchentliche Diktieraktivität im letzten Jahr"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -4623,12 +4623,13 @@ msgstr "Wörter"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.card.words_a_minute"
-msgstr "Wörtern pro Minute"
+msgstr "Wörter pro Minute"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.wpm"
 msgstr "Wörter pro Minute"
+
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx

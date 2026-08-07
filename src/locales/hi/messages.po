@@ -73,13 +73,13 @@ msgstr "{0, plural, one {# शब्द} other {# शब्द}}"
 #. placeholder {1}: hovered.target.week.count
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.v2"
-msgstr "{1, plural, one {# डिक्टेशन} other {# डिक्टेशन}} में {0, plural, one {# शब्द} other {# शब्द}}"
+msgstr "{0, plural, one {# शब्द} other {# शब्द}} {1, plural, one {# डिक्टेशन} other {# डिक्टेशन}} में"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: hovered.target.week.cumulativeWords
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.cumulative"
-msgstr ""
+msgstr "कुल {0, plural, one {# शब्द} other {# शब्द}}"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
@@ -121,7 +121,7 @@ msgstr "{0} फ़ाइलें"
 #. placeholder {0}: formatDuration(minutesSaved(totalWords, totalDurationMs))
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.8.v2"
-msgstr "{0} जो मैंने कभी टाइपिंग में नहीं बिताए। @try_glimpse_app"
+msgstr "{0} जो मैंने कभी टाइप करने में नहीं लगाया। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: model.label
@@ -146,7 +146,7 @@ msgstr "{0} प्रतिस्थापन"
 #. placeholder {0}: formatCompact(totalWords)
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.6"
-msgstr "{0} शब्द बोले, एक भी टाइप नहीं किया। @try_glimpse_app"
+msgstr "{0} शब्द बोले गए, एक भी टाइप नहीं किया। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
@@ -161,7 +161,7 @@ msgstr "{coverageBase} · {activeDevices}/{deviceLimit} डिवाइस स�
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.headline.v2"
-msgstr "{daysDictated, plural, one {पिछले साल # दिन बोलकर लिखा} other {पिछले साल # दिन बोलकर लिखा}}"
+msgstr "{daysDictated, plural, one {# दिन पिछले वर्ष में डिक्टेट किया गया} other {# दिन पिछले वर्ष में डिक्टेट किए गए}}"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
@@ -172,12 +172,12 @@ msgstr "{daysDictated, plural, one {# दिन} other {# दिन}}"
 #. placeholder {0}: formatCompact(totalWords)
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.4.v2"
-msgstr "पिछले साल {daysDictated} दिन टाइपिंग की जगह बोला, कुल {0} शब्द बोलकर लिखे। @try_glimpse_app"
+msgstr "पिछले वर्ष में टाइप करने के बजाय बोलने के {daysDictated} दिन, अब तक {0} शब्द डिक्टेट किए गए। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.9"
-msgstr "{daysDictated} दिन बोलकर काम निपटाया। @try_glimpse_app"
+msgstr "काम के दौरान बोलते‑बोलते बिताए {daysDictated} दिन। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
@@ -222,7 +222,7 @@ msgstr "{wpm, plural, one {आज लगभग # शब्द प्रति �
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.2"
-msgstr "बोलकर {wpm} शब्द प्रति मिनट। मेरे हाथ बहुत खुश हैं। @try_glimpse_app"
+msgstr "ज़ोर से बोलने पर {wpm} शब्द प्रति मिनट। मेरे हाथ इससे ज़्यादा खुश कभी नहीं रहे। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -317,7 +317,7 @@ msgstr "खाता"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup_locked.account_link"
-msgstr "अकाउंट"
+msgstr "खाता"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/AccountPill.tsx
@@ -372,7 +372,7 @@ msgstr "gmail.com जैसा साइट जोड़ें"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.unconfigured"
-msgstr "पहले प्रोवाइडर में एंडपॉइंट और मॉडल जोड़ें"
+msgstr "पहले प्रदाताओं में एक एंडपॉइंट और मॉडल जोड़ें"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -477,7 +477,7 @@ msgstr "पहले ही ख़रीद लिया?"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.already_bought"
-msgstr "पहले ही ख़रीद लिया?"
+msgstr "पहले ही ख़रीद लिया है?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -634,7 +634,7 @@ msgstr "स्वचालन"
 #. js-lingui-explicit-id
 #: src/Home.tsx
 msgid "home.sidebar.back"
-msgstr "वापस"
+msgstr "पीछे"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -664,7 +664,7 @@ msgstr "व्यवहार"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.best_streak"
-msgstr "सर्वश्रेष्ठ श्रृंखला"
+msgstr "सबसे लंबी श्रृंखला"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -829,7 +829,7 @@ msgstr "किसी मॉडल का चयन करें"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.aria"
-msgstr ""
+msgstr "गतिविधि को चार्ट करने का तरीका चुनें"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -849,12 +849,12 @@ msgstr "साफ़-सफ़ाई"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup_locked.license_prefix"
-msgstr "Cleanup के लिए लाइसेंस चाहिए। इसे यहाँ सक्रिय करें"
+msgstr "Cleanup के लिए लाइसेंस ज़रूरी है। इसे सक्रिय करें यहाँ:"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup_locked.provider_prefix"
-msgstr "Cleanup के लिए राइटिंग मॉडल चाहिए। इसे यहाँ सेट करें"
+msgstr "Cleanup के लिए राइटिंग मॉडल ज़रूरी है। इसे सेट करें यहाँ:"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -989,7 +989,7 @@ msgstr "कॉन्फ़िगरेशन"
 #. js-lingui-explicit-id
 #: src/features/settings/components/SpeechModelPanel.tsx
 msgid "settings.speech_model.subtitle"
-msgstr "क्लाउड ट्रांसक्रिप्शन के लिए कनेक्शन विवरण। इसे मॉडल में चुनें।"
+msgstr "क्लाउड ट्रांसक्रिप्शन के लिए कनेक्शन विवरण। इसे मॉडल्स में चुनें।"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -1121,7 +1121,7 @@ msgstr "लिप्यंतरण कॉपी करें"
 #. js-lingui-explicit-id
 #: src/features/license/components/ShareCardModal.tsx
 msgid "settings.stats.share.copy_failed"
-msgstr "यहाँ छवि कॉपी नहीं हो सकती। इसके बजाय सेव करें।"
+msgstr "यहाँ छवियों को कॉपी नहीं किया जा सकता। इसकी बजाय इसे सहेजें।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
@@ -1131,7 +1131,7 @@ msgstr "कोर"
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.free.answer.v2"
-msgstr "मूल डिक्टेशन मुफ़्त है: लोकल ट्रांसक्रिप्शन, शब्दकोश, प्रतिस्थापन और इतिहास। इसके लिए कोई प्रति-मिनट शुल्क या सदस्यता नहीं है। लाइब्रेरी, Cleanup, LLM के साथ पर्सनलाइज़ेशन, लोकल API सर्वर और कमांड लाइन Glimpse Personal का हिस्सा हैं। पहले आपको 14 दिन का ट्रायल मिलता है; उसके बाद सेटिंग्स → अकाउंट में Personal लाइसेंस (एकमुश्त खरीद) या Commercial लाइसेंस (सालाना बिल) सक्रिय करें।"
+msgstr "कोर डिक्टेशन मुफ़्त है: लोकल ट्रांसक्रिप्शन, शब्दकोश, प्रतिस्थापन और हिस्ट्री। इसके लिए कोई प्रति‑मिनट शुल्क या सदस्यता नहीं है। लाइब्रेरी, Cleanup, LLM के साथ personalization, लोकल API सर्वर और CLI, Glimpse Personal का हिस्सा हैं। पहले आपको 14‑दिन का परीक्षण मिलता है; उसके बाद सेटिंग्स → खाता में Personal लाइसेंस (एक बार की ख़रीद) या Commercial लाइसेंस (सालाना बिलिंग) सक्रिय करें।"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -1216,7 +1216,7 @@ msgstr "आपकी रिकॉर्डिंग पढ़ी नहीं �
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.detail.transcript.save_failed"
-msgstr "यह ट्रांसक्रिप्ट सहेजा नहीं जा सका। आपके बदलाव अब भी यहाँ हैं।"
+msgstr "यह ट्रांसक्रिप्ट सहेज नहीं सके। आपके बदलाव अब भी यहाँ हैं।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -1246,12 +1246,12 @@ msgstr "अपनी ऐप्स और वेबसाइटों को अ�
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.cumulative"
-msgstr ""
+msgstr "संचयी"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
 msgid "settings.stats.activity_grid.aria_cumulative"
-msgstr ""
+msgstr "पिछले वर्ष की संचयी डिक्टेशन गतिविधि"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -1291,12 +1291,12 @@ msgstr "कट"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.daily"
-msgstr ""
+msgstr "दैनिक"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
 msgid "settings.stats.activity_grid.aria"
-msgstr "पिछले साल की दैनिक डिक्टेशन गतिविधि"
+msgstr "पिछले वर्ष की दैनिक डिक्टेशन गतिविधि"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -1316,7 +1316,7 @@ msgstr "डेटाबेस"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.streak"
-msgstr "लगातार दिन"
+msgstr "दिनों की श्रृंखला"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -1559,7 +1559,7 @@ msgstr "शब्दकोश केवल उन्हीं मॉडलों
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.mode.disable"
-msgstr "बंद करें"
+msgstr "अक्षम करें"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
@@ -1644,7 +1644,7 @@ msgstr "ट्रांसक्राइब करने के लिए फ�
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.mode.duplicate"
-msgstr "डुप्लिकेट"
+msgstr "डुप्लिकेट करें"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -1674,7 +1674,7 @@ msgstr "खाली ट्रांसक्रिप्शन"
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.mode.enable"
-msgstr "चालू करें"
+msgstr "सक्रिय करें"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -2114,7 +2114,7 @@ msgstr "मैं बोलता हूँ"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.1"
-msgstr "मैं {wpm} शब्द प्रति मिनट बोलता हूँ। बोलना टाइपिंग से बेहतर है। @try_glimpse_app से लिखा"
+msgstr "मैं {wpm} शब्द प्रति मिनट बोलता हूँ। पता चला, बोलना टाइपिंग से बेहतर है। @try_glimpse_app के साथ डिक्टेट किया गया"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
@@ -2507,7 +2507,7 @@ msgstr "माइक्रोफ़ोन एक्सेस"
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.permissions.answer.v2"
-msgstr "आपकी आवाज़ रिकॉर्ड करने के लिए माइक्रोफ़ोन एक्सेस, और टेक्स्ट डालने तथा किसी शॉर्टकट द्वारा चयनित टेक्स्ट को दोबारा लिखते समय उसे पढ़ने के लिए एक्सेसिबिलिटी एक्सेस। Glimpse इनका उपयोग केवल तब करता है जब आप बोल रहे होते हैं।"
+msgstr "आपकी आवाज़ रिकॉर्ड करने के लिए माइक्रोफ़ोन की अनुमति, और टेक्स्ट डालने व चयनित टेक्स्ट को पढ़ने के लिए एक्सेसिबिलिटी की अनुमति, जब कोई शॉर्टकट उसे फिर से लिखता है। Glimpse इन्हें केवल तब उपयोग करता है जब आप सक्रिय रूप से डिक्टेट कर रहे हों।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2664,7 +2664,7 @@ msgstr "बहुभाषी"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.5"
-msgstr "मेरा कीबोर्ड जल रहा है। @try_glimpse_app के साथ {wpm} शब्द प्रति मिनट"
+msgstr "मेरा कीबोर्ड जलने लगा है। @try_glimpse_app के साथ {wpm} शब्द प्रति मिनट"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2955,7 +2955,7 @@ msgstr "इस ऐप से लाने के लिए कुछ नही�
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.card.of_dictating"
-msgstr "इस साल बोलकर लिखा"
+msgstr "इस वर्ष डिक्टेट करने के"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -2990,7 +2990,7 @@ msgstr "डिवाइस पर"
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.ai_writing.answer.v2"
-msgstr "केवल तभी जब आप सेटिंग्स → प्रोवाइडर में कोई राइटिंग मॉडल सेट करें। तब Cleanup चालू वाले शॉर्टकट और पर्सनलाइज़ेशन संबंधित टेक्स्ट सीधे उस प्रोवाइडर को भेजते हैं। आपकी API कुंजी Glimpse में स्थानीय रूप से संग्रहीत रहती है। ऑडियो आपके डिवाइस से तभी जाता है जब आप सेटिंग्स → मॉडल में क्लाउड स्पीच मॉडल चुनते हैं।"
+msgstr "सिर्फ़ तब, जब आप सेटिंग्स → प्रदाताओं के तहत कोई राइटिंग मॉडल सेट करते हैं। Cleanup चालू वाले शॉर्टकट, और Personalization, फिर संबंधित टेक्स्ट सीधे उसी प्रदाता को भेजते हैं। आपकी API कुंजी Glimpse में लोकल ही संग्रहीत रहती है। ऑडियो आपके डिवाइस से तभी बाहर जाएगा जब आप सेटिंग्स → मॉडल्स में कोई क्लाउड स्पीच मॉडल चुनते हैं।"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -3010,7 +3010,7 @@ msgstr "लॉगिन पर खोलें"
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.star.answer"
-msgstr ""
+msgstr "GitHub खोलें"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3115,7 +3115,7 @@ msgstr "पोर्ट"
 #. js-lingui-explicit-id
 #: src/features/license/components/ShareCardModal.tsx
 msgid "settings.stats.share.post"
-msgstr "पोस्ट करें"
+msgstr "पोस्ट"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3201,7 +3201,7 @@ msgstr "प्रदाता"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup_locked.providers_link"
-msgstr "प्रोवाइडर"
+msgstr "प्रदाता"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
@@ -3231,12 +3231,12 @@ msgstr "{app} बंद करें"
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.review.answer"
-msgstr ""
+msgstr "रेट करें"
 
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.review.title"
-msgstr ""
+msgstr "Microsoft Store में Glimpse को रेट करें?"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3577,7 +3577,7 @@ msgstr "सेटअप विज़ार्ड फिर से चलाए�
 #. js-lingui-explicit-id
 #: src/features/license/components/ShareCardModal.tsx
 msgid "settings.stats.share.save"
-msgstr "सेव करें"
+msgstr "सहेजें"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -3587,7 +3587,7 @@ msgstr "नाम सहेजें"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.card.saved"
-msgstr "बचाया"
+msgstr "सहेजा गया"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
@@ -3782,7 +3782,7 @@ msgstr "सेटअप"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.share.open"
-msgstr "साझा करें"
+msgstr "शेयर करें"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -3917,7 +3917,7 @@ msgstr "मानक"
 #. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.ask.star.title"
-msgstr ""
+msgstr "GitHub पर Glimpse को स्टार दें?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3982,7 +3982,7 @@ msgstr "रुका हुआ"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.3"
-msgstr "टाइप करना छोड़ा, बोलना शुरू किया। {wpm} शब्द प्रति मिनट। @try_glimpse_app"
+msgstr "टाइप करना छोड़ा, बोलना शुरू किया। {wpm} शब्द प्रति मिनट और गिनती जारी। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4097,7 +4097,7 @@ msgstr "पाठ का आकार"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.card.than_typing"
-msgstr "टाइपिंग से"
+msgstr "टाइप करने से"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
@@ -4112,12 +4112,12 @@ msgstr "यह डोमेन पहले से जोड़ा जा चु
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
 msgid "settings.account.activate.discount_code_error"
-msgstr ""
+msgstr "यह किसी डिस्काउंट कोड जैसा लग रहा है। इसे चेकआउट पर दर्ज करें, फिर अपनी रसीद से लाइसेंस कुंजी पेस्ट करें।"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.discount_code_error"
-msgstr ""
+msgstr "यह किसी डिस्काउंट कोड जैसा लग रहा है। इसे चेकआउट पर दर्ज करें, फिर अपनी रसीद से लाइसेंस कुंजी पेस्ट करें।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -4183,12 +4183,12 @@ msgstr "यह आपके संग्रह से ट्रांसक्�
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.through"
-msgstr ""
+msgstr "{date} तक"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.saved"
-msgstr "समय बचा"
+msgstr "बचा हुआ समय"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4342,7 +4342,7 @@ msgstr "इसे उपयोग करने के लिए सिस्ट�
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.7"
-msgstr "मैं टाइप करने से तेज़ सोचता हूँ। {wpm} शब्द प्रति मिनट। @try_glimpse_app"
+msgstr "लगता है, मैं सोचता टाइप करने से तेज़ हूँ। {wpm} शब्द प्रति मिनट। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4377,7 +4377,7 @@ msgstr "AI क्लीनअप, वॉइस एडिटिंग, प्र�
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_adds.v2"
-msgstr "Cleanup, पर्सनैलिटी, फ़ाइल ट्रांसक्रिप्शन और बहुत कुछ अनलॉक करें।"
+msgstr "Cleanup, Personalities, File Transcription और अन्य सुविधाएँ अनलॉक करें।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/useSettingsForm.ts
@@ -4467,12 +4467,12 @@ msgstr "साफ़-सफ़ाई से पहले मूल ट्रा�
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.subtitle"
-msgstr "राइटिंग मॉडल चालू वाले शॉर्टकट और पर्सनलाइज़ेशन इसका उपयोग करते हैं।"
+msgstr "उन शॉर्टकट्स द्वारा उपयोग किया जाता है जिनमें writing मॉडल चालू है, और Personalization द्वारा भी।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.help_writing"
-msgstr "केवल उस शॉर्टकट के लिए राइटिंग मॉडल का उपयोग करता है। यह आपके बोले हुए को साफ़ करता है और निर्देश बोलने पर चयनित टेक्स्ट को दोबारा लिखता है।"
+msgstr "उस शॉर्टकट के लिए सिर्फ़ राइटिंग मॉडल का उपयोग करता है। यह आपकी डिक्टेशन को सलीके से लिखता है, और जब आप कोई निर्देश बोलते हैं तो चुने हुए पाठ को दोबारा लिखता है।"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -4513,7 +4513,7 @@ msgstr "हिस्ट्री देखें"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.10"
-msgstr "आवाज़ मेरा सबसे तेज़ कीबोर्ड है। {wpm} शब्द प्रति मिनट। @try_glimpse_app"
+msgstr "आवाज़ मेरे पास मौजूद सबसे तेज़ कीबोर्ड है। {wpm} शब्द प्रति मिनट। @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4553,17 +4553,17 @@ msgstr "वेबसाइटें"
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.tooltip.week_of"
-msgstr ""
+msgstr "{date} का सप्ताह"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.mode.weekly"
-msgstr ""
+msgstr "साप्ताहिक"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/ActivityGrid.tsx
 msgid "settings.stats.activity_grid.aria_weekly"
-msgstr ""
+msgstr "पिछले वर्ष की साप्ताहिक डिक्टेशन गतिविधि"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -4629,6 +4629,7 @@ msgstr "शब्द प्रति मिनट"
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.wpm"
 msgstr "शब्द प्रति मिनट"
+
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
