@@ -98,9 +98,9 @@ const FAQModal = ({ isOpen, onClose }: FAQModalProps) => {
         message: "When does text leave my device?",
       }),
       answer: t({
-        id: "faq.ai_writing.answer",
+        id: "faq.ai_writing.answer.v2",
         message:
-          "Only if you enable AI writing and set up a provider under Settings → Providers. Cleanup, Edit Mode, and Personalization then send the relevant text directly to that provider. Your API key stays stored locally in Glimpse.",
+          "Only if you set up a writing model under Settings → Providers. Shortcuts with Cleanup turned on, and Personalization, then send the relevant text directly to that provider. Your API key stays stored locally in Glimpse. Audio leaves your device only if you pick a cloud speech model in Settings → Models.",
       }),
     },
     {
@@ -110,9 +110,9 @@ const FAQModal = ({ isOpen, onClose }: FAQModalProps) => {
         message: "What is free vs Glimpse Personal?",
       }),
       answer: t({
-        id: "faq.free.answer",
+        id: "faq.free.answer.v2",
         message:
-          "Core dictation is free: local transcription, dictionary, replacements, and history. There are no per-minute fees or subscriptions for that. Library, AI Cleanup, Edit Mode, personalization with an LLM, the local API server, and the CLI are part of Glimpse Personal. You get a 14-day trial first; after that, activate a Personal license (a one-time purchase) or a Commercial license (billed yearly) in Settings → Account.",
+          "Core dictation is free: local transcription, dictionary, replacements, and history. There are no per-minute fees or subscriptions for that. Library, Cleanup, personalization with an LLM, the local API server, and the CLI are part of Glimpse Personal. You get a 14-day trial first; after that, activate a Personal license (a one-time purchase) or a Commercial license (billed yearly) in Settings → Account.",
       }),
     },
     {
@@ -134,9 +134,9 @@ const FAQModal = ({ isOpen, onClose }: FAQModalProps) => {
         message: "What permissions does Glimpse need?",
       }),
       answer: t({
-        id: "faq.permissions.answer",
+        id: "faq.permissions.answer.v2",
         message:
-          "Microphone access to record your voice, and Accessibility access to insert text and read selected text for Edit Mode. Glimpse only uses these while you are actively dictating.",
+          "Microphone access to record your voice, and Accessibility access to insert text and to read selected text when a shortcut rewrites it. Glimpse only uses these while you are actively dictating.",
       }),
     },
   ];

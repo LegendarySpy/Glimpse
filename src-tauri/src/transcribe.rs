@@ -687,8 +687,10 @@ async fn process_transcript_text(
                             "LLM edit failed, keeping original selected text: {message}"
                         );
                     }
-                    llm_cleanup::note_preflight_failure();
-                    maybe_warn_llm_unavailable(app, true);
+                    if !llm_cleanup::is_transient_llm_error(&err) {
+                        llm_cleanup::note_preflight_failure();
+                    }
+                    maybe_warn_llm_issue(app, true, &message);
                     (selected.clone(), false)
                 }
             }
@@ -704,8 +706,10 @@ async fn process_transcript_text(
                     } else {
                         tracing::error!("Cleanup failed, using raw transcript: {message}");
                     }
-                    llm_cleanup::note_preflight_failure();
-                    maybe_warn_llm_unavailable(app, false);
+                    if !llm_cleanup::is_transient_llm_error(&err) {
+                        llm_cleanup::note_preflight_failure();
+                    }
+                    maybe_warn_llm_issue(app, false, &message);
                     (raw_transcript.clone(), false)
                 }
             }
@@ -1132,7 +1136,7 @@ fn emit_transcription_complete_with_cleanup(
     if !update_checker::maybe_show_update_toast(app, &update_state) {
         crate::notifications::evaluate_after_use(app);
     }
-    crate::survey::evaluate_after_use(app);
+    crate::asks::evaluate_after_use(app);
 
     persisted
 }
@@ -1507,7 +1511,7 @@ fn decode_wav(path: &Path) -> Result<(Vec<i16>, u32)> {
     let samples = if spec.channels <= 1 {
         samples
     } else {
-        downmix_interleaved(&samples, spec.channels as usize)
+        crate::recorder::downmix_to_mono(&samples, spec.channels as usize)
     };
 
     if samples.is_empty() {
@@ -1515,10 +1519,6 @@ fn decode_wav(path: &Path) -> Result<(Vec<i16>, u32)> {
     }
 
     Ok((samples, spec.sample_rate))
-}
-
-fn downmix_interleaved(samples: &[i16], channels: usize) -> Vec<i16> {
-    crate::recorder::downmix_to_mono(samples, channels)
 }
 
 struct LocalChunkingConfig<'a> {
@@ -1703,6 +1703,12 @@ pub(crate) fn append_deduped_chunk(existing: &mut String, next: &str) {
 }
 
 fn maybe_warn_llm_unavailable(app: &AppHandle<AppRuntime>, is_edit_mode: bool) {
+    maybe_warn_llm_issue(app, is_edit_mode, "Language model unreachable.");
+}
+
+/// Says what actually went wrong. A rate limit and a bad key are not the same
+/// problem, and the user can only act on the difference if they are told it.
+fn maybe_warn_llm_issue(app: &AppHandle<AppRuntime>, is_edit_mode: bool, reason: &str) {
     if !llm_cleanup::should_show_unavailable_notice() {
         return;
     }
@@ -1712,8 +1718,8 @@ fn maybe_warn_llm_unavailable(app: &AppHandle<AppRuntime>, is_edit_mode: bool) {
             app,
             toast::Payload {
                 toast_type: "error".to_string(),
-                title: Some("Edit Mode".to_string()),
-                message: "Language model unreachable. Edit mode won't run.".to_string(),
+                title: Some("Writing model".to_string()),
+                message: format!("{reason} Your selected text was left alone."),
                 auto_dismiss: Some(true),
                 duration: Some(10_000),
                 retry_id: None,
@@ -1728,8 +1734,8 @@ fn maybe_warn_llm_unavailable(app: &AppHandle<AppRuntime>, is_edit_mode: bool) {
         toast::show_with_action(
             app,
             "warning",
-            Some("Language Model"),
-            "Language model unreachable. Transcript refinement was skipped.",
+            Some("Writing model"),
+            &format!("{reason} Your words were left as dictated."),
             "open_llm_cleanup_settings",
             "Open Settings",
         );

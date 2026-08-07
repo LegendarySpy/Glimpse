@@ -21,6 +21,8 @@ import type {
 
 const PAGE_SIZE = 30;
 
+const LIBRARY_STALE_TIME = 5 * 60 * 1000;
+
 export const libraryKeys = {
   all: ["library"] as const,
   list: (filter: LibraryFilter) =>
@@ -187,6 +189,7 @@ export function useLibraryItems(
       libraryApi.getLibraryItemsPage(filter, PAGE_SIZE, pageParam),
     enabled,
     gcTime: 60_000,
+    staleTime: LIBRARY_STALE_TIME,
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.has_more) return undefined;

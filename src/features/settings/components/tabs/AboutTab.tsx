@@ -299,16 +299,10 @@ const AboutTab = ({
               message: `${pairCount} audio and text pairs`,
             });
 
-  const isCloudMode = transcriptionMode === "cloud";
-  const modeLabel = isCloudMode
-    ? t({
-        id: "settings.about.mode.cloud",
-        message: "Cloud",
-      })
-    : t({
-        id: "settings.about.mode.local",
-        message: "Local",
-      });
+  const modeLabel = t({
+    id: "settings.about.mode.local",
+    message: "Local",
+  });
 
   const recordingsBytes = appInfo?.storage_breakdown?.recordings_bytes ?? 0;
   const libraryBytes = appInfo?.storage_breakdown?.library_bytes ?? 0;
@@ -332,7 +326,7 @@ const AboutTab = ({
     : cliInstallLocked
       ? t({
           id: "settings.about.cli.locked_info",
-          message: "Command line install requires a full active license.",
+          message: "Command line install requires an active license.",
         })
       : cliInstalled && !cliManagedByApp
         ? t({
@@ -361,7 +355,7 @@ const AboutTab = ({
     : cliInstallLocked
       ? t({
           id: "settings.about.cli.locked_subtitle",
-          message: "Requires a full active license",
+          message: "Requires an active license",
         })
       : cliInstalled
         ? t({
@@ -445,12 +439,12 @@ const AboutTab = ({
       className="space-y-5"
     >
       <header>
-        <h1 className="ui-text-title-lg font-medium ui-color-primary">
+        <h2 className="ui-text-title-lg font-medium ui-color-primary">
           {t({
             id: "settings.about.version_label",
             message: "Glimpse",
           })}
-        </h1>
+        </h2>
         <p className="mt-1 ui-text-body-sm ui-color-muted">
           {t({
             id: "settings.about.version_mode",

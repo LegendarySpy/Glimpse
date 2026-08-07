@@ -1,10 +1,9 @@
 use aes_gcm::{
     Aes256Gcm, Nonce,
-    aead::{Aead, KeyInit},
+    aead::{Aead, Generate, KeyInit},
 };
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use pbkdf2::pbkdf2_hmac_array;
-use rand::Rng;
 use sha2::Sha256;
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
@@ -15,7 +14,7 @@ const PBKDF2_ITERATIONS: u32 = 100_000;
 const NONCE_SIZE: usize = 12;
 const SALT: &[u8] = b"glimpse_api_key_v1";
 #[cfg(target_os = "windows")]
-const CREATE_NO_WINDOW: u32 = 0x08000000;
+pub(crate) const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 static CACHED_KEY: OnceLock<(String, [u8; 32])> = OnceLock::new();
 #[cfg(target_os = "windows")]
@@ -107,8 +106,7 @@ pub fn encrypt(plaintext: &str, hardware_uuid: &str) -> Result<String, String> {
     let cipher =
         Aes256Gcm::new_from_slice(&key).map_err(|e| format!("Failed to create cipher: {}", e))?;
 
-    let mut nonce_bytes = [0u8; NONCE_SIZE];
-    rand::rng().fill_bytes(&mut nonce_bytes);
+    let nonce_bytes = <[u8; NONCE_SIZE]>::generate();
     let nonce = Nonce::try_from(nonce_bytes.as_slice())
         .map_err(|_| "Failed to create nonce".to_string())?;
 

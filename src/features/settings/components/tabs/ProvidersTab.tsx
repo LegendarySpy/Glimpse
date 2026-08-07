@@ -7,8 +7,6 @@ import type { LlmProvider, RemoteSpeechProvider } from "../../../../types";
 
 type ProvidersTabProps = {
   variants: Variants;
-  llmEnabled: boolean;
-  setLlmEnabled: (value: boolean) => void;
   llmProvider: LlmProvider;
   setLlmProvider: (value: LlmProvider) => void;
   llmEndpoint: string;
@@ -19,8 +17,6 @@ type ProvidersTabProps = {
   setLlmModel: (value: string) => void;
   availableModels: string[];
   fetchAvailableModels: () => void;
-  remoteSpeechEnabled: boolean;
-  setRemoteSpeechEnabled: (value: boolean) => void;
   remoteSpeechProvider: RemoteSpeechProvider;
   setRemoteSpeechProvider: (value: RemoteSpeechProvider) => void;
   remoteSpeechEndpoint: string;
@@ -35,8 +31,6 @@ type ProvidersTabProps = {
 
 const ProvidersTab = ({
   variants,
-  llmEnabled,
-  setLlmEnabled,
   llmProvider,
   setLlmProvider,
   llmEndpoint,
@@ -47,8 +41,6 @@ const ProvidersTab = ({
   setLlmModel,
   availableModels,
   fetchAvailableModels,
-  remoteSpeechEnabled,
-  setRemoteSpeechEnabled,
   remoteSpeechProvider,
   setRemoteSpeechProvider,
   remoteSpeechEndpoint,
@@ -80,8 +72,6 @@ const ProvidersTab = ({
             })}
           </SectionLabel>
           <SpeechModelPanel
-            enabled={remoteSpeechEnabled}
-            setEnabled={setRemoteSpeechEnabled}
             provider={remoteSpeechProvider}
             setProvider={setRemoteSpeechProvider}
             endpoint={remoteSpeechEndpoint}
@@ -103,8 +93,6 @@ const ProvidersTab = ({
             })}
           </SectionLabel>
           <LanguageModelPanel
-            llmEnabled={llmEnabled}
-            setLlmEnabled={setLlmEnabled}
             llmProvider={llmProvider}
             setLlmProvider={setLlmProvider}
             llmEndpoint={llmEndpoint}

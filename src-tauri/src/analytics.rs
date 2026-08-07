@@ -30,6 +30,17 @@ const CRASH_PHASES: [&str; 13] = [
 ];
 static CRASH_PHASE: AtomicU8 = AtomicU8::new(0);
 
+/// Debug builds stay out of the production project, so `tauri dev` never reports.
+fn credentials() -> Option<(&'static str, &'static str)> {
+    if cfg!(debug_assertions) {
+        return None;
+    }
+    match (POSTHOG_API_KEY, POSTHOG_HOST) {
+        (Some(key), Some(host)) if !key.is_empty() && !host.is_empty() => Some((key, host)),
+        _ => None,
+    }
+}
+
 pub fn set_crash_phase(phase: &'static str) {
     let Some(next) = CRASH_PHASES
         .iter()
@@ -57,9 +68,8 @@ pub(crate) fn crash_phase() -> &'static str {
 
 /// Starts analytics and records your app version, OS, install type, and (once) install date.
 pub async fn init(app: &tauri::AppHandle<AppRuntime>) {
-    let (api_key, host) = match (POSTHOG_API_KEY, POSTHOG_HOST) {
-        (Some(k), Some(h)) if !k.is_empty() && !h.is_empty() => (k, h),
-        _ => return,
+    let Some((api_key, host)) = credentials() else {
+        return;
     };
 
     let (enabled, distinct_id) = app.state::<AppState>().analytics_state();
@@ -107,9 +117,7 @@ fn build_event(
     props: serde_json::Value,
     require_enabled: bool,
 ) -> Option<posthog_rs::Event> {
-    if POSTHOG_API_KEY.is_none_or(|k| k.is_empty()) || POSTHOG_HOST.is_none_or(|h| h.is_empty()) {
-        return None;
-    }
+    credentials()?;
 
     let (enabled, distinct_id) = app.state::<AppState>().analytics_state();
     if (require_enabled && !enabled) || distinct_id.is_empty() {
@@ -120,6 +128,12 @@ fn build_event(
     let _ = event.insert_prop("app_version", APP_VERSION);
     let _ = event.insert_prop("platform", std::env::consts::OS);
     let _ = event.insert_prop("install_type", crate::platform::install_type());
+    if let Some(license) = app.state::<AppState>().license_snapshot() {
+        let _ = event.insert_prop("license_status", license.status);
+        if let Some(edition) = license.edition {
+            let _ = event.insert_prop("license_edition", edition);
+        }
+    }
     if let Some(obj) = props.as_object() {
         for (key, value) in obj {
             let _ = event.insert_prop(key.as_str(), value.clone());
@@ -320,29 +334,90 @@ pub fn track_onboarding_step_viewed(app: tauri::AppHandle<AppRuntime>, step: Str
     capture_event(&app, "onboarding_step_viewed", json!({ "step": step }));
 }
 
-/// Records that the one-time feedback prompt appeared, with usage as coarse
+/// Records that a one-time ask appeared, with usage as coarse
 /// buckets rather than exact counts. Never records any answer.
-pub fn track_survey_prompt_shown(
+pub fn track_ask_prompt_shown(
     app: &tauri::AppHandle<AppRuntime>,
+    kind: &str,
     dictations: &str,
     days_installed: &str,
 ) {
     capture_event(
         app,
-        "survey_prompt_shown",
+        &format!("{kind}_prompt_shown"),
         json!({ "dictations": dictations, "days_installed": days_installed }),
     );
 }
 
-/// Records that the feedback prompt sent someone to the form. The form itself
+/// Records that an ask sent someone to its destination. The form itself
 /// is anonymous and carries nothing from the app.
-pub fn track_survey_prompt_opened(app: &tauri::AppHandle<AppRuntime>) {
-    capture_event(app, "survey_prompt_opened", json!({}));
+pub fn track_ask_prompt_opened(app: &tauri::AppHandle<AppRuntime>, kind: &str) {
+    capture_event(app, &format!("{kind}_prompt_opened"), json!({}));
 }
 
-/// Records that the feedback prompt was declined.
-pub fn track_survey_prompt_dismissed(app: &tauri::AppHandle<AppRuntime>) {
-    capture_event(app, "survey_prompt_dismissed", json!({}));
+/// Records that an ask was declined.
+pub fn track_ask_prompt_dismissed(app: &tauri::AppHandle<AppRuntime>, kind: &str) {
+    capture_event(app, &format!("{kind}_prompt_dismissed"), json!({}));
+}
+
+/// Records that the trial ran out, once per install.
+pub fn track_trial_expired(app: &tauri::AppHandle<AppRuntime>) {
+    capture_event(app, "trial_expired", json!({}));
+}
+
+/// Records that a license was activated, and which edition it granted.
+/// The key itself is never recorded.
+pub fn track_license_activated(app: &tauri::AppHandle<AppRuntime>, edition: Option<&str>) {
+    capture_event(
+        app,
+        "license_activated",
+        json!({ "edition": edition.unwrap_or("unknown") }),
+    );
+}
+
+/// Records that an activation attempt failed, as a bounded reason.
+/// The key that was typed is never recorded.
+pub fn track_license_activation_failed(app: &tauri::AppHandle<AppRuntime>, message: &str) {
+    capture_event(
+        app,
+        "license_activation_failed",
+        json!({ "reason": classify_activation_failure(message) }),
+    );
+}
+
+/// Maps an activation error onto a fixed set, so a typed key can never
+/// reach analytics through the message.
+fn classify_activation_failure(message: &str) -> &'static str {
+    let lower = message.to_lowercase();
+    if lower.contains("device limit") {
+        "device_limit"
+    } else if lower.contains("was not found") {
+        "not_found"
+    } else if lower.contains("not valid for this app") {
+        "wrong_product"
+    } else if lower.contains("no longer active") {
+        "revoked"
+    } else if lower.contains("could not reach") {
+        "network"
+    } else if lower.contains("unreadable") {
+        "bad_response"
+    } else if lower.contains("enter your glimpse activation code") {
+        "empty_key"
+    } else {
+        "other"
+    }
+}
+
+/// Records that a locked feature was shown, and where.
+#[tauri::command]
+pub fn track_paywall_shown(app: tauri::AppHandle<AppRuntime>, source: String) {
+    capture_event(&app, "paywall_shown", json!({ "source": source }));
+}
+
+/// Records that a locked feature was clicked, and where.
+#[tauri::command]
+pub fn track_paywall_clicked(app: tauri::AppHandle<AppRuntime>, source: String) {
+    capture_event(&app, "paywall_clicked", json!({ "source": source }));
 }
 
 /// Records selected product-setting toggles after settings persist.
@@ -370,16 +445,10 @@ pub fn track_settings_changes(
     next: &UserSettings,
 ) {
     for (setting, from_value, to_value) in [
-        ("llm_enabled", previous.llm_enabled, next.llm_enabled),
         (
-            "cleanup_enabled",
-            previous.cleanup_enabled,
-            next.cleanup_enabled,
-        ),
-        (
-            "edit_mode_enabled",
-            previous.edit_mode_enabled,
-            next.edit_mode_enabled,
+            "shortcut_cleanup_enabled",
+            previous.shortcut_bindings.any_cleanup_enabled(),
+            next.shortcut_bindings.any_cleanup_enabled(),
         ),
         (
             "remote_speech_enabled",

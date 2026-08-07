@@ -19,7 +19,7 @@ export default defineConfig(async () => ({
     lingui(),
     tailwindcss(),
   ],
-  resolve: { alias: { "@": path.resolve(__dirname, "src") } },
+  resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

@@ -4,7 +4,7 @@ use crate::{
     AppRuntime, AppState, AudioSpectrumPayload, EVENT_AUDIO_SPECTRUM, MAIN_WINDOW_LABEL, assistive,
     core::hotkeys::{self, HotkeyState},
     emit_event, model_manager, music, platform,
-    recorder::{MIN_RECORDING_DURATION_MS, RecorderManager},
+    recorder::{MIN_RECORDING_DURATION_MS, RecorderManager, SPECTRUM_SIZE},
     settings::{MediaAction, UserSettings},
     toast,
 };
@@ -60,7 +60,6 @@ pub struct PillStatePayload {
     pub status: PillStatus,
 }
 
-const SPECTRUM_SIZE: usize = 512;
 const SPECTRUM_BINS: usize = SPECTRUM_SIZE / 2;
 const SPECTRUM_SMOOTHING: f32 = 0.8;
 const SPECTRUM_MIN_DB: f32 = -100.0;
@@ -428,7 +427,7 @@ impl PillController {
     ) {
         let state = app.state::<AppState>();
 
-        if !settings.edit_mode_enabled {
+        if !settings.cleanup_enabled || !crate::llm_cleanup::is_llm_available(settings) {
             state.set_pending_selected_text(None);
             return;
         }

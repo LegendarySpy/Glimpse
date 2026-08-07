@@ -1,5 +1,6 @@
 mod accessibility_context;
 mod analytics;
+mod asks;
 mod assistive;
 mod audio;
 mod auto_dictionary;
@@ -30,7 +31,6 @@ mod settings;
 mod speech;
 mod storage;
 mod streaming_transcription;
-mod survey;
 mod toast;
 mod transcribe;
 mod transcription_api;
@@ -208,14 +208,6 @@ pub(crate) fn sync_launch_at_login(
             .map_err(|err| format!("Failed to disable launch at login: {err}"))?;
     }
 
-    Ok(())
-}
-
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-pub(crate) fn sync_launch_at_login(
-    _app: &AppHandle<AppRuntime>,
-    _enabled: bool,
-) -> Result<(), String> {
     Ok(())
 }
 
@@ -598,6 +590,14 @@ pub fn run() {
                     if let Some(path) = crash_marker {
                         analytics::report_pending_crash(&h, &path);
                     }
+                    {
+                        let app_state = h.state::<AppState>();
+                        if let Ok(license_state) =
+                            license::get_license_state(&app_state.settings_store)
+                        {
+                            note_license_state(&h, &app_state, &license_state);
+                        }
+                    }
                     if h.state::<AppState>().analytics_first_run() {
                         analytics::track_app_installed(&h);
                     }
@@ -642,6 +642,8 @@ pub fn run() {
             data_export::delete_all_data,
             get_transcriptions_page,
             get_today_dictation_stats,
+            get_dictation_activity,
+            save_share_image,
             delete_transcription,
             retry_transcription,
             retry_llm_cleanup,
@@ -687,14 +689,16 @@ pub fn run() {
             toast::debug_show_toast,
             analytics::report_frontend_crash,
             analytics::track_onboarding_step_viewed,
+            analytics::track_paywall_shown,
+            analytics::track_paywall_clicked,
             fetch_llm_models,
             apple_llm_availability,
             fetch_remote_speech_models,
             open_about_page,
             open_account_page,
-            survey::get_survey_prompt,
-            survey::mark_survey_prompt_seen,
-            survey::resolve_survey_prompt,
+            asks::get_ask_prompt,
+            asks::mark_ask_prompt_seen,
+            asks::resolve_ask_prompt,
             reveal_logs,
             update_checker::get_update_status,
             update_checker::check_for_updates,
@@ -838,6 +842,14 @@ pub struct AppState {
     session_counters: parking_lot::Mutex<SessionCounters>,
     streaming_session: parking_lot::Mutex<Option<streaming_transcription::StreamingSession>>,
     should_start_in_background: bool,
+    /// Cached so analytics can tag events without touching the settings DB.
+    license_snapshot: parking_lot::Mutex<Option<LicenseSnapshot>>,
+}
+
+#[derive(Clone)]
+pub struct LicenseSnapshot {
+    pub status: &'static str,
+    pub edition: Option<&'static str>,
 }
 
 #[derive(Clone, Copy)]
@@ -907,6 +919,7 @@ impl AppState {
                 transcription_count: 0,
             }),
             streaming_session: parking_lot::Mutex::new(None),
+            license_snapshot: parking_lot::Mutex::new(None),
             should_start_in_background,
         }
     }
@@ -938,6 +951,17 @@ impl AppState {
     pub fn analytics_state(&self) -> (bool, String) {
         let s = self.settings.lock();
         (s.analytics_enabled, s.analytics_install_id.clone())
+    }
+
+    pub fn note_license_state(&self, state: &license::LicenseState) {
+        *self.license_snapshot.lock() = Some(LicenseSnapshot {
+            status: state.status.as_str(),
+            edition: state.edition.map(|edition| edition.as_str()),
+        });
+    }
+
+    pub fn license_snapshot(&self) -> Option<LicenseSnapshot> {
+        self.license_snapshot.lock().clone()
     }
 
     pub fn analytics_first_run(&self) -> bool {
@@ -1021,8 +1045,6 @@ impl AppState {
             next.transcription_mode = TranscriptionMode::Local;
         }
         settings::sync_legacy_shortcuts_from_bindings(&mut next);
-        next.auto_delete_duration =
-            settings::canonicalize_recording_prune_policy(next.auto_delete_duration);
 
         store.save(&next)?;
         Ok(next)
@@ -1265,7 +1287,6 @@ impl AppState {
 fn disable_license_gated_settings(settings: &mut UserSettings) {
     settings.llm_enabled = false;
     settings.cleanup_enabled = false;
-    settings.edit_mode_enabled = false;
     for binding in settings
         .shortcut_bindings
         .smart
@@ -1376,31 +1397,68 @@ fn update_settings(
     core::settings::update_settings(args, &app, &state)
 }
 
+/// Caches the license status for analytics and reports a lapsed trial once.
+fn note_license_state(
+    app: &tauri::AppHandle<AppRuntime>,
+    state: &AppState,
+    license_state: &license::LicenseState,
+) {
+    state.note_license_state(license_state);
+    if license::take_trial_expiry_report(&state.settings_store, license_state) {
+        analytics::track_trial_expired(app);
+    }
+}
+
 #[tauri::command]
-fn get_license_state(state: tauri::State<AppState>) -> Result<license::LicenseState, String> {
-    license::get_license_state(&state.settings_store)
+fn get_license_state(
+    app: tauri::AppHandle<AppRuntime>,
+    state: tauri::State<AppState>,
+) -> Result<license::LicenseState, String> {
+    let license_state = license::get_license_state(&state.settings_store)?;
+    note_license_state(&app, &state, &license_state);
+    Ok(license_state)
 }
 
 #[tauri::command]
 async fn activate_license(
+    app: tauri::AppHandle<AppRuntime>,
     state: tauri::State<'_, AppState>,
     args: license::ActivateLicenseArgs,
 ) -> Result<license::LicenseState, String> {
-    license::activate_license(state.http(), &state.settings_store, args).await
+    match license::activate_license(state.http(), &state.settings_store, args).await {
+        Ok(license_state) => {
+            note_license_state(&app, &state, &license_state);
+            analytics::track_license_activated(
+                &app,
+                license_state.edition.map(|edition| edition.as_str()),
+            );
+            Ok(license_state)
+        }
+        Err(err) => {
+            analytics::track_license_activation_failed(&app, &err);
+            Err(err)
+        }
+    }
 }
 
 #[tauri::command]
 async fn refresh_license(
+    app: tauri::AppHandle<AppRuntime>,
     state: tauri::State<'_, AppState>,
 ) -> Result<license::LicenseState, String> {
-    license::refresh_license(state.http(), &state.settings_store).await
+    let license_state = license::refresh_license(state.http(), &state.settings_store).await?;
+    note_license_state(&app, &state, &license_state);
+    Ok(license_state)
 }
 
 #[tauri::command]
 async fn deactivate_license(
+    app: tauri::AppHandle<AppRuntime>,
     state: tauri::State<'_, AppState>,
 ) -> Result<license::LicenseState, String> {
-    license::deactivate_license(state.http(), &state.settings_store).await
+    let license_state = license::deactivate_license(state.http(), &state.settings_store).await?;
+    note_license_state(&app, &state, &license_state);
+    Ok(license_state)
 }
 
 #[derive(Serialize)]
@@ -1702,6 +1760,22 @@ fn get_today_dictation_stats(
         .storage()
         .today_dictation_stats(start_ms, end_ms)
         .map_err(|err| format!("Failed to get today's dictation stats: {err}"))
+}
+
+#[tauri::command]
+fn save_share_image(path: String, bytes: Vec<u8>) -> Result<(), String> {
+    std::fs::write(&path, bytes).map_err(|err| format!("Failed to save image: {err}"))
+}
+
+#[tauri::command]
+fn get_dictation_activity(
+    start_ms: i64,
+    state: tauri::State<AppState>,
+) -> Result<Vec<storage::DictationDay>, String> {
+    state
+        .storage()
+        .dictation_activity(start_ms)
+        .map_err(|err| format!("Failed to get dictation activity: {err}"))
 }
 
 #[tauri::command]

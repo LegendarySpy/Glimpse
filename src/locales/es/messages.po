@@ -14,66 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-#~ msgid "settings.about.version"
-#~ msgstr "Versión"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.balanced.helper"
-#~ msgstr "Precisión y tamaño"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.quality"
-#~ msgstr "Preciso"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.balanced"
-#~ msgstr "Equilibrado"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.quality.helper"
-#~ msgstr "Mejores resultados"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.subtitle"
-#~ msgstr "Los modelos más grandes son más precisos; los más pequeños son más rápidos."
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.builtin"
-#~ msgstr "Integrado"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.compact.helper"
-#~ msgstr "Menos espacio"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.builtin.helper"
-#~ msgstr "Sin descarga"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.priority.compact"
-#~ msgstr "Pequeño"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ModelStep.tsx
-#~ msgid "onboarding.model.subtitle.languages"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: src/shared/lib/nativeMenuStrings.ts
-#~ msgid "native.toast.recovered_saved"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(si es necesario)"
@@ -127,6 +67,21 @@ msgid "import.cat.dictionary.detail"
 msgstr "{0, plural, one {# palabra} other {# palabras}}"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: hovered.target.cell.words
+#. placeholder {0}: hovered.target.week.words
+#. placeholder {1}: hovered.target.cell.count
+#. placeholder {1}: hovered.target.week.count
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.v2"
+msgstr "{0, plural, one {# palabra} other {# palabras}} en {1, plural, one {# dictado} other {# dictados}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: hovered.target.week.cumulativeWords
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
 #. placeholder {0}: stats.longestWords
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.longest_words"
@@ -137,6 +92,12 @@ msgstr "{0, plural, one {Dictado más largo de hoy: # palabra} other {Dictado m�
 #: src/features/import/components/ImportStep.tsx
 msgid "import.subtitle"
 msgstr "{0, plural, one {Encontramos otra app de dictado. Elige qué importar.} other {Encontramos otras apps de dictado. Elige qué importar.}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: personality.name
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.copy_name"
+msgstr "{0} copia"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: entries.length
@@ -155,6 +116,12 @@ msgstr "{0} archivo(s) omitido(s) por formato no compatible."
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.summary.multiple"
 msgstr "{0} archivos"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: formatDuration(minutesSaved(totalWords, totalDurationMs))
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.8.v2"
+msgstr "{0} que nunca pasé escribiendo. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: model.label
@@ -176,6 +143,12 @@ msgid "dictionary.replacements.count.multiple"
 msgstr "{0} reemplazos"
 
 #. js-lingui-explicit-id
+#. placeholder {0}: formatCompact(totalWords)
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.6"
+msgstr "{0} palabras dictadas, ninguna escrita. @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.avg_words"
 msgstr "{avg, plural, one {Aproximadamente # palabra por dictado hoy} other {Aproximadamente # palabras por dictado hoy}}"
@@ -184,6 +157,37 @@ msgstr "{avg, plural, one {Aproximadamente # palabra por dictado hoy} other {Apr
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.coverage_with_devices"
 msgstr "{coverageBase} · {activeDevices} de {deviceLimit} dispositivos activos"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.headline.v2"
+msgstr "{daysDictated, plural, one {# día dictado en el último año} other {# días dictados en el último año}}"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.days_headline.v2"
+msgstr "{daysDictated, plural, one {# día} other {# días}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: formatCompact(totalWords)
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.4.v2"
+msgstr "{daysDictated} días hablando en vez de escribir en el último año, {0} palabras dictadas en total. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.9"
+msgstr "{daysDictated} días hablando para sacar el trabajo adelante. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.faster_value"
+msgstr "{fasterPercent}% más rápido"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.faster_inline"
+msgstr "{fasterPercent}% más rápido que escribir"
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/homeHeaderStats.ts
@@ -214,6 +218,11 @@ msgstr "{seconds, plural, one {# segundo hablado hoy} other {# segundos hablados
 #: src/features/transcriptions/homeHeaderStats.ts
 msgid "home.today.stats.pace_wpm"
 msgstr "{wpm, plural, one {Aproximadamente # palabra por minuto hoy} other {Aproximadamente # palabras por minuto hoy}}"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.2"
+msgstr "{wpm} palabras por minuto en voz alta. Mis manos están felices. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -281,7 +290,7 @@ msgid "home.support.about.title"
 msgstr "Acerca de"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.about"
 msgstr "Acerca de"
 
@@ -301,13 +310,13 @@ msgid "onboarding.accessibility.title"
 msgstr "Accesibilidad"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.account"
 msgstr "Cuenta"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.account_tab"
+msgid "settings.general.shortcuts.cleanup_locked.account_link"
 msgstr "Cuenta"
 
 #. js-lingui-explicit-id
@@ -326,9 +335,9 @@ msgid "onboarding.license.activate"
 msgstr "Activar"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.license_prefix"
-msgstr "Activa tu licencia de Glimpse en"
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.input_aria"
+msgstr "Código de activación"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -356,14 +365,14 @@ msgid "personalization.modal.add"
 msgstr "Agregar"
 
 #. js-lingui-explicit-id
-#: src/features/dictionary/components/DictionaryView.tsx
-msgid "dictionary.replacements.none_description"
-msgstr "Agrega pares de palabras para sustituirlos automáticamente en las transcripciones. Las coincidencias no distinguen mayúsculas de minúsculas."
-
-#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.websites.placeholder"
 msgstr "Añade un sitio como gmail.com"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud.unconfigured"
+msgstr "Añade primero un endpoint y un modelo en Proveedores"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -412,8 +421,18 @@ msgstr "Agregar dominio de sitio web"
 
 #. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
+msgid "dictionary.replacements.none_description"
+msgstr "Agrega pares de palabras para sustituirlos automáticamente en las transcripciones. Las coincidencias no distinguen mayúsculas de minúsculas."
+
+#. js-lingui-explicit-id
+#: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.no_entries.description"
 msgstr "Agrega palabras, frases o nombres que no estén en el diccionario predeterminado."
+
+#. js-lingui-explicit-id
+#: src/shared/ui/ModelPickerModal.tsx
+msgid "model_picker.ane.info"
+msgstr "Añade un codificador Core ML que se ejecuta en el Apple Neural Engine para una transcripción más rápida y eficiente energéticamente. La primera carga tarda más mientras macOS lo optimiza para tu chip."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -451,9 +470,14 @@ msgid "settings.local_api.allow_browser_requests_aria"
 msgstr "Permitir solicitudes de navegador de orígenes cruzados"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.section.activate"
+msgstr "¿Ya lo compraste?"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
-msgid "onboarding.license.placeholder"
-msgstr "¿Ya lo compraste? Pega tu clave"
+msgid "onboarding.license.already_bought"
+msgstr "¿Ya lo compraste?"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -466,7 +490,7 @@ msgid "settings.app.analytics.body"
 msgstr "anónimo, no se comparten transcripciones ni audio."
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.answer"
 msgstr "Respuesta"
 
@@ -491,17 +515,12 @@ msgid "settings.speech_model.api_key"
 msgstr "Clave de API"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.api_server"
 msgstr "Servidor API"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.api_server.full_license_required"
-msgstr "El servidor API requiere una licencia completa activa."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.app"
 msgstr "App"
 
@@ -527,13 +546,13 @@ msgstr "Apps"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
-msgid "library.detail.assign_new_speaker"
-msgstr "Asignar nuevo hablante"
+msgid "library.detail.speaker.unassigned"
+msgstr "Asignar"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
-msgid "library.detail.speaker.unassigned"
-msgstr "Asignar"
+msgid "library.detail.assign_new_speaker"
+msgstr "Asignar nuevo hablante"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -613,6 +632,11 @@ msgid "settings.app.automation"
 msgstr "Automatización"
 
 #. js-lingui-explicit-id
+#: src/Home.tsx
+msgid "home.sidebar.back"
+msgstr "Atrás"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.back"
 msgstr "Atrás"
@@ -636,6 +660,11 @@ msgstr "Visualizador de audio en segundo plano"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.behavior"
 msgstr "Comportamiento"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.best_streak"
+msgstr "Mejor racha"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
@@ -666,6 +695,11 @@ msgstr "Integrado en el Mac"
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.ready"
 msgstr "Integrado en este Mac."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_idle"
+msgstr "Comprar una licencia"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -793,6 +827,11 @@ msgid "onboarding.model.title"
 msgstr "Elige un modelo"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.aria"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.export_dialog_title"
 msgstr "Elige dónde guardar el conjunto de datos"
@@ -806,6 +845,16 @@ msgstr "Limpiando..."
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.cleanup"
 msgstr "Limpieza"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.cleanup_locked.license_prefix"
+msgstr "Cleanup necesita una licencia. Actívala en"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.cleanup_locked.provider_prefix"
+msgstr "Cleanup necesita un modelo de escritura. Configura uno en"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -828,16 +877,6 @@ msgid "library.detail.speaker.clear"
 msgstr "Altavoz nítido"
 
 #. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.dropzone"
-msgstr "Suelta archivos para importar"
-
-#. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.empty_state"
-msgstr "Arrastra archivos aquí para crear tu biblioteca."
-
-#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.detail.speaker.rename"
 msgstr "Haz clic para cambiar el nombre"
@@ -855,6 +894,11 @@ msgstr "Cerrar"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.close"
+msgstr "Cerrar"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.close"
 msgstr "Cerrar"
 
 #. js-lingui-explicit-id
@@ -883,28 +927,13 @@ msgid "toast.close"
 msgstr "Cerrar notificación"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.close_button"
-msgstr "Cerrar configuración"
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.close_window"
 msgstr "Cerrar ventana"
 
 #. js-lingui-explicit-id
-#: src/Home.tsx
-msgid "home.mode.cloud"
-msgstr "Nube"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.mode.cloud"
-msgstr "Nube"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.label"
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud"
 msgstr "Nube"
 
 #. js-lingui-explicit-id
@@ -918,24 +947,19 @@ msgid "settings.speech_model.provider.cloud"
 msgstr "Nube (clave API)"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.aria"
-msgstr "Procesamiento en la nube (Próximamente)"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/CloudModelCard.tsx
 msgid "models.cloud_card.transcribing"
 msgstr "Transcripción en la nube"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
-msgid "home.sidebar.collapse"
-msgstr "Contraer barra lateral"
+msgid "home.sidebar.collapse_label"
+msgstr "Contraer"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.badge"
-msgstr "próximamente"
+#: src/Home.tsx
+msgid "home.sidebar.collapse"
+msgstr "Contraer barra lateral"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -961,6 +985,11 @@ msgstr "Preguntas frecuentes"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.configuration"
 msgstr "Configuración"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/SpeechModelPanel.tsx
+msgid "settings.speech_model.subtitle"
+msgstr "Datos de conexión para la transcripción en la nube. Selecciónala en Modelos."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -1050,6 +1079,11 @@ msgid "settings.local_api.logs.copy"
 msgstr "Copiar"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.copy"
+msgstr "Copiar"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.copy"
 msgstr "Copiar"
@@ -1060,7 +1094,7 @@ msgid "home.local_api.copy_url"
 msgstr "Copiar URL base"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/components/SettingsScreen.tsx
 msgid "settings.error.copy"
 msgstr "Copiar error"
 
@@ -1085,14 +1119,19 @@ msgid "transcriptions.item.copy_transcription"
 msgstr "Copiar transcripción"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.copy_failed"
+msgstr "Aquí no se pueden copiar imágenes. Guárdala en su lugar."
+
+#. js-lingui-explicit-id
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.core"
 msgstr "Núcleo"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.free.answer"
-msgstr "Glimpse utiliza modelos de IA OSS en el dispositivo para la transcripción, por lo que no hay costos continuos para la experiencia básica."
+msgid "faq.free.answer.v2"
+msgstr "El dictado básico es gratis: transcripción local, diccionario, reemplazos e historial. No hay tarifas por minuto ni suscripciones para eso. La biblioteca, Cleanup, la personalización con un LLM, el servidor de API local y la línea de comandos forman parte de Glimpse Personal. Primero tienes 14 días de prueba; después, activa una licencia Personal (pago único) o Commercial (facturada al año) en Ajustes → Cuenta."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/OnboardingScreen.tsx
@@ -1175,6 +1214,11 @@ msgid "settings.about.data.count_error"
 msgstr "No se pudieron leer tus grabaciones"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryDetail.tsx
+msgid "library.detail.transcript.save_failed"
+msgstr "No se pudo guardar esta transcripción. Tus cambios siguen aquí."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.generic_error"
 msgstr "No se pudo iniciar la prueba del micrófono."
@@ -1198,6 +1242,16 @@ msgstr "Contando grabaciones…"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.empty.description"
 msgstr "Crea un modo para empezar a personalizar tus apps y sitios web."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.cumulative"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_cumulative"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -1235,6 +1289,16 @@ msgid "native.menu.cut"
 msgstr "Cortar"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.daily"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria"
+msgstr "Actividad diaria de dictado durante el último año"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.theme.dark"
 msgstr "Oscuro"
@@ -1248,6 +1312,11 @@ msgstr "Datos"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.database"
 msgstr "Base de datos"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.streak"
+msgstr "Días seguidos"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
@@ -1287,6 +1356,11 @@ msgstr "Eliminar"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.delete"
+msgstr "Eliminar"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.delete"
 msgstr "Eliminar"
 
 #. js-lingui-explicit-id
@@ -1422,9 +1496,14 @@ msgid "library.retranscribe.detect_speakers.aria"
 msgstr "Detectar oradores"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.developer"
 msgstr "Desarrollador"
+
+#. js-lingui-explicit-id
+#: src/features/settings/settingsPanes.ts
+msgid "settings.modal.section.dictation"
+msgstr "Dictado"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
@@ -1435,6 +1514,16 @@ msgstr "El dictado es gratis para siempre"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.free_title"
 msgstr "El dictado es gratis para siempre"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.dictations"
+msgstr "dictados"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.dictations"
+msgstr "Dictados"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -1466,6 +1555,11 @@ msgstr "El diccionario está lleno"
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.warning"
 msgstr "El diccionario solo funciona con modelos que lo admiten. El modelo actual {0} ignorará estas entradas hasta que cambies a un modelo compatible."
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.disable"
+msgstr "Desactivar"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
@@ -1513,11 +1607,6 @@ msgid "model_picker.ane.download"
 msgstr "Descargar codificador de Neural Engine"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.download_one"
-msgstr "Descargar uno"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/ModelStatCard.tsx
 msgid "models.card.downloading"
 msgstr "Descargando"
@@ -1533,9 +1622,19 @@ msgid "member_card.draft_aria"
 msgstr "Borrador de tarjeta de miembro de Glimpse"
 
 #. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.empty_state"
+msgstr "Arrastra archivos aquí para crear tu biblioteca."
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.custom_instructions.drag"
 msgstr "Arrastrar para cambiar el tamaño"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.dropzone"
+msgstr "Suelta archivos para importar"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -1543,14 +1642,14 @@ msgid "home.drag_import.title"
 msgstr "Suelta archivos para transcribir"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.duplicate"
+msgstr "Duplicar"
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.edit"
 msgstr "Editar"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode"
-msgstr "Modo de edición"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -1571,6 +1670,11 @@ msgstr "Correo electrónico"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.recent_empty_item"
 msgstr "Transcripción vacía"
+
+#. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.enable"
+msgstr "Activar"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -1833,7 +1937,7 @@ msgid "personalization.modal.snippets.full_list"
 msgstr "Lista completa de fragmentos"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.general"
 msgstr "General"
 
@@ -1895,6 +1999,11 @@ msgstr "Glimpse necesita estos para oírte y escribir por ti."
 #. js-lingui-explicit-id
 #: src/features/settings/components/AccountView.tsx
 msgid "settings.account.activate.placeholder"
+msgstr "GLIMPSE_…"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
@@ -1998,6 +2107,16 @@ msgid "settings.speech_model.endpoint.placeholder"
 msgstr "https://your-speech-endpoint.com"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.speak_at"
+msgstr "Hablo a"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.1"
+msgstr "Hablo a {wpm} palabras por minuto. Hablar le gana a escribir. Dictado con @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.confirm"
 msgstr "Importar"
@@ -2011,6 +2130,11 @@ msgstr "Importar"
 #: src/features/import/components/ImportStep.tsx
 msgid "import.cta"
 msgstr "Importar"
+
+#. js-lingui-explicit-id
+#: src/features/library/components/LibraryView.tsx
+msgid "library.view.description"
+msgstr "Importa archivos de audio y video para transcribirlos."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2056,11 +2180,6 @@ msgstr "Importando..."
 #: src/features/import/components/ImportStep.tsx
 msgid "import.importing"
 msgstr "Importando..."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.cloud.description"
-msgstr "En desarrollo"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -2235,11 +2354,6 @@ msgid "onboarding.done.license_active_title"
 msgstr "Licencia activa"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/AccountView.tsx
-msgid "settings.account.activate.input_aria"
-msgstr "Código de activación"
-
-#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.input_aria"
 msgstr "Clave de licencia"
@@ -2305,11 +2419,6 @@ msgid "settings.language_model.provider.local"
 msgstr "Local"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.section.local"
-msgstr "Local"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/SpeechModelPanel.tsx
 msgid "settings.speech_model.provider.local"
 msgstr "Local"
@@ -2317,11 +2426,6 @@ msgstr "Local"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.mode.local"
-msgstr "Local"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.label"
 msgstr "Local"
 
 #. js-lingui-explicit-id
@@ -2371,11 +2475,6 @@ msgid "settings.general.shortcuts.help_temporary"
 msgstr "Hace que un atajo sea temporal. No guardará audio, transcripción ni historial."
 
 #. js-lingui-explicit-id
-#: src/features/library/components/LibraryView.tsx
-msgid "library.view.description"
-msgstr "Importa archivos de audio y video para transcribirlos."
-
-#. js-lingui-explicit-id
 #: src/shared/ui/WindowControls.tsx
 msgid "window.controls.maximize"
 msgstr "Maximizar"
@@ -2407,8 +2506,8 @@ msgstr "Acceso al micrófono"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.permissions.answer"
-msgstr "Acceso al micrófono para grabar tu voz y acceso a Accesibilidad para insertar texto y leer texto seleccionado en el modo de edición. Glimpse solo usa estos permisos mientras estás dictando activamente."
+msgid "faq.permissions.answer.v2"
+msgstr "Acceso al micrófono para grabar tu voz y acceso de accesibilidad para insertar texto y leer el texto seleccionado cuando un atajo lo reescribe. Glimpse solo los usa mientras dictas."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2498,7 +2597,7 @@ msgid "native.menu.models"
 msgstr "Modelos"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.models"
 msgstr "Modelos"
 
@@ -2521,11 +2620,6 @@ msgstr "Más información"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.command_line.info_aria"
 msgstr "Más información sobre las herramientas de línea de comandos"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.info_aria"
-msgstr "Más información sobre el modo de edición"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -2566,6 +2660,11 @@ msgstr "Multilingüe"
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.multilingual"
 msgstr "Multilingüe"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.5"
+msgstr "Mi teclado está celoso. {wpm} palabras por minuto con @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2644,6 +2743,11 @@ msgid "updates.whats_new.no_changelog"
 msgstr "No hay registro de cambios disponible."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip_empty"
+msgstr "Sin dictado"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.option.no_download"
 msgstr "Sin descarga"
@@ -2684,19 +2788,14 @@ msgid "settings.local_api.model.none_held"
 msgstr "ningún modelo se mantiene en memoria entre solicitudes"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.no_model"
-msgstr "Ningún modelo instalado."
-
-#. js-lingui-explicit-id
 #: src/features/library/components/LibraryImportModal.tsx
 msgid "library.import.no_models"
-msgstr "No hay modelos locales instalados. Descarga un modelo en Ajustes -> Modelos antes de importar."
+msgstr "No hay modelos disponibles. Configura un proveedor remoto o descarga un modelo local en Ajustes -> Modelos antes de importar."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryRetranscribeModal.tsx
 msgid "library.retranscribe.no_models"
-msgstr "No hay modelos locales instalados. Descarga un modelo en Ajustes -> Modelos antes de retranscribir."
+msgstr "No hay modelos disponibles. Configura un proveedor remoto o descarga un modelo local en Ajustes -> Modelos antes de volver a transcribir."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -2774,7 +2873,7 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "Aún no hay etiquetas"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.dismiss"
 msgstr "No, gracias"
 
@@ -2854,6 +2953,11 @@ msgid "import.empty"
 msgstr "Nada que trasladar desde esta app."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.of_dictating"
+msgstr "dictando este año"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.permission.off"
 msgstr "desactivado"
@@ -2885,8 +2989,8 @@ msgstr "En el dispositivo"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
-msgid "faq.ai_writing.answer"
-msgstr "Solo si activas la redacción con IA y configuras un proveedor en Ajustes → Proveedores. Las funciones Cleanup, Edit Mode y Personalization enviarán entonces el texto correspondiente directamente a ese proveedor. Tu clave de API permanece almacenada localmente en Glimpse."
+msgid "faq.ai_writing.answer.v2"
+msgstr "Solo si configuras un modelo de escritura en Ajustes → Proveedores. Los atajos con Cleanup activado, y la personalización, envían entonces el texto correspondiente directamente a ese proveedor. Tu clave de API se guarda localmente en Glimpse. El audio sale de tu dispositivo solo si eliges un modelo de voz en la nube en Ajustes → Modelos."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -2902,6 +3006,11 @@ msgstr "Abrir ajustes del servidor API"
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.auto_launch"
 msgstr "Abrir al iniciar sesión"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.answer"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -2949,11 +3058,6 @@ msgid "native.menu.paste"
 msgstr "Pegar"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/AccountView.tsx
-msgid "settings.account.section.activate"
-msgstr "¿Ya lo compraste?"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.auto_pause_media.pause"
 msgstr "Pausar"
@@ -2999,11 +3103,6 @@ msgid "personalization.title"
 msgstr "Personalización"
 
 #. js-lingui-explicit-id
-#: src/features/license/components/MemberCard.tsx
-msgid "member_card.draft_idle"
-msgstr "Elige una licencia"
-
-#. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.play_audio"
 msgstr "Reproducir audio"
@@ -3012,6 +3111,11 @@ msgstr "Reproducir audio"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.port"
 msgstr "Puerto"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.post"
+msgstr "Publicar"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3075,21 +3179,6 @@ msgid "faq.privacy.link"
 msgstr "Política de privacidad"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.badge"
-msgstr "privado"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.processing"
-msgstr "Procesando"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.processing_mode"
-msgstr "Modo de procesamiento"
-
-#. js-lingui-explicit-id
 #: src/features/pill/PillOverlay.tsx
 msgid "pill.status.processing"
 msgstr "Procesando..."
@@ -3105,13 +3194,13 @@ msgid "settings.speech_model.provider"
 msgstr "Proveedor"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
+#: src/features/settings/settingsPanes.ts
 msgid "settings.modal.tab.providers"
 msgstr "Proveedores"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.providers_tab"
+msgid "settings.general.shortcuts.cleanup_locked.providers_link"
 msgstr "Proveedores"
 
 #. js-lingui-explicit-id
@@ -3138,6 +3227,16 @@ msgstr "Salir de {app}"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "Salir de {app}"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.answer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3262,6 +3361,11 @@ msgid "settings.about.data.delete_all_description"
 msgstr "Elimina grabaciones, transcripciones, modelos y ajustes, y luego sale"
 
 #. js-lingui-explicit-id
+#: src/features/personalization/components/PersonalizationView.tsx
+msgid "personalization.mode.rename"
+msgstr "Renombrar"
+
+#. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.rename"
 msgstr "Renombrar"
@@ -3326,24 +3430,14 @@ msgid "settings.local_api.api_key.lan_required"
 msgstr "Necesario al escuchar en la LAN"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/AboutTab.tsx
-msgid "settings.about.cli.locked_subtitle"
-msgstr "Requiere una licencia activa"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help_license_requirement"
-msgstr "Requiere una licencia de Glimpse."
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.auto_dictionary.unsupported_body"
 msgstr "requiere un modelo con compatibilidad con diccionario"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help_requirement"
-msgstr "Requiere un modelo de lenguaje activado y configurado en la pestaña Modelos."
+#: src/features/settings/components/tabs/AboutTab.tsx
+msgid "settings.about.cli.locked_subtitle"
+msgstr "Requiere una licencia activa"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -3476,29 +3570,24 @@ msgid "settings.local_api.status.running"
 msgstr "En ejecución"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.shortcuts.help_cleanup"
-msgstr "Ejecuta la limpieza solo para ese atajo."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.local.description"
-msgstr "Se ejecuta completamente en tu dispositivo"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.restart_onboarding_description"
 msgstr "volver a ejecutar el asistente de configuración"
 
 #. js-lingui-explicit-id
-#: src/shared/ui/ModelPickerModal.tsx
-msgid "model_picker.ane.info"
-msgstr "Añade un codificador Core ML que se ejecuta en el Apple Neural Engine para una transcripción más rápida y eficiente energéticamente. La primera carga tarda más mientras macOS lo optimiza para tu chip."
+#: src/features/license/components/ShareCardModal.tsx
+msgid "settings.stats.share.save"
+msgstr "Guardar"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.save_name"
 msgstr "Guardar nombre"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.saved"
+msgstr "ahorrado"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
@@ -3651,11 +3740,6 @@ msgid "settings.speech_model.provider.select"
 msgstr "Seleccionar proveedor..."
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.help"
-msgstr "Selecciona texto en cualquier app y di un comando como \"make this formal\" o \"fix my grammar\"."
-
-#. js-lingui-explicit-id
 #: src/shared/ui/Dropdown.tsx
 msgid "dropdown.placeholder"
 msgstr "Seleccionar..."
@@ -3681,9 +3765,9 @@ msgid "native.menu.services"
 msgstr "Servicios"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.configure_prefix"
-msgstr "Configurar la escritura con IA en"
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud.set_up"
+msgstr "Configurar"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -3691,19 +3775,14 @@ msgid "home.sidebar.settings"
 msgstr "Ajustes"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.dialog_label"
-msgstr "Ajustes"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SettingsModal.tsx
-msgid "settings.modal.title"
-msgstr "Ajustes"
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.setup"
 msgstr "Configuración"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.share.open"
+msgstr "Compartir"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -3801,7 +3880,7 @@ msgid "onboarding.done.recap.shortcut"
 msgstr "Atajo inteligente"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.title"
 msgstr "¿Algunas preguntas sobre cómo usas Glimpse?"
 
@@ -3834,6 +3913,11 @@ msgstr "Voz"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.category.standard"
 msgstr "Estándar"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3871,6 +3955,11 @@ msgid "onboarding.download.starting"
 msgstr "iniciando..."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.title"
+msgstr "Estadísticas"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.stop"
 msgstr "Detener"
@@ -3889,6 +3978,11 @@ msgstr "Detener transcripción"
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.status.stopped"
 msgstr "Detenido"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.3"
+msgstr "Dejé de escribir y empecé a hablar. {wpm} palabras por minuto. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -4001,6 +4095,11 @@ msgid "settings.app.text_size.label"
 msgstr "Tamaño de texto"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.than_typing"
+msgstr "que escribir"
+
+#. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx
 msgid "member_card.edition_blurb_contributor"
 msgstr "Gracias por contribuir. Hasta 5 dispositivos."
@@ -4009,6 +4108,16 @@ msgstr "Gracias por contribuir. Hasta 5 dispositivos."
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.duplicate"
 msgstr "Ese dominio ya está añadido"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/AccountView.tsx
+msgid "settings.account.activate.discount_code_error"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/LicenseModal.tsx
+msgid "onboarding.license.discount_code_error"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
@@ -4072,6 +4181,16 @@ msgid "library.modal.delete_confirm.description"
 msgstr "Esto elimina la transcripción y el audio de tu biblioteca."
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.through"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.saved"
+msgstr "Tiempo ahorrado"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.include_timestamps"
 msgstr "Marcas de tiempo"
@@ -4085,16 +4204,6 @@ msgstr "Marcas de tiempo"
 #: src/features/library/components/LibraryDetail.tsx
 msgid "library.modal.timestamps"
 msgstr "Marcas de tiempo"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.models_suffix"
-msgstr "para usar el Modo de edición."
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.to_use_local"
-msgstr "para usar local."
 
 #. js-lingui-explicit-id
 #: src/features/transcriptions/components/TranscriptionList.tsx
@@ -4132,11 +4241,6 @@ msgid "settings.app.auto_update.toggle_aria"
 msgstr "Activar/desactivar la actualización automática"
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.toggle_aria"
-msgstr "Activar/desactivar modo de edición"
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.fullscreen"
 msgstr "Activar/desactivar pantalla completa"
@@ -4165,11 +4269,6 @@ msgstr "Activar/desactivar analíticas de uso"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.total"
 msgstr "Total"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/SpeechModelPanel.tsx
-msgid "settings.speech_model.description"
-msgstr "Transcribe grabaciones mediante APIs en la nube o autoalojadas compatibles con OpenAI."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4226,11 +4325,6 @@ msgstr "Transcripciones"
 msgid "settings.about.data.verbatim_text_hint"
 msgstr "Transcripciones antes de la limpieza"
 
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/GeneralTab.tsx
-msgid "settings.general.edit_mode.body"
-msgstr "transformar el texto seleccionado con la voz"
-
 #: src/features/settings/components/AccountView.tsx
 msgid "Trial · {trialDaysRemaining} of {TRIAL_TOTAL_DAYS} days left"
 msgstr "Prueba · Quedan {trialDaysRemaining} de {TRIAL_TOTAL_DAYS} días"
@@ -4244,6 +4338,11 @@ msgstr "Prueba · Queda 1 día"
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_enabled"
 msgstr "Activa Apple Intelligence en Configuración del sistema para usar esto."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.7"
+msgstr "Pienso más rápido de lo que escribo. {wpm} palabras por minuto. @try_glimpse_app"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4277,8 +4376,8 @@ msgstr "Desbloquea limpieza con IA, edición de voz, personalidades por app, tra
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_adds"
-msgstr "Desbloquea Limpieza, Modo edición, Personalidades, Transcripción de archivos y más."
+msgid "onboarding.done.license_adds.v2"
+msgstr "Desbloquea Cleanup, personalidades, transcripción de archivos y más."
 
 #. js-lingui-explicit-id
 #: src/features/settings/useSettingsForm.ts
@@ -4303,7 +4402,7 @@ msgstr "Formato de archivo no compatible."
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.language_info.active_model"
-msgstr "La lista de idiomas se filtra según el modelo de transcripción activo."
+msgstr "Los idiomas no compatibles no están disponibles en tu modelo activo. Cambia a un modelo compatible para usarlos."
 
 #. js-lingui-explicit-id
 #: src/features/updates/components/UpdateChecker.tsx
@@ -4367,18 +4466,13 @@ msgstr "Usar las transcripciones originales antes de la limpieza"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
-msgid "settings.language_model.toggle"
-msgstr "Activar o desactivar funciones de IA"
+msgid "settings.language_model.subtitle"
+msgstr "Lo usan los atajos con el modelo de escritura activado y la personalización."
 
 #. js-lingui-explicit-id
-#: src/features/settings/components/SpeechModelPanel.tsx
-msgid "settings.speech_model.toggle"
-msgstr "Usar este proveedor para voz a texto"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/LanguageModelPanel.tsx
-msgid "settings.language_model.description"
-msgstr "Compartido por Cleanup, Modo de edición y Personalización."
+#: src/features/settings/components/tabs/GeneralTab.tsx
+msgid "settings.general.shortcuts.help_writing"
+msgstr "Usa el modelo de escritura solo para ese atajo. Limpia lo que dictas y reescribe el texto seleccionado cuando dices una instrucción."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -4417,6 +4511,11 @@ msgid "native.toast.view_history"
 msgstr "Ver historial"
 
 #. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.post.10"
+msgstr "Mi voz es el teclado más rápido que tengo. {wpm} palabras por minuto. @try_glimpse_app"
+
+#. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
 msgid "import.title"
 msgstr "¿Quieres traer tu configuración?"
@@ -4450,6 +4549,21 @@ msgstr "Sitios web"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.websites"
 msgstr "Sitios web"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.tooltip.week_of"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.mode.weekly"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/license/components/ActivityGrid.tsx
+msgid "settings.stats.activity_grid.aria_weekly"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -4500,6 +4614,21 @@ msgstr "Marcas de tiempo a nivel de palabra"
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.capability.timestamps"
 msgstr "Marcas de tiempo a nivel de palabra"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.words"
+msgstr "palabras"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.card.words_a_minute"
+msgstr "palabras por minuto"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/DictationStatsPanel.tsx
+msgid "settings.stats.wpm"
+msgstr "Palabras por minuto"
 
 #. js-lingui-explicit-id
 #: src/features/license/components/MemberCard.tsx

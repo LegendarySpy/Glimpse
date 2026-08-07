@@ -29,7 +29,7 @@ pub enum RecordingRejectionReason {
     EmptyBuffer,
 }
 
-const SPECTRUM_SIZE: usize = 512;
+pub(crate) const SPECTRUM_SIZE: usize = 512;
 const ARM_SIGNAL_FLOOR: f32 = 0.01;
 
 struct AudioSpectrumState {

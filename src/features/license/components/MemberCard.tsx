@@ -198,7 +198,7 @@ const MemberCardInner = ({
 
   const idlePrompt = t({
     id: "member_card.draft_idle",
-    message: "Pick a license",
+    message: "Buy a license",
   });
 
   const coverageBase = editionBlurb;
@@ -694,35 +694,19 @@ const TierOption = ({
         id: "member_card.tier_purchase_aria",
         message: `Purchase ${label} for ${price}`,
       })}
-      className="group flex min-w-0 flex-1 items-center justify-between gap-1.5 border-0 bg-transparent py-1.5 text-left disabled:opacity-50"
+      className="flex min-w-0 flex-1 items-center justify-between gap-1.5 border-0 bg-transparent py-1.5 text-left disabled:opacity-50"
       style={{ color: highlighted ? accent.fg : palette.textPrimary }}
     >
-      <span className="flex min-w-0 items-center gap-2">
-        <span
-          aria-hidden="true"
-          className="shrink-0"
-          style={{
-            width: "8px",
-            height: "8px",
-            border: `1px solid ${highlighted ? accent.fg : palette.textDisabled}`,
-            backgroundColor: highlighted ? accent.fg : "transparent",
-            opacity: highlighted ? 0.88 : 0.45,
-          }}
-        />
-        <span
-          className="truncate font-mono uppercase tracking-[0.05em]"
-          style={{
-            fontSize: "10px",
-            fontWeight: 600,
-            textDecoration: highlighted ? "underline" : "none",
-            textUnderlineOffset: "3px",
-            textDecorationColor: highlighted
-              ? `color-mix(in srgb, ${accent.fg} 70%, transparent)`
-              : undefined,
-          }}
-        >
-          {pickerLabel}
-        </span>
+      <span
+        className="min-w-0 truncate font-mono uppercase tracking-[0.05em] underline"
+        style={{
+          fontSize: "10px",
+          fontWeight: 600,
+          textUnderlineOffset: "3px",
+          textDecorationColor: `color-mix(in srgb, ${highlighted ? accent.fg : palette.textPrimary} ${highlighted ? 70 : 30}%, transparent)`,
+        }}
+      >
+        {pickerLabel}
       </span>
       {opening ? (
         <Loader2
@@ -733,8 +717,8 @@ const TierOption = ({
       ) : (
         <ArrowUpRight
           size={11}
-          className="shrink-0 transition-opacity group-hover:opacity-100"
-          style={{ color: accent.fg, opacity: highlighted ? 0.85 : 0.45 }}
+          className="shrink-0 transition-opacity"
+          style={{ color: accent.fg, opacity: highlighted ? 1 : 0.8 }}
           aria-hidden="true"
         />
       )}

@@ -40,7 +40,6 @@ const KEY_AUTO_DICTIONARY_ENABLED: &str = "auto_dictionary_enabled";
 const KEY_AUTO_DICTIONARY_IGNORED: &str = "auto_dictionary_ignored";
 const KEY_REPLACEMENTS: &str = "replacements";
 const KEY_PERSONALITIES: &str = "personalities";
-const KEY_EDIT_MODE_ENABLED: &str = "edit_mode_enabled";
 const KEY_MEDIA_ACTION: &str = "media_action";
 const LEGACY_KEY_MEDIA_CONTROL_ENABLED: &str = "media_control_enabled";
 const KEY_AUTO_UPDATE_ENABLED: &str = "auto_update_enabled";
@@ -51,7 +50,7 @@ const KEY_AUTO_DELETE_DURATION: &str = "auto_delete_duration";
 const LEGACY_KEY_RECORDING_PRUNE_POLICY: &str = "recording_prune_policy";
 const LEGACY_KEY_TRANSCRIPTION_PRUNE_POLICY: &str = "transcription_prune_policy";
 const KEY_ANALYTICS_ENABLED: &str = "analytics_enabled";
-const KEY_ANALYTICS_INSTALL_ID: &str = "analytics_install_id";
+pub(crate) const KEY_ANALYTICS_INSTALL_ID: &str = "analytics_install_id";
 const KEY_LOCAL_API_KEY: &str = "local_api_key";
 const KEY_LOCAL_API_PORT: &str = "local_api_port";
 const KEY_LOCAL_API_MODEL: &str = "local_api_model";
@@ -95,6 +94,16 @@ pub struct ShortcutBindings {
     pub hold: Vec<ShortcutBinding>,
     #[serde(default)]
     pub toggle: Vec<ShortcutBinding>,
+}
+
+impl ShortcutBindings {
+    pub fn any_cleanup_enabled(&self) -> bool {
+        self.smart
+            .iter()
+            .chain(self.hold.iter())
+            .chain(self.toggle.iter())
+            .any(|binding| binding.cleanup_enabled)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -163,8 +172,6 @@ pub struct UserSettings {
     pub replacements: Vec<Replacement>,
     #[serde(default = "default_personalities")]
     pub personalities: Vec<Personality>,
-    #[serde(default)]
-    pub edit_mode_enabled: bool,
     #[serde(default)]
     pub media_action: MediaAction,
     #[serde(default)]
@@ -237,26 +244,6 @@ pub fn default_shortcut_bindings() -> ShortcutBindings {
             shortcut: default_toggle_shortcut(),
             temporary: false,
             cleanup_enabled: false,
-        }],
-    }
-}
-
-pub fn shortcut_bindings_from_legacy(settings: &UserSettings) -> ShortcutBindings {
-    ShortcutBindings {
-        smart: vec![ShortcutBinding {
-            shortcut: settings.smart_shortcut.clone(),
-            temporary: false,
-            cleanup_enabled: settings.cleanup_enabled,
-        }],
-        hold: vec![ShortcutBinding {
-            shortcut: settings.hold_shortcut.clone(),
-            temporary: false,
-            cleanup_enabled: settings.cleanup_enabled,
-        }],
-        toggle: vec![ShortcutBinding {
-            shortcut: settings.toggle_shortcut.clone(),
-            temporary: false,
-            cleanup_enabled: settings.cleanup_enabled,
         }],
     }
 }
@@ -470,9 +457,8 @@ impl Default for UserSettings {
             auto_dictionary_ignored: Vec::new(),
             replacements: Vec::new(),
             personalities: default_personalities(),
-            edit_mode_enabled: false,
             media_action: MediaAction::Off,
-            auto_update_enabled: false,
+            auto_update_enabled: true,
             auto_launch_enabled: false,
             start_in_background: true,
             auto_delete_target: default_auto_delete_target(),
@@ -547,19 +533,11 @@ pub enum RecordingPrunePolicy {
     Day,
     Week,
     Month,
-    ThreeMonths,
     Year,
 }
 
 fn default_auto_delete_duration() -> RecordingPrunePolicy {
     RecordingPrunePolicy::Never
-}
-
-pub fn canonicalize_recording_prune_policy(policy: RecordingPrunePolicy) -> RecordingPrunePolicy {
-    match policy {
-        RecordingPrunePolicy::ThreeMonths => RecordingPrunePolicy::Year,
-        policy => policy,
-    }
 }
 
 pub(crate) fn recording_prune_cutoff(
@@ -572,7 +550,6 @@ pub(crate) fn recording_prune_cutoff(
         RecordingPrunePolicy::Day => now.checked_sub_days(Days::new(1)),
         RecordingPrunePolicy::Week => now.checked_sub_days(Days::new(7)),
         RecordingPrunePolicy::Month => now.checked_sub_months(Months::new(1)),
-        RecordingPrunePolicy::ThreeMonths => now.checked_sub_months(Months::new(3)),
         RecordingPrunePolicy::Year => now.checked_sub_months(Months::new(12)),
     }
 }
@@ -610,13 +587,13 @@ fn migrate_auto_delete_from_legacy(
 ) {
     if legacy_transcription != RecordingPrunePolicy::Never {
         settings.auto_delete_target = AutoDeleteTarget::Transcripts;
-        settings.auto_delete_duration = canonicalize_recording_prune_policy(legacy_transcription);
+        settings.auto_delete_duration = legacy_transcription;
         return;
     }
 
     if legacy_recording != RecordingPrunePolicy::Never {
         settings.auto_delete_target = AutoDeleteTarget::Audio;
-        settings.auto_delete_duration = canonicalize_recording_prune_policy(legacy_recording);
+        settings.auto_delete_duration = legacy_recording;
     }
 }
 
@@ -782,7 +759,6 @@ impl SettingsStore {
         let encrypted_remote_speech_api_key: String;
         let encrypted_local_api_key: String;
         let theme_mode_exists: bool;
-        let shortcut_bindings_exists: bool;
         {
             let conn = self.conn.lock();
 
@@ -803,10 +779,9 @@ impl SettingsStore {
                 self.read_value(&conn, KEY_TOGGLE_SHORTCUT, settings.toggle_shortcut.clone())?;
             settings.toggle_enabled =
                 self.read_value(&conn, KEY_TOGGLE_ENABLED, settings.toggle_enabled)?;
-            let shortcut_bindings =
-                self.read_optional_value::<ShortcutBindings>(&conn, KEY_SHORTCUT_BINDINGS)?;
-            shortcut_bindings_exists = shortcut_bindings.is_some();
-            if let Some(shortcut_bindings) = shortcut_bindings {
+            if let Some(shortcut_bindings) =
+                self.read_optional_value::<ShortcutBindings>(&conn, KEY_SHORTCUT_BINDINGS)?
+            {
                 settings.shortcut_bindings = shortcut_bindings;
             }
             settings.transcription_mode = self.read_value(
@@ -883,8 +858,6 @@ impl SettingsStore {
                 self.read_value(&conn, KEY_REPLACEMENTS, settings.replacements.clone())?;
             settings.personalities =
                 self.read_value(&conn, KEY_PERSONALITIES, settings.personalities.clone())?;
-            settings.edit_mode_enabled =
-                self.read_value(&conn, KEY_EDIT_MODE_ENABLED, settings.edit_mode_enabled)?;
             if let Some(media_action) =
                 self.read_optional_value::<MediaAction>(&conn, KEY_MEDIA_ACTION)?
             {
@@ -953,97 +926,68 @@ impl SettingsStore {
         }
 
         if !encrypted_llm_api_key.is_empty() {
-            let key_looks_encrypted = crate::crypto::looks_encrypted(&encrypted_llm_api_key);
             if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
                 match crate::crypto::decrypt(&encrypted_llm_api_key, &hardware_uuid) {
                     Ok(decrypted) => settings.llm_api_key = decrypted,
                     Err(e) => {
-                        if !key_looks_encrypted {
-                            settings.llm_api_key = encrypted_llm_api_key;
-                        } else {
-                            tracing::error!(
-                                "Error: Failed to decrypt API key: {}. Preserving encrypted value.",
-                                e
-                            );
-                            settings.llm_api_key = String::new();
-                            llm_api_key_ciphertext = Some(encrypted_llm_api_key);
-                        }
+                        tracing::error!(
+                            "Error: Failed to decrypt API key: {}. Preserving encrypted value.",
+                            e
+                        );
+                        settings.llm_api_key = String::new();
+                        llm_api_key_ciphertext = Some(encrypted_llm_api_key);
                     }
                 }
             } else {
                 tracing::error!("Warning: Could not get hardware UUID, preserving stored API key");
-                if key_looks_encrypted {
-                    settings.llm_api_key = String::new();
-                    llm_api_key_ciphertext = Some(encrypted_llm_api_key);
-                } else {
-                    settings.llm_api_key = encrypted_llm_api_key;
-                }
+                settings.llm_api_key = String::new();
+                llm_api_key_ciphertext = Some(encrypted_llm_api_key);
             }
         }
         *self.llm_api_key_ciphertext.lock() = llm_api_key_ciphertext;
 
         if !encrypted_remote_speech_api_key.is_empty() {
-            let key_looks_encrypted =
-                crate::crypto::looks_encrypted(&encrypted_remote_speech_api_key);
             if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
                 match crate::crypto::decrypt(&encrypted_remote_speech_api_key, &hardware_uuid) {
                     Ok(decrypted) => settings.remote_speech_api_key = decrypted,
                     Err(e) => {
-                        if !key_looks_encrypted {
-                            settings.remote_speech_api_key = encrypted_remote_speech_api_key;
-                        } else {
-                            tracing::error!(
-                                "Error: Failed to decrypt remote speech API key: {}. Preserving encrypted value.",
-                                e
-                            );
-                            settings.remote_speech_api_key = String::new();
-                            remote_speech_api_key_ciphertext =
-                                Some(encrypted_remote_speech_api_key);
-                        }
+                        tracing::error!(
+                            "Error: Failed to decrypt remote speech API key: {}. Preserving encrypted value.",
+                            e
+                        );
+                        settings.remote_speech_api_key = String::new();
+                        remote_speech_api_key_ciphertext = Some(encrypted_remote_speech_api_key);
                     }
                 }
             } else {
                 tracing::error!(
                     "Warning: Could not get hardware UUID, preserving stored remote speech API key"
                 );
-                if key_looks_encrypted {
-                    settings.remote_speech_api_key = String::new();
-                    remote_speech_api_key_ciphertext = Some(encrypted_remote_speech_api_key);
-                } else {
-                    settings.remote_speech_api_key = encrypted_remote_speech_api_key;
-                }
+                settings.remote_speech_api_key = String::new();
+                remote_speech_api_key_ciphertext = Some(encrypted_remote_speech_api_key);
             }
         }
         *self.remote_speech_api_key_ciphertext.lock() = remote_speech_api_key_ciphertext;
 
         if !encrypted_local_api_key.is_empty() {
-            let key_looks_encrypted = crate::crypto::looks_encrypted(&encrypted_local_api_key);
             if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
                 match crate::crypto::decrypt(&encrypted_local_api_key, &hardware_uuid) {
                     Ok(decrypted) => settings.local_api_key = decrypted,
                     Err(e) => {
-                        if !key_looks_encrypted {
-                            settings.local_api_key = encrypted_local_api_key;
-                        } else {
-                            tracing::error!(
-                                "Error: Failed to decrypt Local API key: {}. Preserving encrypted value.",
-                                e
-                            );
-                            settings.local_api_key = String::new();
-                            local_api_key_ciphertext = Some(encrypted_local_api_key);
-                        }
+                        tracing::error!(
+                            "Error: Failed to decrypt Local API key: {}. Preserving encrypted value.",
+                            e
+                        );
+                        settings.local_api_key = String::new();
+                        local_api_key_ciphertext = Some(encrypted_local_api_key);
                     }
                 }
             } else {
                 tracing::error!(
                     "Warning: Could not get hardware UUID, preserving stored Local API key"
                 );
-                if key_looks_encrypted {
-                    settings.local_api_key = String::new();
-                    local_api_key_ciphertext = Some(encrypted_local_api_key);
-                } else {
-                    settings.local_api_key = encrypted_local_api_key;
-                }
+                settings.local_api_key = String::new();
+                local_api_key_ciphertext = Some(encrypted_local_api_key);
             }
         }
         *self.local_api_key_ciphertext.lock() = local_api_key_ciphertext;
@@ -1064,27 +1008,6 @@ impl SettingsStore {
             should_persist = true;
         }
 
-        if !shortcut_bindings_exists {
-            settings.shortcut_bindings = shortcut_bindings_from_legacy(&settings);
-            should_persist = true;
-        }
-
-        if settings.cleanup_enabled {
-            if !shortcut_bindings_exists {
-                for binding in settings
-                    .shortcut_bindings
-                    .smart
-                    .iter_mut()
-                    .chain(settings.shortcut_bindings.hold.iter_mut())
-                    .chain(settings.shortcut_bindings.toggle.iter_mut())
-                {
-                    binding.cleanup_enabled = true;
-                }
-            }
-            settings.cleanup_enabled = false;
-            should_persist = true;
-        }
-
         sync_legacy_shortcuts_from_bindings(&mut settings);
 
         if crate::model_manager::definition(&settings.local_model).is_none() {
@@ -1094,13 +1017,6 @@ impl SettingsStore {
 
         if matches!(settings.transcription_mode, TranscriptionMode::Cloud) {
             settings.transcription_mode = TranscriptionMode::Local;
-            should_persist = true;
-        }
-
-        let canonical_auto_delete_duration =
-            canonicalize_recording_prune_policy(settings.auto_delete_duration);
-        if settings.auto_delete_duration != canonical_auto_delete_duration {
-            settings.auto_delete_duration = canonical_auto_delete_duration;
             should_persist = true;
         }
 
@@ -1277,7 +1193,6 @@ impl SettingsStore {
         )?;
         self.write_value(&conn, KEY_REPLACEMENTS, &settings.replacements)?;
         self.write_value(&conn, KEY_PERSONALITIES, &settings.personalities)?;
-        self.write_value(&conn, KEY_EDIT_MODE_ENABLED, &settings.edit_mode_enabled)?;
         self.write_value(&conn, KEY_MEDIA_ACTION, &settings.media_action)?;
         self.write_value(
             &conn,
@@ -1413,17 +1328,6 @@ fn platform_config_dir() -> Result<PathBuf> {
     env::var_os("APPDATA")
         .map(PathBuf::from)
         .context("Unable to resolve roaming app data directory")
-}
-
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn platform_config_dir() -> Result<PathBuf> {
-    if let Some(config_home) = env::var_os("XDG_CONFIG_HOME") {
-        return Ok(PathBuf::from(config_home));
-    }
-    let home = env::var_os("HOME")
-        .map(PathBuf::from)
-        .context("Unable to resolve home directory")?;
-    Ok(home.join(".config"))
 }
 
 fn settings_db_path(mut dir: PathBuf) -> PathBuf {

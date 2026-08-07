@@ -9,6 +9,8 @@ export const settingsKeys = {
   devices: () => ["inputDevices"] as const,
 };
 
+const SETTINGS_STALE_TIME = 5 * 60 * 1000;
+
 export function useSettings<TSelect = StoredSettings>(
   select?: (data: StoredSettings) => TSelect,
   enabled: boolean = true,
@@ -18,6 +20,7 @@ export function useSettings<TSelect = StoredSettings>(
     queryFn: settingsApi.getSettings,
     select,
     enabled,
+    staleTime: SETTINGS_STALE_TIME,
   });
 }
 

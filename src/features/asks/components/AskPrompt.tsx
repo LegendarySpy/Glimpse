@@ -5,17 +5,17 @@ import { ArrowUpRight } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import * as surveyApi from "../api";
-import { surveyKeys, useSurveyPrompt } from "../queries";
+import * as asksApi from "../api";
+import { askKeys, useAskPrompt } from "../queries";
 
-type SurveyPromptProps = {
+type AskPromptProps = {
   active: boolean;
 };
 
-export default function SurveyPrompt({ active }: SurveyPromptProps) {
+export default function AskPrompt({ active }: AskPromptProps) {
   const { t } = useLingui();
   const queryClient = useQueryClient();
-  const { data } = useSurveyPrompt(active);
+  const { data } = useAskPrompt(active);
   const [resolving, setResolving] = useState(false);
   const seenRef = useRef(false);
 
@@ -23,9 +23,9 @@ export default function SurveyPrompt({ active }: SurveyPromptProps) {
     let cancelled = false;
     let unlisten: UnlistenFn | undefined;
 
-    listen("survey:eligible", () => {
+    listen("ask:eligible", () => {
       if (!cancelled) {
-        void queryClient.invalidateQueries({ queryKey: surveyKeys.prompt() });
+        void queryClient.invalidateQueries({ queryKey: askKeys.prompt() });
       }
     })
       .then((fn) => {
@@ -33,7 +33,7 @@ export default function SurveyPrompt({ active }: SurveyPromptProps) {
         else unlisten = fn;
       })
       .catch((err) =>
-        console.error("Failed to subscribe to survey:eligible", err),
+        console.error("Failed to subscribe to ask:eligible", err),
       );
 
     return () => {
@@ -43,7 +43,7 @@ export default function SurveyPrompt({ active }: SurveyPromptProps) {
   }, [queryClient]);
 
   useEffect(() => {
-    if (!active || !data?.show || seenRef.current) return;
+    if (!active || !data?.kind || seenRef.current) return;
 
     let cancelled = false;
     const window = getCurrentWindow();
@@ -53,7 +53,7 @@ export default function SurveyPrompt({ active }: SurveyPromptProps) {
       if (document.visibilityState !== "visible") return;
       if (!(await window.isVisible().catch(() => false))) return;
       seenRef.current = true;
-      void surveyApi.markSurveyPromptSeen().catch(() => {
+      void asksApi.markAskPromptSeen().catch(() => {
         seenRef.current = false;
       });
     };
@@ -68,14 +68,14 @@ export default function SurveyPrompt({ active }: SurveyPromptProps) {
       document.removeEventListener("visibilitychange", onVisibility);
       void unlistenFocus.then((fn) => fn());
     };
-  }, [active, data?.show]);
+  }, [active, data?.kind]);
 
   const resolve = useCallback(
-    async (action: surveyApi.SurveyAction) => {
+    async (action: asksApi.AskAction) => {
       setResolving(true);
       try {
-        await surveyApi.resolveSurveyPrompt(action);
-        queryClient.setQueryData(surveyKeys.prompt(), { show: false });
+        await asksApi.resolveAskPrompt(action);
+        queryClient.setQueryData(askKeys.prompt(), { kind: null });
       } catch (err) {
         console.error(err);
         setResolving(false);
@@ -84,9 +84,39 @@ export default function SurveyPrompt({ active }: SurveyPromptProps) {
     [queryClient],
   );
 
+  const askCopy = () => {
+    switch (data?.kind) {
+      case "review":
+        return {
+          title: t({
+            id: "home.ask.review.title",
+            message: "Rate Glimpse in the Microsoft Store?",
+          }),
+          accept: t({ id: "home.ask.review.answer", message: "Rate" }),
+        };
+      case "star":
+        return {
+          title: t({
+            id: "home.ask.star.title",
+            message: "Star Glimpse on GitHub?",
+          }),
+          accept: t({ id: "home.ask.star.answer", message: "Open GitHub" }),
+        };
+      default:
+        return {
+          title: t({
+            id: "home.survey.title",
+            message: "Some questions about how you use Glimpse?",
+          }),
+          accept: t({ id: "home.survey.answer", message: "Answer" }),
+        };
+    }
+  };
+  const { title, accept } = askCopy();
+
   return (
     <AnimatePresence initial={false}>
-      {data?.show && (
+      {data?.kind && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -94,19 +124,14 @@ export default function SurveyPrompt({ active }: SurveyPromptProps) {
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="mt-2 shrink-0 overflow-hidden ui-text-body-sm ui-color-quiet"
         >
-          {t({
-            id: "home.survey.title",
-            message: "Some questions about how you use Glimpse?",
-          })}{" "}
+          {title}{" "}
           <button
             type="button"
             disabled={resolving}
             onClick={() => void resolve("answer")}
             className="ui-color-cloud transition-colors hover:text-cloud-hover disabled:opacity-50"
           >
-            <span className="underline underline-offset-2">
-              {t({ id: "home.survey.answer", message: "Answer" })}
-            </span>
+            <span className="underline underline-offset-2">{accept}</span>
             <ArrowUpRight size={11} aria-hidden="true" className="inline" />
           </button>
           <span aria-hidden="true" className="mx-1.5">

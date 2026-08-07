@@ -58,16 +58,6 @@ fn platform_start(
     windows::start(tx, blocking_hotkeys)
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn platform_start(
-    _tx: crossbeam_channel::Sender<KeyEvent>,
-    _blocking_hotkeys: BlockingHotkeys,
-) -> Result<PlatformShutdown> {
-    Err(anyhow!(
-        "Global shortcuts are supported on macOS and Windows only"
-    ))
-}
-
 pub(crate) struct PlatformShutdown {
     stop: Box<dyn FnOnce() + Send + 'static>,
     join_handle: Option<JoinHandle<()>>,
@@ -408,6 +398,45 @@ pub(crate) enum Key {
     MouseMiddle,
     MouseBack,
     MouseForward,
+}
+
+impl Key {
+    // macOS reports these as function keys whether or not Fn is held, so on them the flag
+    // says nothing about the physical key and cannot be part of a chord.
+    pub(crate) fn is_function_key(self) -> bool {
+        matches!(
+            self,
+            Key::LeftArrow
+                | Key::RightArrow
+                | Key::UpArrow
+                | Key::DownArrow
+                | Key::Home
+                | Key::End
+                | Key::PageUp
+                | Key::PageDown
+                | Key::ForwardDelete
+                | Key::F1
+                | Key::F2
+                | Key::F3
+                | Key::F4
+                | Key::F5
+                | Key::F6
+                | Key::F7
+                | Key::F8
+                | Key::F9
+                | Key::F10
+                | Key::F11
+                | Key::F12
+                | Key::F13
+                | Key::F14
+                | Key::F15
+                | Key::F16
+                | Key::F17
+                | Key::F18
+                | Key::F19
+                | Key::F20
+        )
+    }
 }
 
 impl fmt::Display for Key {

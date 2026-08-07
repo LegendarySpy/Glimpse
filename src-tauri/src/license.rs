@@ -9,15 +9,19 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter};
 
-use crate::{AppRuntime, EVENT_LICENSE_CHECKOUT_RETURNED, settings::SettingsStore, tray};
+use crate::{
+    AppRuntime, EVENT_LICENSE_CHECKOUT_RETURNED,
+    settings::{KEY_ANALYTICS_INSTALL_ID, SettingsStore},
+    tray,
+};
 
 const KEY_LICENSE_KEY: &str = "license_key";
 const KEY_LICENSE_ACTIVATION_ID: &str = "license_activation_id";
 const KEY_LICENSE_GRANT: &str = "license_grant";
 
 const KEY_LICENSE_TRIAL_STARTED_AT: &str = "license_trial_started_at";
+const KEY_ANALYTICS_TRIAL_EXPIRED_REPORTED: &str = "analytics_trial_expired_reported";
 const KEY_LICENSE_TRIAL_RECORD: &str = "license_trial_record";
-const KEY_ANALYTICS_INSTALL_ID: &str = "analytics_install_id";
 const TRIAL_SEAL_PEPPER: &str = "glimpse_trial_v1";
 
 const GRANT_STATUS_GRANTED: &str = "granted";
@@ -75,6 +79,28 @@ pub enum LicenseStatus {
     Active,
     Expired,
     Invalid,
+}
+
+impl LicenseStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Trial => "trial",
+            Self::Active => "active",
+            Self::Expired => "expired",
+            Self::Invalid => "invalid",
+        }
+    }
+}
+
+impl LicenseEdition {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Personal => "personal",
+            Self::Commercial => "commercial",
+            Self::Founder => "founder",
+            Self::Contributor => "contributor",
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -940,6 +966,25 @@ fn read_optional_string(store: &SettingsStore, key: &str) -> Result<Option<Strin
             (!trimmed.is_empty()).then_some(trimmed)
         })
         .map_err(|err| err.to_string())
+}
+
+/// True only the first time the trial is found run out with no license ever
+/// activated, so the expiry is reported once per install rather than per launch.
+pub fn take_trial_expiry_report(store: &SettingsStore, state: &LicenseState) -> bool {
+    let lapsed_trial = !state.trial_active
+        && state.status == LicenseStatus::Expired
+        && state.display_key.is_none();
+    if !lapsed_trial {
+        return false;
+    }
+    if read_optional_string(store, KEY_ANALYTICS_TRIAL_EXPIRED_REPORTED)
+        .ok()
+        .flatten()
+        .is_some()
+    {
+        return false;
+    }
+    write_string(store, KEY_ANALYTICS_TRIAL_EXPIRED_REPORTED, "1").is_ok()
 }
 
 fn write_string(store: &SettingsStore, key: &str, value: &str) -> Result<(), String> {

@@ -184,7 +184,7 @@ const LocalApiTab = ({
                 aria-hidden="true"
               />
             )}
-            <h1 className="ui-text-title-lg font-medium ui-color-primary">
+            <h2 className="ui-text-title-lg font-medium ui-color-primary">
               {running
                 ? t({
                     id: "settings.local_api.status.running",
@@ -194,7 +194,7 @@ const LocalApiTab = ({
                     id: "settings.local_api.status.stopped",
                     message: "Stopped",
                   })}
-            </h1>
+            </h2>
           </div>
           <button
             className="mt-1 ui-text-body-sm ui-color-muted hover:ui-color-primary transition-colors inline-flex items-center gap-1.5 group"

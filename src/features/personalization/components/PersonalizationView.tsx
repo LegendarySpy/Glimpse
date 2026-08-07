@@ -1,8 +1,16 @@
 import { useLingui } from "@lingui/react/macro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus } from "@phosphor-icons/react";
+import {
+  CopySimple,
+  Eye,
+  EyeSlash,
+  Pencil,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { useShiftHeld } from "../../../shared/hooks/useShiftHeld";
 import ToggleSwitch from "../../../shared/ui/ToggleSwitch";
 import DotMatrix from "../../../shared/ui/DotMatrix";
@@ -27,10 +35,41 @@ import PersonalityModal, {
   type PendingDeletePersonality,
 } from "./PersonalityModal";
 
+const ModeMenuItem = ({
+  icon,
+  label,
+  onClick,
+  destructive = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+}) => (
+  <button
+    type="button"
+    role="menuitem"
+    onClick={onClick}
+    className={`flex w-full items-center gap-2.5 px-3 py-2 ui-text-menu-item transition-colors hover:bg-surface-elevated ${
+      destructive ? "ui-color-error" : "ui-color-secondary"
+    }`}
+  >
+    {icon}
+    <span>{label}</span>
+  </button>
+);
+
 const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
   const { t } = useLingui();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState("");
+  const [modeMenu, setModeMenu] = useState<{
+    personality: Personality;
+    x: number;
+    y: number;
+  } | null>(null);
   const [activePersonalityId, setActivePersonalityId] = useState<string | null>(
     null,
   );
@@ -145,6 +184,11 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
       const persistVersion = persistVersionRef.current + 1;
       persistVersionRef.current = persistVersion;
       lastPendingPersonalitiesRef.current = next;
+      // A fetch already in flight would otherwise resolve with the pre edit
+      // value and overwrite this.
+      void queryClient.cancelQueries({
+        queryKey: personalizationKeys.personalities(),
+      });
       setPersonalitiesCache(queryClient, next);
 
       if (saveTimeoutRef.current !== null) {
@@ -229,6 +273,37 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
     [updatePersonalities],
   );
 
+  const duplicateMode = useCallback(
+    (personality: Personality) => {
+      const copy: Personality = {
+        ...personality,
+        id: createId(),
+        name: t({
+          id: "personalization.mode.copy_name",
+          message: `${personality.name} copy`,
+        }),
+      };
+      updatePersonalities((prev) => {
+        const at = prev.findIndex((mode) => mode.id === personality.id);
+        if (at < 0) return [...prev, copy];
+        return [...prev.slice(0, at + 1), copy, ...prev.slice(at + 1)];
+      });
+    },
+    [t, updatePersonalities],
+  );
+
+  const startRename = useCallback((personality: Personality) => {
+    setRenamingId(personality.id);
+    setRenameDraft(personality.name);
+  }, []);
+
+  const commitRename = useCallback(() => {
+    if (!renamingId) return;
+    const name = renameDraft.trim();
+    if (name) updatePersonality(renamingId, { name });
+    setRenamingId(null);
+  }, [renameDraft, renamingId, updatePersonality]);
+
   const handleAddMode = () => {
     const id = createId();
     const nextMode: Personality = {
@@ -298,6 +373,18 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
         return;
       }
 
+      if (renamingId) {
+        event.preventDefault();
+        setRenamingId(null);
+        return;
+      }
+
+      if (modeMenu) {
+        event.preventDefault();
+        setModeMenu(null);
+        return;
+      }
+
       if (pendingDeletePersonality) {
         event.preventDefault();
         setPendingDeletePersonality(null);
@@ -312,10 +399,16 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activePersonalityId, isActive, pendingDeletePersonality]);
+  }, [
+    activePersonalityId,
+    isActive,
+    modeMenu,
+    pendingDeletePersonality,
+    renamingId,
+  ]);
 
   return (
-    <div className="w-full text-left max-w-7xl mx-auto px-0">
+    <div className="flex h-full min-h-0 w-full max-w-7xl flex-col text-left mx-auto px-0">
       <ScreenHeader
         className="mb-6 mt-2 md:-mt-6"
         icon={
@@ -386,198 +479,319 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-          {personalities.map((personality, index) => {
-            const appsPreview = personality.apps.slice(0, 3);
-            const sitesPreview = personality.websites.slice(0, 2);
-            const moreApps = Math.max(
-              0,
-              personality.apps.length - appsPreview.length,
-            );
-            const moreSites = Math.max(
-              0,
-              personality.websites.length - sitesPreview.length,
-            );
-            return (
-              <div
-                key={personality.id || `personality-${index}`}
-                onClick={() => {
-                  if (shiftHeld) {
-                    requestDeleteModeConfirm(personality);
-                    return;
-                  }
-                  setActivePersonalityId(personality.id);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar scrollbar-gutter pb-6 pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            {personalities.map((personality, index) => {
+              const appsPreview = personality.apps.slice(0, 3);
+              const sitesPreview = personality.websites.slice(0, 2);
+              const moreApps = Math.max(
+                0,
+                personality.apps.length - appsPreview.length,
+              );
+              const moreSites = Math.max(
+                0,
+                personality.websites.length - sitesPreview.length,
+              );
+              return (
+                <div
+                  key={personality.id || `personality-${index}`}
+                  onContextMenu={(event) => {
+                    event.preventDefault();
+                    setModeMenu({
+                      personality,
+                      x: event.clientX,
+                      y: event.clientY,
+                    });
+                  }}
+                  onClick={() => {
                     if (shiftHeld) {
                       requestDeleteModeConfirm(personality);
                       return;
                     }
                     setActivePersonalityId(personality.id);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                className={`ui-card-liftable group relative p-2.5 text-left ${
-                  shiftHeld
-                    ? "!border-red-500/30 hover:!border-red-500/60 hover:!bg-red-500/5"
-                    : ""
-                }`}
-              >
-                <div className="relative space-y-2">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="ui-text-body-lg-strong ui-color-primary">
-                        {personality.name}
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div
-                        data-no-press
-                        className="-mt-0.5"
-                        onPointerDown={(event) => event.stopPropagation()}
-                        onClick={(event) => event.stopPropagation()}
-                        onKeyDown={(event) => {
-                          if (
-                            event.key === "Enter" ||
-                            event.key === " " ||
-                            event.key === "Spacebar"
-                          ) {
-                            event.stopPropagation();
-                          }
-                        }}
-                      >
-                        <ToggleSwitch
-                          enabled={personality.enabled}
-                          onToggle={() =>
-                            updatePersonality(personality.id, {
-                              enabled: !personality.enabled,
-                            })
-                          }
-                          ariaLabel={
-                            personality.enabled
-                              ? t({
-                                  id: "personalization.disable_mode",
-                                  message: "Disable mode",
-                                })
-                              : t({
-                                  id: "personalization.enable_mode",
-                                  message: "Enable mode",
-                                })
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="ui-text-uppercase-micro ui-color-disabled">
-                        {t({
-                          id: "personalization.apps",
-                          message: "Apps",
-                        })}
-                      </p>
-                      <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                        {appsPreview.length === 0 ? (
-                          <span className="ui-text-meta ui-color-disabled">
-                            {t({
-                              id: "personalization.no_apps",
-                              message: "No apps yet",
-                            })}
-                          </span>
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      if (shiftHeld) {
+                        requestDeleteModeConfirm(personality);
+                        return;
+                      }
+                      setActivePersonalityId(personality.id);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  className={`ui-card-liftable group relative p-2.5 text-left ${
+                    shiftHeld
+                      ? "!border-red-500/30 hover:!border-red-500/60 hover:!bg-red-500/5"
+                      : ""
+                  }`}
+                >
+                  <div className="relative space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        {renamingId === personality.id ? (
+                          <input
+                            data-no-press
+                            autoFocus
+                            value={renameDraft}
+                            onChange={(event) =>
+                              setRenameDraft(event.target.value)
+                            }
+                            onClick={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onBlur={commitRename}
+                            onKeyDown={(event) => {
+                              event.stopPropagation();
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                commitRename();
+                              }
+                              if (event.key === "Escape") {
+                                event.preventDefault();
+                                setRenamingId(null);
+                              }
+                            }}
+                            className="ui-text-body-lg-strong ui-color-primary block w-full min-w-0 border-0 bg-transparent p-0 shadow-[inset_0_-1px_0_0_var(--color-border-hover)] outline-hidden"
+                          />
                         ) : (
-                          appsPreview.map((app, index) => (
-                            <div
-                              key={`app-preview-${index}-${app || "empty"}`}
-                              title={app}
-                            >
-                              <AppIconBadge
-                                appName={app}
-                                iconPath={
-                                  installedAppByName.get(app.toLowerCase())
-                                    ?.icon_path
-                                }
-                                size="chip"
-                              />
-                            </div>
-                          ))
+                          <p className="ui-text-body-lg-strong ui-color-primary">
+                            {personality.name}
+                          </p>
                         )}
-                        {moreApps > 0 && (
-                          <span className="ui-text-meta font-mono ui-color-muted">
-                            +{moreApps}
-                          </span>
-                        )}
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div
+                          data-no-press
+                          className="-mt-0.5"
+                          onPointerDown={(event) => event.stopPropagation()}
+                          onClick={(event) => event.stopPropagation()}
+                          onKeyDown={(event) => {
+                            if (
+                              event.key === "Enter" ||
+                              event.key === " " ||
+                              event.key === "Spacebar"
+                            ) {
+                              event.stopPropagation();
+                            }
+                          }}
+                        >
+                          <ToggleSwitch
+                            enabled={personality.enabled}
+                            onToggle={() =>
+                              updatePersonality(personality.id, {
+                                enabled: !personality.enabled,
+                              })
+                            }
+                            ariaLabel={
+                              personality.enabled
+                                ? t({
+                                    id: "personalization.disable_mode",
+                                    message: "Disable mode",
+                                  })
+                                : t({
+                                    id: "personalization.enable_mode",
+                                    message: "Enable mode",
+                                  })
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <p className="ui-text-uppercase-micro ui-color-disabled">
-                        {t({
-                          id: "personalization.websites",
-                          message: "Websites",
-                        })}
-                      </p>
-                      <div className="mt-1.5 flex items-center gap-1.5 min-w-0 flex-nowrap">
-                        {sitesPreview.length === 0 ? (
-                          <span className="ui-text-meta ui-color-disabled">
-                            {t({
-                              id: "personalization.no_sites",
-                              message: "No sites yet",
-                            })}
-                          </span>
-                        ) : (
-                          sitesPreview.map((site, index) => (
-                            <span
-                              key={`site-preview-${index}-${site || "empty"}`}
-                              className="min-w-0 max-w-[118px] rounded-md border border-border-primary bg-surface-overlay px-2 py-1 ui-text-micro ui-color-secondary inline-flex items-center gap-1"
-                            >
-                              <WebsiteFavicon
-                                site={site}
-                                iconPath={
-                                  websiteIconBySite[normalizeWebsite(site)]
-                                }
-                                size="chip"
-                              />
-                              <span className="min-w-0 truncate font-mono">
-                                {formatWebsitePreview(site)}
-                              </span>
-                            </span>
-                          ))
-                        )}
-                        {moreSites > 0 && (
-                          <span className="shrink-0 ui-text-meta font-mono ui-color-muted">
-                            +{moreSites}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 pt-2 border-t border-border-primary ui-text-meta ui-color-muted flex items-center gap-2 min-w-0">
-                    <span className="ui-text-uppercase-micro ui-color-disabled">
-                      {t({
-                        id: "personalization.notes",
-                        message: "Notes:",
-                      })}
-                    </span>
-                    <span className="font-mono truncate flex-1">
-                      {personality.instructions.length > 0
-                        ? personality.instructions[0]
-                        : t({
-                            id: "personalization.no_notes",
-                            message: "No notes yet",
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="ui-text-uppercase-micro ui-color-disabled">
+                          {t({
+                            id: "personalization.apps",
+                            message: "Apps",
                           })}
-                    </span>
+                        </p>
+                        <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                          {appsPreview.length === 0 ? (
+                            <span className="ui-text-meta ui-color-disabled">
+                              {t({
+                                id: "personalization.no_apps",
+                                message: "No apps yet",
+                              })}
+                            </span>
+                          ) : (
+                            appsPreview.map((app, index) => (
+                              <div
+                                key={`app-preview-${index}-${app || "empty"}`}
+                                title={app}
+                              >
+                                <AppIconBadge
+                                  appName={app}
+                                  iconPath={
+                                    installedAppByName.get(app.toLowerCase())
+                                      ?.icon_path
+                                  }
+                                  size="chip"
+                                />
+                              </div>
+                            ))
+                          )}
+                          {moreApps > 0 && (
+                            <span className="ui-text-meta font-mono ui-color-muted">
+                              +{moreApps}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="ui-text-uppercase-micro ui-color-disabled">
+                          {t({
+                            id: "personalization.websites",
+                            message: "Websites",
+                          })}
+                        </p>
+                        <div className="mt-1.5 flex items-center gap-1.5 min-w-0 flex-nowrap">
+                          {sitesPreview.length === 0 ? (
+                            <span className="ui-text-meta ui-color-disabled">
+                              {t({
+                                id: "personalization.no_sites",
+                                message: "No sites yet",
+                              })}
+                            </span>
+                          ) : (
+                            sitesPreview.map((site, index) => (
+                              <span
+                                key={`site-preview-${index}-${site || "empty"}`}
+                                className="min-w-0 max-w-[118px] rounded-md border border-border-primary bg-surface-overlay px-2 py-1 ui-text-micro ui-color-secondary inline-flex items-center gap-1"
+                              >
+                                <WebsiteFavicon
+                                  site={site}
+                                  iconPath={
+                                    websiteIconBySite[normalizeWebsite(site)]
+                                  }
+                                  size="chip"
+                                />
+                                <span className="min-w-0 truncate font-mono">
+                                  {formatWebsitePreview(site)}
+                                </span>
+                              </span>
+                            ))
+                          )}
+                          {moreSites > 0 && (
+                            <span className="shrink-0 ui-text-meta font-mono ui-color-muted">
+                              +{moreSites}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 pt-2 border-t border-border-primary ui-text-meta ui-color-muted flex items-center gap-2 min-w-0">
+                      <span className="ui-text-uppercase-micro ui-color-disabled">
+                        {t({
+                          id: "personalization.notes",
+                          message: "Notes:",
+                        })}
+                      </span>
+                      <span className="font-mono truncate flex-1">
+                        {personality.instructions.length > 0
+                          ? personality.instructions[0]
+                          : t({
+                              id: "personalization.no_notes",
+                              message: "No notes yet",
+                            })}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
+
+      {modeMenu &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-[110]"
+              onClick={() => setModeMenu(null)}
+              onContextMenu={(event) => {
+                event.preventDefault();
+                setModeMenu(null);
+              }}
+            />
+            <div
+              role="menu"
+              className="ui-surface-menu fixed z-[120] min-w-[168px] py-1"
+              style={{
+                left: Math.min(modeMenu.x, window.innerWidth - 184),
+                top: Math.min(modeMenu.y, window.innerHeight - 172),
+              }}
+            >
+              <ModeMenuItem
+                icon={<Pencil size={12} className="ui-color-muted" />}
+                label={t({
+                  id: "personalization.mode.rename",
+                  message: "Rename",
+                })}
+                onClick={() => {
+                  startRename(modeMenu.personality);
+                  setModeMenu(null);
+                }}
+              />
+              <ModeMenuItem
+                icon={<CopySimple size={12} className="ui-color-muted" />}
+                label={t({
+                  id: "personalization.mode.duplicate",
+                  message: "Duplicate",
+                })}
+                onClick={() => {
+                  duplicateMode(modeMenu.personality);
+                  setModeMenu(null);
+                }}
+              />
+              <ModeMenuItem
+                icon={
+                  modeMenu.personality.enabled ? (
+                    <EyeSlash size={12} className="ui-color-muted" />
+                  ) : (
+                    <Eye size={12} className="ui-color-muted" />
+                  )
+                }
+                label={
+                  modeMenu.personality.enabled
+                    ? t({
+                        id: "personalization.mode.disable",
+                        message: "Disable",
+                      })
+                    : t({
+                        id: "personalization.mode.enable",
+                        message: "Enable",
+                      })
+                }
+                onClick={() => {
+                  updatePersonality(modeMenu.personality.id, {
+                    enabled: !modeMenu.personality.enabled,
+                  });
+                  setModeMenu(null);
+                }}
+              />
+              <div className="my-1 h-px bg-[var(--border-subtle)]" />
+              <ModeMenuItem
+                icon={<Trash size={12} className="ui-color-error" />}
+                label={t({
+                  id: "personalization.mode.delete",
+                  message: "Delete",
+                })}
+                destructive
+                onClick={() => {
+                  requestDeleteModeConfirm(modeMenu.personality);
+                  setModeMenu(null);
+                }}
+              />
+            </div>
+          </>,
+          document.body,
+        )}
 
       {errorMessage && (
         <div className="mt-4 ui-text-body-sm ui-color-error-soft">

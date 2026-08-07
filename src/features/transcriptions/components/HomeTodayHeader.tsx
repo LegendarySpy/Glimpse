@@ -10,7 +10,7 @@ import {
 } from "../homeGreeting";
 import { getActiveTodayStatSlide } from "../todayStats";
 import type { TodayDictationStats } from "../../../types";
-import SurveyPrompt from "../../survey/components/SurveyPrompt";
+import AskPrompt from "../../asks/components/AskPrompt";
 
 const fadeTransition = { duration: 0.22, ease: "easeOut" as const };
 
@@ -66,7 +66,7 @@ export default function HomeTodayHeader({
         <p className="mt-2 ui-text-body-sm ui-color-disabled">{statText}</p>
       ) : null}
 
-      <SurveyPrompt active={active} />
+      <AskPrompt active={active} />
     </header>
   );
 }

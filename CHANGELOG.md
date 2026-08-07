@@ -1,3 +1,45 @@
+1.1.0
+
+### Improvements
+
+- Settings now opens inside the main window instead of a floating panel.
+- The Account screen shows your dictation statistics.
+- You can share those statistics as a picture.
+- Right click a personalization mode to rename, duplicate, enable or delete it.
+- Auto-update is now on by default. If you already turned it off, it stays off.
+- Home can also ask you to rate Glimpse or star it on GitHub, in the same place it asks about the survey. Only one ask appears at a time, and answering or declining removes it for good.
+- Entering a license key is clearer, on the setup screen and in Account.
+
+### Changes
+
+- Edit Mode is gone as a separate setting. The Cleanup button on a shortcut now does both: it tidies what you dictate, and rewrites selected text when you speak an instruction over it.
+- Setting up a writing model is all it takes to use one. The provider no longer has its own on switch.
+- Cloud transcription is now chosen in Models, beside the downloaded ones. Providers still holds the endpoint, key and model.
+
+### Fixes
+
+- Models that show their reasoning no longer paste it in with your words.
+- A rate limited writing model is waited out and retried instead of quietly giving up, and one busy moment no longer switches the model off for the next few minutes.
+- Glimpse now says what went wrong with the writing model, rather than calling every failure unreachable.
+- Renaming or editing a personalization mode no longer reverts a moment later.
+- Settings changed while another part of the app reloaded them, such as the Cleanup button on a shortcut, no longer revert.
+- Editing a transcript no longer loses the words typed while it was saving.
+- Clearing a transcript no longer locks the editor until the recording is transcribed again.
+- The personalization list scrolls, so modes past the first few are reachable.
+- Member since and Words spoken no longer slide back in each time you open the Account screen.
+- Settings opens straight away instead of showing an empty panel first.
+- Dialogs now dim the whole window instead of leaving the sidebar bright.
+- Fixed the fade above and below the model list showing as white in light mode.
+- Fixed the API Server section appearing during a trial and then showing nothing.
+- Fixed dropping files to import while Settings was open appearing to do nothing.
+- Escape now closes What's New, the FAQ or a confirmation without closing all of Settings.
+- The Microsoft Store now lists every interface language included with Glimpse instead of only English.
+- A shortcut no longer stops working until you restart Glimpse. If a key release was missed, such as while the screen was locked or another window took over, the modifier stayed stuck.
+- Shortcuts on the arrow keys, the navigation keys and F1 to F20 now work on macOS. They could fail if the shortcut was typed in, imported or saved by an older version.
+- Pasting no longer leaves Command held down for other apps on macOS.
+
+---
+
 1.0.7
 
 ### Improvements

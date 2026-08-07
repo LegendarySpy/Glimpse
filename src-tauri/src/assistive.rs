@@ -41,11 +41,6 @@ pub fn focused_text_snapshot() -> Option<FocusedTextSnapshot> {
     windows_uia::focused_text_snapshot()
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-pub fn focused_text_snapshot() -> Option<FocusedTextSnapshot> {
-    None
-}
-
 #[cfg(target_os = "macos")]
 pub fn get_selected_text_ax() -> Option<String> {
     match macos_ax::probe_selection() {
@@ -443,7 +438,7 @@ fn send_copy_keystroke() -> Result<()> {
 
     let key_up = CGEvent::new_keyboard_event(source, C_KEY, false)
         .map_err(|_| anyhow!("Failed to create key-up event"))?;
-    key_up.set_flags(CGEventFlags::CGEventFlagCommand);
+    key_up.set_flags(CGEventFlags::empty());
     key_up.post(CGEventTapLocation::HID);
 
     Ok(())
@@ -519,13 +514,7 @@ pub fn paste_text(text: &str) -> Result<()> {
     paste_result
 }
 
-#[cfg(target_os = "windows")]
-pub fn copy_text_to_clipboard(text: &str) -> Result<()> {
-    let mut clipboard = Clipboard::new().map_err(|e| anyhow!("Failed to access clipboard: {e}"))?;
-    set_text_excluding_history(&mut clipboard, text.to_string())
-}
-
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 pub fn copy_text_to_clipboard(text: &str) -> Result<()> {
     let mut clipboard = Clipboard::new().map_err(|e| anyhow!("Failed to access clipboard: {e}"))?;
     set_text_excluding_history(&mut clipboard, text.to_string())
@@ -628,7 +617,7 @@ fn send_paste_keystroke() -> Result<()> {
 
     let key_up = CGEvent::new_keyboard_event(source, V_KEY, false)
         .map_err(|_| anyhow!("Failed to create key-up event"))?;
-    key_up.set_flags(CGEventFlags::CGEventFlagCommand);
+    key_up.set_flags(CGEventFlags::empty());
     key_up.post(CGEventTapLocation::HID);
 
     Ok(())

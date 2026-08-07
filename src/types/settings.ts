@@ -6,7 +6,7 @@ export type ThemeMode = "system" | "light" | "dark";
 export type AppLocaleSetting = "system" | string;
 
 export type RecordingPrunePolicy =
-  "never" | "immediately" | "day" | "week" | "month" | "three_months" | "year";
+  "never" | "immediately" | "day" | "week" | "month" | "year";
 
 export type AutoDeleteTarget = "audio" | "transcripts";
 
@@ -102,7 +102,6 @@ export type StoredSettings = {
   auto_dictionary_ignored: string[];
   replacements: Replacement[];
   personalities: Personality[];
-  edit_mode_enabled: boolean;
   media_action: MediaAction;
   auto_update_enabled: boolean;
   auto_launch_enabled: boolean;

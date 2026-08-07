@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Template for the Microsoft Store package. CI replaces the GLIMPSE_MSIX_*
-  placeholders from Partner Center identity secrets (Product identity page)
+  Template for the Microsoft Store package. CI generates the Resource entries
+  from supported-app-locales.json, replaces the remaining GLIMPSE_MSIX_*
+  placeholders from Partner Center identity secrets (Product identity page),
   and packs with makeappx; the Store signs the package on publish.
 
   The scale-* and targetsize-* logo variants in src-tauri/icons are made by
@@ -33,7 +34,7 @@
   </Dependencies>
 
   <Resources>
-    <Resource Language="en-US" />
+    GLIMPSE_MSIX_RESOURCE_LANGUAGES
   </Resources>
 
   <Applications>

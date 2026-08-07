@@ -84,7 +84,7 @@ fn remove_cli_link() -> Result<(), String> {
     }
 }
 
-fn cli_install_status() -> CliInstallStatus {
+pub(crate) fn cli_install_status() -> CliInstallStatus {
     let source = cli_source_binary().ok();
     let default_path = default_install_path().ok();
     let managed_by_app = default_path

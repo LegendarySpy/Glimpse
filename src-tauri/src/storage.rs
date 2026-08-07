@@ -59,6 +59,14 @@ pub struct LifetimeStats {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DictationDay {
+    pub day: String,
+    pub count: u64,
+    pub words: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TodayDictationStats {
     pub count: u64,
     pub words: u64,
@@ -606,6 +614,29 @@ impl StorageManager {
         .map_err(Into::into)
     }
 
+    // Grouped in SQLite's localtime so a day boundary matches the user's clock.
+    pub fn dictation_activity(&self, start_ms: i64) -> Result<Vec<DictationDay>> {
+        let conn = self.connection.lock();
+        let mut stmt = conn.prepare(
+            "SELECT date(timestamp / 1000, 'unixepoch', 'localtime') AS day,
+                    COUNT(*),
+                    COALESCE(SUM(word_count), 0)
+             FROM transcriptions
+             WHERE status = 'success' AND timestamp >= ?1
+             GROUP BY day
+             ORDER BY day",
+        )?;
+        let rows = stmt.query_map(params![start_ms], |row| {
+            Ok(DictationDay {
+                day: row.get::<_, String>(0)?,
+                count: row.get::<_, i64>(1)?.max(0) as u64,
+                words: row.get::<_, i64>(2)?.max(0) as u64,
+            })
+        })?;
+        rows.collect::<std::result::Result<Vec<_>, _>>()
+            .map_err(Into::into)
+    }
+
     fn record_dictation(
         conn: &Connection,
         word_count: u32,
@@ -935,66 +966,6 @@ impl StorageManager {
             );",
         )?;
 
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "speech_model",
-            "ALTER TABLE transcriptions ADD COLUMN speech_model TEXT NOT NULL DEFAULT ''",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "llm_model",
-            "ALTER TABLE transcriptions ADD COLUMN llm_model TEXT NULL",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "word_count",
-            "ALTER TABLE transcriptions ADD COLUMN word_count INTEGER NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "audio_duration_seconds",
-            "ALTER TABLE transcriptions ADD COLUMN audio_duration_seconds REAL NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "synced",
-            "ALTER TABLE transcriptions ADD COLUMN synced INTEGER NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "mode_id",
-            "ALTER TABLE transcriptions ADD COLUMN mode_id TEXT NULL",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "mode_name",
-            "ALTER TABLE transcriptions ADD COLUMN mode_name TEXT NULL",
-        )?;
-        Self::ensure_column(
-            conn,
-            "library_items",
-            "show_timestamps",
-            "ALTER TABLE library_items ADD COLUMN show_timestamps INTEGER NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "library_items",
-            "source_path",
-            "ALTER TABLE library_items ADD COLUMN source_path TEXT NOT NULL DEFAULT ''",
-        )?;
-        Self::ensure_column(
-            conn,
-            "library_items",
-            "store_original",
-            "ALTER TABLE library_items ADD COLUMN store_original INTEGER NOT NULL DEFAULT 0",
-        )?;
         Self::ensure_column(
             conn,
             "library_items",

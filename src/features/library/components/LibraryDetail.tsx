@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
@@ -68,6 +69,8 @@ const SPEAKER_COLORS = [
   "#bb9af7",
   "#7dcfff",
 ];
+
+const MAX_SPEAKERS = 16;
 
 const SegmentWordsRow = ({
   tokens,
@@ -193,6 +196,13 @@ const LibraryDetail = ({
   const [speakerFilter, setSpeakerFilter] = useState<string | null>(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const transcriptTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transcriptPending = useRef<string | null>(null);
+  const transcriptSent = useRef<string | null>(null);
+  const transcriptSaves = useRef(0);
+  const transcriptSaveFailed = useRef(false);
+  const transcriptChain = useRef<Promise<unknown>>(Promise.resolve());
+  const onUpdateRef = useRef(onUpdate);
+  onUpdateRef.current = onUpdate;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const tagMenuRef = useRef<HTMLDivElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -216,9 +226,9 @@ const LibraryDetail = ({
 
   const modelLabel =
     resolveSpeechModelLabel(models, item.speech_model) ?? item.speech_model;
+  const transcriptEditable = item.status.type === "complete";
   const transcriptAvailable =
-    item.status.type === "complete" &&
-    (item.transcript ?? "").trim().length > 0;
+    transcriptEditable && (item.transcript ?? "").trim().length > 0;
   const canShowTimestamps = !!item.segments && item.segments.length > 0;
   const speakers = useMemo(
     () =>
@@ -228,6 +238,7 @@ const LibraryDetail = ({
       })),
     [item.speakers],
   );
+  const canAddSpeaker = speakers.length < MAX_SPEAKERS;
   const isBusy =
     item.status.type === "transcribing" ||
     item.status.type === "cancelling" ||
@@ -492,6 +503,8 @@ const LibraryDetail = ({
   );
 
   useEffect(() => {
+    if (transcriptPending.current !== null || transcriptSaves.current > 0)
+      return;
     setTranscriptDraft(item.transcript ?? "");
   }, [item.transcript]);
 
@@ -524,22 +537,66 @@ const LibraryDetail = ({
     streamTranscriptRef.current = nextTranscript;
   }, [item.status.type, item.transcript]);
 
+  const writeTranscript = useCallback(() => {
+    const written = transcriptPending.current;
+    if (written === null) return;
+    transcriptPending.current = null;
+    transcriptSent.current = written;
+    transcriptSaves.current += 1;
+    transcriptChain.current = transcriptChain.current
+      .then(() => onUpdateRef.current({ transcript: written }))
+      .then(() => {
+        transcriptSaveFailed.current = false;
+      })
+      .catch((err) => {
+        console.error("failed to save transcript:", err);
+        if (
+          transcriptPending.current === null &&
+          transcriptSent.current === written
+        ) {
+          transcriptPending.current = written;
+        }
+        if (transcriptSaveFailed.current) return;
+        transcriptSaveFailed.current = true;
+        invoke("debug_show_toast", {
+          toastType: "error",
+          message: t({
+            id: "library.detail.transcript.save_failed",
+            message:
+              "Couldn't save this transcript. Your changes are still here.",
+          }),
+        }).catch(() => {});
+      })
+      .finally(() => {
+        transcriptSaves.current -= 1;
+        if (transcriptSaves.current === 0) transcriptSent.current = null;
+      });
+  }, []);
+
   useEffect(() => {
-    if (!transcriptAvailable) return;
-    if (transcriptTimer.current) clearTimeout(transcriptTimer.current);
+    if (!transcriptEditable) {
+      transcriptPending.current = null;
+      return;
+    }
+    const stored =
+      transcriptSaves.current > 0 && transcriptSent.current !== null
+        ? transcriptSent.current
+        : (item.transcript ?? "");
+    if (transcriptDraft === stored) {
+      transcriptPending.current = null;
+      return;
+    }
+    transcriptPending.current = transcriptDraft;
     transcriptTimer.current = setTimeout(() => {
-      if (transcriptDraft !== (item.transcript ?? "")) {
-        Promise.resolve(onUpdate({ transcript: transcriptDraft })).catch(
-          (err) => {
-            console.error("failed to save transcript:", err);
-          },
-        );
-      }
+      transcriptTimer.current = null;
+      writeTranscript();
     }, 600);
     return () => {
       if (transcriptTimer.current) clearTimeout(transcriptTimer.current);
     };
-  }, [transcriptDraft, transcriptAvailable, item.transcript, onUpdate]);
+  }, [transcriptDraft, transcriptEditable, item.transcript, writeTranscript]);
+
+  useEffect(() => writeTranscript, [writeTranscript]);
   useClickOutside(tagMenuRef, () => setTagMenuOpen(false), tagMenuOpen);
   useClickOutside(exportMenuRef, () => setExportOpen(false), exportOpen);
   useClickOutside(overflowMenuRef, () => setOverflowOpen(false), overflowOpen);
@@ -600,6 +657,7 @@ const LibraryDetail = ({
   };
 
   const handleAddSpeaker = async () => {
+    if (!canAddSpeaker) return null;
     const nextIndex = speakers.length + 1;
     const speaker: Speaker = {
       id: crypto.randomUUID(),
@@ -1247,7 +1305,7 @@ const LibraryDetail = ({
               ? speaker.name
               : t({
                   id: "library.detail.speaker.unassigned",
-                  message: "Assign speaker",
+                  message: "Assign",
                 })
           }
           aria-label={
@@ -1255,7 +1313,7 @@ const LibraryDetail = ({
               ? speaker.name
               : t({
                   id: "library.detail.speaker.unassigned",
-                  message: "Assign speaker",
+                  message: "Assign",
                 })
           }
           className={`flex items-center justify-center p-1 -m-1 transition-opacity hover:opacity-80 ${
@@ -1324,9 +1382,10 @@ const LibraryDetail = ({
                 onClick={async (event) => {
                   event.stopPropagation();
                   const created = await handleAddSpeaker();
-                  await handleAssignSpeaker(idx, created.id);
+                  if (created) await handleAssignSpeaker(idx, created.id);
                 }}
-                className="w-full flex items-center gap-2 text-left px-2.5 py-1.5 ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary"
+                disabled={!canAddSpeaker}
+                className="w-full flex items-center gap-2 text-left px-2.5 py-1.5 ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-content-muted"
               >
                 <UserPlus size={11} />
                 {t({
@@ -1537,7 +1596,7 @@ const LibraryDetail = ({
           <div className="col-start-3 row-start-1 flex items-center justify-end gap-1">
             <button
               onClick={handleCopy}
-              disabled={!transcriptAvailable}
+              disabled={!transcriptDraft.trim()}
               className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 ui-text-meta disabled:opacity-50 transition-colors ${
                 copyConfirmed
                   ? "ui-color-success bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]"
@@ -1949,7 +2008,8 @@ const LibraryDetail = ({
                     <button
                       type="button"
                       onClick={() => handleAddSpeaker()}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary"
+                      disabled={!canAddSpeaker}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left ui-text-meta text-content-muted hover:bg-surface-elevated/70 hover:text-content-primary transition-colors border-t border-border-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-content-muted"
                     >
                       <UserPlus size={11} />
                       {t({
@@ -2132,7 +2192,7 @@ const LibraryDetail = ({
                 ref={transcriptAreaRef}
                 value={transcriptDraft}
                 onChange={(event) => setTranscriptDraft(event.target.value)}
-                disabled={!transcriptAvailable}
+                disabled={!transcriptEditable}
                 placeholder={t({
                   id: "library.modal.transcript_placeholder",
                   message: "Transcript will appear here.",
@@ -2215,7 +2275,7 @@ const LibraryDetail = ({
               disabled={!audioReady || !!audioError || !canDecreasePlaybackRate}
               aria-label={t({
                 id: "library.modal.playback.decrease",
-                message: "Decrease speed",
+                message: "Decrease playback speed",
               })}
               className={`transition-colors p-0.5 ${
                 !audioReady || audioError || !canDecreasePlaybackRate
@@ -2245,7 +2305,7 @@ const LibraryDetail = ({
               disabled={!audioReady || !!audioError || !canIncreasePlaybackRate}
               aria-label={t({
                 id: "library.modal.playback.increase",
-                message: "Increase speed",
+                message: "Increase playback speed",
               })}
               className={`transition-colors p-0.5 ${
                 !audioReady || audioError || !canIncreasePlaybackRate
@@ -2280,7 +2340,11 @@ const LibraryDetail = ({
                 if (!nextValue) {
                   onFollowTimestampsChange(false);
                 }
-                onUpdate({ show_timestamps: nextValue });
+                Promise.resolve(onUpdate({ show_timestamps: nextValue })).catch(
+                  (err) => {
+                    console.error("failed to save timestamps setting:", err);
+                  },
+                );
               }}
               ariaLabel={t({
                 id: "library.modal.timestamps",
@@ -2317,107 +2381,113 @@ const LibraryDetail = ({
         </div>
       </footer>
 
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-xs px-6"
-            onClick={(event) => {
-              event.stopPropagation();
-              setShowDeleteConfirm(false);
-            }}
-          >
+      {createPortal(
+        <AnimatePresence>
+          {showDeleteConfirm && (
             <motion.div
-              initial={{ scale: 0.96, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.96, opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="w-full max-w-sm rounded-2xl border border-border-primary bg-surface-tertiary p-5 ui-shadow-modal-deep"
-              onClick={(event) => event.stopPropagation()}
-              role="dialog"
-              aria-modal="true"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-xs px-6"
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowDeleteConfirm(false);
+              }}
             >
-              <div className="flex items-center gap-3 mb-3">
-                <AlertTriangle
-                  size={20}
-                  className="ui-color-warning-strong shrink-0"
-                />
-                <div>
-                  <p className="ui-text-body-lg font-semibold text-content-primary">
-                    {t({
-                      id: "library.modal.delete_confirm.title",
-                      message: "Delete this item?",
-                    })}
-                  </p>
-                  <p className="ui-text-label text-content-disabled">
-                    {t({
-                      id: "library.modal.delete_confirm.description",
-                      message:
-                        "This removes the transcript and audio from your library.",
-                    })}
-                  </p>
+              <motion.div
+                initial={{ scale: 0.96, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.96, opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="w-full max-w-sm rounded-2xl border border-border-primary bg-surface-tertiary p-5 ui-shadow-modal-deep"
+                onClick={(event) => event.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <AlertTriangle
+                    size={20}
+                    className="ui-color-warning-strong shrink-0"
+                  />
+                  <div>
+                    <p className="ui-text-body-lg font-semibold text-content-primary">
+                      {t({
+                        id: "library.modal.delete_confirm.title",
+                        message: "Delete this item?",
+                      })}
+                    </p>
+                    <p className="ui-text-label text-content-disabled">
+                      {t({
+                        id: "library.modal.delete_confirm.description",
+                        message:
+                          "This removes the transcript and audio from your library.",
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="rounded-lg border border-border-secondary px-4 py-2 ui-text-body-sm font-medium text-content-secondary hover:border-border-hover transition-colors"
-                >
-                  {t({
-                    id: "library.modal.cancel",
-                    message: "Cancel",
-                  })}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    const audio = releaseAudioSource();
-                    void onDelete().catch(() => {
-                      if (audio) {
-                        audio.src = audioUrl;
-                        audioRef.current = audio;
-                        audio.load();
-                      }
-                    });
-                  }}
-                  className="rounded-lg bg-red-500/90 px-4 py-2 ui-text-body-sm font-semibold ui-color-on-solid hover:bg-red-500 transition-colors"
-                >
-                  {t({
-                    id: "library.modal.delete",
-                    message: "Delete",
-                  })}
-                </button>
-              </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="rounded-lg border border-border-secondary px-4 py-2 ui-text-body-sm font-medium text-content-secondary hover:border-border-hover transition-colors"
+                  >
+                    {t({
+                      id: "library.modal.cancel",
+                      message: "Cancel",
+                    })}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      const audio = releaseAudioSource();
+                      void onDelete().catch(() => {
+                        if (audio) {
+                          audio.src = audioUrl;
+                          audioRef.current = audio;
+                          audio.load();
+                        }
+                      });
+                    }}
+                    className="rounded-lg bg-red-500/90 px-4 py-2 ui-text-body-sm font-semibold ui-color-on-solid hover:bg-red-500 transition-colors"
+                  >
+                    {t({
+                      id: "library.modal.delete",
+                      message: "Delete",
+                    })}
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
 
-      <AnimatePresence>
-        {showRetranscribe && (
-          <LibraryRetranscribeModal
-            item={item}
-            models={models}
-            onCancel={() => setShowRetranscribe(false)}
-            onConfirm={async (options) => {
-              try {
-                await onUpdate({
-                  speech_model: options.model_key,
-                  llm_cleanup_enabled: false,
-                  show_timestamps: options.show_timestamps,
-                  detect_speakers: options.detect_speakers,
-                });
-                await onRetry();
-                setShowRetranscribe(false);
-              } catch (err) {
-                console.error("Failed to retranscribe:", err);
-              }
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {createPortal(
+        <AnimatePresence>
+          {showRetranscribe && (
+            <LibraryRetranscribeModal
+              item={item}
+              models={models}
+              onCancel={() => setShowRetranscribe(false)}
+              onConfirm={async (options) => {
+                try {
+                  await onUpdate({
+                    speech_model: options.model_key,
+                    llm_cleanup_enabled: false,
+                    show_timestamps: options.show_timestamps,
+                    detect_speakers: options.detect_speakers,
+                  });
+                  await onRetry();
+                  setShowRetranscribe(false);
+                } catch (err) {
+                  console.error("Failed to retranscribe:", err);
+                }
+              }}
+            />
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </div>
   );
 };

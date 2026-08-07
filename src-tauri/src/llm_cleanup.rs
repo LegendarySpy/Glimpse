@@ -216,6 +216,25 @@ pub async fn fetch_available_models(
     Ok(data.data.into_iter().map(|m| m.id).collect())
 }
 
+/// A rate limit means try again shortly, not that the endpoint is down, so it
+/// must not be allowed to switch the feature off for the next five minutes.
+pub fn is_transient_llm_error(error: &RemoteError) -> bool {
+    matches!(
+        error.kind,
+        RemoteErrorKind::RateLimited | RemoteErrorKind::UpstreamUnavailable
+    )
+}
+
+/// Providers hand back a retry hint; waiting it out beats handing the user
+/// their raw words back.
+pub fn short_retry_delay(error: &RemoteError) -> Option<Duration> {
+    if !matches!(error.kind, RemoteErrorKind::RateLimited) {
+        return None;
+    }
+    let after = error.retry_after.unwrap_or(Duration::from_secs(2));
+    (after <= Duration::from_secs(8)).then(|| after.max(Duration::from_millis(500)))
+}
+
 pub fn llm_issue_message(error: &RemoteError) -> String {
     match error.kind {
         RemoteErrorKind::RateLimited => {
@@ -304,7 +323,7 @@ struct MessageContent {
 
 impl MessageContent {
     fn text(self) -> String {
-        match self.content {
+        let raw = match self.content {
             Some(ResponseContent::Text(text)) => text,
             Some(ResponseContent::Parts(parts)) => parts
                 .into_iter()
@@ -312,8 +331,34 @@ impl MessageContent {
                 .collect::<Vec<_>>()
                 .join(""),
             None => String::new(),
+        };
+        strip_reasoning(&raw)
+    }
+}
+
+const REASONING_TAGS: [&str; 5] = ["think", "thinking", "reason", "reasoning", "scratchpad"];
+
+/// Reasoning models emit their working before the answer. Pasting that into the
+/// user's document is worse than returning nothing, so it is removed here rather
+/// than in any one caller.
+pub fn strip_reasoning(raw: &str) -> String {
+    let mut out = raw.to_string();
+
+    for tag in REASONING_TAGS {
+        let close = format!("</{tag}>");
+        // Answer follows the final close tag; nested blocks collapse with it.
+        if let Some(at) = out.to_lowercase().rfind(&close) {
+            out = out[at + close.len()..].to_string();
+            continue;
+        }
+        // Truncated block with no close: keep only what came before it.
+        let open = format!("<{tag}>");
+        if let Some(at) = out.to_lowercase().find(&open) {
+            out.truncate(at);
         }
     }
+
+    out.trim().to_string()
 }
 
 #[derive(Debug, Deserialize)]
@@ -371,7 +416,23 @@ async fn run_text_task(
         max_tokens: Some(task.max_tokens()),
     };
 
-    let raw = send_chat_request(client, settings, &body).await?;
+    let raw = match send_chat_request(client, settings, &body).await {
+        Ok(raw) => raw,
+        Err(err) => {
+            // Providers routinely ask for a couple of seconds. Waiting beats
+            // handing back the raw words as though the model had refused.
+            let Some(delay) = short_retry_delay(&err) else {
+                return Err(err);
+            };
+            tracing::warn!(
+                "[LLM] rate limited, retrying in {:?}: {}",
+                delay,
+                llm_issue_message(&err)
+            );
+            tokio::time::sleep(delay).await;
+            send_chat_request(client, settings, &body).await?
+        }
+    };
 
     Ok(extract_plain_text(&raw).unwrap_or_else(|| fallback_text.to_string()))
 }
@@ -753,7 +814,7 @@ fn personality_has_style_guidance(mode: Option<&Personality>) -> bool {
 }
 
 pub const PREFLIGHT_TTL: Duration = Duration::from_secs(300);
-const PREFLIGHT_NOTICE_COOLDOWN: Duration = Duration::from_secs(120);
+const PREFLIGHT_NOTICE_COOLDOWN: Duration = Duration::from_secs(45);
 
 #[derive(Default)]
 struct PreflightState {
@@ -811,8 +872,7 @@ pub async fn run_preflight(client: Client, settings: UserSettings) {
         personality.enabled
             && mode_context::format_cleanup_style_guidance_for_personality(personality).is_some()
     });
-    let llm_is_needed =
-        settings.edit_mode_enabled || settings.cleanup_enabled || has_personalization;
+    let llm_is_needed = settings.cleanup_enabled || has_personalization;
 
     if settings.transcription_mode != TranscriptionMode::Local
         || !is_llm_available(&settings)

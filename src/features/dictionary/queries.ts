@@ -8,11 +8,14 @@ const dictionaryKeys = {
   replacements: () => [...dictionaryKeys.all, "replacements"] as const,
 };
 
+const REPLACEMENTS_STALE_TIME = 5 * 60 * 1000;
+
 export function useReplacements(enabled: boolean = true) {
   return useQuery({
     queryKey: dictionaryKeys.replacements(),
     queryFn: dictionaryApi.getReplacements,
     enabled,
+    staleTime: REPLACEMENTS_STALE_TIME,
   });
 }
 

@@ -56,8 +56,8 @@ function useQueuedPersist<T>({
   const queuedRef = useRef<T | null>(null);
   const isPersistingRef = useRef(false);
 
-  currentRef.current = value;
   if (!isPersistingRef.current && queuedRef.current === null) {
+    currentRef.current = value;
     persistedRef.current = value;
   }
 
@@ -743,7 +743,7 @@ const DictionaryView = ({ isActive = true }: { isActive?: boolean }) => {
                     {t({
                       id: "dictionary.replacements.none_description",
                       message:
-                        "Add a find and replace pair above, then press Enter to save it here.",
+                        "Add word pairs to automatically swap in transcriptions. Matches are case-insensitive.",
                     })}
                   </p>
                 </div>

@@ -21,10 +21,6 @@ pub fn app_support_dir(home: &Path, app_folder: &str) -> PathBuf {
             .unwrap_or_else(|| home.join("AppData").join("Roaming"))
             .join(app_folder)
     }
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    {
-        home.join(".config").join(app_folder)
-    }
 }
 
 pub fn translate_accelerator(raw: &str) -> Option<String> {

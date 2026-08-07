@@ -388,9 +388,16 @@ impl Drop for WorkerSession {
 
 pub(crate) fn parse_shortcut(shortcut: &str) -> Result<Hotkey> {
     let normalized = normalize_legacy_shortcut_input(shortcut);
-    normalized
+    let mut hotkey = normalized
         .parse::<Hotkey>()
-        .map_err(|err| anyhow!("Shortcut `{shortcut}` is invalid: {err}"))
+        .map_err(|err| anyhow!("Shortcut `{shortcut}` is invalid: {err}"))?;
+
+    // Drops the phantom Fn that older captures baked into function-key shortcuts.
+    if hotkey.key.is_some_and(Key::is_function_key) {
+        hotkey.modifiers.remove(Modifiers::FN);
+    }
+
+    Ok(hotkey)
 }
 
 pub(crate) fn validate_recording_shortcut(shortcut: &Hotkey) -> Result<()> {
@@ -501,6 +508,17 @@ fn modifier_group_subset(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn function_key_shortcuts_drop_the_phantom_fn() {
+        let migrated = parse_shortcut("Ctrl+Fn+Left").unwrap();
+        assert_eq!(migrated.modifiers, Modifiers::CTRL);
+        assert_eq!(migrated.key, Some(Key::LeftArrow));
+
+        // Fn stays meaningful on keys that do not carry it by themselves.
+        let held = parse_shortcut("Fn+A").unwrap();
+        assert_eq!(held.modifiers, Modifiers::FN);
+    }
 
     fn event(modifiers: Modifiers, key: Option<Key>, is_key_down: bool) -> KeyEvent {
         KeyEvent {

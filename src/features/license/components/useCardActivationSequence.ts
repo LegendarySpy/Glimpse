@@ -29,6 +29,11 @@ const DETAILS_HOLD_MS = 700;
 const PAUSE_BEFORE_COVERAGE_MS = 480;
 const REVEAL_FLOOR_MS = 6400;
 
+// The reveal is a one-time event, not a property of the mounted component.
+// Remounting the account screen, or a background license refetch, must not
+// replay it.
+let sessionRevealed = false;
+
 export function useCardActivationSequence(
   activating: boolean,
   active: boolean,
@@ -38,7 +43,7 @@ export function useCardActivationSequence(
   activationAttempt: number,
 ) {
   const [stage, setStage] = useState<CardRevealStage>(() =>
-    active ? "done" : "draft",
+    active || sessionRevealed ? "done" : "draft",
   );
   const [isUserActivationReveal, setIsUserActivationReveal] = useState(false);
   const timersRef = useRef<number[]>([]);
@@ -106,12 +111,21 @@ export function useCardActivationSequence(
   }, [active, licenseLoading, stage]);
 
   useEffect(() => {
+    if (active && stage === "done") sessionRevealed = true;
+  }, [active, stage]);
+
+  useEffect(() => {
     const wasActive = prevActiveRef.current;
     const becameActive = active && !wasActive;
     const becameInactive = !active && wasActive;
     prevActiveRef.current = active;
 
+    // A refetch in flight is not a deactivation; dropping to draft here is
+    // what made the details animate back in.
+    if (licenseLoading && !activating) return;
+
     if (!activating && !active) {
+      sessionRevealed = false;
       clearTimers();
       sequenceStartedRef.current = false;
       revealScheduledRef.current = false;
@@ -143,7 +157,14 @@ export function useCardActivationSequence(
     ) {
       beginUserReveal();
     }
-  }, [activating, active, activationAttempt, beginUserReveal, clearTimers]);
+  }, [
+    activating,
+    active,
+    activationAttempt,
+    beginUserReveal,
+    clearTimers,
+    licenseLoading,
+  ]);
 
   useEffect(() => {
     if (
