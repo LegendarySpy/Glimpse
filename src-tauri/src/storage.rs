@@ -968,66 +968,6 @@ impl StorageManager {
 
         Self::ensure_column(
             conn,
-            "transcriptions",
-            "speech_model",
-            "ALTER TABLE transcriptions ADD COLUMN speech_model TEXT NOT NULL DEFAULT ''",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "llm_model",
-            "ALTER TABLE transcriptions ADD COLUMN llm_model TEXT NULL",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "word_count",
-            "ALTER TABLE transcriptions ADD COLUMN word_count INTEGER NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "audio_duration_seconds",
-            "ALTER TABLE transcriptions ADD COLUMN audio_duration_seconds REAL NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "synced",
-            "ALTER TABLE transcriptions ADD COLUMN synced INTEGER NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "mode_id",
-            "ALTER TABLE transcriptions ADD COLUMN mode_id TEXT NULL",
-        )?;
-        Self::ensure_column(
-            conn,
-            "transcriptions",
-            "mode_name",
-            "ALTER TABLE transcriptions ADD COLUMN mode_name TEXT NULL",
-        )?;
-        Self::ensure_column(
-            conn,
-            "library_items",
-            "show_timestamps",
-            "ALTER TABLE library_items ADD COLUMN show_timestamps INTEGER NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
-            "library_items",
-            "source_path",
-            "ALTER TABLE library_items ADD COLUMN source_path TEXT NOT NULL DEFAULT ''",
-        )?;
-        Self::ensure_column(
-            conn,
-            "library_items",
-            "store_original",
-            "ALTER TABLE library_items ADD COLUMN store_original INTEGER NOT NULL DEFAULT 0",
-        )?;
-        Self::ensure_column(
-            conn,
             "library_items",
             "words",
             "ALTER TABLE library_items ADD COLUMN words TEXT",

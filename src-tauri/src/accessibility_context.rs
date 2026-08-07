@@ -261,11 +261,6 @@ mod windows_context {
 #[cfg(target_os = "windows")]
 pub use windows_context::get_active_context;
 
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-pub fn get_active_context() -> Option<ActiveContext> {
-    None
-}
-
 fn truncate_text(text: &str, max_len: usize) -> String {
     text.chars().take(max_len).collect()
 }

@@ -42,9 +42,6 @@ pub fn build_app_menu(
         app_submenu = app_submenu.separator();
     }
 
-    // TODO: add back Mode submenu when cloud is added.
-    // let mode_submenu = SubmenuBuilder::new(app, "Mode") ...
-
     app_submenu = app_submenu.item(&build_models_submenu(app, settings)?);
 
     // Microphone submenu

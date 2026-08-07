@@ -163,14 +163,10 @@ impl AskState {
     }
 
     fn resolved_at(&self) -> Option<DateTime<Utc>> {
-        self.resolved_at.as_deref().and_then(parse_timestamp)
+        self.resolved_at
+            .as_deref()
+            .and_then(notifications::parse_timestamp)
     }
-}
-
-fn parse_timestamp(raw: &str) -> Option<DateTime<Utc>> {
-    DateTime::parse_from_rfc3339(raw)
-        .ok()
-        .map(|ts| ts.with_timezone(&Utc))
 }
 
 #[derive(Debug, Serialize)]

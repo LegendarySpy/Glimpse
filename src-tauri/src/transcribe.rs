@@ -1511,7 +1511,7 @@ fn decode_wav(path: &Path) -> Result<(Vec<i16>, u32)> {
     let samples = if spec.channels <= 1 {
         samples
     } else {
-        downmix_interleaved(&samples, spec.channels as usize)
+        crate::recorder::downmix_to_mono(&samples, spec.channels as usize)
     };
 
     if samples.is_empty() {
@@ -1519,10 +1519,6 @@ fn decode_wav(path: &Path) -> Result<(Vec<i16>, u32)> {
     }
 
     Ok((samples, spec.sample_rate))
-}
-
-fn downmix_interleaved(samples: &[i16], channels: usize) -> Vec<i16> {
-    crate::recorder::downmix_to_mono(samples, channels)
 }
 
 struct LocalChunkingConfig<'a> {

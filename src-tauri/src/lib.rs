@@ -211,14 +211,6 @@ pub(crate) fn sync_launch_at_login(
     Ok(())
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-pub(crate) fn sync_launch_at_login(
-    _app: &AppHandle<AppRuntime>,
-    _enabled: bool,
-) -> Result<(), String> {
-    Ok(())
-}
-
 #[cfg(target_os = "macos")]
 fn handle_app_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
     use crate::recent_transcriptions::{
@@ -1023,8 +1015,6 @@ impl AppState {
             next.transcription_mode = TranscriptionMode::Local;
         }
         settings::sync_legacy_shortcuts_from_bindings(&mut next);
-        next.auto_delete_duration =
-            settings::canonicalize_recording_prune_policy(next.auto_delete_duration);
 
         store.save(&next)?;
         Ok(next)

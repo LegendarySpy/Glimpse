@@ -1420,22 +1420,24 @@ fn build_vtt(item: &LibraryItem) -> Result<String> {
     Ok(out.trim().to_string())
 }
 
-fn format_srt_timestamp(ms: u64) -> String {
+fn format_cue_timestamp(ms: u64, millis_separator: char) -> String {
     let total_seconds = ms / 1000;
     let hours = total_seconds / 3600;
     let minutes = (total_seconds % 3600) / 60;
     let seconds = total_seconds % 60;
     let millis = ms % 1000;
-    format!("{:02}:{:02}:{:02},{:03}", hours, minutes, seconds, millis)
+    format!(
+        "{:02}:{:02}:{:02}{}{:03}",
+        hours, minutes, seconds, millis_separator, millis
+    )
+}
+
+fn format_srt_timestamp(ms: u64) -> String {
+    format_cue_timestamp(ms, ',')
 }
 
 fn format_vtt_timestamp(ms: u64) -> String {
-    let total_seconds = ms / 1000;
-    let hours = total_seconds / 3600;
-    let minutes = (total_seconds % 3600) / 60;
-    let seconds = total_seconds % 60;
-    let millis = ms % 1000;
-    format!("{:02}:{:02}:{:02}.{:03}", hours, minutes, seconds, millis)
+    format_cue_timestamp(ms, '.')
 }
 
 fn format_duration(seconds: f32) -> String {

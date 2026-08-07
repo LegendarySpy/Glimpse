@@ -144,9 +144,6 @@ fn build_tray_menu(
         menu = menu.separator();
     }
 
-    // TODO: add back Mode submenu when cloud is added.
-    // let mode_submenu = SubmenuBuilder::new(app, "Mode") ...
-
     menu = menu.item(&build_models_submenu(app, settings)?);
 
     let mut mic_submenu = SubmenuBuilder::new(app, strings.get("native.menu.microphone"));

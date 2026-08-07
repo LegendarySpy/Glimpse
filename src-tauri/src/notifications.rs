@@ -72,7 +72,7 @@ impl NoticeState {
     }
 }
 
-fn parse_timestamp(raw: &str) -> Option<DateTime<Utc>> {
+pub(crate) fn parse_timestamp(raw: &str) -> Option<DateTime<Utc>> {
     DateTime::parse_from_rfc3339(raw)
         .ok()
         .map(|ts| ts.with_timezone(&Utc))

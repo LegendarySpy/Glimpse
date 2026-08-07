@@ -9,7 +9,11 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter};
 
-use crate::{AppRuntime, EVENT_LICENSE_CHECKOUT_RETURNED, settings::SettingsStore, tray};
+use crate::{
+    AppRuntime, EVENT_LICENSE_CHECKOUT_RETURNED,
+    settings::{KEY_ANALYTICS_INSTALL_ID, SettingsStore},
+    tray,
+};
 
 const KEY_LICENSE_KEY: &str = "license_key";
 const KEY_LICENSE_ACTIVATION_ID: &str = "license_activation_id";
@@ -17,7 +21,6 @@ const KEY_LICENSE_GRANT: &str = "license_grant";
 
 const KEY_LICENSE_TRIAL_STARTED_AT: &str = "license_trial_started_at";
 const KEY_LICENSE_TRIAL_RECORD: &str = "license_trial_record";
-const KEY_ANALYTICS_INSTALL_ID: &str = "analytics_install_id";
 const TRIAL_SEAL_PEPPER: &str = "glimpse_trial_v1";
 
 const GRANT_STATUS_GRANTED: &str = "granted";

@@ -58,16 +58,6 @@ fn platform_start(
     windows::start(tx, blocking_hotkeys)
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn platform_start(
-    _tx: crossbeam_channel::Sender<KeyEvent>,
-    _blocking_hotkeys: BlockingHotkeys,
-) -> Result<PlatformShutdown> {
-    Err(anyhow!(
-        "Global shortcuts are supported on macOS and Windows only"
-    ))
-}
-
 pub(crate) struct PlatformShutdown {
     stop: Box<dyn FnOnce() + Send + 'static>,
     join_handle: Option<JoinHandle<()>>,

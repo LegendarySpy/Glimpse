@@ -126,21 +126,21 @@ fn is_private_or_local_host(site: &str) -> bool {
     )
 }
 
-fn fetch_and_cache_website_icon(
+async fn fetch_and_cache_website_icon(
     site: &str,
     cache_dir: &Path,
-    client: &reqwest::blocking::Client,
+    client: &reqwest::Client,
 ) -> Option<PathBuf> {
     if is_private_or_local_host(site) {
         return None;
     }
     let url = format!("https://icons.duckduckgo.com/ip3/{site}.ico");
-    let response = client.get(&url).send().ok()?;
+    let response = client.get(&url).send().await.ok()?;
     if !response.status().is_success() {
         return None;
     }
 
-    let bytes = response.bytes().ok()?;
+    let bytes = response.bytes().await.ok()?;
     if bytes.is_empty() || bytes.len() > WEBSITE_ICON_MAX_BYTES {
         return None;
     }
@@ -155,8 +155,8 @@ fn warm_website_icon_cache_in_background(pending_sites: Vec<String>, cache_dir: 
         return;
     }
 
-    std::thread::spawn(move || {
-        let client = match reqwest::blocking::Client::builder()
+    tauri::async_runtime::spawn(async move {
+        let client = match reqwest::Client::builder()
             .user_agent(WEBSITE_ICON_USER_AGENT)
             .timeout(Duration::from_secs(4))
             .connect_timeout(Duration::from_secs(3))
@@ -167,7 +167,7 @@ fn warm_website_icon_cache_in_background(pending_sites: Vec<String>, cache_dir: 
         };
 
         for site in pending_sites {
-            let _ = fetch_and_cache_website_icon(&site, &cache_dir, &client);
+            let _ = fetch_and_cache_website_icon(&site, &cache_dir, &client).await;
         }
     });
 }
@@ -243,11 +243,5 @@ pub fn list_installed_apps(app: AppHandle<AppRuntime>) -> Result<Vec<InstalledAp
     #[cfg(target_os = "windows")]
     {
         platform::windows::icons::list_installed_apps(&app)
-    }
-
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    {
-        let _ = app;
-        Ok(Vec::new())
     }
 }

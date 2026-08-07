@@ -57,7 +57,6 @@ const transcriptionPrunePolicyFor = (
 const recordingPrunePolicySeverity: Record<RecordingPrunePolicy, number> = {
   never: 0,
   year: 1,
-  three_months: 1,
   month: 3,
   week: 4,
   day: 5,

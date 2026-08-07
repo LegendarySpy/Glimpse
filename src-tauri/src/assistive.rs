@@ -41,11 +41,6 @@ pub fn focused_text_snapshot() -> Option<FocusedTextSnapshot> {
     windows_uia::focused_text_snapshot()
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-pub fn focused_text_snapshot() -> Option<FocusedTextSnapshot> {
-    None
-}
-
 #[cfg(target_os = "macos")]
 pub fn get_selected_text_ax() -> Option<String> {
     match macos_ax::probe_selection() {
@@ -519,13 +514,7 @@ pub fn paste_text(text: &str) -> Result<()> {
     paste_result
 }
 
-#[cfg(target_os = "windows")]
-pub fn copy_text_to_clipboard(text: &str) -> Result<()> {
-    let mut clipboard = Clipboard::new().map_err(|e| anyhow!("Failed to access clipboard: {e}"))?;
-    set_text_excluding_history(&mut clipboard, text.to_string())
-}
-
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 pub fn copy_text_to_clipboard(text: &str) -> Result<()> {
     let mut clipboard = Clipboard::new().map_err(|e| anyhow!("Failed to access clipboard: {e}"))?;
     set_text_excluding_history(&mut clipboard, text.to_string())

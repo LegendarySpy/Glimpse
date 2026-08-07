@@ -6,7 +6,7 @@ export type ThemeMode = "system" | "light" | "dark";
 export type AppLocaleSetting = "system" | string;
 
 export type RecordingPrunePolicy =
-  "never" | "immediately" | "day" | "week" | "month" | "three_months" | "year";
+  "never" | "immediately" | "day" | "week" | "month" | "year";
 
 export type AutoDeleteTarget = "audio" | "transcripts";
 
