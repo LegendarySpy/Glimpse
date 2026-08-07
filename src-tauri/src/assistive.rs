@@ -443,7 +443,7 @@ fn send_copy_keystroke() -> Result<()> {
 
     let key_up = CGEvent::new_keyboard_event(source, C_KEY, false)
         .map_err(|_| anyhow!("Failed to create key-up event"))?;
-    key_up.set_flags(CGEventFlags::CGEventFlagCommand);
+    key_up.set_flags(CGEventFlags::empty());
     key_up.post(CGEventTapLocation::HID);
 
     Ok(())
@@ -628,7 +628,7 @@ fn send_paste_keystroke() -> Result<()> {
 
     let key_up = CGEvent::new_keyboard_event(source, V_KEY, false)
         .map_err(|_| anyhow!("Failed to create key-up event"))?;
-    key_up.set_flags(CGEventFlags::CGEventFlagCommand);
+    key_up.set_flags(CGEventFlags::empty());
     key_up.post(CGEventTapLocation::HID);
 
     Ok(())
