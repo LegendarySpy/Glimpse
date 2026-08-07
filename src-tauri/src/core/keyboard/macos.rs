@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{self, RecvTimeoutError};
@@ -38,7 +37,6 @@ pub(super) fn start(
     let join_handle = thread::Builder::new()
         .name("glimpse-keyboard-macos".to_string())
         .spawn(move || {
-            let state = RefCell::new(MacState::default());
             let run_loop = CFRunLoop::get_current();
             let reenable_tap = Arc::new(AtomicBool::new(false));
             let request_reenable = Arc::clone(&reenable_tap);
@@ -63,7 +61,6 @@ pub(super) fn start(
                     handle_event(
                         event_type,
                         event,
-                        &state,
                         &tx,
                         &blocking_hotkeys,
                         has_blocking_hotkeys,
@@ -134,28 +131,21 @@ pub(super) fn start(
     ))
 }
 
-#[derive(Default)]
-struct MacState {
-    modifiers: Modifiers,
-}
-
 fn handle_event(
     event_type: CGEventType,
     event: &CGEvent,
-    state: &RefCell<MacState>,
     tx: &Sender<KeyEvent>,
     blocking_hotkeys: &BlockingHotkeys,
     can_block: bool,
     reenable_tap: &AtomicBool,
 ) -> CallbackResult {
     let key_event = match event_type {
-        CGEventType::KeyDown => key_event(event, state, true),
-        CGEventType::KeyUp => key_event(event, state, false),
-        CGEventType::FlagsChanged => flags_changed_event(event, state),
-        CGEventType::OtherMouseDown => mouse_event(event, state, true),
-        CGEventType::OtherMouseUp => mouse_event(event, state, false),
+        CGEventType::KeyDown => key_event(event, true),
+        CGEventType::KeyUp => key_event(event, false),
+        CGEventType::FlagsChanged => flags_changed_event(event),
+        CGEventType::OtherMouseDown => mouse_event(event, true),
+        CGEventType::OtherMouseUp => mouse_event(event, false),
         CGEventType::TapDisabledByTimeout | CGEventType::TapDisabledByUserInput => {
-            state.borrow_mut().modifiers = Modifiers::empty();
             reenable_tap.store(true, Ordering::Release);
             Some(KeyEvent {
                 modifiers: Modifiers::empty(),
@@ -184,17 +174,14 @@ fn handle_event(
     }
 }
 
-fn key_event(event: &CGEvent, state: &RefCell<MacState>, is_key_down: bool) -> Option<KeyEvent> {
-    let flags = event.get_flags();
-    let modifiers = modifiers_for_key_event(state.borrow().modifiers, flags);
-
+fn key_event(event: &CGEvent, is_key_down: bool) -> Option<KeyEvent> {
     let key_code = event.get_integer_value_field(EventField::KEYBOARD_EVENT_KEYCODE) as CGKeyCode;
     let key = key_from_keycode(key_code)?;
     let repeat =
         is_key_down && event.get_integer_value_field(EventField::KEYBOARD_EVENT_AUTOREPEAT) != 0;
 
     Some(KeyEvent {
-        modifiers,
+        modifiers: modifiers_from_flags(event.get_flags(), None),
         key: Some(key),
         is_key_down,
         changed_modifier: None,
@@ -202,7 +189,7 @@ fn key_event(event: &CGEvent, state: &RefCell<MacState>, is_key_down: bool) -> O
     })
 }
 
-fn mouse_event(event: &CGEvent, state: &RefCell<MacState>, is_key_down: bool) -> Option<KeyEvent> {
+fn mouse_event(event: &CGEvent, is_key_down: bool) -> Option<KeyEvent> {
     let button = event.get_integer_value_field(EventField::MOUSE_EVENT_BUTTON_NUMBER);
     let key = match button {
         2 => Key::MouseMiddle,
@@ -212,7 +199,7 @@ fn mouse_event(event: &CGEvent, state: &RefCell<MacState>, is_key_down: bool) ->
     };
 
     Some(KeyEvent {
-        modifiers: modifiers_for_key_event(state.borrow().modifiers, event.get_flags()),
+        modifiers: modifiers_from_flags(event.get_flags(), None),
         key: Some(key),
         is_key_down,
         changed_modifier: None,
@@ -220,13 +207,13 @@ fn mouse_event(event: &CGEvent, state: &RefCell<MacState>, is_key_down: bool) ->
     })
 }
 
-fn flags_changed_event(event: &CGEvent, state: &RefCell<MacState>) -> Option<KeyEvent> {
+fn flags_changed_event(event: &CGEvent) -> Option<KeyEvent> {
     let flags = event.get_flags();
     let key_code = event.get_integer_value_field(EventField::KEYBOARD_EVENT_KEYCODE) as CGKeyCode;
 
     if let Some(key) = lock_key_from_keycode(key_code) {
         return Some(KeyEvent {
-            modifiers: modifiers_with_fn(state.borrow().modifiers, flags),
+            modifiers: modifiers_from_flags(flags, None),
             key: Some(key),
             is_key_down: flags.contains(CGEventFlags::CGEventFlagAlphaShift),
             changed_modifier: None,
@@ -235,118 +222,79 @@ fn flags_changed_event(event: &CGEvent, state: &RefCell<MacState>) -> Option<Key
     }
 
     let changed_modifier = modifier_from_keycode(key_code)?;
-
-    let mut state = state.borrow_mut();
-    let is_key_down = update_modifier_state(&mut state.modifiers, changed_modifier, flags);
+    let modifiers = modifiers_from_flags(flags, Some(changed_modifier));
 
     Some(KeyEvent {
-        modifiers: modifiers_with_fn(state.modifiers, flags),
+        modifiers,
         key: None,
-        is_key_down,
+        is_key_down: modifiers.contains(changed_modifier),
         changed_modifier: Some(changed_modifier),
         repeat: false,
     })
 }
 
-fn update_modifier_state(
-    modifiers: &mut Modifiers,
-    changed_modifier: Modifiers,
-    flags: CGEventFlags,
-) -> bool {
-    if changed_modifier == Modifiers::FN {
-        return set_modifier_from_flag(
-            modifiers,
-            changed_modifier,
-            flags.contains(CGEventFlags::CGEventFlagSecondaryFn),
-        );
-    }
-
-    let Some((group_flag, sibling)) = modifier_group(changed_modifier) else {
-        return set_modifier_from_flag(modifiers, changed_modifier, false);
-    };
-
-    if !flags.contains(group_flag) {
-        modifiers.remove(changed_modifier | sibling);
-        return false;
-    }
-
-    if modifiers.contains(changed_modifier) && modifiers.contains(sibling) {
-        modifiers.remove(changed_modifier);
-        return false;
-    }
-
-    modifiers.insert(changed_modifier);
-    true
-}
-
-fn set_modifier_from_flag(modifiers: &mut Modifiers, modifier: Modifiers, is_down: bool) -> bool {
-    if is_down {
-        modifiers.insert(modifier);
-    } else {
-        modifiers.remove(modifier);
-    }
-    is_down
-}
-
-fn modifier_group(modifier: Modifiers) -> Option<(CGEventFlags, Modifiers)> {
-    match modifier {
-        Modifiers::CMD_LEFT => Some((CGEventFlags::CGEventFlagCommand, Modifiers::CMD_RIGHT)),
-        Modifiers::CMD_RIGHT => Some((CGEventFlags::CGEventFlagCommand, Modifiers::CMD_LEFT)),
-        Modifiers::SHIFT_LEFT => Some((CGEventFlags::CGEventFlagShift, Modifiers::SHIFT_RIGHT)),
-        Modifiers::SHIFT_RIGHT => Some((CGEventFlags::CGEventFlagShift, Modifiers::SHIFT_LEFT)),
-        Modifiers::CTRL_LEFT => Some((CGEventFlags::CGEventFlagControl, Modifiers::CTRL_RIGHT)),
-        Modifiers::CTRL_RIGHT => Some((CGEventFlags::CGEventFlagControl, Modifiers::CTRL_LEFT)),
-        Modifiers::OPT_LEFT => Some((CGEventFlags::CGEventFlagAlternate, Modifiers::OPT_RIGHT)),
-        Modifiers::OPT_RIGHT => Some((CGEventFlags::CGEventFlagAlternate, Modifiers::OPT_LEFT)),
-        _ => None,
-    }
-}
-
-fn modifiers_with_fn(mut modifiers: Modifiers, flags: CGEventFlags) -> Modifiers {
-    if flags.contains(CGEventFlags::CGEventFlagSecondaryFn) {
-        modifiers.insert(Modifiers::FN);
-    } else {
-        modifiers.remove(Modifiers::FN);
-    }
-    modifiers
-}
-
-fn modifiers_for_key_event(mut modifiers: Modifiers, flags: CGEventFlags) -> Modifiers {
-    reconcile_group(
-        &mut modifiers,
-        flags.contains(CGEventFlags::CGEventFlagCommand),
+// CGEventFlags is the IOKit NX flags word, whose low bits name the physical side of each
+// held modifier (IOLLEvent.h). IOHIDFamily stamps them from the HID usage, so every event
+// carries the whole chord and nothing has to be remembered between events.
+const MODIFIER_GROUPS: [(CGEventFlags, u64, u64, Modifiers, Modifiers); 4] = [
+    (
+        CGEventFlags::CGEventFlagCommand,
+        0x8,
+        0x10,
         Modifiers::CMD_LEFT,
         Modifiers::CMD_RIGHT,
-    );
-    reconcile_group(
-        &mut modifiers,
-        flags.contains(CGEventFlags::CGEventFlagShift),
+    ),
+    (
+        CGEventFlags::CGEventFlagShift,
+        0x2,
+        0x4,
         Modifiers::SHIFT_LEFT,
         Modifiers::SHIFT_RIGHT,
-    );
-    reconcile_group(
-        &mut modifiers,
-        flags.contains(CGEventFlags::CGEventFlagControl),
+    ),
+    (
+        CGEventFlags::CGEventFlagControl,
+        0x1,
+        0x2000,
         Modifiers::CTRL_LEFT,
         Modifiers::CTRL_RIGHT,
-    );
-    reconcile_group(
-        &mut modifiers,
-        flags.contains(CGEventFlags::CGEventFlagAlternate),
+    ),
+    (
+        CGEventFlags::CGEventFlagAlternate,
+        0x20,
+        0x40,
         Modifiers::OPT_LEFT,
         Modifiers::OPT_RIGHT,
-    );
-    modifiers_with_fn(modifiers, flags)
-}
+    ),
+];
 
-fn reconcile_group(modifiers: &mut Modifiers, active: bool, left: Modifiers, right: Modifiers) {
-    if active {
-        if !modifiers.contains(left) && !modifiers.contains(right) {
+fn modifiers_from_flags(flags: CGEventFlags, changed_modifier: Option<Modifiers>) -> Modifiers {
+    let raw = flags.bits();
+    let mut modifiers = Modifiers::empty();
+
+    for (group_flag, left_bit, right_bit, left, right) in MODIFIER_GROUPS {
+        if !flags.contains(group_flag) {
+            continue;
+        }
+        if raw & left_bit != 0 {
             modifiers.insert(left);
         }
-    } else {
-        modifiers.remove(left | right);
+        if raw & right_bit != 0 {
+            modifiers.insert(right);
+        }
+        // Posted events carry the group flag alone, so the side has to be inferred: from the
+        // keycode on a modifier transition, otherwise left by macOS convention.
+        if raw & (left_bit | right_bit) == 0 {
+            modifiers.insert(match changed_modifier {
+                Some(modifier) if modifier == right => right,
+                _ => left,
+            });
+        }
     }
+
+    if flags.contains(CGEventFlags::CGEventFlagSecondaryFn) {
+        modifiers.insert(Modifiers::FN);
+    }
+    modifiers
 }
 
 fn modifier_from_keycode(key_code: CGKeyCode) -> Option<Modifiers> {
@@ -479,6 +427,20 @@ fn key_from_keycode(key_code: CGKeyCode) -> Option<Key> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
+
+    const D_LCMD: u64 = 0x8;
+    const D_RCMD: u64 = 0x10;
+    const D_RALT: u64 = 0x40;
+    const CMD: u64 = 0x0010_0000;
+    const ALT: u64 = 0x0008_0000;
+
+    fn flags_changed(key_code: CGKeyCode, raw_flags: u64) -> KeyEvent {
+        let source = CGEventSource::new(CGEventSourceStateID::Private).unwrap();
+        let event = CGEvent::new_keyboard_event(source, key_code, true).unwrap();
+        event.set_flags(CGEventFlags::from_bits_retain(raw_flags));
+        flags_changed_event(&event).unwrap()
+    }
 
     #[test]
     fn function_key_is_a_modifier() {
@@ -486,50 +448,51 @@ mod tests {
     }
 
     #[test]
-    fn side_modifier_release_uses_inactive_group_flag() {
-        let mut modifiers = Modifiers::OPT_RIGHT;
-        let is_down =
-            update_modifier_state(&mut modifiers, Modifiers::OPT_RIGHT, CGEventFlags::empty());
+    fn device_bits_name_the_side_that_is_held() {
+        let event = flags_changed(0x36, CMD | D_RCMD);
 
-        assert!(!is_down);
-        assert!(!modifiers.contains(Modifiers::OPT_RIGHT));
+        assert_eq!(event.modifiers, Modifiers::CMD_RIGHT);
+        assert_eq!(event.changed_modifier, Some(Modifiers::CMD_RIGHT));
+        assert!(event.is_key_down);
     }
 
     #[test]
-    fn stale_single_side_modifier_press_stays_down() {
-        let mut modifiers = Modifiers::OPT_RIGHT;
-        let is_down = update_modifier_state(
-            &mut modifiers,
-            Modifiers::OPT_RIGHT,
-            CGEventFlags::CGEventFlagAlternate,
-        );
+    fn releasing_one_side_keeps_the_other_held() {
+        let event = flags_changed(0x37, CMD | D_RCMD);
 
-        assert!(is_down);
-        assert!(modifiers.contains(Modifiers::OPT_RIGHT));
+        assert_eq!(event.modifiers, Modifiers::CMD_RIGHT);
+        assert_eq!(event.changed_modifier, Some(Modifiers::CMD_LEFT));
+        assert!(!event.is_key_down);
     }
 
     #[test]
-    fn side_modifier_release_keeps_sibling_when_group_stays_active() {
-        let mut modifiers = Modifiers::OPT_LEFT | Modifiers::OPT_RIGHT;
-        let is_down = update_modifier_state(
-            &mut modifiers,
-            Modifiers::OPT_RIGHT,
-            CGEventFlags::CGEventFlagAlternate,
-        );
+    fn a_missed_release_cannot_wedge_later_events() {
+        // Right Option goes down and its release is never delivered.
+        flags_changed(0x3D, ALT | D_RALT);
 
-        assert!(!is_down);
-        assert!(modifiers.contains(Modifiers::OPT_LEFT));
-        assert!(!modifiers.contains(Modifiers::OPT_RIGHT));
+        // The next event is still read purely from its own flags.
+        let event = flags_changed(0x37, CMD | D_LCMD);
+
+        assert_eq!(event.modifiers, Modifiers::CMD_LEFT);
+        assert!(Modifiers::CMD_LEFT.matches(event.modifiers));
     }
 
     #[test]
-    fn key_event_flag_fallback_does_not_stick_without_flags_changed() {
-        let stored_modifiers = Modifiers::empty();
-        let paste_key_modifiers =
-            modifiers_for_key_event(stored_modifiers, CGEventFlags::CGEventFlagCommand);
+    fn posted_events_without_device_bits_assume_left() {
+        // Our own synthesized paste sets the group flag and nothing else.
+        let source = CGEventSource::new(CGEventSourceStateID::Private).unwrap();
+        let event = CGEvent::new_keyboard_event(source, KeyCode::ANSI_V, true).unwrap();
+        event.set_flags(CGEventFlags::CGEventFlagCommand);
 
-        assert!(paste_key_modifiers.contains(Modifiers::CMD_LEFT));
-        assert!(stored_modifiers.is_empty());
-        assert!(modifiers_for_key_event(stored_modifiers, CGEventFlags::empty()).is_empty());
+        let event = key_event(&event, true).unwrap();
+        assert_eq!(event.modifiers, Modifiers::CMD_LEFT);
+    }
+
+    #[test]
+    fn posted_modifier_transitions_take_the_side_from_the_keycode() {
+        let event = flags_changed(0x36, CMD);
+
+        assert_eq!(event.modifiers, Modifiers::CMD_RIGHT);
+        assert!(event.is_key_down);
     }
 }
