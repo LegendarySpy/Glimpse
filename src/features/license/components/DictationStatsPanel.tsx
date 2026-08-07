@@ -264,7 +264,7 @@ const DictationStatsPanel = () => {
   );
 
   return (
-    <div className="space-y-3">
+    <div className="mx-auto w-full max-w-[686px] space-y-3">
       <SectionLabel
         trailing={
           <button

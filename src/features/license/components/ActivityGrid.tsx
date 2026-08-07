@@ -84,6 +84,7 @@ const ActivityGrid = ({
     <svg
       viewBox={`0 0 ${width} ${height}`}
       width="100%"
+      style={{ maxWidth: width }}
       preserveAspectRatio="xMinYMin meet"
       role="img"
       aria-label={ariaLabel}

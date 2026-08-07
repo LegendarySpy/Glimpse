@@ -31,7 +31,7 @@ const SettingsNavToggle = ({
   >
     <div className="relative flex h-5 w-[20px] shrink-0 items-center justify-center">
       <motion.span
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center will-change-[transform,opacity]"
         animate={{
           rotate: open ? -100 : 0,
           opacity: open ? 0 : 1,
@@ -42,7 +42,7 @@ const SettingsNavToggle = ({
         <GearSix size={20} />
       </motion.span>
       <motion.span
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center will-change-[transform,opacity]"
         animate={{
           rotate: open ? 0 : 70,
           opacity: open ? 1 : 0,
