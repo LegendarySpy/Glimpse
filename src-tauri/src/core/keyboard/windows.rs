@@ -21,7 +21,6 @@ const LLKHF_EXTENDED_FLAG: u32 = 0x01;
 
 struct HookState {
     tx: Sender<KeyEvent>,
-    modifiers: Modifiers,
     blocking_hotkeys: BlockingHotkeys,
 }
 
@@ -41,7 +40,6 @@ pub(super) fn start(
             HOOK_STATE.with(|state| {
                 *state.borrow_mut() = Some(HookState {
                     tx,
-                    modifiers: Modifiers::empty(),
                     blocking_hotkeys,
                 });
             });
@@ -114,8 +112,8 @@ unsafe extern "system" fn hook_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -
     }
 
     let event = HOOK_STATE.with(|state| {
-        let mut state = state.borrow_mut();
-        let state = state.as_mut()?;
+        let state = state.borrow();
+        let state = state.as_ref()?;
         let info = unsafe { &*(lparam.0 as *const KBDLLHOOKSTRUCT) };
         build_event(state, info, is_key_down)
     });
@@ -154,10 +152,10 @@ unsafe extern "system" fn mouse_hook_proc(code: i32, wparam: WPARAM, lparam: LPA
     };
 
     let event = HOOK_STATE.with(|state| {
-        let mut state = state.borrow_mut();
-        let state = state.as_mut()?;
+        let state = state.borrow();
+        let state = state.as_ref()?;
         let event = KeyEvent {
-            modifiers: state.modifiers,
+            modifiers: held_modifiers(None),
             key: Some(key),
             is_key_down,
             changed_modifier: None,
@@ -195,7 +193,7 @@ fn mouse_key(message: u32, mouse_data: u32) -> Option<Key> {
 }
 
 fn build_event(
-    state: &mut HookState,
+    state: &HookState,
     info: &KBDLLHOOKSTRUCT,
     is_key_down: bool,
 ) -> Option<(KeyEvent, BlockingHotkeys, Sender<KeyEvent>)> {
@@ -203,14 +201,8 @@ fn build_event(
     let is_extended = (info.flags.0 & LLKHF_EXTENDED_FLAG) != 0;
 
     let event = if let Some(modifier) = modifier_from_vk(vk, info.scanCode, is_extended) {
-        if is_key_down {
-            state.modifiers.insert(modifier);
-        } else {
-            state.modifiers.remove(modifier);
-        }
-
         KeyEvent {
-            modifiers: state.modifiers,
+            modifiers: held_modifiers(Some((modifier, is_key_down))),
             key: None,
             is_key_down,
             changed_modifier: Some(modifier),
@@ -218,7 +210,7 @@ fn build_event(
         }
     } else {
         KeyEvent {
-            modifiers: state.modifiers,
+            modifiers: held_modifiers(None),
             key: Some(key_from_vk(vk, is_extended)?),
             is_key_down,
             changed_modifier: None,
@@ -227,6 +219,40 @@ fn build_event(
     };
 
     Some((event, state.blocking_hotkeys.clone(), state.tx.clone()))
+}
+
+// A key-up the hook never sees, because the secure desktop, the lock screen or an elevated
+// window swallowed it, would otherwise leave a modifier set for good. Windows keeps the real
+// state, so the chord is read back rather than remembered. The hook runs before that state is
+// updated for the key it was called about, so this event's own modifier comes from the hook.
+fn held_modifiers(changed: Option<(Modifiers, bool)>) -> Modifiers {
+    const MODIFIER_KEYS: [(VIRTUAL_KEY, Modifiers); 8] = [
+        (VK_LWIN, Modifiers::CMD_LEFT),
+        (VK_RWIN, Modifiers::CMD_RIGHT),
+        (VK_LSHIFT, Modifiers::SHIFT_LEFT),
+        (VK_RSHIFT, Modifiers::SHIFT_RIGHT),
+        (VK_LCONTROL, Modifiers::CTRL_LEFT),
+        (VK_RCONTROL, Modifiers::CTRL_RIGHT),
+        (VK_LMENU, Modifiers::OPT_LEFT),
+        (VK_RMENU, Modifiers::OPT_RIGHT),
+    ];
+
+    let mut modifiers = Modifiers::empty();
+    for (vk, modifier) in MODIFIER_KEYS {
+        if unsafe { GetAsyncKeyState(vk.0 as i32) } as u16 & 0x8000 != 0 {
+            modifiers.insert(modifier);
+        }
+    }
+
+    if let Some((modifier, is_key_down)) = changed {
+        if is_key_down {
+            modifiers.insert(modifier);
+        } else {
+            modifiers.remove(modifier);
+        }
+    }
+
+    modifiers
 }
 
 fn modifier_from_vk(vk: VIRTUAL_KEY, scan_code: u32, is_extended: bool) -> Option<Modifiers> {
