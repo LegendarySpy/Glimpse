@@ -1,5 +1,6 @@
 mod accessibility_context;
 mod analytics;
+mod asks;
 mod assistive;
 mod audio;
 mod auto_dictionary;
@@ -30,7 +31,6 @@ mod settings;
 mod speech;
 mod storage;
 mod streaming_transcription;
-mod survey;
 mod toast;
 mod transcribe;
 mod transcription_api;
@@ -694,9 +694,9 @@ pub fn run() {
             fetch_remote_speech_models,
             open_about_page,
             open_account_page,
-            survey::get_survey_prompt,
-            survey::mark_survey_prompt_seen,
-            survey::resolve_survey_prompt,
+            asks::get_ask_prompt,
+            asks::mark_ask_prompt_seen,
+            asks::resolve_ask_prompt,
             reveal_logs,
             update_checker::get_update_status,
             update_checker::check_for_updates,

@@ -490,7 +490,7 @@ msgid "settings.app.analytics.body"
 msgstr "anonyme, aucune transcription ni audio partagé."
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.answer"
 msgstr "Répondre"
 
@@ -695,6 +695,11 @@ msgstr "Intégré au Mac"
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.ready"
 msgstr "Intégré à ce Mac."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_idle"
+msgstr "Acheter une licence"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -2868,7 +2873,7 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "Aucun tag pour l'instant"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.dismiss"
 msgstr "Non merci"
 
@@ -3003,6 +3008,11 @@ msgid "onboarding.done.auto_launch"
 msgstr "Ouvrir à la connexion"
 
 #. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.answer"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.open_settings"
 msgstr "Ouvrir les réglages"
@@ -3091,11 +3101,6 @@ msgstr "Personnalisation"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.title"
 msgstr "Personnalisation"
-
-#. js-lingui-explicit-id
-#: src/features/license/components/MemberCard.tsx
-msgid "member_card.draft_idle"
-msgstr "Acheter une licence"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3222,6 +3227,16 @@ msgstr "Quitter {app}"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "Quitter {app}"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.answer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3865,7 +3880,7 @@ msgid "onboarding.done.recap.shortcut"
 msgstr "Raccourci intelligent"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.title"
 msgstr "Quelques questions sur votre utilisation de Glimpse ?"
 
@@ -3898,6 +3913,11 @@ msgstr "Parole"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.category.standard"
 msgstr "Standard"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx

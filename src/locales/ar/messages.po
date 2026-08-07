@@ -490,7 +490,7 @@ msgid "settings.app.analytics.body"
 msgstr "مجهول الهوية، لا تتم مشاركة أي نصوص أو ملفات صوتية."
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.answer"
 msgstr "إجابة"
 
@@ -695,6 +695,11 @@ msgstr "مدمج في Mac"
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.ready"
 msgstr "مدمج في هذا الـ Mac."
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_idle"
+msgstr "شراء ترخيص"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -2868,7 +2873,7 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "لا توجد علامات بعد"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.dismiss"
 msgstr "لا، شكرًا"
 
@@ -3003,6 +3008,11 @@ msgid "onboarding.done.auto_launch"
 msgstr "الفتح عند تسجيل الدخول"
 
 #. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.answer"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.open_settings"
 msgstr "فتح الإعدادات"
@@ -3091,11 +3101,6 @@ msgstr "التخصيص"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.title"
 msgstr "التخصيص"
-
-#. js-lingui-explicit-id
-#: src/features/license/components/MemberCard.tsx
-msgid "member_card.draft_idle"
-msgstr "شراء ترخيص"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3222,6 +3227,16 @@ msgstr "إنهاء {app}"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "إنهاء {app}"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.answer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3865,7 +3880,7 @@ msgid "onboarding.done.recap.shortcut"
 msgstr "اختصار ذكي"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.title"
 msgstr "بعض الأسئلة حول كيفية استخدامك لـ Glimpse؟"
 
@@ -3898,6 +3913,11 @@ msgstr "الكلام"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.category.standard"
 msgstr "قياسي"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx

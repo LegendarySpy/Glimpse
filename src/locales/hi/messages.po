@@ -490,7 +490,7 @@ msgid "settings.app.analytics.body"
 msgstr "गुमनाम, कोई लिप्यंतरण या ऑडियो साझा नहीं किया जाता।"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.answer"
 msgstr "उत्तर"
 
@@ -695,6 +695,11 @@ msgstr "Mac में अंतर्निर्मित"
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.ready"
 msgstr "इस Mac में अंतर्निर्मित।"
+
+#. js-lingui-explicit-id
+#: src/features/license/components/MemberCard.tsx
+msgid "member_card.draft_idle"
+msgstr "लाइसेंस खरीदें"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -2868,7 +2873,7 @@ msgid "library.modal.tags.no_tags_yet"
 msgstr "अभी तक कोई टैग नहीं"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.dismiss"
 msgstr "नहीं, धन्यवाद"
 
@@ -3003,6 +3008,11 @@ msgid "onboarding.done.auto_launch"
 msgstr "लॉगिन पर खोलें"
 
 #. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.answer"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
 msgid "settings.app.open_settings"
 msgstr "सेटिंग्स खोलें"
@@ -3091,11 +3101,6 @@ msgstr "व्यक्तिकरण"
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.title"
 msgstr "व्यक्तिकरण"
-
-#. js-lingui-explicit-id
-#: src/features/license/components/MemberCard.tsx
-msgid "member_card.draft_idle"
-msgstr "लाइसेंस खरीदें"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3222,6 +3227,16 @@ msgstr "{app} बंद करें"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.quit"
 msgstr "{app} बंद करें"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.answer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.review.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryCard.tsx
@@ -3865,7 +3880,7 @@ msgid "onboarding.done.recap.shortcut"
 msgstr "स्मार्ट शॉर्टकट"
 
 #. js-lingui-explicit-id
-#: src/features/survey/components/SurveyPrompt.tsx
+#: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.title"
 msgstr "आप Glimpse का उपयोग कैसे करते हैं, इस बारे में कुछ प्रश्न?"
 
@@ -3898,6 +3913,11 @@ msgstr "स्पीच"
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.category.standard"
 msgstr "मानक"
+
+#. js-lingui-explicit-id
+#: src/features/asks/components/AskPrompt.tsx
+msgid "home.ask.star.title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
