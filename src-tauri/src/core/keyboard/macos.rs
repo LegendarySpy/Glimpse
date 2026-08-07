@@ -180,8 +180,13 @@ fn key_event(event: &CGEvent, is_key_down: bool) -> Option<KeyEvent> {
     let repeat =
         is_key_down && event.get_integer_value_field(EventField::KEYBOARD_EVENT_AUTOREPEAT) != 0;
 
+    let mut modifiers = modifiers_from_flags(event.get_flags(), None);
+    if key.is_function_key() {
+        modifiers.remove(Modifiers::FN);
+    }
+
     Some(KeyEvent {
-        modifiers: modifiers_from_flags(event.get_flags(), None),
+        modifiers,
         key: Some(key),
         is_key_down,
         changed_modifier: None,
@@ -486,6 +491,20 @@ mod tests {
 
         let event = key_event(&event, true).unwrap();
         assert_eq!(event.modifiers, Modifiers::CMD_LEFT);
+    }
+
+    #[test]
+    fn arrow_keys_do_not_report_the_fn_they_always_carry() {
+        const FN: u64 = 0x0080_0000;
+        const CTRL: u64 = 0x0004_0000;
+        const D_LCTRL: u64 = 0x1;
+
+        let source = CGEventSource::new(CGEventSourceStateID::Private).unwrap();
+        let event = CGEvent::new_keyboard_event(source, KeyCode::LEFT_ARROW, true).unwrap();
+        event.set_flags(CGEventFlags::from_bits_retain(FN | CTRL | D_LCTRL));
+
+        let event = key_event(&event, true).unwrap();
+        assert_eq!(event.modifiers, Modifiers::CTRL_LEFT);
     }
 
     #[test]
