@@ -8,11 +8,13 @@ import { URL } from "node:url";
 const DEFAULT_PROJECT_ID = "6252908169c7abdf708bc0.88157474";
 const SOURCE_LOCALE = "en";
 const API_BASE = "https://api.lokalise.com/api2";
+const SYNC_STATE_FILE = ".lokalise-sync.json";
 
 function usage() {
   return [
-    "Usage: bun run locale:pull-task <task-id>",
+    "Usage: bun run locale:pull-task [latest|task-id]",
     "",
+    "Omit the argument or use latest to pull every task completed since the last sync.",
     "Set LOKALISE_API_TOKEN in .env or the shell before running.",
     "LOKALISE_PROJECT_ID may override the Glimpse project ID.",
   ].join("\n");
@@ -161,22 +163,13 @@ function run(command, args) {
   }
 }
 
-async function main() {
-  if (process.argv.length !== 3) {
-    throw new Error(usage());
-  }
-
-  const token = process.env.LOKALISE_API_TOKEN;
-  if (!token) {
-    throw new Error(`LOKALISE_API_TOKEN is not set\n\n${usage()}`);
-  }
-
-  const taskId = parseTaskId(process.argv[2]);
-  const projectId = process.env.LOKALISE_PROJECT_ID ?? DEFAULT_PROJECT_ID;
-  const workspace = process.cwd();
-  const supportedLocales = JSON.parse(
-    readFileSync(resolve(workspace, "supported-app-locales.json"), "utf8"),
-  );
+async function pullTask({
+  taskId,
+  token,
+  projectId,
+  workspace,
+  supportedLocales,
+}) {
   const targetLocales = new Set(
     supportedLocales.filter((locale) => locale !== SOURCE_LOCALE),
   );
@@ -284,6 +277,95 @@ async function main() {
   console.log(
     `Pulled task ${taskId}: ${taskEntryTotal} entries checked, ${changedTotal} translations updated.`,
   );
+}
+
+function taskIsAfterCheckpoint(task, checkpoint) {
+  const completedAt = task.completed_at_timestamp ?? 0;
+  return (
+    completedAt > checkpoint.completedAtTimestamp ||
+    (completedAt === checkpoint.completedAtTimestamp &&
+      task.task_id > checkpoint.taskId)
+  );
+}
+
+async function main() {
+  if (process.argv.length > 3) {
+    throw new Error(usage());
+  }
+
+  const token = process.env.LOKALISE_API_TOKEN;
+  if (!token) {
+    throw new Error(`LOKALISE_API_TOKEN is not set\n\n${usage()}`);
+  }
+
+  const projectId = process.env.LOKALISE_PROJECT_ID ?? DEFAULT_PROJECT_ID;
+  const workspace = process.cwd();
+  const supportedLocales = JSON.parse(
+    readFileSync(resolve(workspace, "supported-app-locales.json"), "utf8"),
+  );
+  const context = {
+    token,
+    projectId,
+    workspace,
+    supportedLocales,
+  };
+  const requestedTask = process.argv[2];
+  if (requestedTask && requestedTask !== "latest") {
+    await pullTask({ ...context, taskId: parseTaskId(requestedTask) });
+    return;
+  }
+
+  const statePath = resolve(workspace, SYNC_STATE_FILE);
+  const checkpoint = JSON.parse(readFileSync(statePath, "utf8"));
+  if (
+    !Number.isInteger(checkpoint.taskId) ||
+    !Number.isInteger(checkpoint.completedAtTimestamp)
+  ) {
+    throw new Error(`${SYNC_STATE_FILE} contains an invalid checkpoint`);
+  }
+
+  const tasksPayload = await fetchLokalise(
+    `/projects/${encodeURIComponent(projectId)}/tasks`,
+    token,
+    {
+      filter_statuses: "completed",
+      limit: 5000,
+    },
+  );
+  const pendingTasks = (tasksPayload.tasks ?? [])
+    .filter((task) => taskIsAfterCheckpoint(task, checkpoint))
+    .sort(
+      (left, right) =>
+        left.completed_at_timestamp - right.completed_at_timestamp ||
+        left.task_id - right.task_id,
+    );
+
+  if (pendingTasks.length === 0) {
+    console.log(`No completed Lokalise tasks after ${checkpoint.taskId}.`);
+    return;
+  }
+
+  console.log(
+    `Pulling ${pendingTasks.length} completed Lokalise ${pendingTasks.length === 1 ? "task" : "tasks"}.`,
+  );
+  for (const task of pendingTasks) {
+    await pullTask({ ...context, taskId: String(task.task_id) });
+  }
+
+  const latest = pendingTasks.at(-1);
+  writeFileSync(
+    statePath,
+    `${JSON.stringify(
+      {
+        taskId: latest.task_id,
+        completedAtTimestamp: latest.completed_at_timestamp,
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+  console.log(`Lokalise checkpoint advanced to task ${latest.task_id}.`);
 }
 
 main().catch((error) => {
