@@ -238,7 +238,6 @@ const SettingsScreen = ({
                 variants={paneVariants}
                 appInfo={form.appInfo}
                 transcriptionMode={form.transcriptionMode}
-                formatBytes={form.formatBytes}
                 cliInstallStatus={form.cliInstallStatus}
                 cliInstallBusy={form.cliInstallBusy}
                 activeLicense={form.activeLicense}

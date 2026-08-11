@@ -205,7 +205,7 @@ export function isRemoteSpeechConfigured(args: {
   );
 }
 
-export const REMOTE_SPEECH_MODEL_PREFIX = "remote:";
+const REMOTE_SPEECH_MODEL_PREFIX = "remote:";
 
 function formatSpeechProviderModelLabel(
   providerId: string,

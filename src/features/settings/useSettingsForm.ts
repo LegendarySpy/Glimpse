@@ -1836,17 +1836,6 @@ export function useSettingsForm({
     }
   }, [removeCliAsync, showSettingsError]);
 
-  const formatBytes = useCallback((bytes: number) => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const decimals = i >= 3 ? 1 : 0;
-    return (
-      parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i]
-    );
-  }, []);
-
   return {
     activeTab,
     setActiveTab,
@@ -1974,6 +1963,5 @@ export function useSettingsForm({
     handleDelete,
     handleCancelDownload,
     handleOpenDataDir,
-    formatBytes,
   };
 }

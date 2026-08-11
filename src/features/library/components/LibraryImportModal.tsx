@@ -15,9 +15,9 @@ import {
 import {
   SUPPORTED_EXTENSIONS,
   uniquePaths,
-  formatBytes,
   formatDuration,
 } from "./library-utils";
+import { formatBytes } from "../../../shared/lib/format";
 import type { LibraryImportOptions, SpeechModel } from "../../../types";
 
 type ImportFileProbe = {

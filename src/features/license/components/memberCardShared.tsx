@@ -201,8 +201,6 @@ export function getCardShellStyle(palette: MemberCardPalette, extraHeight = 0) {
   };
 }
 
-export const EDITION_STAMP_COLORS = EDITION_COLORS;
-
 export const TIER_COLORS: Record<PurchaseTier, { fg: string; bg: string }> = {
   personal: EDITION_COLORS.personal,
   commercial: EDITION_COLORS.commercial,

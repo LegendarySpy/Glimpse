@@ -2,12 +2,6 @@ import type { LicenseEdition, LicenseState } from "../types/license";
 
 export type { LicenseEdition, LicenseState };
 
-export type EditionInfo = {
-  id: LicenseEdition;
-  label: string;
-  blurb: string;
-};
-
 export const EDITION_COLORS: Record<
   LicenseEdition,
   { fg: string; bg: string }
@@ -17,33 +11,6 @@ export const EDITION_COLORS: Record<
   founder: { fg: "#0d9488", bg: "rgba(13, 148, 136, 0.12)" },
   contributor: { fg: "#1d4ed8", bg: "rgba(29, 78, 216, 0.10)" },
 };
-
-const EDITION_INFO: Record<LicenseEdition, EditionInfo> = {
-  personal: {
-    id: "personal",
-    label: "Personal",
-    blurb: "For you. Up to 5 devices.",
-  },
-  commercial: {
-    id: "commercial",
-    label: "Commercial",
-    blurb: "For work. One person per seat, billed yearly.",
-  },
-  founder: {
-    id: "founder",
-    label: "Founder",
-    blurb: "Launch founder. Up to 5 devices.",
-  },
-  contributor: {
-    id: "contributor",
-    label: "Contributor",
-    blurb: "Thank you for contributing. Up to 5 devices.",
-  },
-};
-
-export function editionInfo(edition: LicenseEdition): EditionInfo {
-  return EDITION_INFO[edition];
-}
 
 export function editionFromLicenseState(
   licenseState: LicenseState | null,
