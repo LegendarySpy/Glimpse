@@ -549,10 +549,6 @@ pub fn run() {
                 platform::toast::init(handle, &toast_window);
             }
 
-            if let Some(settings_window) = handle.get_webview_window(SETTINGS_WINDOW_LABEL) {
-                platform::settings_window::init(&settings_window);
-            }
-
             analytics::set_crash_phase("tray_shortcuts");
             if let Ok(tray) = tray::build_tray(handle) {
                 handle.state::<AppState>().store_tray(tray);

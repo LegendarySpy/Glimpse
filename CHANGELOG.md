@@ -5,6 +5,7 @@
 - New users now get a guided first-dictation practice screen after setup.
 - The last setup screen lets you change your model and microphone before you start.
 - The Models screen makes switching cloud transcription on and off clearer.
+- Starting in the background now uses less memory until you open the app window.
 
 ### Fixes
 
