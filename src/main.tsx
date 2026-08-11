@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import App from "./app/App";
 import { AppProviders } from "./app/providers";
+import { localeReady } from "./i18n";
 import { detectAppPlatform } from "./platform/service";
 import {
   parseTextSizeMode,
@@ -174,12 +175,19 @@ const applyInitialTextScale = () => {
 
 applyInitialTextScale();
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <CrashBoundary>
-      <AppProviders>
-        <App />
-      </AppProviders>
-    </CrashBoundary>
-  </React.StrictMode>,
-);
+// Catalogs load on demand, so the first one has to land before the first
+// render or every window would paint untranslated and then swap.
+localeReady
+  .finally(() => {
+    ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+      <React.StrictMode>
+        <CrashBoundary>
+          <AppProviders>
+            <App />
+          </AppProviders>
+        </CrashBoundary>
+      </React.StrictMode>,
+    );
+  })
+  // A missing catalog renders untranslated rather than a blank window.
+  .catch(() => {});

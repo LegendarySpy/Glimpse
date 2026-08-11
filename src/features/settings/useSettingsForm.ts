@@ -886,7 +886,7 @@ export function useSettingsForm({
     (nextLocale: AppLocaleSetting) => {
       clearPendingSettingsSave();
       setAppLocale(nextLocale);
-      activateLocale(nextLocale);
+      void activateLocale(nextLocale);
       queryClient.setQueryData<StoredSettings>(
         settingsKeys.detail(),
         (current) =>

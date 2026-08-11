@@ -103,7 +103,7 @@ function SettingsContent() {
     // Later locale changes activate immediately in the settings form.
     if (!settings || didActivateInitialLocale.current) return;
     didActivateInitialLocale.current = true;
-    activateLocale(settings.app_locale);
+    void activateLocale(settings.app_locale);
   }, [settings]);
 
   useEffect(() => {
