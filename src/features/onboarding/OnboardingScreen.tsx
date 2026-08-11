@@ -30,6 +30,7 @@ import { WelcomeStep } from "./steps/WelcomeStep";
 import { ModelStep } from "./steps/ModelStep";
 import { PermissionsStep } from "./steps/PermissionsStep";
 import { ReadyStep } from "./steps/ReadyStep";
+import FirstDictationGuide from "./FirstDictationGuide";
 import { LicenseModal } from "./steps/LicenseModal";
 import { StepIndicator } from "./steps/shared";
 import { useActivateLicense, useLicenseState } from "../license/queries";
@@ -505,7 +506,7 @@ export default function OnboardingScreen({
     modelCatalogQuery.isLoading || settingsQuery.isLoading;
   const modelCatalogUnavailable = modelCatalogQuery.isError;
 
-  const handleComplete = useCallback(async () => {
+  const handleStartPractice = useCallback(async () => {
     if (
       settingsQuery.isLoading ||
       settingsQuery.isError ||
@@ -548,9 +549,8 @@ export default function OnboardingScreen({
           ctx.autoLaunch,
         ),
       });
-      await invoke("complete_onboarding");
       send({ type: "COMPLETE_SUCCESS" });
-      onComplete();
+      send({ type: "START_PRACTICE" });
     } catch (err) {
       console.error("Failed to finish onboarding", err);
       const message = typeof err === "string" ? err : String(err);
@@ -569,7 +569,6 @@ export default function OnboardingScreen({
     ctx.autoLaunch,
     ctx.selectedMode,
     ctx.smartShortcut,
-    onComplete,
     persistedSettings,
     selectedModel,
     send,
@@ -577,6 +576,28 @@ export default function OnboardingScreen({
     settingsQuery.isLoading,
     t,
   ]);
+
+  const handleFinishOnboarding = useCallback(async () => {
+    send({ type: "COMPLETING" });
+    try {
+      await invoke("complete_onboarding");
+      send({ type: "COMPLETE_SUCCESS" });
+      onComplete();
+    } catch (err) {
+      console.error("Failed to finish onboarding", err);
+      const message = typeof err === "string" ? err : String(err);
+      send({
+        type: "COMPLETE_ERROR",
+        error:
+          message ||
+          t({
+            id: "onboarding.complete.failed",
+            message:
+              "Could not finish setup. Check your settings and try again.",
+          }),
+      });
+    }
+  }, [onComplete, send, t]);
 
   const applySmartShortcut = useCallback(
     async (shortcut: string) => {
@@ -718,7 +739,19 @@ export default function OnboardingScreen({
             }}
             isCompleting={ctx.isCompleting}
             completionError={ctx.completionError}
-            onComplete={handleComplete}
+            onComplete={handleStartPractice}
+          />
+        );
+      case "practice":
+        return (
+          <FirstDictationGuide
+            key="practice"
+            stepMotionProps={stepMotionProps}
+            smartShortcut={ctx.smartShortcut}
+            onSetShortcut={applySmartShortcut}
+            onFinish={handleFinishOnboarding}
+            isFinishing={ctx.isCompleting}
+            completionError={ctx.completionError}
           />
         );
       default:
@@ -726,7 +759,10 @@ export default function OnboardingScreen({
     }
   };
 
-  const showChrome = currentStep !== "welcome" && currentStep !== "done";
+  const showChrome =
+    currentStep !== "welcome" &&
+    currentStep !== "done" &&
+    currentStep !== "practice";
 
   return (
     <MotionConfig reducedMotion="user">

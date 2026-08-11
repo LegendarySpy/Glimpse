@@ -33,6 +33,7 @@ export type OnboardingEvent =
   | { type: "SET_AUTO_LAUNCH"; value: boolean }
   | { type: "SET_SHORTCUT"; shortcut: string }
   | { type: "SHOW_LOCAL_CONFIRM"; show: boolean }
+  | { type: "START_PRACTICE" }
   | { type: "COMPLETING" }
   | { type: "COMPLETE_SUCCESS" }
   | { type: "COMPLETE_ERROR"; error: string }
@@ -177,6 +178,7 @@ export const onboardingMachine = setup({
     },
     done: {
       on: {
+        START_PRACTICE: { target: "practice", actions: "forward" },
         BACK: [
           {
             target: "permissions",
@@ -185,6 +187,11 @@ export const onboardingMachine = setup({
           },
           { target: "model", actions: "backward" },
         ],
+      },
+    },
+    practice: {
+      on: {
+        BACK: { target: "done", actions: "backward" },
       },
     },
   },

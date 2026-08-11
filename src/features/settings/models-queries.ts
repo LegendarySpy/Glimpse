@@ -7,7 +7,7 @@ import {
 import { useMemo } from "react";
 import * as modelsApi from "./models-api";
 import { formatTranscriptionSpeechModel } from "../../shared/lib/speechProviders";
-import type { ModelStatus, SpeechModel } from "../../types";
+import type { ModelInfo, ModelStatus, SpeechModel } from "../../types";
 
 export const modelKeys = {
   all: ["models"] as const,
@@ -46,6 +46,40 @@ export function resolveSpeechModelLabel(
   if (fromList) return fromList;
 
   return formatTranscriptionSpeechModel(normalized) ?? normalized;
+}
+
+export function resolveLocalFallbackModel(
+  catalog: ModelInfo[],
+  statusByModel: Record<string, ModelStatus>,
+  preferredKey: string,
+): ModelInfo | null {
+  const preferred = catalog.find((model) => model.key === preferredKey);
+  if (preferred && statusByModel[preferred.key]?.installed) return preferred;
+
+  const installed = catalog.find(
+    (model) => model.downloadable && statusByModel[model.key]?.installed,
+  );
+  if (installed) return installed;
+
+  const legacyInstalled = catalog.find(
+    (model) => !model.downloadable && statusByModel[model.key]?.installed,
+  );
+  if (legacyInstalled) return legacyInstalled;
+
+  if (preferred) return preferred;
+
+  const recommended = catalog.find(
+    (model) =>
+      model.downloadable &&
+      model.tags.some((tag) => tag.toLowerCase() === "recommended"),
+  );
+  if (recommended) return recommended;
+
+  return (
+    [...catalog]
+      .filter((model) => model.downloadable)
+      .sort((a, b) => a.size_mb - b.size_mb)[0] ?? null
+  );
 }
 
 export function useModelStatuses(

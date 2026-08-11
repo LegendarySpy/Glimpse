@@ -32,6 +32,7 @@ import {
   resolvedSpeechModel,
 } from "../../../../shared/lib/speechProviders";
 import { useShiftHeld } from "../../../../shared/hooks/useShiftHeld";
+import { resolveLocalFallbackModel } from "../../models-queries";
 import type {
   DownloadEvent,
   ModelInfo,
@@ -56,34 +57,6 @@ type ModelsTabProps = {
   handleDelete: (modelKey: string) => void;
   handleCancelDownload: (modelKey: string) => void;
   onOpenProvidersTab: () => void;
-};
-
-const pickInstalledModel = (
-  catalog: ModelInfo[],
-  localModel: string,
-  modelStatus: Record<string, ModelStatus>,
-): ModelInfo | null => {
-  const active = catalog.find((m) => m.key === localModel);
-  if (active) return active;
-  const installed = catalog.find(
-    (m) => modelStatus[m.key]?.installed && m.downloadable,
-  );
-  const legacyInstalled = catalog.find(
-    (m) => modelStatus[m.key]?.installed && !m.downloadable,
-  );
-  if (installed) return installed;
-  if (legacyInstalled) return legacyInstalled;
-  const recommended = catalog.find(
-    (m) =>
-      m.downloadable &&
-      m.tags.some((tag) => tag.toLowerCase() === "recommended"),
-  );
-  if (recommended) return recommended;
-  return (
-    [...catalog]
-      .filter((m) => m.downloadable)
-      .sort((a, b) => a.size_mb - b.size_mb)[0] ?? null
-  );
 };
 
 const InstalledModelRow = ({
@@ -301,10 +274,13 @@ const ModelsTab = ({
   const [browsing, setBrowsing] = useState(false);
   const shiftHeld = useShiftHeld();
 
-  const installedModel = pickInstalledModel(
+  const installedModel = resolveLocalFallbackModel(
     modelCatalog,
-    localModel,
     modelStatus,
+    localModel,
+  );
+  const hasInstalledFallback = Boolean(
+    installedModel && modelStatus[installedModel.key]?.installed,
   );
 
   const providerLabel =
@@ -378,7 +354,7 @@ const ModelsTab = ({
       ) : (
         <div className="flex h-full min-h-0 flex-col gap-5">
           {remoteSpeechEnabled ? (
-            installedModel ? (
+            installedModel && hasInstalledFallback ? (
               <div className="flex shrink-0 items-start justify-center gap-4">
                 <div className="flex flex-col items-center gap-2">
                   <CloudModelCard
@@ -387,12 +363,16 @@ const ModelsTab = ({
                     modelLabel={activeModel ?? null}
                     onClick={onOpenProvidersTab}
                   />
-                  <span className="ui-text-meta ui-color-cloud">
+                  <button
+                    type="button"
+                    onClick={() => setRemoteSpeechEnabled(false)}
+                    className="ui-text-meta ui-color-cloud transition-colors hover:text-content-primary"
+                  >
                     {t({
-                      id: "settings.models.card.active",
-                      message: "Active",
+                      id: "settings.models.cloud.disable",
+                      message: "Disable cloud",
                     })}
-                  </span>
+                  </button>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   {renderLocalCard(SIDE_BY_SIDE_WIDTH, true)}
@@ -405,12 +385,22 @@ const ModelsTab = ({
                 </div>
               </div>
             ) : (
-              <div className="flex shrink-0 justify-center">
+              <div className="flex shrink-0 flex-col items-center gap-2">
                 <CloudModelCard
                   providerLabel={providerLabel}
                   modelLabel={activeModel ?? null}
                   onClick={onOpenProvidersTab}
                 />
+                <button
+                  type="button"
+                  onClick={() => setRemoteSpeechEnabled(false)}
+                  className="ui-text-meta ui-color-cloud transition-colors hover:text-content-primary"
+                >
+                  {t({
+                    id: "settings.models.cloud.disable",
+                    message: "Disable cloud",
+                  })}
+                </button>
               </div>
             )
           ) : (

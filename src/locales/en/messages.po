@@ -14,6 +14,56 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+#~ msgid "settings.models.card.active"
+#~ msgstr "Active"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.eyebrow"
+#~ msgstr "One quick practice"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.practice_label"
+#~ msgstr "Practice field"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.edit_shortcut"
+#~ msgstr "Edit"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.hint"
+#~ msgstr "Tip: tap to toggle, or hold and release to dictate."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.goal"
+#~ msgstr "Your goal"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.say_this"
+#~ msgstr "Say this"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.success_title"
+#~ msgstr "That’s it"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.body"
+#~ msgstr "Press your shortcut. Your words will appear below."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.prompt"
+msgstr "“Glimpse turns my voice into text.”"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.api_key.optional_hint"
 msgstr "(if required)"
@@ -347,11 +397,6 @@ msgstr "Active"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.installed.active"
-msgstr "Active"
-
-#. js-lingui-explicit-id
-#: src/features/settings/components/tabs/ModelsTab.tsx
-msgid "settings.models.card.active"
 msgstr "Active"
 
 #. js-lingui-explicit-id
@@ -1002,6 +1047,11 @@ msgid "onboarding.permissions.continue"
 msgstr "Continue"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.continue"
+msgstr "Continue to Glimpse"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.confirm.title"
 msgstr "Continue without a model?"
@@ -1501,6 +1551,11 @@ msgid "settings.modal.section.developer"
 msgstr "Developer"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.dictate_to_continue"
+msgstr "Dictate to continue"
+
+#. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.dictation"
 msgstr "Dictation"
@@ -1560,6 +1615,11 @@ msgstr "Dictionary works only for models with dictionary support. Current model 
 #: src/features/personalization/components/PersonalizationView.tsx
 msgid "personalization.mode.disable"
 msgstr "Disable"
+
+#. js-lingui-explicit-id
+#: src/features/settings/components/tabs/ModelsTab.tsx
+msgid "settings.models.cloud.disable"
+msgstr "Disable cloud"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
@@ -1895,6 +1955,16 @@ msgstr "Find word..."
 #: src/features/onboarding/steps/ModelStep.tsx
 msgid "onboarding.model.loading"
 msgstr "Finding a model for your device"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.finishing"
+msgstr "Finishing..."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.complete"
+msgstr "First dictation complete"
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -3118,11 +3188,17 @@ msgid "settings.stats.share.post"
 msgstr "Post"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.practice_aria"
+msgstr "Practice your first dictation"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.preloaded_model"
 msgstr "Preloaded model"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut_capture"
 msgstr "Press a shortcut"
@@ -3162,6 +3238,11 @@ msgstr "Press your dictation shortcut, speak, and release. Glimpse transcribes o
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.subtitle"
 msgstr "Press your shortcut in any app to dictate."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.title"
+msgstr "Press your shortcut, then say this"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3840,6 +3921,11 @@ msgid "library.retranscribe.show_timestamps.aria"
 msgstr "Show timestamps"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.later"
+msgstr "Skip"
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
 msgid "onboarding.permissions.skip"
 msgstr "Skip"
@@ -3875,6 +3961,7 @@ msgid "settings.general.shortcuts.smart"
 msgstr "Smart"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "Smart shortcut"
@@ -4465,6 +4552,11 @@ msgid "settings.about.data.verbatim_text_aria"
 msgstr "Use the original transcripts before cleanup"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.success_body"
+msgstr "Use the same shortcut wherever you type."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.subtitle"
 msgstr "Used by shortcuts with the writing model turned on, and by Personalization."
@@ -4684,6 +4776,11 @@ msgstr "Your trial ended on"
 #: src/features/settings/components/AccountView.tsx
 msgid "settings.account.trial.text_ended"
 msgstr "Your trial has ended"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.placeholder"
+msgstr "Your words will appear here…"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
