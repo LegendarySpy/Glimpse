@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- Quitting while a dictation was still recording no longer freezes the app.
 - Automatic local fallback selection now prefers a model that is already installed.
 - Turning cloud transcription off now resets a language the local model cannot handle.
 - The Settings navigation icon no longer shifts by a pixel after animating on Windows.

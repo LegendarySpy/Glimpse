@@ -731,7 +731,7 @@ pub fn run() {
                 // should not report as crashes while running.
                 analytics::set_crash_phase("shutdown");
                 let state = handler.state::<AppState>();
-                state.local_transcriber.unload();
+                state.local_transcriber.unload_if_idle();
                 state.stop_preflight_loop();
                 let now = Instant::now();
                 let counters = state.session_counters.lock();
