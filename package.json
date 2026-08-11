@@ -29,7 +29,7 @@
     "@tauri-apps/plugin-opener": "^2.5.4",
     "@tauri-apps/plugin-process": "^2.3.1",
     "@xstate/react": "^6.1.0",
-    "framer-motion": "^13.0.0",
+    "framer-motion": "^13.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0",
@@ -60,11 +60,11 @@
     "@typescript/native": "npm:typescript@~7.0.2",
     "@vitejs/plugin-react": "^6.0.5",
     "eslint": "^10.8.1",
-    "eslint-plugin-boundaries": "^7.1.0",
+    "eslint-plugin-boundaries": "^7.2.0",
     "prettier": "3.9.6",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.66.0",
+    "typescript-eslint": "^8.67.0",
     "vite": "^8.2.1"
   }
 }
