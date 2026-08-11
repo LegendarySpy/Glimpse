@@ -326,9 +326,8 @@ pub fn track_dictation_discarded(app: &tauri::AppHandle<AppRuntime>, reason: &st
 #[tauri::command]
 pub fn track_onboarding_step_viewed(app: tauri::AppHandle<AppRuntime>, step: String) {
     let step = match step.as_str() {
-        "welcome" | "import" | "model" | "model_downloading" | "permissions" | "done" => {
-            step.as_str()
-        }
+        "welcome" | "import" | "model" | "model_downloading" | "permissions" | "done"
+        | "practice" => step.as_str(),
         _ => "unknown",
     };
     capture_event(&app, "onboarding_step_viewed", json!({ "step": step }));

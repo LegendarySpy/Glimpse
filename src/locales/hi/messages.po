@@ -892,6 +892,11 @@ msgid "native.menu.check_updates_long"
 msgstr "अपडेट जाँचें..."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed_body"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.loading"
 msgstr "समाचार की जाँच हो रही है…"
@@ -4264,6 +4269,11 @@ msgstr "यह किसी डिस्काउंट कोड जैसा �
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.busy_error"
 msgstr "यह माइक्रोफ़ोन पहले से उपयोग में है।"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

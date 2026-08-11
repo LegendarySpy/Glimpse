@@ -42,6 +42,7 @@ export default function FirstDictationGuide({
   const { t } = useLingui();
   const practiceRef = useRef<HTMLTextAreaElement>(null);
   const [completedDictation, setCompletedDictation] = useState(false);
+  const [dictationFailed, setDictationFailed] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [preview, setPreview] = useState("");
   const shortcutLabel = formatShortcutForDisplay(smartShortcut);
@@ -73,12 +74,20 @@ export default function FirstDictationGuide({
   useEffect(() => {
     practiceRef.current?.focus();
 
-    const unlistenPromise = listen("transcription:complete", () => {
-      setCompletedDictation(true);
-    });
+    const unlistenPromises = [
+      listen("transcription:complete", () => {
+        setDictationFailed(false);
+        setCompletedDictation(true);
+      }),
+      listen("transcription:error", () => {
+        setDictationFailed(true);
+      }),
+    ];
 
     return () => {
-      unlistenPromise.then((unlisten) => unlisten()).catch(() => {});
+      unlistenPromises.forEach((promise) => {
+        promise.then((unlisten) => unlisten()).catch(() => {});
+      });
     };
   }, []);
 
@@ -281,6 +290,29 @@ export default function FirstDictationGuide({
                     })}
                   </motion.li>
                 </ul>
+              </motion.div>
+            ) : dictationFailed ? (
+              <motion.div
+                key="failed"
+                className="w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                <p className="text-balance ui-text-body-sm font-medium text-content-primary">
+                  {t({
+                    id: "onboarding.first_dictation.failed",
+                    message: "That one did not come through.",
+                  })}
+                </p>
+                <p className="mx-auto mt-1 max-w-sm text-balance ui-text-meta text-content-muted">
+                  {t({
+                    id: "onboarding.first_dictation.failed_body",
+                    message:
+                      "Check that the right microphone is selected, then try again.",
+                  })}
+                </p>
               </motion.div>
             ) : (
               <motion.p

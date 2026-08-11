@@ -892,6 +892,11 @@ msgid "native.menu.check_updates_long"
 msgstr "Nach Updates suchen …"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed_body"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
 msgid "news.loading"
 msgstr "Nach Neuigkeiten suchen…"
@@ -4264,6 +4269,11 @@ msgstr "Das sieht wie ein Rabattcode aus. Gib ihn an der Kasse ein und füge dan
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.microphone_test.busy_error"
 msgstr "Dieses Mikrofon wird bereits verwendet."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
