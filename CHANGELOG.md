@@ -1,3 +1,22 @@
+1.1.1
+
+### Improvements
+
+- New users now get a guided first-dictation practice screen after setup.
+- The last setup screen lets you change your model and microphone before you start.
+- The Models screen makes switching cloud transcription on and off clearer.
+- Starting in the background now uses less memory until you open the app window.
+
+### Fixes
+
+- Quitting while a dictation was still recording no longer freezes the app.
+- Automatic local fallback selection now prefers a model that is already installed.
+- Turning cloud transcription off now resets a language the local model cannot handle.
+- The Settings navigation icon no longer shifts by a pixel after animating on Windows.
+- The Account activity chart no longer stretches beyond its intended size in a fullscreen window.
+
+---
+
 1.1.0
 
 ### Improvements

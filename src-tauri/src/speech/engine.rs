@@ -235,6 +235,18 @@ impl LocalTranscriber {
         *last_used = None;
         self.idle_wait.notify_one();
     }
+
+    /// Shutdown variant that never waits. A live dictation holds `exclusive`
+    /// for the whole session, so blocking here freezes the event loop on quit.
+    pub fn unload_if_idle(&self) {
+        let Some(_exclusive) = self.exclusive.try_lock() else {
+            return;
+        };
+        self.service.unload();
+        let mut last_used = self.last_used.lock();
+        *last_used = None;
+        self.idle_wait.notify_one();
+    }
 }
 
 /// Exclusive hold on the transcriber for one live dictation session. All

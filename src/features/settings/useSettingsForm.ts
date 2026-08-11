@@ -52,6 +52,7 @@ import {
 } from "./modelDiscovery";
 import {
   modelKeys,
+  resolveLocalFallbackModel,
   useFetchLlmModels,
   useFetchRemoteSpeechModels,
   useCliInstallStatus,
@@ -885,7 +886,7 @@ export function useSettingsForm({
     (nextLocale: AppLocaleSetting) => {
       clearPendingSettingsSave();
       setAppLocale(nextLocale);
-      activateLocale(nextLocale);
+      void activateLocale(nextLocale);
       queryClient.setQueryData<StoredSettings>(
         settingsKeys.detail(),
         (current) =>
@@ -1452,6 +1453,79 @@ export function useSettingsForm({
     ],
   );
 
+  const handleRemoteSpeechEnabledChange = useCallback(
+    (enabled: boolean) => {
+      clearPendingSettingsSave();
+      const fallback = resolveLocalFallbackModel(
+        modelCatalog,
+        modelStatus,
+        localModel,
+      );
+      const nextLocalModel =
+        fallback && modelStatus[fallback.key]?.installed
+          ? fallback.key
+          : localModel;
+      const nextModel = modelCatalog.find(
+        (model) => model.key === nextLocalModel,
+      );
+      const nextLanguage =
+        !enabled && !languageSupportedByModel(nextModel, language)
+          ? ""
+          : language;
+
+      setRemoteSpeechEnabled(enabled);
+      if (nextLocalModel !== localModel) setLocalModel(nextLocalModel);
+      if (nextLanguage !== language) setLanguage(nextLanguage);
+
+      void saveSettingsNow({
+        localModel: nextLocalModel,
+        remoteSpeechEnabled: enabled,
+        language: nextLanguage,
+      }).then((saved) => {
+        if (saved) return;
+        setRemoteSpeechEnabled(remoteSpeechEnabled);
+        setLocalModel(localModel);
+        setLanguage(language);
+        void queryClient.invalidateQueries({ queryKey: settingsKeys.detail() });
+      });
+    },
+    [
+      clearPendingSettingsSave,
+      language,
+      localModel,
+      modelCatalog,
+      modelStatus,
+      queryClient,
+      remoteSpeechEnabled,
+      saveSettingsNow,
+    ],
+  );
+
+  useEffect(() => {
+    if (!remoteSpeechEnabled || modelStatusesQuery.isLoading) return;
+    const fallback = resolveLocalFallbackModel(
+      modelCatalog,
+      modelStatus,
+      localModel,
+    );
+    if (
+      !fallback ||
+      fallback.key === localModel ||
+      !modelStatus[fallback.key]?.installed
+    ) {
+      return;
+    }
+
+    // Keep the persisted remote fallback aligned with what the runtime can use.
+    setLocalModel(fallback.key);
+  }, [
+    localModel,
+    modelCatalog,
+    modelStatus,
+    modelStatusesQuery.isLoading,
+    remoteSpeechEnabled,
+  ]);
+
   const fetchAvailableModels = useCallback(async () => {
     const requestSeq = beginModelDiscoveryRequest();
     try {
@@ -1762,17 +1836,6 @@ export function useSettingsForm({
     }
   }, [removeCliAsync, showSettingsError]);
 
-  const formatBytes = useCallback((bytes: number) => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const decimals = i >= 3 ? 1 : 0;
-    return (
-      parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i]
-    );
-  }, []);
-
   return {
     activeTab,
     setActiveTab,
@@ -1795,7 +1858,7 @@ export function useSettingsForm({
     localModel,
     setLocalModel: handleLocalModelChange,
     remoteSpeechEnabled,
-    setRemoteSpeechEnabled,
+    setRemoteSpeechEnabled: handleRemoteSpeechEnabledChange,
     remoteSpeechProvider,
     setRemoteSpeechProvider,
     remoteSpeechEndpoint,
@@ -1900,6 +1963,5 @@ export function useSettingsForm({
     handleDelete,
     handleCancelDownload,
     handleOpenDataDir,
-    formatBytes,
   };
 }

@@ -12,12 +12,12 @@ import {
 } from "@phosphor-icons/react";
 import {
   clampProgress,
-  formatBytes,
   formatDuration,
   getLibraryErrorDetails,
   shouldShowImportProgress,
   formatLibraryName,
 } from "./library-utils";
+import { formatBytes } from "../../../shared/lib/format";
 import { useClickOutside } from "../../../shared/hooks/useClickOutside";
 import { IntelligencePixel } from "../../../shared/ui/IntelligencePixel";
 import type { LibraryItem } from "../../../types";

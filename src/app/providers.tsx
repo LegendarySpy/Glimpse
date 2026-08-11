@@ -16,7 +16,7 @@ function OverlayLocaleSync() {
 
     void listen<StoredSettings>("settings:changed", (event) => {
       receivedChange = true;
-      if (!cancelled) activateLocale(event.payload.app_locale);
+      if (!cancelled) void activateLocale(event.payload.app_locale);
     })
       .then(async (stopListening) => {
         if (cancelled) {
@@ -25,7 +25,8 @@ function OverlayLocaleSync() {
         }
         unlisten = stopListening;
         const settings = await getSettings();
-        if (!cancelled && !receivedChange) activateLocale(settings.app_locale);
+        if (!cancelled && !receivedChange)
+          void activateLocale(settings.app_locale);
       })
       .catch(() => {});
 

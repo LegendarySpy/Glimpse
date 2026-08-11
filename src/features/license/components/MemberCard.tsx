@@ -2,7 +2,10 @@ import { useLingui } from "@lingui/react/macro";
 import { motion } from "framer-motion";
 import { ArrowUpRight, CircleNotch as Loader2 } from "@phosphor-icons/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { editionFromLicenseState } from "../../../shared/lib/licenseEdition";
+import {
+  EDITION_COLORS,
+  editionFromLicenseState,
+} from "../../../shared/lib/licenseEdition";
 import { tierInfo, type PurchaseTier } from "../../license/purchaseConfig";
 import { TypewriterText } from "../../../shared/ui/TypewriterText";
 import type { LicenseState } from "../api";
@@ -25,7 +28,6 @@ import {
   MemberCardStripe,
   STAMP_LAYER_CLASS,
   TierStamp,
-  EDITION_STAMP_COLORS,
   TIER_COLORS,
   useMemberCardPalette,
 } from "./memberCardShared";
@@ -120,7 +122,7 @@ const MemberCardInner = ({
               id: "member_card.edition_blurb_personal",
               message: "For you. Up to 5 devices.",
             });
-  const editionColors = EDITION_STAMP_COLORS[edition];
+  const editionColors = EDITION_COLORS[edition];
   const name = customerName?.trim() || null;
   const displayTitle = name || email;
   const memberSinceValue = formatCardDate(memberSinceISO) ?? PLACEHOLDER;

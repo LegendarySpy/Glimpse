@@ -41,6 +41,7 @@ import SettingCard from "../../../../shared/ui/SettingCard";
 import SettingRow from "../../../../shared/ui/SettingRow";
 import { UpdateChecker } from "../../../updates/components/UpdateChecker";
 import { detectAppPlatform } from "../../../../platform/service";
+import { formatBytes } from "../../../../shared/lib/format";
 import type {
   AppInfo,
   CliInstallStatus,
@@ -174,7 +175,6 @@ type AboutTabProps = {
   variants: Variants;
   appInfo: AppInfo | null;
   transcriptionMode: TranscriptionMode;
-  formatBytes: (bytes: number) => string;
   cliInstallStatus: CliInstallStatus | null;
   cliInstallBusy: boolean;
   activeLicense: boolean;
@@ -189,7 +189,6 @@ const AboutTab = ({
   variants,
   appInfo,
   transcriptionMode,
-  formatBytes,
   cliInstallStatus,
   cliInstallBusy,
   activeLicense,

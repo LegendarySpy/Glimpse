@@ -1,5 +1,5 @@
 import { useLingui } from "@lingui/react/macro";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMachine } from "@xstate/react";
 import {
   useMutation,
@@ -30,10 +30,12 @@ import { WelcomeStep } from "./steps/WelcomeStep";
 import { ModelStep } from "./steps/ModelStep";
 import { PermissionsStep } from "./steps/PermissionsStep";
 import { ReadyStep } from "./steps/ReadyStep";
+import FirstDictationGuide from "./FirstDictationGuide";
 import { LicenseModal } from "./steps/LicenseModal";
 import { StepIndicator } from "./steps/shared";
 import { useActivateLicense, useLicenseState } from "../license/queries";
 import FAQModal from "../../shared/ui/FAQModal";
+import ModelPickerModal from "../../shared/ui/ModelPickerModal";
 import WindowControls from "../../shared/ui/WindowControls";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../types";
 
@@ -96,6 +98,7 @@ const buildSettingsArgs = (
   transcriptionMode: string,
   localModel: string,
   autoLaunchEnabled: boolean,
+  microphoneDevice: string | null,
 ) => {
   const { hold: holdShortcut, toggle: toggleShortcut } = getDefaultShortcuts(
     getOnboardingPlatform().id,
@@ -125,7 +128,7 @@ const buildSettingsArgs = (
     remoteSpeechEndpoint: latest.remote_speech_endpoint ?? "",
     remoteSpeechApiKey: latest.remote_speech_api_key ?? "",
     remoteSpeechModel: latest.remote_speech_model ?? "",
-    microphoneDevice: latest.microphone_device ?? null,
+    microphoneDevice,
     language: latest.language ?? "",
     appLocale: latest.app_locale ?? "system",
     themeMode: latest.theme_mode ?? "system",
@@ -174,6 +177,7 @@ export default function OnboardingScreen({
     useState<PurchaseTier | null>(null);
   const [licenseOpenError, setLicenseOpenError] = useState<string | null>(null);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
   const ctx = state.context;
   const queryClient = useQueryClient();
 
@@ -219,6 +223,17 @@ export default function OnboardingScreen({
   }, [modelCatalogQuery.data, ctx.localModelChoice]);
   const persistedLocalModel = settingsQuery.data?.local_model ?? "";
   const persistedSettings = settingsQuery.data;
+
+  const micDeviceSeeded = useRef(false);
+  useEffect(() => {
+    if (!persistedSettings || micDeviceSeeded.current) return;
+    micDeviceSeeded.current = true;
+    send({
+      type: "SET_MICROPHONE_DEVICE",
+      device: persistedSettings.microphone_device ?? null,
+    });
+  }, [persistedSettings, send]);
+
   const selectedModel =
     ctx.localModelChoice ||
     pickDefaultOnboardingModel(
@@ -505,7 +520,7 @@ export default function OnboardingScreen({
     modelCatalogQuery.isLoading || settingsQuery.isLoading;
   const modelCatalogUnavailable = modelCatalogQuery.isError;
 
-  const handleComplete = useCallback(async () => {
+  const handleStartPractice = useCallback(async () => {
     if (
       settingsQuery.isLoading ||
       settingsQuery.isError ||
@@ -546,11 +561,11 @@ export default function OnboardingScreen({
           ctx.selectedMode,
           resolvedLocalModel,
           ctx.autoLaunch,
+          ctx.microphoneDevice,
         ),
       });
-      await invoke("complete_onboarding");
       send({ type: "COMPLETE_SUCCESS" });
-      onComplete();
+      send({ type: "START_PRACTICE" });
     } catch (err) {
       console.error("Failed to finish onboarding", err);
       const message = typeof err === "string" ? err : String(err);
@@ -569,7 +584,6 @@ export default function OnboardingScreen({
     ctx.autoLaunch,
     ctx.selectedMode,
     ctx.smartShortcut,
-    onComplete,
     persistedSettings,
     selectedModel,
     send,
@@ -577,6 +591,28 @@ export default function OnboardingScreen({
     settingsQuery.isLoading,
     t,
   ]);
+
+  const handleFinishOnboarding = useCallback(async () => {
+    send({ type: "COMPLETING" });
+    try {
+      await invoke("complete_onboarding");
+      send({ type: "COMPLETE_SUCCESS" });
+      onComplete();
+    } catch (err) {
+      console.error("Failed to finish onboarding", err);
+      const message = typeof err === "string" ? err : String(err);
+      send({
+        type: "COMPLETE_ERROR",
+        error:
+          message ||
+          t({
+            id: "onboarding.complete.failed",
+            message:
+              "Could not finish setup. Check your settings and try again.",
+          }),
+      });
+    }
+  }, [onComplete, send, t]);
 
   const applySmartShortcut = useCallback(
     async (shortcut: string) => {
@@ -590,13 +626,20 @@ export default function OnboardingScreen({
             ctx.selectedMode,
             selectedModel,
             ctx.autoLaunch,
+            ctx.microphoneDevice,
           ),
         });
       } catch {
         return;
       }
     },
-    [ctx.autoLaunch, ctx.selectedMode, selectedModel, send],
+    [
+      ctx.autoLaunch,
+      ctx.microphoneDevice,
+      ctx.selectedMode,
+      selectedModel,
+      send,
+    ],
   );
 
   const goNext = useCallback(() => {
@@ -706,6 +749,11 @@ export default function OnboardingScreen({
             smartShortcut={ctx.smartShortcut}
             onSetShortcut={applySmartShortcut}
             modelLabel={selectedModelInfo?.label ?? null}
+            onEditModel={() => setShowModelPicker(true)}
+            microphoneDevice={ctx.microphoneDevice}
+            onSetMicrophoneDevice={(device) =>
+              send({ type: "SET_MICROPHONE_DEVICE", device })
+            }
             autoLaunch={ctx.autoLaunch}
             onSetAutoLaunch={(value) =>
               send({ type: "SET_AUTO_LAUNCH", value })
@@ -718,7 +766,19 @@ export default function OnboardingScreen({
             }}
             isCompleting={ctx.isCompleting}
             completionError={ctx.completionError}
-            onComplete={handleComplete}
+            onComplete={handleStartPractice}
+          />
+        );
+      case "practice":
+        return (
+          <FirstDictationGuide
+            key="practice"
+            stepMotionProps={stepMotionProps}
+            smartShortcut={ctx.smartShortcut}
+            onSetShortcut={applySmartShortcut}
+            onFinish={handleFinishOnboarding}
+            isFinishing={ctx.isCompleting}
+            completionError={ctx.completionError}
           />
         );
       default:
@@ -726,7 +786,10 @@ export default function OnboardingScreen({
     }
   };
 
-  const showChrome = currentStep !== "welcome" && currentStep !== "done";
+  const showChrome =
+    currentStep !== "welcome" &&
+    currentStep !== "done" &&
+    currentStep !== "practice";
 
   return (
     <MotionConfig reducedMotion="user">
@@ -767,6 +830,26 @@ export default function OnboardingScreen({
         <FAQModal
           isOpen={ctx.showFAQModal}
           onClose={() => send({ type: "TOGGLE_FAQ", show: false })}
+        />
+
+        <ModelPickerModal
+          open={showModelPicker}
+          onClose={() => setShowModelPicker(false)}
+          catalog={modelCatalogQuery.data ?? []}
+          activeKey={selectedModel}
+          isInstalled={(key) =>
+            Boolean(modelStatus[key]?.installed) ||
+            displayStateByModel[key]?.status === "complete"
+          }
+          isAneInstalled={(key) => Boolean(modelStatus[key]?.ane_installed)}
+          progressFor={(key) => displayStateByModel[key]}
+          onUse={(key) => {
+            send({ type: "SELECT_MODEL", key });
+            setShowModelPicker(false);
+          }}
+          onDownload={handleDownload}
+          onDelete={handleDelete}
+          onCancel={handleCancelDownload}
         />
 
         <AnimatePresence>

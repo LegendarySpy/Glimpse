@@ -375,7 +375,9 @@ pub fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> 
                     .visible(false);
 
             #[cfg(target_os = "macos")]
-            let builder = builder.hidden_title(true);
+            let builder = builder
+                .hidden_title(true)
+                .title_bar_style(tauri::TitleBarStyle::Overlay);
 
             #[cfg(target_os = "windows")]
             let builder = builder.decorations(false);

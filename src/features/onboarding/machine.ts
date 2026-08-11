@@ -14,6 +14,7 @@ export type OnboardingContext = {
   selectedMode: TranscriptionMode;
   importableApps: DetectedApp[];
   localModelChoice: string;
+  microphoneDevice: string | null;
   autoLaunch: boolean;
   showLocalConfirm: boolean;
   smartShortcut: string;
@@ -30,9 +31,11 @@ export type OnboardingEvent =
   | { type: "SELECT_MODE"; mode: TranscriptionMode }
   | { type: "SET_IMPORTABLE"; apps: DetectedApp[] }
   | { type: "SELECT_MODEL"; key: string }
+  | { type: "SET_MICROPHONE_DEVICE"; device: string | null }
   | { type: "SET_AUTO_LAUNCH"; value: boolean }
   | { type: "SET_SHORTCUT"; shortcut: string }
   | { type: "SHOW_LOCAL_CONFIRM"; show: boolean }
+  | { type: "START_PRACTICE" }
   | { type: "COMPLETING" }
   | { type: "COMPLETE_SUCCESS" }
   | { type: "COMPLETE_ERROR"; error: string }
@@ -94,6 +97,7 @@ export const onboardingMachine = setup({
     selectedMode: "local",
     importableApps: [],
     localModelChoice: "",
+    microphoneDevice: null,
     autoLaunch: false,
     showLocalConfirm: false,
     smartShortcut: getDefaultShortcuts(initialPlatform.id).smart,
@@ -112,6 +116,9 @@ export const onboardingMachine = setup({
     },
     SELECT_MODEL: {
       actions: assign({ localModelChoice: ({ event }) => event.key }),
+    },
+    SET_MICROPHONE_DEVICE: {
+      actions: assign({ microphoneDevice: ({ event }) => event.device }),
     },
     SET_AUTO_LAUNCH: {
       actions: assign({ autoLaunch: ({ event }) => event.value }),
@@ -177,6 +184,7 @@ export const onboardingMachine = setup({
     },
     done: {
       on: {
+        START_PRACTICE: { target: "practice", actions: "forward" },
         BACK: [
           {
             target: "permissions",
@@ -185,6 +193,11 @@ export const onboardingMachine = setup({
           },
           { target: "model", actions: "backward" },
         ],
+      },
+    },
+    practice: {
+      on: {
+        BACK: { target: "done", actions: "backward" },
       },
     },
   },

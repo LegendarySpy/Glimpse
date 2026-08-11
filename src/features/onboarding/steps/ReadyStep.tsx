@@ -2,9 +2,15 @@ import { useLingui } from "@lingui/react/macro";
 import { motion } from "framer-motion";
 import { useCallback, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { SpinnerGap as Loader2, PencilSimple } from "@phosphor-icons/react";
+import {
+  SpinnerGap as Loader2,
+  PencilSimple,
+  CaretRight,
+} from "@phosphor-icons/react";
 import { formatShortcutForDisplay } from "../../../shared/lib/shortcuts";
 import { useShortcutCapture } from "../../../shared/hooks/useShortcutCapture";
+import { useInputDevices } from "../../settings/queries";
+import { Dropdown } from "../../../shared/ui/Dropdown";
 import {
   OnboardingHeader,
   OnboardingStep,
@@ -12,11 +18,17 @@ import {
   type StepMotionProps,
 } from "./shared";
 
+const CHIP_CLASS =
+  "flex h-8 items-center gap-1.5 rounded-md bg-surface-elevated px-2.5 transition-colors hover:bg-surface-overlay";
+
 interface ReadyStepProps {
   stepMotionProps: StepMotionProps;
   smartShortcut: string;
   onSetShortcut: (shortcut: string) => void;
   modelLabel: string | null;
+  onEditModel: () => void;
+  microphoneDevice: string | null;
+  onSetMicrophoneDevice: (device: string | null) => void;
   autoLaunch: boolean;
   onSetAutoLaunch: (value: boolean) => void;
   licenseActive: boolean;
@@ -31,6 +43,9 @@ export function ReadyStep({
   smartShortcut,
   onSetShortcut,
   modelLabel,
+  onEditModel,
+  microphoneDevice,
+  onSetMicrophoneDevice,
   autoLaunch,
   onSetAutoLaunch,
   licenseActive,
@@ -43,6 +58,11 @@ export function ReadyStep({
   const shortcut = formatShortcutForDisplay(smartShortcut);
   const [capturing, setCapturing] = useState(false);
   const [preview, setPreview] = useState("");
+  const inputDevices = useInputDevices().data ?? [];
+  const systemDefaultLabel = t({
+    id: "onboarding.done.recap.microphone_default",
+    message: "System default",
+  });
 
   const stopCapture = useCallback(async () => {
     await invoke("set_shortcut_capture_active", { active: false }).catch(
@@ -108,7 +128,7 @@ export function ReadyStep({
           <button
             type="button"
             onClick={startCapture}
-            className="group flex items-center gap-1.5 rounded-md bg-surface-elevated px-2 py-1 transition-colors hover:bg-surface-overlay"
+            className={`group ${CHIP_CLASS}`}
           >
             {capturing ? (
               <span className="flex items-center gap-1.5 font-mono ui-text-body-sm text-cloud">
@@ -141,11 +161,45 @@ export function ReadyStep({
           <Row
             label={t({ id: "onboarding.done.recap.model", message: "Model" })}
           >
-            <span className="ui-text-body-sm text-content-secondary">
-              {modelLabel}
-            </span>
+            <button
+              type="button"
+              onClick={onEditModel}
+              className={`group min-w-0 ${CHIP_CLASS}`}
+            >
+              <span className="truncate ui-text-body-sm text-content-secondary">
+                {modelLabel}
+              </span>
+              <CaretRight
+                size={12}
+                className="text-content-disabled transition-colors group-hover:text-content-secondary"
+              />
+            </button>
           </Row>
         ) : null}
+
+        <Row
+          label={t({
+            id: "onboarding.done.recap.microphone",
+            message: "Microphone",
+          })}
+        >
+          <Dropdown
+            value={microphoneDevice ?? ""}
+            onChange={(value) => onSetMicrophoneDevice(value || null)}
+            options={[
+              { value: "", label: systemDefaultLabel },
+              ...inputDevices.map((device) => ({
+                value: device.id,
+                label: device.name,
+              })),
+            ]}
+            className="h-8 w-60 shrink-0"
+            buttonClassName="h-8 !rounded-md !border-0 !bg-surface-elevated px-2.5 ui-text-body-sm hover:!bg-surface-overlay"
+            valueClassName="text-content-secondary"
+            menuClassName="top-9"
+            truncate
+          />
+        </Row>
 
         <button
           type="button"
@@ -184,20 +238,13 @@ export function ReadyStep({
         </button>
       </div>
 
-      <p className="mt-3 ui-text-meta text-content-disabled">
-        {t({
-          id: "onboarding.done.more_options",
-          message: "More options available in Settings.",
-        })}
-      </p>
-
       <div className="mt-8 flex w-full items-start justify-between gap-4 text-left">
         <span>
           <span className="block ui-text-body-sm-strong text-content-primary">
             {licenseActive
               ? t({
-                  id: "onboarding.done.license_active_title",
-                  message: "License active",
+                  id: "onboarding.done.license_active_title.v2",
+                  message: "Thank you for supporting Glimpse",
                 })
               : t({
                   id: "onboarding.done.free_title",
@@ -207,8 +254,8 @@ export function ReadyStep({
           <span className="mt-0.5 block ui-text-meta text-content-muted text-pretty">
             {licenseActive
               ? t({
-                  id: "onboarding.done.license_active",
-                  message: "Every feature is unlocked.",
+                  id: "onboarding.done.license_active.v2",
+                  message: "Every feature is unlocked. Go make something!",
                 })
               : t({
                   id: "onboarding.done.license_adds.v2",
@@ -237,8 +284,8 @@ export function ReadyStep({
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3.5">
-      <span className="ui-text-body-sm-strong text-content-primary">
+    <div className="flex items-center justify-between gap-3 py-3.5">
+      <span className="text-pretty ui-text-body-sm-strong text-content-primary">
         {label}
       </span>
       {children}

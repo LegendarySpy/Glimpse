@@ -8,8 +8,9 @@ import {
   normalizeSupportedAppLocale,
 } from "./shared/lib/appLocales";
 
+// Lazy on purpose: eager loading bundles every catalog into the entry chunk,
+// which each window then parses at startup for locales it will never show.
 const localeCatalogs = import.meta.glob<Messages>("./locales/*/messages.po", {
-  eager: true,
   import: "messages",
 });
 
@@ -20,17 +21,27 @@ function extractLocaleCode(path: string): string | null {
 
 export type AppLocale = string;
 
-const catalogs = Object.fromEntries(
-  Object.entries(localeCatalogs).flatMap(([path, messages]) => {
+const catalogLoaders = Object.fromEntries(
+  Object.entries(localeCatalogs).flatMap(([path, load]) => {
     const locale = extractLocaleCode(path);
-    return locale ? [[locale, messages]] : [];
+    return locale ? [[locale, load]] : [];
   }),
-) as Record<string, Messages>;
+) as Record<string, () => Promise<Messages>>;
 
 for (const locale of SUPPORTED_APP_LOCALES) {
-  if (!catalogs[locale]) {
+  if (!catalogLoaders[locale]) {
     throw new Error(`Missing locale catalog for ${locale}`);
   }
+}
+
+const loadedCatalogs = new Map<string, Messages>();
+
+async function loadCatalog(locale: string): Promise<Messages> {
+  const cached = loadedCatalogs.get(locale);
+  if (cached) return cached;
+  const messages = await catalogLoaders[locale]();
+  loadedCatalogs.set(locale, messages);
+  return messages;
 }
 
 function resolveSystemLocale(): string {
@@ -61,17 +72,20 @@ function resolveRequestedLocale(
   return localeSetting;
 }
 
-export function activateLocale(
+// Guards against an earlier catalog resolving after a later one and winning.
+let activationSeq = 0;
+
+export async function activateLocale(
   localeSetting?: AppLocaleSetting | string | null,
-): AppLocale {
+): Promise<AppLocale> {
   const nextLocale = normalizeSupportedAppLocale(
     resolveRequestedLocale(localeSetting),
   );
+  const seq = (activationSeq += 1);
+  const messages = await loadCatalog(nextLocale);
+  if (seq !== activationSeq) return nextLocale;
 
-  i18n.loadAndActivate({
-    locale: nextLocale,
-    messages: catalogs[nextLocale],
-  });
+  i18n.loadAndActivate({ locale: nextLocale, messages });
 
   if (typeof document !== "undefined") {
     document.documentElement.lang = nextLocale;
@@ -81,7 +95,8 @@ export function activateLocale(
   return nextLocale;
 }
 
-// Keep the active locale when HMR re-evaluates this module (catalog edits).
-activateLocale(i18n.locale || DEFAULT_APP_LOCALE);
+// Keeps the active locale when HMR re-evaluates this module (catalog edits),
+// and gives main.tsx a handle to await before the first render.
+export const localeReady = activateLocale(i18n.locale || DEFAULT_APP_LOCALE);
 
 export { i18n };
