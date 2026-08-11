@@ -1,5 +1,5 @@
 import { useLingui } from "@lingui/react/macro";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMachine } from "@xstate/react";
 import {
   useMutation,
@@ -35,6 +35,7 @@ import { LicenseModal } from "./steps/LicenseModal";
 import { StepIndicator } from "./steps/shared";
 import { useActivateLicense, useLicenseState } from "../license/queries";
 import FAQModal from "../../shared/ui/FAQModal";
+import ModelPickerModal from "../../shared/ui/ModelPickerModal";
 import WindowControls from "../../shared/ui/WindowControls";
 import type { DownloadEvent, ModelInfo, ModelStatus } from "../../types";
 
@@ -97,6 +98,7 @@ const buildSettingsArgs = (
   transcriptionMode: string,
   localModel: string,
   autoLaunchEnabled: boolean,
+  microphoneDevice: string | null,
 ) => {
   const { hold: holdShortcut, toggle: toggleShortcut } = getDefaultShortcuts(
     getOnboardingPlatform().id,
@@ -126,7 +128,7 @@ const buildSettingsArgs = (
     remoteSpeechEndpoint: latest.remote_speech_endpoint ?? "",
     remoteSpeechApiKey: latest.remote_speech_api_key ?? "",
     remoteSpeechModel: latest.remote_speech_model ?? "",
-    microphoneDevice: latest.microphone_device ?? null,
+    microphoneDevice,
     language: latest.language ?? "",
     appLocale: latest.app_locale ?? "system",
     themeMode: latest.theme_mode ?? "system",
@@ -175,6 +177,7 @@ export default function OnboardingScreen({
     useState<PurchaseTier | null>(null);
   const [licenseOpenError, setLicenseOpenError] = useState<string | null>(null);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
   const ctx = state.context;
   const queryClient = useQueryClient();
 
@@ -220,6 +223,17 @@ export default function OnboardingScreen({
   }, [modelCatalogQuery.data, ctx.localModelChoice]);
   const persistedLocalModel = settingsQuery.data?.local_model ?? "";
   const persistedSettings = settingsQuery.data;
+
+  const micDeviceSeeded = useRef(false);
+  useEffect(() => {
+    if (!persistedSettings || micDeviceSeeded.current) return;
+    micDeviceSeeded.current = true;
+    send({
+      type: "SET_MICROPHONE_DEVICE",
+      device: persistedSettings.microphone_device ?? null,
+    });
+  }, [persistedSettings, send]);
+
   const selectedModel =
     ctx.localModelChoice ||
     pickDefaultOnboardingModel(
@@ -547,6 +561,7 @@ export default function OnboardingScreen({
           ctx.selectedMode,
           resolvedLocalModel,
           ctx.autoLaunch,
+          ctx.microphoneDevice,
         ),
       });
       send({ type: "COMPLETE_SUCCESS" });
@@ -611,13 +626,20 @@ export default function OnboardingScreen({
             ctx.selectedMode,
             selectedModel,
             ctx.autoLaunch,
+            ctx.microphoneDevice,
           ),
         });
       } catch {
         return;
       }
     },
-    [ctx.autoLaunch, ctx.selectedMode, selectedModel, send],
+    [
+      ctx.autoLaunch,
+      ctx.microphoneDevice,
+      ctx.selectedMode,
+      selectedModel,
+      send,
+    ],
   );
 
   const goNext = useCallback(() => {
@@ -727,6 +749,11 @@ export default function OnboardingScreen({
             smartShortcut={ctx.smartShortcut}
             onSetShortcut={applySmartShortcut}
             modelLabel={selectedModelInfo?.label ?? null}
+            onEditModel={() => setShowModelPicker(true)}
+            microphoneDevice={ctx.microphoneDevice}
+            onSetMicrophoneDevice={(device) =>
+              send({ type: "SET_MICROPHONE_DEVICE", device })
+            }
             autoLaunch={ctx.autoLaunch}
             onSetAutoLaunch={(value) =>
               send({ type: "SET_AUTO_LAUNCH", value })
@@ -803,6 +830,26 @@ export default function OnboardingScreen({
         <FAQModal
           isOpen={ctx.showFAQModal}
           onClose={() => send({ type: "TOGGLE_FAQ", show: false })}
+        />
+
+        <ModelPickerModal
+          open={showModelPicker}
+          onClose={() => setShowModelPicker(false)}
+          catalog={modelCatalogQuery.data ?? []}
+          activeKey={selectedModel}
+          isInstalled={(key) =>
+            Boolean(modelStatus[key]?.installed) ||
+            displayStateByModel[key]?.status === "complete"
+          }
+          isAneInstalled={(key) => Boolean(modelStatus[key]?.ane_installed)}
+          progressFor={(key) => displayStateByModel[key]}
+          onUse={(key) => {
+            send({ type: "SELECT_MODEL", key });
+            setShowModelPicker(false);
+          }}
+          onDownload={handleDownload}
+          onDelete={handleDelete}
+          onCancel={handleCancelDownload}
         />
 
         <AnimatePresence>

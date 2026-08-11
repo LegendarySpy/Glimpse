@@ -59,6 +59,56 @@ msgstr ""
 #~ msgstr ""
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.license_active"
+#~ msgstr "Tutte le funzionalità sono sbloccate."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.complete"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.license_active_title"
+#~ msgstr "Licenza attiva"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.more_options"
+#~ msgstr "Altre opzioni disponibili nelle Impostazioni."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.title"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.success_body"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.speak"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.hold"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.cta_downloading"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
 msgstr ""
@@ -1797,9 +1847,14 @@ msgid "pill.status.error"
 msgstr "Si è verificato un errore"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.next.library"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_active"
-msgstr "Tutte le funzionalità sono sbloccate."
+msgid "onboarding.done.license_active.v2"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -1959,11 +2014,6 @@ msgstr "Ricerca di un modello per il tuo dispositivo"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.finishing"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.complete"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -2145,6 +2195,11 @@ msgstr "Tieni premuto per riavviare"
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.hold_description"
 msgstr "tieni premuto per parlare, rilascia per fermare"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.subtitle"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2419,11 +2474,6 @@ msgid "onboarding.license.dialog_aria"
 msgstr "Licenza"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_active_title"
-msgstr "Licenza attiva"
-
-#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.input_aria"
 msgstr "Chiave di licenza"
@@ -2575,6 +2625,11 @@ msgid "onboarding.microphone.title"
 msgstr "Accesso al microfono"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.microphone"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.permissions.answer.v2"
 msgstr "Accesso al microfono per registrare la voce e accesso all'Accessibilità per inserire testo e leggere il testo selezionato quando una scorciatoia lo riscrive. Glimpse utilizza questi permessi solo durante la dettatura attiva."
@@ -2710,11 +2765,6 @@ msgstr "Altre opzioni"
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.more_options"
 msgstr "Altre opzioni"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.more_options"
-msgstr "Altre opzioni disponibili nelle Impostazioni."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -3238,11 +3288,6 @@ msgstr "Premi la scorciatoia di dettatura, parla e rilascia. Glimpse trascrive s
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.subtitle"
 msgstr "Premi la tua scorciatoia in qualsiasi app per dettare."
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.title"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3961,7 +4006,6 @@ msgid "settings.general.shortcuts.smart"
 msgstr "Smart"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "Scorciatoia intelligente"
@@ -4132,6 +4176,11 @@ msgid "settings.app.auto_pause_media.body_off"
 msgstr "L'audio di sistema viene riprodotto durante la registrazione."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.microphone_default"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.mic_system_default"
 msgstr "Predefinito di sistema"
@@ -4192,6 +4241,11 @@ msgid "member_card.edition_blurb_contributor"
 msgstr "Grazie per il tuo contributo. Fino a 5 dispositivi."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.license_active_title.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.duplicate"
 msgstr "Questo dominio è già stato aggiunto"
@@ -4217,6 +4271,11 @@ msgid "native.toast.too_quiet"
 msgstr "Audio troppo basso per essere rilevato. Registrazione eliminata."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.complete.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_ready"
 msgstr "Il modello Apple Intelligence è ancora in fase di download."
@@ -4230,6 +4289,11 @@ msgstr "Il comando glimpse è installato in {cliInstallPath} e gestito estername
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.cli.installed_info"
 msgstr "Il comando glimpse è installato in {cliInstallPath}. Usalo da Terminale, script o strumenti di automazione per richiamare Glimpse senza aprire l'interfaccia dell'app."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.next.anywhere"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -4422,6 +4486,11 @@ msgid "settings.account.trial.text_one"
 msgstr "Prova · 1 giorno rimanente"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.title.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_enabled"
 msgstr "Attiva Apple Intelligence in Impostazioni di Sistema per usare questa funzione."
@@ -4552,11 +4621,6 @@ msgid "settings.about.data.verbatim_text_aria"
 msgstr "Usa le trascrizioni originali prima della pulizia"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.success_body"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.subtitle"
 msgstr "Usato dalle scorciatoie con il modello di scrittura attivo e dalla Personalizzazione."
@@ -4606,6 +4670,11 @@ msgstr "Visualizza cronologia"
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.10"
 msgstr "La voce è la tastiera più veloce che abbia. {wpm} parole al minuto. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.v2"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

@@ -59,6 +59,56 @@ msgstr ""
 #~ msgstr ""
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.license_active"
+#~ msgstr "हर फ़ीचर अनलॉक है।"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.complete"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.license_active_title"
+#~ msgstr "लाइसेंस सक्रिय है"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.more_options"
+#~ msgstr "अधिक विकल्प सेटिंग्स में उपलब्ध हैं।"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.title"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.success_body"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.speak"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.hold"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.cta_downloading"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
 msgstr ""
@@ -1797,9 +1847,14 @@ msgid "pill.status.error"
 msgstr "त्रुटि हुई"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.next.library"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_active"
-msgstr "हर फ़ीचर अनलॉक है।"
+msgid "onboarding.done.license_active.v2"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -1959,11 +2014,6 @@ msgstr "आपके डिवाइस के लिए मॉडल ढूँ�
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.finishing"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.complete"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -2145,6 +2195,11 @@ msgstr "दबाकर रखें और पुनः प्रारंभ �
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.hold_description"
 msgstr "बोलने के लिए दबाए रखें, रोकने के लिए छोड़ें"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.subtitle"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2419,11 +2474,6 @@ msgid "onboarding.license.dialog_aria"
 msgstr "लाइसेंस"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_active_title"
-msgstr "लाइसेंस सक्रिय है"
-
-#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.input_aria"
 msgstr "लाइसेंस कुंजी"
@@ -2575,6 +2625,11 @@ msgid "onboarding.microphone.title"
 msgstr "माइक्रोफ़ोन एक्सेस"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.microphone"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.permissions.answer.v2"
 msgstr "आपकी आवाज़ रिकॉर्ड करने के लिए माइक्रोफ़ोन की अनुमति, और टेक्स्ट डालने व चयनित टेक्स्ट को पढ़ने के लिए एक्सेसिबिलिटी की अनुमति, जब कोई शॉर्टकट उसे फिर से लिखता है। Glimpse इन्हें केवल तब उपयोग करता है जब आप सक्रिय रूप से डिक्टेट कर रहे हों।"
@@ -2710,11 +2765,6 @@ msgstr "अधिक विकल्प"
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.more_options"
 msgstr "अधिक विकल्प"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.more_options"
-msgstr "अधिक विकल्प सेटिंग्स में उपलब्ध हैं।"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -3238,11 +3288,6 @@ msgstr "अपना डिक्टेशन शॉर्टकट दबाए
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.subtitle"
 msgstr "किसी भी ऐप में अपना शॉर्टकट दबाकर डिक्टेट करें।"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.title"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3961,7 +4006,6 @@ msgid "settings.general.shortcuts.smart"
 msgstr "स्मार्ट"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "स्मार्ट शॉर्टकट"
@@ -4132,6 +4176,11 @@ msgid "settings.app.auto_pause_media.body_off"
 msgstr "रिकॉर्ड करते समय सिस्टम ऑडियो चलता है।"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.microphone_default"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.mic_system_default"
 msgstr "सिस्टम डिफ़ॉल्ट"
@@ -4192,6 +4241,11 @@ msgid "member_card.edition_blurb_contributor"
 msgstr "योगदान देने के लिए धन्यवाद। अधिकतम 5 डिवाइस।"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.license_active_title.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.duplicate"
 msgstr "यह डोमेन पहले से जोड़ा जा चुका है"
@@ -4217,6 +4271,11 @@ msgid "native.toast.too_quiet"
 msgstr "यह सुनने के लिए बहुत धीमा था। रिकॉर्डिंग हटाई गई।"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.complete.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_ready"
 msgstr "Apple Intelligence मॉडल अभी डाउनलोड हो रहा है।"
@@ -4230,6 +4289,11 @@ msgstr "glimpse कमांड {cliInstallPath} पर इंस्टॉल �
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.cli.installed_info"
 msgstr "glimpse कमांड {cliInstallPath} पर इंस्टॉल है। Glimpse का ऐप UI खोले बिना इसे कॉल करने के लिए इसे टर्मिनल, स्क्रिप्ट या स्वचालन टूल से उपयोग करें।"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.next.anywhere"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -4422,6 +4486,11 @@ msgid "settings.account.trial.text_one"
 msgstr "परीक्षण · 1 दिन शेष"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.title.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_enabled"
 msgstr "इसे उपयोग करने के लिए सिस्टम सेटिंग्स में Apple Intelligence चालू करें।"
@@ -4552,11 +4621,6 @@ msgid "settings.about.data.verbatim_text_aria"
 msgstr "साफ़-सफ़ाई से पहले मूल ट्रांस्क्रिप्ट्स का उपयोग करें"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.success_body"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.subtitle"
 msgstr "उन शॉर्टकट्स द्वारा उपयोग किया जाता है जिनमें writing मॉडल चालू है, और Personalization द्वारा भी।"
@@ -4606,6 +4670,11 @@ msgstr "हिस्ट्री देखें"
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.10"
 msgstr "आवाज़ मेरे पास मौजूद सबसे तेज़ कीबोर्ड है। {wpm} शब्द प्रति मिनट। @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.v2"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

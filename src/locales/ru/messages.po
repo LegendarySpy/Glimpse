@@ -59,6 +59,56 @@ msgstr ""
 #~ msgstr ""
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.license_active"
+#~ msgstr "Все функции разблокированы."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.complete"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.license_active_title"
+#~ msgstr "Лицензия активна"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.more_options"
+#~ msgstr "Дополнительные параметры доступны в Настройках."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.title"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.success_body"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.speak"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.hold"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.cta_downloading"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
 msgstr ""
@@ -1797,9 +1847,14 @@ msgid "pill.status.error"
 msgstr "Произошла ошибка"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.next.library"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_active"
-msgstr "Все функции разблокированы."
+msgid "onboarding.done.license_active.v2"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -1959,11 +2014,6 @@ msgstr "Поиск модели для вашего устройства"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.finishing"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.complete"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -2145,6 +2195,11 @@ msgstr "Удерживайте для перезапуска"
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.hold_description"
 msgstr "удерживайте для записи, отпустите для остановки"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.subtitle"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2419,11 +2474,6 @@ msgid "onboarding.license.dialog_aria"
 msgstr "Лицензия"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.license_active_title"
-msgstr "Лицензия активна"
-
-#. js-lingui-explicit-id
 #: src/features/onboarding/steps/LicenseModal.tsx
 msgid "onboarding.license.input_aria"
 msgstr "Лицензионный ключ"
@@ -2575,6 +2625,11 @@ msgid "onboarding.microphone.title"
 msgstr "Доступ к микрофону"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.microphone"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
 msgid "faq.permissions.answer.v2"
 msgstr "Доступ к микрофону для записи голоса и доступ к функциям специальных возможностей для вставки текста и чтения выделенного текста при его переработке с помощью сочетания клавиш. Glimpse использует эти разрешения только во время активной диктовки."
@@ -2710,11 +2765,6 @@ msgstr "Дополнительные параметры"
 #: src/features/library/components/LibraryCard.tsx
 msgid "library.card.more_options"
 msgstr "Дополнительные параметры"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.more_options"
-msgstr "Дополнительные параметры доступны в Настройках."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -3238,11 +3288,6 @@ msgstr "Нажмите сочетание клавиш для диктовки, 
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.subtitle"
 msgstr "Нажмите сочетание клавиш в любом приложении, чтобы начать диктовку."
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.title"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -3961,7 +4006,6 @@ msgid "settings.general.shortcuts.smart"
 msgstr "Умный"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.shortcut"
 msgstr "Умное сочетание клавиш"
@@ -4132,6 +4176,11 @@ msgid "settings.app.auto_pause_media.body_off"
 msgstr "Системный звук воспроизводится во время записи."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.microphone_default"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.mic_system_default"
 msgstr "Системный язык по умолчанию"
@@ -4192,6 +4241,11 @@ msgid "member_card.edition_blurb_contributor"
 msgstr "Спасибо за ваш вклад. До 5 устройств."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.license_active_title.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
 msgid "personalization.modal.website.duplicate"
 msgstr "Этот домен уже добавлен"
@@ -4217,6 +4271,11 @@ msgid "native.toast.too_quiet"
 msgstr "Слишком тихо для распознавания. Запись удалена."
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.complete.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_ready"
 msgstr "Модель Apple Intelligence ещё загружается."
@@ -4230,6 +4289,11 @@ msgstr "Команда glimpse установлена по пути {cliInstallP
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.cli.installed_info"
 msgstr "Команда glimpse установлена по пути {cliInstallPath}. Используйте её в Терминале, скриптах или инструментах автоматизации для вызова Glimpse без открытия интерфейса приложения."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.next.anywhere"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -4422,6 +4486,11 @@ msgid "settings.account.trial.text_one"
 msgstr "Пробный период · остался 1 день"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.title.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.apple.not_enabled"
 msgstr "Включите Apple Intelligence в Системных настройках, чтобы использовать эту функцию."
@@ -4552,11 +4621,6 @@ msgid "settings.about.data.verbatim_text_aria"
 msgstr "Использовать исходные транскрипты до очистки"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.success_body"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
 msgid "settings.language_model.subtitle"
 msgstr "Используется в сочетаниях клавиш с включённой моделью письма, а также в Personalization."
@@ -4606,6 +4670,11 @@ msgstr "Открыть историю"
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.10"
 msgstr "Голос — самая быстрая клавиатура из всех, что у меня есть. {wpm} слов в минуту. @try_glimpse_app"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.v2"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

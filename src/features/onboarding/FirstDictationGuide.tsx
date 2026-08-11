@@ -2,7 +2,7 @@ import { useLingui } from "@lingui/react/macro";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
-  CheckCircle,
+  Check,
   PencilSimple,
   SpinnerGap as Loader2,
 } from "@phosphor-icons/react";
@@ -17,6 +17,11 @@ import {
   type StepMotionProps,
 } from "./steps/shared";
 
+const REVEAL_VARIANTS = {
+  hidden: { opacity: 0, y: 5 },
+  shown: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+} as const;
+
 interface FirstDictationGuideProps {
   stepMotionProps: StepMotionProps;
   smartShortcut: string;
@@ -24,58 +29,6 @@ interface FirstDictationGuideProps {
   onFinish: () => void;
   isFinishing: boolean;
   completionError: string | null;
-}
-
-const CELEBRATION_DOTS = [
-  { x: -18, y: -10, color: "bg-cloud", delay: 0 },
-  { x: -15, y: 12, color: "bg-local", delay: 0.04 },
-  { x: 0, y: -18, color: "bg-local", delay: 0.08 },
-  { x: 17, y: -9, color: "bg-cloud", delay: 0.12 },
-  { x: 16, y: 12, color: "bg-local", delay: 0.16 },
-] as const;
-
-function CelebrationMark() {
-  return (
-    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center">
-      {CELEBRATION_DOTS.map((dot) => (
-        <motion.span
-          key={`${dot.x}-${dot.y}`}
-          className={`absolute h-1 w-1 rounded-full ${dot.color}`}
-          initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
-          animate={{
-            x: [0, dot.x, dot.x * 1.12],
-            y: [0, dot.y, dot.y * 1.12],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0.6],
-          }}
-          transition={{
-            duration: 0.7,
-            delay: dot.delay,
-            ease: "easeOut",
-          }}
-        />
-      ))}
-      <motion.div
-        className="relative flex h-8 w-8 items-center justify-center rounded-full bg-local/12"
-        initial={{ opacity: 0, scale: 0.6 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 360, damping: 20 }}
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.4, rotate: -16 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 420,
-            damping: 19,
-            delay: 0.08,
-          }}
-        >
-          <CheckCircle size={20} weight="fill" className="text-local" />
-        </motion.div>
-      </motion.div>
-    </div>
-  );
 }
 
 export default function FirstDictationGuide({
@@ -196,74 +149,73 @@ export default function FirstDictationGuide({
     >
       <OnboardingHeader
         title={t({
-          id: "onboarding.first_dictation.title",
-          message: "Press your shortcut, then say this",
+          id: "onboarding.first_dictation.title.v2",
+          message: "Try your first dictation",
+        })}
+        subtitle={t({
+          id: "onboarding.first_dictation.subtitle",
+          message: "Hold your shortcut and read the line below out loud.",
         })}
       />
 
-      <div className="flex flex-col items-center">
-        <span className="ui-text-uppercase-meta font-semibold text-content-muted">
-          {t({
-            id: "onboarding.done.recap.shortcut",
-            message: "Smart shortcut",
-          })}
-        </span>
-        <button
-          type="button"
-          onClick={startCapture}
-          className="group mt-1.5 flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:text-content-primary"
-        >
-          {capturing ? (
-            <span className="flex items-center gap-1.5 font-mono ui-text-body-lg text-local">
-              <motion.span
-                className="h-1.5 w-1.5 rounded-full bg-local"
-                animate={{ opacity: [0.35, 1, 0.35] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              />
-              {preview ||
-                t({
-                  id: "onboarding.done.recap.shortcut_capture",
-                  message: "Press a shortcut",
-                })}
+      <button
+        type="button"
+        onClick={startCapture}
+        className="group -mt-5 mb-8 flex min-w-[132px] items-center justify-center gap-1.5 rounded-md px-2.5 py-1 transition-colors hover:bg-surface-elevated"
+      >
+        {capturing ? (
+          <span className="flex items-center gap-1.5 font-mono ui-text-body-sm text-local">
+            <motion.span
+              className="h-1.5 w-1.5 rounded-full bg-local"
+              animate={{ opacity: [0.35, 1, 0.35] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+            {preview ||
+              t({
+                id: "onboarding.done.recap.shortcut_capture",
+                message: "Press a shortcut",
+              })}
+          </span>
+        ) : (
+          <>
+            <span className="font-mono ui-text-body-sm text-content-secondary">
+              {shortcutLabel}
             </span>
-          ) : (
-            <>
-              <span className="font-mono ui-text-body-lg text-content-primary">
-                {shortcutLabel}
-              </span>
-              <PencilSimple
-                size={12}
-                className="text-content-disabled transition-colors group-hover:text-content-secondary"
-              />
-            </>
-          )}
-        </button>
-      </div>
+            <PencilSimple
+              size={12}
+              className="text-content-disabled transition-colors group-hover:text-content-secondary"
+            />
+          </>
+        )}
+      </button>
 
-      <div className="mt-7 w-full text-left">
-        <p className="text-center ui-text-body-lg font-medium text-content-primary">
+      <div className="w-full">
+        <p className="ui-text-body-lg font-medium text-content-secondary">
           {t({
             id: "onboarding.first_dictation.prompt",
             message: "“Glimpse turns my voice into text.”",
           })}
         </p>
 
-        <motion.div
-          className={`mt-5 min-h-[104px] border-b px-2 pb-3 transition-colors ${
+        <div
+          className={`relative mt-4 min-h-[72px] border-b px-2 pb-3 transition-colors ${
             completedDictation
               ? "border-local/50"
               : "border-border-secondary focus-within:border-local/50"
           }`}
-          animate={
-            completedDictation
-              ? { borderColor: [null, "var(--color-local)", null] }
-              : undefined
-          }
-          transition={{ duration: 0.7, ease: "easeOut" }}
         >
+          {completedDictation ? (
+            <motion.span
+              aria-hidden
+              className="absolute inset-x-0 -bottom-px h-px origin-center bg-local"
+              initial={{ scaleX: 0, opacity: 1 }}
+              animate={{ scaleX: 1, opacity: 0.5 }}
+              transition={{ duration: 0.55, ease: "easeOut" }}
+            />
+          ) : null}
           <textarea
             ref={practiceRef}
-            rows={3}
+            rows={2}
             spellCheck={false}
             aria-label={t({
               id: "onboarding.first_dictation.practice_aria",
@@ -273,41 +225,78 @@ export default function FirstDictationGuide({
               id: "onboarding.first_dictation.placeholder",
               message: "Your words will appear here…",
             })}
-            className="block w-full resize-none bg-transparent p-0 ui-text-body-lg text-content-primary outline-none placeholder:text-content-disabled"
+            className="block w-full resize-none bg-transparent p-0 text-center ui-text-body-lg text-content-primary outline-none placeholder:text-content-disabled"
           />
-        </motion.div>
+        </div>
 
-        <div className="flex h-14 items-center justify-center">
-          <AnimatePresence initial={false}>
+        <div
+          aria-live="polite"
+          className="mt-5 flex min-h-[76px] items-start justify-center"
+        >
+          <AnimatePresence initial={false} mode="wait">
             {completedDictation ? (
               <motion.div
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, y: 6, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 22,
-                  delay: 0.06,
+                key="done"
+                className="w-full"
+                variants={{
+                  hidden: {},
+                  shown: { transition: { staggerChildren: 0.07 } },
                 }}
+                initial="hidden"
+                animate="shown"
               >
-                <CelebrationMark />
-                <div>
-                  <p className="ui-text-body-sm font-medium text-content-primary">
+                <motion.p
+                  variants={REVEAL_VARIANTS}
+                  className="flex items-center justify-center gap-1.5 text-balance ui-text-body-sm font-medium text-content-primary"
+                >
+                  <motion.span
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 420,
+                      damping: 18,
+                      delay: 0.1,
+                    }}
+                  >
+                    <Check size={14} weight="bold" className="text-local" />
+                  </motion.span>
+                  {t({
+                    id: "onboarding.first_dictation.complete.v2",
+                    message: "That's it, that's the whole thing.",
+                  })}
+                </motion.p>
+                <ul className="mx-auto mt-2.5 flex max-w-sm flex-col gap-1 text-balance ui-text-meta text-content-muted">
+                  <motion.li variants={REVEAL_VARIANTS}>
                     {t({
-                      id: "onboarding.first_dictation.complete",
-                      message: "First dictation complete",
+                      id: "onboarding.first_dictation.next.anywhere",
+                      message:
+                        "The same shortcut works in any app where you can type.",
                     })}
-                  </p>
-                  <p className="mt-0.5 ui-text-meta text-content-muted">
+                  </motion.li>
+                  <motion.li variants={REVEAL_VARIANTS}>
                     {t({
-                      id: "onboarding.first_dictation.success_body",
-                      message: "Use the same shortcut wherever you type.",
+                      id: "onboarding.first_dictation.next.library",
+                      message: "Every dictation is saved in your Library.",
                     })}
-                  </p>
-                </div>
+                  </motion.li>
+                </ul>
               </motion.div>
-            ) : null}
+            ) : (
+              <motion.p
+                key="waiting"
+                className="ui-text-body-sm text-content-muted"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                {t({
+                  id: "onboarding.first_dictation.waiting.v2",
+                  message: "Waiting for you to speak.",
+                })}
+              </motion.p>
+            )}
           </AnimatePresence>
         </div>
       </div>
