@@ -14,6 +14,8 @@
 - Turning cloud transcription off now resets a language the local model cannot handle.
 - The Settings navigation icon no longer shifts by a pixel after animating on Windows.
 - The Account activity chart no longer stretches beyond its intended size in a fullscreen window.
+- What's New, the FAQ and the auto-delete confirmation dim the whole window again instead of leaving the sidebar bright.
+- Clicking the sidebar with What's New or the FAQ open now closes it, instead of leaving it open over Settings.
 
 ---
 

@@ -1,5 +1,6 @@
 import { useLingui } from "@lingui/react/macro";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { invoke } from "@tauri-apps/api/core";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
@@ -1011,73 +1012,77 @@ const AppTab = ({
         )}
       </motion.div>
 
-      <AnimatePresence>
-        {pendingPruneConfirmation && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-xs px-6"
-            onClick={handleClosePruneConfirmation}
-          >
-            <motion.div
-              initial={{ scale: 0.96, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.96, opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="w-full max-w-sm rounded-2xl border border-red-500/30 bg-surface-tertiary p-5 ui-shadow-modal-deep"
-              onClick={(event) => event.stopPropagation()}
-              role="dialog"
-              aria-modal="true"
-              aria-label={t({
-                id: "settings.app.auto_delete.confirm.title",
-                message: "Delete older items now?",
-              })}
-            >
-              <div className="mb-3 flex items-start gap-3">
-                <AlertTriangle
-                  size={20}
-                  className="mt-1 shrink-0 text-red-400"
-                />
-                <div className="min-w-0">
-                  <p className="ui-text-body-lg font-semibold ui-color-error-strong leading-tight">
-                    {t({
-                      id: "settings.app.auto_delete.confirm.title",
-                      message: "Delete older items now?",
-                    })}
-                  </p>
-                  <p className="mt-1 ui-text-body text-content-primary leading-relaxed">
-                    {pruneConfirmationMessage}
-                  </p>
-                </div>
-              </div>
-              <p className="ui-text-micro text-content-muted">
-                {pruneConfirmationFootnote}
-              </p>
-              <div className="mt-4 flex justify-end gap-2">
-                <button
-                  onClick={handleClosePruneConfirmation}
-                  className="rounded-lg border border-border-secondary px-4 py-2 ui-text-body-sm font-medium text-content-secondary hover:border-border-hover transition-colors"
-                >
-                  {t({
-                    id: "settings.app.cancel",
-                    message: "Cancel",
+      {active &&
+        createPortal(
+          <AnimatePresence>
+            {pendingPruneConfirmation && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="settings-typescale font-sans fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-xs px-6"
+                onClick={handleClosePruneConfirmation}
+              >
+                <motion.div
+                  initial={{ scale: 0.96, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.96, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="w-full max-w-sm rounded-2xl border border-red-500/30 bg-surface-tertiary p-5 ui-shadow-modal-deep"
+                  onClick={(event) => event.stopPropagation()}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={t({
+                    id: "settings.app.auto_delete.confirm.title",
+                    message: "Delete older items now?",
                   })}
-                </button>
-                <button
-                  onClick={handleConfirmPruneChange}
-                  className="rounded-lg bg-red-500/90 px-4 py-2 ui-text-body-sm font-semibold ui-color-on-solid hover:bg-red-500 transition-colors"
                 >
-                  {t({
-                    id: "settings.app.auto_delete.confirm.apply",
-                    message: "Apply anyway",
-                  })}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+                  <div className="mb-3 flex items-start gap-3">
+                    <AlertTriangle
+                      size={20}
+                      className="mt-1 shrink-0 text-red-400"
+                    />
+                    <div className="min-w-0">
+                      <p className="ui-text-body-lg font-semibold ui-color-error-strong leading-tight">
+                        {t({
+                          id: "settings.app.auto_delete.confirm.title",
+                          message: "Delete older items now?",
+                        })}
+                      </p>
+                      <p className="mt-1 ui-text-body text-content-primary leading-relaxed">
+                        {pruneConfirmationMessage}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="ui-text-micro text-content-muted">
+                    {pruneConfirmationFootnote}
+                  </p>
+                  <div className="mt-4 flex justify-end gap-2">
+                    <button
+                      onClick={handleClosePruneConfirmation}
+                      className="rounded-lg border border-border-secondary px-4 py-2 ui-text-body-sm font-medium text-content-secondary hover:border-border-hover transition-colors"
+                    >
+                      {t({
+                        id: "settings.app.cancel",
+                        message: "Cancel",
+                      })}
+                    </button>
+                    <button
+                      onClick={handleConfirmPruneChange}
+                      className="rounded-lg bg-red-500/90 px-4 py-2 ui-text-body-sm font-semibold ui-color-on-solid hover:bg-red-500 transition-colors"
+                    >
+                      {t({
+                        id: "settings.app.auto_delete.confirm.apply",
+                        message: "Apply anyway",
+                      })}
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </>
   );
 };

@@ -70,12 +70,18 @@ const SettingsScreen = ({
     initialTab: legacyTabFor(pane),
     transcriptionMode: initialTranscriptionMode,
   });
-  const { activeLicense, setActiveTab } = form;
+  const { activeLicense, setActiveTab, setShowFAQModal, setWhatsNewOpen } =
+    form;
   const localApiLocked = !activeLicense;
 
   useEffect(() => {
     setActiveTab(legacyTabFor(pane));
   }, [pane, setActiveTab]);
+
+  useEffect(() => {
+    setShowFAQModal(false);
+    setWhatsNewOpen(false);
+  }, [pane, active, setShowFAQModal, setWhatsNewOpen]);
 
   const handleOpenTab = (tab: LegacyTab) => {
     if (localApiLocked && tab === "local-api") return;
@@ -279,14 +285,18 @@ const SettingsScreen = ({
         )}
       </div>
 
-      <FAQModal
-        isOpen={form.showFAQModal}
-        onClose={() => form.setShowFAQModal(false)}
-      />
-      <WhatsNewModal
-        isOpen={form.whatsNewOpen}
-        onClose={() => form.setWhatsNewOpen(false)}
-      />
+      {active && (
+        <>
+          <FAQModal
+            isOpen={form.showFAQModal}
+            onClose={() => form.setShowFAQModal(false)}
+          />
+          <WhatsNewModal
+            isOpen={form.whatsNewOpen}
+            onClose={() => form.setWhatsNewOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 };
