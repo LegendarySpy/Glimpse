@@ -111,7 +111,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
-msgstr ""
+msgstr "\"Glimpse मेरी आवाज़ को टेक्स्ट में बदल देता है।\""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -894,7 +894,7 @@ msgstr "अपडेट जाँचें..."
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed_body"
-msgstr ""
+msgstr "सुनिश्चित करें कि सही माइक्रोफ़ोन चुना हुआ है, फिर दोबारा प्रयास करें।"
 
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
@@ -1104,7 +1104,7 @@ msgstr "जारी रखें"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.continue"
-msgstr ""
+msgstr "Glimpse पर जारी रखें"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -1608,7 +1608,7 @@ msgstr "डेवलपर"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.dictate_to_continue"
-msgstr ""
+msgstr "आगे बढ़ने के लिए डिक्टेशन करें"
 
 #. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
@@ -1674,7 +1674,7 @@ msgstr "अक्षम करें"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.disable"
-msgstr ""
+msgstr "क्लाउड निष्क्रिय करें"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
@@ -1854,12 +1854,12 @@ msgstr "त्रुटि हुई"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.library"
-msgstr ""
+msgstr "हर डिक्टेशन आपकी लाइब्रेरी में सहेजा जाता है।"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active.v2"
-msgstr ""
+msgstr "हर फ़ीचर अनलॉक है। अब कुछ नया बनाएँ!"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2019,7 +2019,7 @@ msgstr "आपके डिवाइस के लिए मॉडल ढूँ�
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.finishing"
-msgstr ""
+msgstr "पूरा किया जा रहा है..."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2204,7 +2204,7 @@ msgstr "बोलने के लिए दबाए रखें, रोकन
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.subtitle"
-msgstr ""
+msgstr "अपना शॉर्टकट दबाए रखें और नीचे दी गई पंक्ति ज़ोर से पढ़ें।"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2632,7 +2632,7 @@ msgstr "माइक्रोफ़ोन एक्सेस"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone"
-msgstr ""
+msgstr "माइक्रोफ़ोन"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3245,7 +3245,7 @@ msgstr "पोस्ट"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.practice_aria"
-msgstr ""
+msgstr "अपना पहला डिक्टेशन अभ्यास करें"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3973,7 +3973,7 @@ msgstr "समय-मोहरे दिखाएँ"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.later"
-msgstr ""
+msgstr "छोड़ें"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4183,7 +4183,7 @@ msgstr "रिकॉर्ड करते समय सिस्टम ऑड�
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone_default"
-msgstr ""
+msgstr "सिस्टम डिफ़ॉल्ट"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4248,7 +4248,7 @@ msgstr "योगदान देने के लिए धन्यवाद�
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active_title.v2"
-msgstr ""
+msgstr "Glimpse को समर्थन देने के लिए धन्यवाद"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -4273,7 +4273,7 @@ msgstr "यह माइक्रोफ़ोन पहले से उपय�
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed"
-msgstr ""
+msgstr "यह वाला ठीक से नहीं आ सका।"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4283,7 +4283,7 @@ msgstr "यह सुनने के लिए बहुत धीमा था
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.complete.v2"
-msgstr ""
+msgstr "बस इतना ही, यही पूरी प्रक्रिया है।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4303,7 +4303,7 @@ msgstr "glimpse कमांड {cliInstallPath} पर इंस्टॉल �
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.anywhere"
-msgstr ""
+msgstr "जहाँ भी आप टाइप कर सकते हैं, किसी भी ऐप में यही शॉर्टकट काम करता है।"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -4498,7 +4498,7 @@ msgstr "परीक्षण · 1 दिन शेष"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.title.v2"
-msgstr ""
+msgstr "अपना पहला डिक्टेशन आज़माएँ"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4684,7 +4684,7 @@ msgstr "आवाज़ मेरे पास मौजूद सबसे त�
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.waiting.v2"
-msgstr ""
+msgstr "आपके बोलने का इंतज़ार हो रहा है।"
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4859,7 +4859,7 @@ msgstr "आपकी परीक्षण अवधि समाप्त ह�
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.placeholder"
-msgstr ""
+msgstr "आपके शब्द यहाँ दिखाई देंगे…"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

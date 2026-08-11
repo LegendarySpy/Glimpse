@@ -111,7 +111,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
-msgstr ""
+msgstr "\"Glimpse convierte mi voz en texto.\""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -894,7 +894,7 @@ msgstr "Buscar actualizaciones..."
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed_body"
-msgstr ""
+msgstr "Comprueba que el micrófono correcto esté seleccionado y vuelve a intentarlo."
 
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
@@ -1104,7 +1104,7 @@ msgstr "Continuar"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.continue"
-msgstr ""
+msgstr "Continuar a Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -1608,7 +1608,7 @@ msgstr "Desarrollador"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.dictate_to_continue"
-msgstr ""
+msgstr "Dicta para continuar"
 
 #. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
@@ -1674,7 +1674,7 @@ msgstr "Desactivar"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.disable"
-msgstr ""
+msgstr "Desactivar la nube"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
@@ -1854,12 +1854,12 @@ msgstr "Se produjo un error"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.library"
-msgstr ""
+msgstr "Cada dictado se guarda en tu Biblioteca."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active.v2"
-msgstr ""
+msgstr "Todas las funciones están desbloqueadas. ¡Ve y crea algo!"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2019,7 +2019,7 @@ msgstr "Buscando un modelo para tu dispositivo"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.finishing"
-msgstr ""
+msgstr "Finalizando..."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2204,7 +2204,7 @@ msgstr "mantén pulsado para hablar, suelta para detener"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.subtitle"
-msgstr ""
+msgstr "Mantén pulsado tu atajo y lee en voz alta la línea de abajo."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2632,7 +2632,7 @@ msgstr "Acceso al micrófono"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone"
-msgstr ""
+msgstr "Micrófono"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3245,7 +3245,7 @@ msgstr "Publicar"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.practice_aria"
-msgstr ""
+msgstr "Practica tu primer dictado"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3973,7 +3973,7 @@ msgstr "Mostrar marcas de tiempo"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.later"
-msgstr ""
+msgstr "Omitir"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4183,7 +4183,7 @@ msgstr "El audio del sistema se reproduce mientras se graba."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone_default"
-msgstr ""
+msgstr "Predeterminado del sistema"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4248,7 +4248,7 @@ msgstr "Gracias por contribuir. Hasta 5 dispositivos."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active_title.v2"
-msgstr ""
+msgstr "Gracias por apoyar Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -4273,7 +4273,7 @@ msgstr "Ese micrófono ya está en uso."
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed"
-msgstr ""
+msgstr "Ese no se ha recibido."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4283,7 +4283,7 @@ msgstr "Eso fue demasiado silencioso para oírlo. Grabación eliminada."
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.complete.v2"
-msgstr ""
+msgstr "Ya está, eso es todo."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4303,7 +4303,7 @@ msgstr "El comando glimpse está instalado en {cliInstallPath}. Úsalo desde Ter
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.anywhere"
-msgstr ""
+msgstr "El mismo atajo funciona en cualquier app donde puedas escribir."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -4498,7 +4498,7 @@ msgstr "Prueba · Queda 1 día"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.title.v2"
-msgstr ""
+msgstr "Prueba tu primer dictado"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4684,7 +4684,7 @@ msgstr "La voz es el teclado más rápido que tengo. {wpm} palabras por minuto. 
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.waiting.v2"
-msgstr ""
+msgstr "Esperando a que hables."
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4859,7 +4859,7 @@ msgstr "Tu prueba ha terminado"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.placeholder"
-msgstr ""
+msgstr "Tus palabras aparecerán aquí…"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

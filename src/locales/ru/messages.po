@@ -111,7 +111,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
-msgstr ""
+msgstr "«Glimpse превращает мой голос в текст.»"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -894,7 +894,7 @@ msgstr "Проверить обновления…"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed_body"
-msgstr ""
+msgstr "Убедитесь, что выбран правильный микрофон, и повторите попытку."
 
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
@@ -1104,7 +1104,7 @@ msgstr "Продолжить"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.continue"
-msgstr ""
+msgstr "Перейти в Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -1608,7 +1608,7 @@ msgstr "Разработчик"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.dictate_to_continue"
-msgstr ""
+msgstr "Продиктуйте для продолжения"
 
 #. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
@@ -1674,7 +1674,7 @@ msgstr "Отключить"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.disable"
-msgstr ""
+msgstr "Отключить облако"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
@@ -1854,12 +1854,12 @@ msgstr "Произошла ошибка"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.library"
-msgstr ""
+msgstr "Каждая диктовка сохраняется в вашей библиотеке."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active.v2"
-msgstr ""
+msgstr "Все функции разблокированы. Создавайте!"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2019,7 +2019,7 @@ msgstr "Поиск модели для вашего устройства"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.finishing"
-msgstr ""
+msgstr "Завершение..."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2204,7 +2204,7 @@ msgstr "удерживайте для записи, отпустите для о
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.subtitle"
-msgstr ""
+msgstr "Удерживайте сочетание клавиш и прочитайте строку ниже вслух."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2632,7 +2632,7 @@ msgstr "Доступ к микрофону"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone"
-msgstr ""
+msgstr "Микрофон"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3245,7 +3245,7 @@ msgstr "Опубликовать"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.practice_aria"
-msgstr ""
+msgstr "Попрактикуйтесь в первой диктовке"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3973,7 +3973,7 @@ msgstr "Показать метки времени"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.later"
-msgstr ""
+msgstr "Пропустить"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4183,7 +4183,7 @@ msgstr "Системный звук воспроизводится во врем
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone_default"
-msgstr ""
+msgstr "Системный по умолчанию"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4248,7 +4248,7 @@ msgstr "Спасибо за ваш вклад. До 5 устройств."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active_title.v2"
-msgstr ""
+msgstr "Спасибо за поддержку Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -4273,7 +4273,7 @@ msgstr "Этот микрофон уже используется."
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed"
-msgstr ""
+msgstr "Не удалось распознать."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4283,7 +4283,7 @@ msgstr "Слишком тихо для распознавания. Запись 
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.complete.v2"
-msgstr ""
+msgstr "Вот и всё."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4303,7 +4303,7 @@ msgstr "Команда glimpse установлена по пути {cliInstallP
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.anywhere"
-msgstr ""
+msgstr "Это же сочетание клавиш работает в любом приложении, где можно вводить текст."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -4498,7 +4498,7 @@ msgstr "Пробный период · остался 1 день"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.title.v2"
-msgstr ""
+msgstr "Попробуйте первую диктовку"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4684,7 +4684,7 @@ msgstr "Голос — самая быстрая клавиатура из вс�
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.waiting.v2"
-msgstr ""
+msgstr "Ожидание речи."
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4859,7 +4859,7 @@ msgstr "Пробный период завершён"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.placeholder"
-msgstr ""
+msgstr "Ваши слова появятся здесь…"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts

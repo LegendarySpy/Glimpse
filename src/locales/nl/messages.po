@@ -111,7 +111,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
-msgstr ""
+msgstr "\"Glimpse zet mijn stem om in tekst.\""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -894,7 +894,7 @@ msgstr "Zoek naar updates…"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed_body"
-msgstr ""
+msgstr "Controleer of de juiste microfoon is geselecteerd en probeer het dan opnieuw."
 
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
@@ -1104,7 +1104,7 @@ msgstr "Doorgaan"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.continue"
-msgstr ""
+msgstr "Ga door naar Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ModelStep.tsx
@@ -1608,7 +1608,7 @@ msgstr "Ontwikkelaar"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.dictate_to_continue"
-msgstr ""
+msgstr "Dicteer om verder te gaan"
 
 #. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
@@ -1674,7 +1674,7 @@ msgstr "Uitschakelen"
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/ModelsTab.tsx
 msgid "settings.models.cloud.disable"
-msgstr ""
+msgstr "Cloud uitschakelen"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalizationView.tsx
@@ -1854,12 +1854,12 @@ msgstr "Er is een fout opgetreden"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.library"
-msgstr ""
+msgstr "Elke dictee-opname wordt bewaard in je Bibliotheek."
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active.v2"
-msgstr ""
+msgstr "Elke functie is ontgrendeld. Ga iets maken!"
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2019,7 +2019,7 @@ msgstr "Een model voor je apparaat zoeken"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.finishing"
-msgstr ""
+msgstr "Bezig met afronden..."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -2204,7 +2204,7 @@ msgstr "ingedrukt houden om te spreken, loslaten om te stoppen"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.subtitle"
-msgstr ""
+msgstr "Houd je sneltoets ingedrukt en lees de onderstaande regel hardop voor."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2632,7 +2632,7 @@ msgstr "Microfoontoegang"
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone"
-msgstr ""
+msgstr "Microfoon"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3245,7 +3245,7 @@ msgstr "Plaatsen"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.practice_aria"
-msgstr ""
+msgstr "Oefen je eerste dictee"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
@@ -3973,7 +3973,7 @@ msgstr "Tijdcodes tonen"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.later"
-msgstr ""
+msgstr "Sla over"
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/PermissionsStep.tsx
@@ -4183,7 +4183,7 @@ msgstr "Systeemgeluid wordt afgespeeld tijdens het opnemen."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.recap.microphone_default"
-msgstr ""
+msgstr "Systeemstandaard"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4248,7 +4248,7 @@ msgstr "Bedankt voor je bijdrage. Tot 5 apparaten."
 #. js-lingui-explicit-id
 #: src/features/onboarding/steps/ReadyStep.tsx
 msgid "onboarding.done.license_active_title.v2"
-msgstr ""
+msgstr "Dank je wel voor je steun aan Glimpse"
 
 #. js-lingui-explicit-id
 #: src/features/personalization/components/PersonalityModal.tsx
@@ -4273,7 +4273,7 @@ msgstr "Die microfoon is al in gebruik."
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.failed"
-msgstr ""
+msgstr "Die is niet doorgekomen."
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
@@ -4283,7 +4283,7 @@ msgstr "Dat was te zacht om te horen. Opname verwijderd."
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.complete.v2"
-msgstr ""
+msgstr "Dat is het, dat is alles."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4303,7 +4303,7 @@ msgstr "De glimpse-opdracht is geïnstalleerd op {cliInstallPath}. Gebruik deze 
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.next.anywhere"
-msgstr ""
+msgstr "Dezelfde sneltoets werkt in elke app waarin je kunt typen."
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -4498,7 +4498,7 @@ msgstr "Proefversie · 1 dag resterend"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.title.v2"
-msgstr ""
+msgstr "Probeer je eerste dictee"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/LanguageModelPanel.tsx
@@ -4684,7 +4684,7 @@ msgstr "Mijn stem is het snelste toetsenbord dat ik heb. {wpm} woorden per minuu
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.waiting.v2"
-msgstr ""
+msgstr "Aan het wachten tot je begint te spreken."
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx
@@ -4859,7 +4859,7 @@ msgstr "Je proefperiode is afgelopen"
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.placeholder"
-msgstr ""
+msgstr "Je woorden verschijnen hier…"
 
 #. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
