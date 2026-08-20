@@ -19,7 +19,7 @@ const WindowControlsButtons = () => {
     "flex h-8 w-11 items-center justify-center text-content-muted transition-colors hover:bg-surface-elevated hover:text-content-primary";
 
   return (
-    <div className="fixed right-0 top-0 z-50 flex h-8" data-window-controls>
+    <div className="fixed right-0 top-0 z-[110] flex h-8" data-window-controls>
       <button
         type="button"
         aria-label={t({ id: "window.controls.minimize", message: "Minimize" })}

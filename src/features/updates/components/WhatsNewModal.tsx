@@ -6,6 +6,7 @@ import {
   useContext,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -245,15 +246,18 @@ function WhatsNewModal({ isOpen, onClose }: WhatsNewModalProps) {
     });
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs"
+          className="settings-typescale font-sans fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs"
           onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="whats-new-title"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -265,7 +269,10 @@ function WhatsNewModal({ isOpen, onClose }: WhatsNewModalProps) {
           >
             <div className="flex items-center justify-between px-7 pt-6 pb-2 shrink-0">
               <div>
-                <h2 className="ui-text-display font-normal ui-color-primary tracking-tight">
+                <h2
+                  id="whats-new-title"
+                  className="ui-text-display font-normal ui-color-primary tracking-tight"
+                >
                   {t({
                     id: "updates.whats_new.title",
                     message: "What's New",
@@ -405,7 +412,8 @@ function WhatsNewModal({ isOpen, onClose }: WhatsNewModalProps) {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 
