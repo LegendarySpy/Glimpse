@@ -1,3 +1,17 @@
+1.1.2
+
+### Improvements
+
+- The last setup screen now has a hold-to-dictate button, so you can try Glimpse without remembering the shortcut first.
+- That practice step now shows your shortcut as keys, and only continues after real words appear.
+- The last setup recap uses the same keycaps for your shortcut.
+
+### Fixes
+
+- During setup, picking a model you already have no longer starts a download just to verify it.
+
+---
+
 1.1.1
 
 ### Improvements

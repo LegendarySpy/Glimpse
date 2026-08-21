@@ -131,6 +131,9 @@
   --ui-shadow-onboarding-local: 0 10px 24px rgba(0, 0, 0, 0.18);
   --ui-shadow-onboarding-model: 0 10px 24px rgba(0, 0, 0, 0.16);
   --ui-shadow-onboarding-model-alt: 0 10px 24px rgba(0, 0, 0, 0.2);
+  --ui-keycap-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -2px 0 rgba(0, 0, 0, 0.38),
+    0 1px 0 rgba(0, 0, 0, 0.28);
   --ui-shadow-modal-deep: 0 20px 60px rgba(0, 0, 0, 0.45);
   --ui-pill-dot-base-rgb: 40, 40, 40;
   --ui-pill-dot-highlight-rgb: 255, 255, 255;
@@ -291,6 +294,9 @@
     0 12px 28px rgba(26, 23, 22, 0.14), 0 3px 6px rgba(26, 23, 22, 0.08);
   --shadow-xl:
     0 24px 56px rgba(26, 23, 22, 0.2), 0 6px 12px rgba(26, 23, 22, 0.1);
+  --ui-keycap-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -2px 0 rgba(26, 23, 22, 0.12), 0 1px 1px rgba(26, 23, 22, 0.08);
 
   --color-scrollbar-thumb: rgba(26, 23, 22, 0.18);
   --color-scrollbar-thumb-hover: rgba(26, 23, 22, 0.32);
@@ -496,6 +502,54 @@
     font-family:
       ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+  }
+
+  .ui-keycap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border-secondary);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    font-weight: 600;
+    user-select: none;
+    box-shadow: var(--ui-keycap-shadow);
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .ui-keycap-md {
+    min-height: 2.5rem;
+    min-width: 2.75rem;
+    padding: 0 0.75rem;
+    font-size: var(--ui-text-size-title-lg);
+    line-height: var(--ui-text-line-title-lg);
+  }
+
+  .ui-keycap-sm {
+    min-height: 1.75rem;
+    min-width: 1.85rem;
+    padding: 0 0.5rem;
+    font-size: var(--ui-text-size-body-sm);
+    line-height: var(--ui-text-line-body-sm);
+  }
+
+  .ui-keycap-active {
+    border-color: color-mix(
+      in srgb,
+      var(--color-local) 48%,
+      var(--color-border-secondary)
+    );
+    background: color-mix(
+      in srgb,
+      var(--color-local) 12%,
+      var(--color-bg-elevated)
+    );
   }
 
   .ui-text-input {

@@ -7,7 +7,7 @@ import {
   PencilSimple,
   CaretRight,
 } from "@phosphor-icons/react";
-import { formatShortcutForDisplay } from "../../../shared/lib/shortcuts";
+import { shortcutDisplayParts } from "../../../shared/lib/shortcuts";
 import { useShortcutCapture } from "../../../shared/hooks/useShortcutCapture";
 import { useInputDevices } from "../../settings/queries";
 import { Dropdown } from "../../../shared/ui/Dropdown";
@@ -15,11 +15,9 @@ import {
   OnboardingHeader,
   OnboardingStep,
   PRIMARY_BUTTON_CLASS,
+  ShortcutKeys,
   type StepMotionProps,
 } from "./shared";
-
-const CHIP_CLASS =
-  "flex h-8 items-center gap-1.5 rounded-md bg-surface-elevated px-2.5 transition-colors hover:bg-surface-overlay";
 
 interface ReadyStepProps {
   stepMotionProps: StepMotionProps;
@@ -55,7 +53,6 @@ export function ReadyStep({
   onComplete,
 }: ReadyStepProps) {
   const { t } = useLingui();
-  const shortcut = formatShortcutForDisplay(smartShortcut);
   const [capturing, setCapturing] = useState(false);
   const [preview, setPreview] = useState("");
   const inputDevices = useInputDevices().data ?? [];
@@ -82,7 +79,7 @@ export function ReadyStep({
   const startCapture = () => {
     setPreview("");
     setCapturing(true);
-    invoke("set_shortcut_capture_active", { active: true }).catch(() => {
+    void invoke("set_shortcut_capture_active", { active: true }).catch(() => {
       setCapturing(false);
     });
   };
@@ -121,57 +118,68 @@ export function ReadyStep({
       <div className="w-full divide-y divide-border-secondary border-y border-border-secondary text-left">
         <Row
           label={t({
-            id: "onboarding.done.recap.shortcut",
-            message: "Smart shortcut",
+            id: "onboarding.done.recap.shortcut.v2",
+            message: "Shortcut",
           })}
         >
           <button
             type="button"
-            onClick={startCapture}
-            className={`group ${CHIP_CLASS}`}
+            onClick={() => {
+              if (capturing) {
+                void stopCapture();
+                return;
+              }
+              startCapture();
+            }}
+            aria-pressed={capturing}
+            aria-label={
+              capturing
+                ? t({
+                    id: "onboarding.first_dictation.cancel_shortcut_aria",
+                    message: "Cancel shortcut change",
+                  })
+                : t({
+                    id: "onboarding.first_dictation.edit_shortcut_aria",
+                    message: "Change shortcut",
+                  })
+            }
+            className="group flex min-w-0 items-center justify-end gap-2 rounded-md py-0.5"
           >
-            {capturing ? (
-              <span className="flex items-center gap-1.5 font-mono ui-text-body-sm text-cloud">
-                <motion.span
-                  className="h-1.5 w-1.5 rounded-full bg-cloud"
-                  animate={{ opacity: [0.35, 1, 0.35] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                />
-                {preview ||
-                  t({
-                    id: "onboarding.done.recap.shortcut_capture",
-                    message: "Press a shortcut",
-                  })}
-              </span>
-            ) : (
-              <>
-                <span className="font-mono ui-text-body-sm text-content-secondary">
-                  {shortcut}
-                </span>
-                <PencilSimple
-                  size={12}
-                  className="text-content-disabled transition-colors group-hover:text-content-secondary"
-                />
-              </>
-            )}
+            <ShortcutKeys
+              parts={shortcutDisplayParts(preview || smartShortcut)}
+              highlighted={capturing}
+              waiting={capturing && !preview}
+              size="sm"
+            />
+            <PencilSimple
+              size={13}
+              className={`shrink-0 transition-colors ${
+                capturing
+                  ? "text-local"
+                  : "text-content-disabled group-hover:text-content-secondary"
+              }`}
+            />
           </button>
         </Row>
 
         {modelLabel ? (
           <Row
-            label={t({ id: "onboarding.done.recap.model", message: "Model" })}
+            label={t({
+              id: "onboarding.done.recap.model.v2",
+              message: "Speech model",
+            })}
           >
             <button
               type="button"
               onClick={onEditModel}
-              className={`group min-w-0 ${CHIP_CLASS}`}
+              className="group flex min-w-0 max-w-[16rem] items-center justify-end gap-1.5"
             >
-              <span className="truncate ui-text-body-sm text-content-secondary">
+              <span className="truncate ui-text-body-sm-strong text-content-primary">
                 {modelLabel}
               </span>
               <CaretRight
                 size={12}
-                className="text-content-disabled transition-colors group-hover:text-content-secondary"
+                className="shrink-0 text-content-disabled transition-colors group-hover:text-content-secondary"
               />
             </button>
           </Row>
@@ -193,10 +201,10 @@ export function ReadyStep({
                 label: device.name,
               })),
             ]}
-            className="h-8 w-60 shrink-0"
-            buttonClassName="h-8 !rounded-md !border-0 !bg-surface-elevated px-2.5 ui-text-body-sm hover:!bg-surface-overlay"
-            valueClassName="text-content-secondary"
-            menuClassName="top-9"
+            className="h-7 max-w-[16rem] shrink-0"
+            buttonClassName="h-7 !rounded-md !border-0 !bg-transparent px-0 ui-text-body-sm-strong hover:!bg-transparent"
+            valueClassName="text-content-primary text-right"
+            menuClassName="top-8"
             truncate
           />
         </Row>
@@ -285,7 +293,7 @@ export function ReadyStep({
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 py-3.5">
-      <span className="text-pretty ui-text-body-sm-strong text-content-primary">
+      <span className="shrink-0 ui-text-section-label-sm ui-color-muted">
         {label}
       </span>
       {children}

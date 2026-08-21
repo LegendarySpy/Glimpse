@@ -236,6 +236,7 @@ fn validate_update_settings_args(args: &UpdateSettingsArgs) -> Result<(), String
 pub(crate) fn complete_onboarding(
     app: &AppHandle<AppRuntime>,
     state: &AppState,
+    first_dictation: bool,
 ) -> Result<(), String> {
     let mut settings = state.current_settings_unmasked();
     settings.onboarding_completed = true;
@@ -251,7 +252,7 @@ pub(crate) fn complete_onboarding(
         .first()
         .map(|binding| analytics::canonical_shortcut(&binding.shortcut))
         .unwrap_or_else(|| "none".to_string());
-    analytics::track_onboarding_completed(app, &smart_shortcut);
+    analytics::track_onboarding_completed(app, &smart_shortcut, first_dictation);
     Ok(())
 }
 

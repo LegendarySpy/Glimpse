@@ -34,6 +34,7 @@ import {
   languageSupportedByModel,
 } from "../../shared/lib/transcriptionLanguages";
 import { useShortcutCapture } from "../../shared/hooks/useShortcutCapture";
+import { formatShortcutForDisplay } from "../../shared/lib/shortcuts";
 import { activateLocale, i18n } from "../../i18n";
 import {
   settingsKeys,
@@ -944,7 +945,8 @@ export function useSettingsForm({
     active: captureActive !== null,
     onCancel: finalizeCapture,
     onCaptureCancelled: discardEmptyCaptureDraft,
-    onPreviewChange: setCapturePreview,
+    onPreviewChange: (shortcut) =>
+      setCapturePreview(shortcut ? formatShortcutForDisplay(shortcut) : ""),
     onShortcutCaptured: (combo) => {
       clearPendingSettingsSave();
       const target = captureActiveRef.current;
