@@ -619,7 +619,6 @@ export default function OnboardingScreen({
 
   const applySmartShortcut = useCallback(
     async (shortcut: string) => {
-      send({ type: "SET_SHORTCUT", shortcut });
       try {
         const latest = await getSettings();
         await invoke("update_settings", {
@@ -632,6 +631,7 @@ export default function OnboardingScreen({
             ctx.microphoneDevice,
           ),
         });
+        send({ type: "SET_SHORTCUT", shortcut });
       } catch {
         return;
       }

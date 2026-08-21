@@ -31,7 +31,6 @@
 - What's New, the FAQ and the auto-delete confirmation dim the whole window again instead of leaving the sidebar bright.
 - Clicking the sidebar with What's New or the FAQ open now closes it, instead of leaving it open over Settings.
 
-
 ---
 
 1.1.0
