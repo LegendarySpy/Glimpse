@@ -1217,6 +1217,18 @@ fn position_overlay_on_cursor_screen(window: &WebviewWindow<AppRuntime>) {
     }
 }
 
+pub fn start_hold_recording(app: &AppHandle<AppRuntime>) -> bool {
+    app.state::<AppState>().pill().handle_hold_press(
+        app,
+        hotkeys::ShortcutAction::Hold,
+        hotkeys::ShortcutOptions::default(),
+    )
+}
+
+pub fn stop_hold_recording(app: &AppHandle<AppRuntime>) {
+    app.state::<AppState>().pill().handle_hold_release(app);
+}
+
 fn microphone_input_kind(settings: &UserSettings) -> &'static str {
     if settings.microphone_device.is_some() {
         "selected"

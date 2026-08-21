@@ -148,7 +148,7 @@ function shortcutTokens(shortcut: string): string[] {
   return shortcut.split("+").map(normalizeShortcutToken).filter(Boolean);
 }
 
-export function formatShortcutForDisplay(shortcut: string): string {
+export function shortcutDisplayParts(shortcut: string): string[] {
   const tokens = shortcutTokens(shortcut);
 
   const modifiers = tokens
@@ -160,5 +160,9 @@ export function formatShortcutForDisplay(shortcut: string): string {
     .filter((token) => !isModifierToken(token))
     .map(humanizeKeyToken);
 
-  return [...modifiers, ...keys].join(" + ");
+  return [...modifiers, ...keys];
+}
+
+export function formatShortcutForDisplay(shortcut: string): string {
+  return shortcutDisplayParts(shortcut).join(" + ");
 }

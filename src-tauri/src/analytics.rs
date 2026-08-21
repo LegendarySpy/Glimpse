@@ -651,13 +651,20 @@ pub fn canonical_shortcut(shortcut: &str) -> String {
         .unwrap_or_else(|_| "invalid".to_string())
 }
 
-/// Records that you finished the first-run setup, and which dictation shortcut
-/// you ended up on.
-pub fn track_onboarding_completed(app: &tauri::AppHandle<AppRuntime>, smart_shortcut: &str) {
+/// Records that you finished the first-run setup, which dictation shortcut
+/// you ended up on, and whether you completed the practice dictation.
+pub fn track_onboarding_completed(
+    app: &tauri::AppHandle<AppRuntime>,
+    smart_shortcut: &str,
+    first_dictation: bool,
+) {
     capture_event(
         app,
         "onboarding_completed",
-        json!({ "smart_shortcut": smart_shortcut }),
+        json!({
+            "smart_shortcut": smart_shortcut,
+            "first_dictation": first_dictation,
+        }),
     );
 }
 

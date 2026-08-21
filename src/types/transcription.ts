@@ -1,3 +1,8 @@
+export type TranscriptionCompletePayload = {
+  transcript: string;
+  auto_paste: boolean;
+};
+
 export type TranscriptionRecord = {
   id: string;
   timestamp: string;

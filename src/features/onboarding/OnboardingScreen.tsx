@@ -252,12 +252,12 @@ export default function OnboardingScreen({
       Array.from(
         new Set(
           [
-            ...onboardingModelCatalog.map((model) => model.key),
+            ...(modelCatalogQuery.data ?? []).map((model) => model.key),
             selectedModel,
           ].filter(Boolean),
         ),
       ),
-    [onboardingModelCatalog, selectedModel],
+    [modelCatalogQuery.data, selectedModel],
   );
   const { statusByModel: modelStatus } = useModelStatuses(
     statusModelKeys,
@@ -592,27 +592,30 @@ export default function OnboardingScreen({
     t,
   ]);
 
-  const handleFinishOnboarding = useCallback(async () => {
-    send({ type: "COMPLETING" });
-    try {
-      await invoke("complete_onboarding");
-      send({ type: "COMPLETE_SUCCESS" });
-      onComplete();
-    } catch (err) {
-      console.error("Failed to finish onboarding", err);
-      const message = typeof err === "string" ? err : String(err);
-      send({
-        type: "COMPLETE_ERROR",
-        error:
-          message ||
-          t({
-            id: "onboarding.complete.failed",
-            message:
-              "Could not finish setup. Check your settings and try again.",
-          }),
-      });
-    }
-  }, [onComplete, send, t]);
+  const handleFinishOnboarding = useCallback(
+    async (firstDictation: boolean) => {
+      send({ type: "COMPLETING" });
+      try {
+        await invoke("complete_onboarding", { firstDictation });
+        send({ type: "COMPLETE_SUCCESS" });
+        onComplete();
+      } catch (err) {
+        console.error("Failed to finish onboarding", err);
+        const message = typeof err === "string" ? err : String(err);
+        send({
+          type: "COMPLETE_ERROR",
+          error:
+            message ||
+            t({
+              id: "onboarding.complete.failed",
+              message:
+                "Could not finish setup. Check your settings and try again.",
+            }),
+        });
+      }
+    },
+    [onComplete, send, t],
+  );
 
   const applySmartShortcut = useCallback(
     async (shortcut: string) => {

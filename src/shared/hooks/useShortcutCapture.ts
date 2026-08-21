@@ -1,6 +1,5 @@
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useCallback, useEffect } from "react";
-import { formatShortcutForDisplay } from "../lib/shortcuts";
 
 type ShortcutCapturePayload =
   | { kind: "preview"; shortcut: string }
@@ -73,7 +72,7 @@ export function useShortcutCapture({
 
       if (payload.kind === "preview") {
         onCaptureInput?.();
-        onPreviewChange(formatShortcutForDisplay(payload.shortcut));
+        onPreviewChange(payload.shortcut);
         return;
       }
 

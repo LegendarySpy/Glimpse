@@ -1,3 +1,17 @@
+1.1.2
+
+### Improvements
+
+- The last setup screen now has a hold-to-dictate button, so you can try Glimpse without remembering the shortcut first.
+- That practice step now shows your shortcut as keys, and only continues after real words appear.
+- The last setup recap uses the same keycaps for your shortcut.
+
+### Fixes
+
+- During setup, picking a model you already have no longer starts a download just to verify it.
+
+---
+
 1.1.1
 
 ### Improvements
@@ -14,6 +28,9 @@
 - Turning cloud transcription off now resets a language the local model cannot handle.
 - The Settings navigation icon no longer shifts by a pixel after animating on Windows.
 - The Account activity chart no longer stretches beyond its intended size in a fullscreen window.
+- What's New, the FAQ and the auto-delete confirmation dim the whole window again instead of leaving the sidebar bright.
+- Clicking the sidebar with What's New or the FAQ open now closes it, instead of leaving it open over Settings.
+
 
 ---
 

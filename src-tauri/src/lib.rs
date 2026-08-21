@@ -678,6 +678,8 @@ pub fn run() {
             open_llm_cleanup_settings,
             open_ffmpeg_install,
             complete_onboarding,
+            start_hold_recording,
+            stop_hold_recording,
             cancel_recording,
             view_recovered_transcriptions,
             copy_last_transcription,
@@ -1370,10 +1372,25 @@ fn open_ffmpeg_install(app: AppHandle<AppRuntime>) -> Result<(), String> {
 
 #[tauri::command]
 fn complete_onboarding(
+    first_dictation: bool,
     app: AppHandle<AppRuntime>,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
-    core::settings::complete_onboarding(&app, &state)
+    core::settings::complete_onboarding(&app, &state, first_dictation)
+}
+
+#[tauri::command]
+fn start_hold_recording(app: AppHandle<AppRuntime>) -> Result<(), String> {
+    if pill::start_hold_recording(&app) {
+        Ok(())
+    } else {
+        Err("Could not start recording".into())
+    }
+}
+
+#[tauri::command]
+fn stop_hold_recording(app: AppHandle<AppRuntime>) {
+    pill::stop_hold_recording(&app);
 }
 
 #[tauri::command]
@@ -1919,6 +1936,16 @@ pub(crate) fn persist_recording_async(
         if let Some(notice) = notice {
             toast::show(&app, "warning", None, &toast::native(&app, notice));
         }
+
+        emit_event(
+            &app,
+            EVENT_TRANSCRIPTION_COMPLETE,
+            TranscriptionCompletePayload {
+                transcript: String::new(),
+                auto_paste: false,
+                record: None,
+            },
+        );
 
         if let Some(path) = recording.pending_path.as_deref() {
             let _ = std::fs::remove_file(path);

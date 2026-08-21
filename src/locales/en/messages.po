@@ -110,6 +110,71 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.dictate_to_continue"
+#~ msgstr "Dictate to continue"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle"
+#~ msgstr "Hold your shortcut and read the line below out loud."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting.v2"
+#~ msgstr "Waiting for you to speak."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.failed_body"
+#~ msgstr "Check that the right microphone is selected, then try again."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting.v3"
+#~ msgstr "Hold the button and speak."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.v3"
+#~ msgstr "Hold the button below and read the line out loud. Your shortcut works too."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.failed"
+#~ msgstr "That one did not come through."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.hold_keys"
+#~ msgstr "Hold"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting.v4"
+#~ msgstr "Hold the keys above, or the button below."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.v4"
+#~ msgstr "Hold this shortcut and read the line below."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.recap.model"
+#~ msgstr "Model"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.recap.shortcut_capture"
+#~ msgstr "Press a shortcut"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.recap.shortcut"
+#~ msgstr "Smart shortcut"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
 msgstr "“Glimpse turns my voice into text.”"
 
@@ -847,9 +912,21 @@ msgid "models.card.cancel_download"
 msgstr "Cancel download"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.first_dictation.cancel_shortcut_aria"
+msgstr "Cancel shortcut change"
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.cancelled"
 msgstr "Cancelled"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.first_dictation.edit_shortcut_aria"
+msgstr "Change shortcut"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -890,11 +967,6 @@ msgstr "Check for Updates"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.check_updates_long"
 msgstr "Check for Updates..."
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.failed_body"
-msgstr "Check that the right microphone is selected, then try again."
 
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
@@ -1606,11 +1678,6 @@ msgid "settings.modal.section.developer"
 msgstr "Developer"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.dictate_to_continue"
-msgstr "Dictate to continue"
-
-#. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.dictation"
 msgstr "Dictation"
@@ -2132,6 +2199,11 @@ msgid "onboarding.license.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.speak"
+msgstr "Go ahead and speak."
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeGreeting.ts
 msgid "home.greeting.afternoon"
 msgstr "Good afternoon"
@@ -2187,9 +2259,19 @@ msgid "settings.general.shortcuts.hold"
 msgstr "Hold"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed_empty_body"
+msgstr "Hold a little longer, then try again."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.hold_to_delete"
 msgstr "Hold to delete"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.hold"
+msgstr "Hold to dictate"
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -2200,11 +2282,6 @@ msgstr "Hold to restart"
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.hold_description"
 msgstr "hold to talk, release to stop"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.subtitle"
-msgstr "Hold your shortcut and read the line below out loud."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2379,6 +2456,11 @@ msgid "library.import.store_original.description"
 msgstr "Keep a copy inside the library folder"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.hold"
+msgstr "Keep holding, then release when you are done."
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.model.kept_warm"
 msgstr "kept warm in memory for fast responses"
@@ -2502,6 +2584,11 @@ msgstr "Listen on LAN"
 #: src/features/pill/PillOverlay.tsx
 msgid "pill.status.listening"
 msgstr "Listening..."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.listening"
+msgstr "Listening…"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -2672,11 +2759,6 @@ msgstr "Model"
 #. js-lingui-explicit-id
 #: src/features/settings/components/SpeechModelPanel.tsx
 msgid "settings.speech_model.model"
-msgstr "Model"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.recap.model"
 msgstr "Model"
 
 #. js-lingui-explicit-id
@@ -3018,6 +3100,11 @@ msgid "personalization.modal.websites.none"
 msgstr "No websites added"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed_empty"
+msgstr "No words came through."
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_words"
 msgstr "No words detected. Recording deleted."
@@ -3253,12 +3340,6 @@ msgid "settings.local_api.preloaded_model"
 msgstr "Preloaded model"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.recap.shortcut_capture"
-msgstr "Press a shortcut"
-
-#. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.replacements.press_enter_to_add"
 msgstr "Press Enter in either field to add"
@@ -3283,6 +3364,21 @@ msgstr "Press Enter to add this word"
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.edit_hint"
 msgstr "Press Enter to save · Esc to cancel"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.v5"
+msgstr "Press the shortcut above, or hold the button below."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.capture"
+msgstr "Press the shortcut you want."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.subtitle.v5"
+msgstr "Press this shortcut and read the line below."
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3916,6 +4012,11 @@ msgid "settings.stats.share.open"
 msgstr "Share"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.shortcut.v2"
+msgstr "Shortcut"
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts"
 msgstr "Shortcuts"
@@ -4011,11 +4112,6 @@ msgid "settings.general.shortcuts.smart"
 msgstr "Smart"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.recap.shortcut"
-msgstr "Smart shortcut"
-
-#. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.title"
 msgstr "Some questions about how you use Glimpse?"
@@ -4044,6 +4140,11 @@ msgstr "Speakers"
 #: src/features/settings/components/tabs/ProvidersTab.tsx
 msgid "settings.providers.speech_label"
 msgstr "Speech"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.model.v2"
+msgstr "Speech model"
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -4271,11 +4372,6 @@ msgid "settings.general.microphone_test.busy_error"
 msgstr "That microphone is already in use."
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.failed"
-msgstr "That one did not come through."
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.too_quiet"
 msgstr "That was too quiet to hear. Recording deleted."
@@ -4430,6 +4526,11 @@ msgstr "Toggle usage analytics"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.total"
 msgstr "Total"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.transcribing"
+msgstr "Transcribing..."
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4680,11 +4781,6 @@ msgstr "View History"
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.10"
 msgstr "Voice is the fastest keyboard I own. {wpm} words a minute. @try_glimpse_app"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.waiting.v2"
-msgstr "Waiting for you to speak."
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

@@ -110,6 +110,71 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.dictate_to_continue"
+#~ msgstr "Ditta per continuare"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle"
+#~ msgstr "Tieni premuta la scorciatoia e leggi ad alta voce la riga qui sotto."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting.v2"
+#~ msgstr "In attesa che tu parli."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.failed_body"
+#~ msgstr "Verifica che il microfono corretto sia selezionato, poi riprova."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting.v3"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.v3"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.failed"
+#~ msgstr "Non è arrivato nulla."
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.hold_keys"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.waiting.v4"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#~ msgid "onboarding.first_dictation.subtitle.v4"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.recap.model"
+#~ msgstr "Modello"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.recap.shortcut_capture"
+#~ msgstr "Premi una scorciatoia"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+#~ msgid "onboarding.done.recap.shortcut"
+#~ msgstr "Scorciatoia intelligente"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
 msgid "onboarding.first_dictation.prompt"
 msgstr "«Glimpse trasforma la mia voce in testo.»"
 
@@ -847,9 +912,21 @@ msgid "models.card.cancel_download"
 msgstr "Annulla download"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.first_dictation.cancel_shortcut_aria"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
 msgid "model_picker.cancelled"
 msgstr "Annullato"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.first_dictation.edit_shortcut_aria"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AppTab.tsx
@@ -890,11 +967,6 @@ msgstr "Controlla aggiornamenti"
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.menu.check_updates_long"
 msgstr "Controlla aggiornamenti..."
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.failed_body"
-msgstr "Verifica che il microfono corretto sia selezionato, poi riprova."
 
 #. js-lingui-explicit-id
 #: src/features/news/components/NewsMenu.tsx
@@ -1606,11 +1678,6 @@ msgid "settings.modal.section.developer"
 msgstr "Sviluppatore"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.dictate_to_continue"
-msgstr "Ditta per continuare"
-
-#. js-lingui-explicit-id
 #: src/features/settings/settingsPanes.ts
 msgid "settings.modal.section.dictation"
 msgstr "Dettatura"
@@ -2132,6 +2199,11 @@ msgid "onboarding.license.placeholder"
 msgstr "GLIMPSE_…"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.speak"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/transcriptions/homeGreeting.ts
 msgid "home.greeting.afternoon"
 msgstr "Buon pomeriggio"
@@ -2187,9 +2259,19 @@ msgid "settings.general.shortcuts.hold"
 msgstr "Tieni premuto"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed_empty_body"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.data.hold_to_delete"
 msgstr "Tieni premuto per eliminare"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.hold"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/settings/components/tabs/AboutTab.tsx
@@ -2200,11 +2282,6 @@ msgstr "Tieni premuto per riavviare"
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts.hold_description"
 msgstr "tieni premuto per parlare, rilascia per fermare"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.subtitle"
-msgstr "Tieni premuta la scorciatoia e leggi ad alta voce la riga qui sotto."
 
 #. js-lingui-explicit-id
 #: src/Home.tsx
@@ -2379,6 +2456,11 @@ msgid "library.import.store_original.description"
 msgstr "Mantieni una copia nella cartella della libreria"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.hold"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/LocalApiTab.tsx
 msgid "settings.local_api.model.kept_warm"
 msgstr "mantenuto attivo in memoria per risposte rapide"
@@ -2502,6 +2584,11 @@ msgstr "Ascolta sulla LAN"
 #: src/features/pill/PillOverlay.tsx
 msgid "pill.status.listening"
 msgstr "In ascolto…"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.listening"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -2672,11 +2759,6 @@ msgstr "Modello"
 #. js-lingui-explicit-id
 #: src/features/settings/components/SpeechModelPanel.tsx
 msgid "settings.speech_model.model"
-msgstr "Modello"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.recap.model"
 msgstr "Modello"
 
 #. js-lingui-explicit-id
@@ -3018,6 +3100,11 @@ msgid "personalization.modal.websites.none"
 msgstr "Nessun sito web aggiunto"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.failed_empty"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.no_words"
 msgstr "Nessuna parola rilevata. Registrazione eliminata."
@@ -3253,12 +3340,6 @@ msgid "settings.local_api.preloaded_model"
 msgstr "Modello precaricato"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.recap.shortcut_capture"
-msgstr "Premi una scorciatoia"
-
-#. js-lingui-explicit-id
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.replacements.press_enter_to_add"
 msgstr "Premi Invio in uno dei campi per aggiungere"
@@ -3283,6 +3364,21 @@ msgstr "Premi Invio per aggiungere questa parola"
 #: src/features/dictionary/components/DictionaryView.tsx
 msgid "dictionary.edit_hint"
 msgstr "Premi Invio per salvare · Esc per annullare"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.v5"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.waiting.capture"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.subtitle.v5"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/ui/FAQModal.tsx
@@ -3916,6 +4012,11 @@ msgid "settings.stats.share.open"
 msgstr "Condividi"
 
 #. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.shortcut.v2"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/features/settings/components/tabs/GeneralTab.tsx
 msgid "settings.general.shortcuts"
 msgstr "Scorciatoie"
@@ -4011,11 +4112,6 @@ msgid "settings.general.shortcuts.smart"
 msgstr "Smart"
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/steps/ReadyStep.tsx
-msgid "onboarding.done.recap.shortcut"
-msgstr "Scorciatoia intelligente"
-
-#. js-lingui-explicit-id
 #: src/features/asks/components/AskPrompt.tsx
 msgid "home.survey.title"
 msgstr "Alcune domande su come utilizzi Glimpse?"
@@ -4044,6 +4140,11 @@ msgstr "Parlanti"
 #: src/features/settings/components/tabs/ProvidersTab.tsx
 msgid "settings.providers.speech_label"
 msgstr "Voce"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/steps/ReadyStep.tsx
+msgid "onboarding.done.recap.model.v2"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/shared/ui/ModelPickerModal.tsx
@@ -4271,11 +4372,6 @@ msgid "settings.general.microphone_test.busy_error"
 msgstr "Il microfono è già in uso."
 
 #. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.failed"
-msgstr "Non è arrivato nulla."
-
-#. js-lingui-explicit-id
 #: src/shared/lib/nativeMenuStrings.ts
 msgid "native.toast.too_quiet"
 msgstr "Audio troppo basso per essere rilevato. Registrazione eliminata."
@@ -4430,6 +4526,11 @@ msgstr "Attiva/disattiva le analisi sull'utilizzo"
 #: src/features/settings/components/tabs/AboutTab.tsx
 msgid "settings.about.storage.total"
 msgstr "Totale"
+
+#. js-lingui-explicit-id
+#: src/features/onboarding/FirstDictationGuide.tsx
+msgid "onboarding.first_dictation.transcribing"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/features/library/components/LibraryDetail.tsx
@@ -4680,11 +4781,6 @@ msgstr "Visualizza cronologia"
 #: src/features/license/components/DictationStatsPanel.tsx
 msgid "settings.stats.post.10"
 msgstr "La voce è la tastiera più veloce che abbia. {wpm} parole al minuto. @try_glimpse_app"
-
-#. js-lingui-explicit-id
-#: src/features/onboarding/FirstDictationGuide.tsx
-msgid "onboarding.first_dictation.waiting.v2"
-msgstr "In attesa che tu parli."
 
 #. js-lingui-explicit-id
 #: src/features/import/components/ImportStep.tsx

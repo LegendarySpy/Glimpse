@@ -92,3 +92,42 @@ export const StepIndicator = ({
 
 export const PRIMARY_BUTTON_CLASS =
   "flex min-w-[160px] items-center justify-center gap-2 rounded-lg bg-content-primary px-6 py-2.5 ui-text-body-lg font-semibold text-surface-secondary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50";
+
+export function ShortcutKeys({
+  parts,
+  highlighted = false,
+  waiting = false,
+  size = "md",
+}: {
+  parts: string[];
+  highlighted?: boolean;
+  waiting?: boolean;
+  size?: "md" | "sm";
+}) {
+  return (
+    <motion.span
+      className="flex items-center justify-center gap-1.5"
+      animate={{ opacity: waiting ? [1, 0.55, 1] : 1 }}
+      transition={
+        waiting
+          ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
+          : { duration: 0.15 }
+      }
+    >
+      {parts.map((part, index) => (
+        <span key={`${part}-${index}`} className="flex items-center gap-1.5">
+          {index > 0 ? (
+            <span className="ui-text-body-sm text-content-disabled">+</span>
+          ) : null}
+          <kbd
+            className={`ui-keycap ui-keycap-${size}${
+              highlighted ? " ui-keycap-active" : ""
+            }`}
+          >
+            {part}
+          </kbd>
+        </span>
+      ))}
+    </motion.span>
+  );
+}
