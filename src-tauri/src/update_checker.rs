@@ -187,23 +187,16 @@ async fn run_auto_update_loop(app: AppHandle<AppRuntime>, state: SharedUpdateSta
                 match update.download_and_install(|_, _| {}, || {}).await {
                     Ok(()) => {
                         // Marker-write failures repeat every poll; report once per install.
-                        let mut restart_marker_failure_reported = false;
+                        let mut marker_failure_reported = false;
                         if should_restart_for_auto_update(&app, &state) {
-                            if write_marker(&app) {
-                                state.lock().clear();
-                                info!("auto-update: installed, restarting");
-                                app.request_restart();
+                            if restart_after_auto_update(
+                                &app,
+                                &state,
+                                &version,
+                                &mut marker_failure_reported,
+                            ) {
                                 return;
                             }
-                            warn!("auto-update: installed, but marker write failed");
-                            crate::analytics::track_update_failed(
-                                &app,
-                                "automatic",
-                                "restart_marker",
-                                Some(&version),
-                                "storage",
-                            );
-                            restart_marker_failure_reported = true;
                         } else {
                             info!("auto-update: installed, waiting for restart conditions");
                         }
@@ -215,24 +208,15 @@ async fn run_auto_update_loop(app: AppHandle<AppRuntime>, state: SharedUpdateSta
                             if !app.state::<AppState>().is_auto_update_enabled() {
                                 break;
                             }
-                            if should_restart_for_auto_update(&app, &state) {
-                                if write_marker(&app) {
-                                    state.lock().clear();
-                                    info!("auto-update: restarting (deferred)");
-                                    app.request_restart();
-                                    return;
-                                }
-                                warn!("auto-update: installed, but deferred marker write failed");
-                                if !restart_marker_failure_reported {
-                                    crate::analytics::track_update_failed(
-                                        &app,
-                                        "automatic",
-                                        "restart_marker",
-                                        Some(&version),
-                                        "storage",
-                                    );
-                                    restart_marker_failure_reported = true;
-                                }
+                            if should_restart_for_auto_update(&app, &state)
+                                && restart_after_auto_update(
+                                    &app,
+                                    &state,
+                                    &version,
+                                    &mut marker_failure_reported,
+                                )
+                            {
+                                return;
                             }
                         }
                         continue;
@@ -297,6 +281,33 @@ async fn wait_for_idle(app: &AppHandle<AppRuntime>, required: Duration) -> bool 
     }
 
     true
+}
+
+/// Writes the restart marker and requests a restart. False when the marker write failed.
+fn restart_after_auto_update(
+    app: &AppHandle<AppRuntime>,
+    state: &SharedUpdateState,
+    version: &str,
+    marker_failure_reported: &mut bool,
+) -> bool {
+    if write_marker(app) {
+        state.lock().clear();
+        info!("auto-update: installed, restarting");
+        app.request_restart();
+        return true;
+    }
+    warn!("auto-update: installed, but marker write failed");
+    if !*marker_failure_reported {
+        crate::analytics::track_update_failed(
+            app,
+            "automatic",
+            "restart_marker",
+            Some(version),
+            "storage",
+        );
+        *marker_failure_reported = true;
+    }
+    false
 }
 
 fn should_restart_for_auto_update(app: &AppHandle<AppRuntime>, state: &SharedUpdateState) -> bool {
@@ -395,16 +406,11 @@ pub fn maybe_show_update_toast(app: &AppHandle<AppRuntime>, state: &SharedUpdate
         app,
         toast::Payload {
             toast_type: "update".to_string(),
-            title: None,
             message,
             auto_dismiss: Some(false),
-            duration: None,
-            retry_id: None,
-            mode: None,
             action: Some("open_about_page".to_string()),
             action_label: Some("Update".to_string()),
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 
@@ -415,6 +421,15 @@ pub fn maybe_show_update_toast(app: &AppHandle<AppRuntime>, state: &SharedUpdate
 pub struct UpdateStatus {
     pub available: bool,
     pub version: Option<String>,
+}
+
+impl UpdateStatus {
+    fn snapshot(state: &UpdateState) -> Self {
+        Self {
+            available: state.is_available(),
+            version: state.available_version().cloned(),
+        }
+    }
 }
 
 #[derive(Clone, Serialize)]
@@ -428,11 +443,7 @@ pub struct UpdateDownloadProgress {
 #[tauri::command]
 pub fn get_update_status(app: AppHandle<AppRuntime>) -> UpdateStatus {
     let state = app.state::<AppState>();
-    let guard = state.update_state().lock();
-    UpdateStatus {
-        available: guard.is_available(),
-        version: guard.available_version().cloned(),
-    }
+    UpdateStatus::snapshot(&state.update_state().lock())
 }
 
 #[tauri::command]
@@ -445,11 +456,8 @@ pub async fn check_for_updates(app: AppHandle<AppRuntime>) -> Result<UpdateStatu
         .await
         .map_err(|err| err.to_string())?;
 
-    let guard = update_state.lock();
-    Ok(UpdateStatus {
-        available: guard.is_available(),
-        version: guard.available_version().cloned(),
-    })
+    let status = UpdateStatus::snapshot(&update_state.lock());
+    Ok(status)
 }
 
 #[tauri::command]

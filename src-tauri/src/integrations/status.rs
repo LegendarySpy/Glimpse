@@ -3,7 +3,7 @@
 use anyhow::Result;
 use serde_json::{Value, json};
 
-use super::{client, coded, output, wants_help};
+use super::{client, output, wants_help};
 
 fn help() {
     super::print_command_help(
@@ -18,25 +18,13 @@ pub(crate) fn run(args: &[String], json: bool) -> Result<()> {
         help();
         return Ok(());
     }
-    match client::try_request("status", json!({}))? {
-        Some(response) if response.ok => {
+    match client::try_request_data("status", json!({}), "status failed")? {
+        Some(data) => {
             if json {
-                let mut value = response.data;
-                if let Some(object) = value.as_object_mut() {
-                    object.insert("ok".to_string(), Value::Bool(true));
-                }
-                output::print_json(&value);
+                output::print_json_ok(data);
             } else {
-                print_plain(&response.data);
+                print_plain(&data);
             }
-        }
-        Some(response) => {
-            return Err(coded(
-                3,
-                response
-                    .error
-                    .unwrap_or_else(|| "status failed".to_string()),
-            ));
         }
         None => {
             if json {

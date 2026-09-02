@@ -699,6 +699,53 @@ pub fn canonicalize_app_locale_or_default(value: &str) -> String {
     canonicalize_app_locale(value).unwrap_or_else(default_app_locale)
 }
 
+/// Decrypts a stored key. On failure the ciphertext is kept so `save` writes it back untouched.
+fn decrypt_stored_setting(encrypted: String, label: &str, cache: &Mutex<Option<String>>) -> String {
+    if encrypted.is_empty() {
+        *cache.lock() = None;
+        return String::new();
+    }
+    let failure = match crate::crypto::get_hardware_uuid() {
+        Some(hardware_uuid) => match crate::crypto::decrypt(&encrypted, &hardware_uuid) {
+            Ok(decrypted) => {
+                *cache.lock() = None;
+                return decrypted;
+            }
+            Err(e) => format!("Failed to decrypt {label}: {e}. Preserving encrypted value."),
+        },
+        None => format!("Could not get hardware UUID, preserving stored {label}"),
+    };
+    tracing::error!("{failure}");
+    *cache.lock() = Some(encrypted);
+    String::new()
+}
+
+/// Ciphertext to store for `plain`, or `None` when the value should be stored
+/// as given: it is already the cached ciphertext, or this device cannot encrypt.
+fn encrypt_setting_for_storage(
+    plain: &str,
+    label: &str,
+    cache: &Mutex<Option<String>>,
+) -> Result<Option<String>> {
+    let mut cached = cache.lock();
+    if plain.is_empty() {
+        return Ok(Some(cached.clone().unwrap_or_default()));
+    }
+    if cached.as_deref() == Some(plain) {
+        return Ok(None);
+    }
+    *cached = None;
+    match crate::crypto::get_hardware_uuid() {
+        Some(hardware_uuid) => crate::crypto::encrypt(plain, &hardware_uuid)
+            .map(Some)
+            .map_err(|e| anyhow::anyhow!("Failed to encrypt {label}: {e}")),
+        None => {
+            tracing::error!("Could not get hardware UUID, storing {label} unencrypted");
+            Ok(None)
+        }
+    }
+}
+
 pub struct SettingsStore {
     conn: Mutex<Connection>,
     llm_api_key_ciphertext: Mutex<Option<String>>,
@@ -752,9 +799,6 @@ impl SettingsStore {
     pub fn load(&self) -> Result<UserSettings> {
         let mut settings = UserSettings::default();
         let mut should_persist = false;
-        let mut llm_api_key_ciphertext: Option<String> = None;
-        let mut remote_speech_api_key_ciphertext: Option<String> = None;
-        let mut local_api_key_ciphertext: Option<String> = None;
         let encrypted_llm_api_key: String;
         let encrypted_remote_speech_api_key: String;
         let encrypted_local_api_key: String;
@@ -925,72 +969,21 @@ impl SettingsStore {
                 self.read_value(&conn, KEY_LOCAL_API_CORS, settings.local_api_cors)?;
         }
 
-        if !encrypted_llm_api_key.is_empty() {
-            if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
-                match crate::crypto::decrypt(&encrypted_llm_api_key, &hardware_uuid) {
-                    Ok(decrypted) => settings.llm_api_key = decrypted,
-                    Err(e) => {
-                        tracing::error!(
-                            "Error: Failed to decrypt API key: {}. Preserving encrypted value.",
-                            e
-                        );
-                        settings.llm_api_key = String::new();
-                        llm_api_key_ciphertext = Some(encrypted_llm_api_key);
-                    }
-                }
-            } else {
-                tracing::error!("Warning: Could not get hardware UUID, preserving stored API key");
-                settings.llm_api_key = String::new();
-                llm_api_key_ciphertext = Some(encrypted_llm_api_key);
-            }
-        }
-        *self.llm_api_key_ciphertext.lock() = llm_api_key_ciphertext;
-
-        if !encrypted_remote_speech_api_key.is_empty() {
-            if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
-                match crate::crypto::decrypt(&encrypted_remote_speech_api_key, &hardware_uuid) {
-                    Ok(decrypted) => settings.remote_speech_api_key = decrypted,
-                    Err(e) => {
-                        tracing::error!(
-                            "Error: Failed to decrypt remote speech API key: {}. Preserving encrypted value.",
-                            e
-                        );
-                        settings.remote_speech_api_key = String::new();
-                        remote_speech_api_key_ciphertext = Some(encrypted_remote_speech_api_key);
-                    }
-                }
-            } else {
-                tracing::error!(
-                    "Warning: Could not get hardware UUID, preserving stored remote speech API key"
-                );
-                settings.remote_speech_api_key = String::new();
-                remote_speech_api_key_ciphertext = Some(encrypted_remote_speech_api_key);
-            }
-        }
-        *self.remote_speech_api_key_ciphertext.lock() = remote_speech_api_key_ciphertext;
-
-        if !encrypted_local_api_key.is_empty() {
-            if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
-                match crate::crypto::decrypt(&encrypted_local_api_key, &hardware_uuid) {
-                    Ok(decrypted) => settings.local_api_key = decrypted,
-                    Err(e) => {
-                        tracing::error!(
-                            "Error: Failed to decrypt Local API key: {}. Preserving encrypted value.",
-                            e
-                        );
-                        settings.local_api_key = String::new();
-                        local_api_key_ciphertext = Some(encrypted_local_api_key);
-                    }
-                }
-            } else {
-                tracing::error!(
-                    "Warning: Could not get hardware UUID, preserving stored Local API key"
-                );
-                settings.local_api_key = String::new();
-                local_api_key_ciphertext = Some(encrypted_local_api_key);
-            }
-        }
-        *self.local_api_key_ciphertext.lock() = local_api_key_ciphertext;
+        settings.llm_api_key = decrypt_stored_setting(
+            encrypted_llm_api_key,
+            "API key",
+            &self.llm_api_key_ciphertext,
+        );
+        settings.remote_speech_api_key = decrypt_stored_setting(
+            encrypted_remote_speech_api_key,
+            "remote speech API key",
+            &self.remote_speech_api_key_ciphertext,
+        );
+        settings.local_api_key = decrypt_stored_setting(
+            encrypted_local_api_key,
+            "Local API key",
+            &self.local_api_key_ciphertext,
+        );
 
         if settings.analytics_install_id.is_empty() {
             settings.analytics_install_id = uuid::Uuid::new_v4().to_string();
@@ -1055,70 +1048,24 @@ impl SettingsStore {
     /// Persist settings into DB immediately.
     pub fn save(&self, settings: &UserSettings) -> Result<()> {
         let stored_app_locale = canonicalize_app_locale_or_default(&settings.app_locale);
-        let stored_key = {
-            let mut llm_api_key_ciphertext = self.llm_api_key_ciphertext.lock();
-            if settings.llm_api_key.is_empty() {
-                llm_api_key_ciphertext.clone().unwrap_or_default()
-            } else if llm_api_key_ciphertext
-                .as_ref()
-                .is_some_and(|ciphertext| ciphertext == &settings.llm_api_key)
-            {
-                settings.llm_api_key.clone()
-            } else if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
-                *llm_api_key_ciphertext = None;
-                crate::crypto::encrypt(&settings.llm_api_key, &hardware_uuid)
-                    .map_err(|e| anyhow::anyhow!("Failed to encrypt API key: {}", e))?
-            } else {
-                *llm_api_key_ciphertext = None;
-                tracing::error!(
-                    "Warning: Could not get hardware UUID, storing API key unencrypted"
-                );
-                settings.llm_api_key.clone()
-            }
-        };
-        let stored_remote_speech_api_key = {
-            let mut remote_speech_api_key_ciphertext = self.remote_speech_api_key_ciphertext.lock();
-            if settings.remote_speech_api_key.is_empty() {
-                remote_speech_api_key_ciphertext.clone().unwrap_or_default()
-            } else if remote_speech_api_key_ciphertext
-                .as_ref()
-                .is_some_and(|ciphertext| ciphertext == &settings.remote_speech_api_key)
-            {
-                settings.remote_speech_api_key.clone()
-            } else if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
-                *remote_speech_api_key_ciphertext = None;
-                crate::crypto::encrypt(&settings.remote_speech_api_key, &hardware_uuid).map_err(
-                    |e| anyhow::anyhow!("Failed to encrypt remote speech API key: {}", e),
-                )?
-            } else {
-                *remote_speech_api_key_ciphertext = None;
-                tracing::error!(
-                    "Warning: Could not get hardware UUID, storing remote speech API key unencrypted"
-                );
-                settings.remote_speech_api_key.clone()
-            }
-        };
-        let stored_local_api_key = {
-            let mut local_api_key_ciphertext = self.local_api_key_ciphertext.lock();
-            if settings.local_api_key.is_empty() {
-                local_api_key_ciphertext.clone().unwrap_or_default()
-            } else if local_api_key_ciphertext
-                .as_ref()
-                .is_some_and(|ciphertext| ciphertext == &settings.local_api_key)
-            {
-                settings.local_api_key.clone()
-            } else if let Some(hardware_uuid) = crate::crypto::get_hardware_uuid() {
-                *local_api_key_ciphertext = None;
-                crate::crypto::encrypt(&settings.local_api_key, &hardware_uuid)
-                    .map_err(|e| anyhow::anyhow!("Failed to encrypt Local API key: {}", e))?
-            } else {
-                *local_api_key_ciphertext = None;
-                tracing::error!(
-                    "Warning: Could not get hardware UUID, storing Local API key unencrypted"
-                );
-                settings.local_api_key.clone()
-            }
-        };
+        let stored_key = encrypt_setting_for_storage(
+            &settings.llm_api_key,
+            "API key",
+            &self.llm_api_key_ciphertext,
+        )?
+        .unwrap_or_else(|| settings.llm_api_key.clone());
+        let stored_remote_speech_api_key = encrypt_setting_for_storage(
+            &settings.remote_speech_api_key,
+            "remote speech API key",
+            &self.remote_speech_api_key_ciphertext,
+        )?
+        .unwrap_or_else(|| settings.remote_speech_api_key.clone());
+        let stored_local_api_key = encrypt_setting_for_storage(
+            &settings.local_api_key,
+            "Local API key",
+            &self.local_api_key_ciphertext,
+        )?
+        .unwrap_or_else(|| settings.local_api_key.clone());
 
         let mut connection = self.conn.lock();
         let conn = connection

@@ -73,7 +73,6 @@ pub fn parse(home: &Path) -> Result<ImportBundle, String> {
                     .push(ImportedTranscription { text, timestamp_ms });
             }
         }
-        bundle.transcript_count = bundle.transcripts.len() as u32;
     }
 
     Ok(bundle)

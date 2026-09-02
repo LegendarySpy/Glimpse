@@ -65,55 +65,17 @@ const SPECTRUM_SMOOTHING: f32 = 0.8;
 const SPECTRUM_MIN_DB: f32 = -100.0;
 const SPECTRUM_MAX_DB: f32 = -30.0;
 
-struct AudioSpectrumEmitter {
+/// A polling thread that stops on request; the join happens off the caller's thread.
+struct BackgroundEmitter {
     stop: Arc<AtomicBool>,
     handle: Option<std::thread::JoinHandle<()>>,
 }
 
-impl AudioSpectrumEmitter {
-    fn start(app: AppHandle<AppRuntime>, recorder: Arc<RecorderManager>) -> Self {
+impl BackgroundEmitter {
+    fn spawn(run: impl FnOnce(&AtomicBool) + Send + 'static) -> Self {
         let stop = Arc::new(AtomicBool::new(false));
         let stop_signal = Arc::clone(&stop);
-        let handle = std::thread::spawn(move || {
-            let interval = Duration::from_millis(40);
-            let mut planner = FftPlanner::<f32>::new();
-            let fft = planner.plan_fft_forward(SPECTRUM_SIZE);
-            let denom = (SPECTRUM_SIZE - 1) as f32;
-            let window: Vec<f32> = (0..SPECTRUM_SIZE)
-                .map(|i| 0.5 - 0.5 * (2.0 * std::f32::consts::PI * i as f32 / denom).cos())
-                .collect();
-            let mut buffer = vec![Complex { re: 0.0, im: 0.0 }; SPECTRUM_SIZE];
-            let mut smoothed = vec![0.0f32; SPECTRUM_BINS];
-            let mut bins = vec![0u8; SPECTRUM_BINS];
-
-            while !stop_signal.load(Ordering::Relaxed) {
-                if let Some(samples) = recorder.spectrum_snapshot() {
-                    for (idx, sample) in samples.iter().enumerate() {
-                        buffer[idx].re = sample * window[idx];
-                        buffer[idx].im = 0.0;
-                    }
-                    fft.process(&mut buffer);
-
-                    for idx in 0..SPECTRUM_BINS {
-                        let magnitude = buffer[idx].norm() / SPECTRUM_SIZE as f32;
-                        let db = 20.0 * magnitude.max(1e-10).log10();
-                        let normalized = ((db - SPECTRUM_MIN_DB)
-                            / (SPECTRUM_MAX_DB - SPECTRUM_MIN_DB))
-                            .clamp(0.0, 1.0);
-                        smoothed[idx] = smoothed[idx] * SPECTRUM_SMOOTHING
-                            + normalized * (1.0 - SPECTRUM_SMOOTHING);
-                        bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
-                    }
-
-                    emit_event(
-                        &app,
-                        EVENT_AUDIO_SPECTRUM,
-                        AudioSpectrumPayload { bins: bins.clone() },
-                    );
-                }
-                std::thread::sleep(interval);
-            }
-        });
+        let handle = std::thread::spawn(move || run(&stop_signal));
         Self {
             stop,
             handle: Some(handle),
@@ -128,6 +90,51 @@ impl AudioSpectrumEmitter {
             });
         }
     }
+}
+
+fn start_spectrum_emitter(
+    app: AppHandle<AppRuntime>,
+    recorder: Arc<RecorderManager>,
+) -> BackgroundEmitter {
+    BackgroundEmitter::spawn(move |stop_signal| {
+        let interval = Duration::from_millis(40);
+        let mut planner = FftPlanner::<f32>::new();
+        let fft = planner.plan_fft_forward(SPECTRUM_SIZE);
+        let denom = (SPECTRUM_SIZE - 1) as f32;
+        let window: Vec<f32> = (0..SPECTRUM_SIZE)
+            .map(|i| 0.5 - 0.5 * (2.0 * std::f32::consts::PI * i as f32 / denom).cos())
+            .collect();
+        let mut buffer = vec![Complex { re: 0.0, im: 0.0 }; SPECTRUM_SIZE];
+        let mut smoothed = vec![0.0f32; SPECTRUM_BINS];
+        let mut bins = vec![0u8; SPECTRUM_BINS];
+
+        while !stop_signal.load(Ordering::Relaxed) {
+            if let Some(samples) = recorder.spectrum_snapshot() {
+                for (idx, sample) in samples.iter().enumerate() {
+                    buffer[idx].re = sample * window[idx];
+                    buffer[idx].im = 0.0;
+                }
+                fft.process(&mut buffer);
+
+                for idx in 0..SPECTRUM_BINS {
+                    let magnitude = buffer[idx].norm() / SPECTRUM_SIZE as f32;
+                    let db = 20.0 * magnitude.max(1e-10).log10();
+                    let normalized = ((db - SPECTRUM_MIN_DB) / (SPECTRUM_MAX_DB - SPECTRUM_MIN_DB))
+                        .clamp(0.0, 1.0);
+                    smoothed[idx] = smoothed[idx] * SPECTRUM_SMOOTHING
+                        + normalized * (1.0 - SPECTRUM_SMOOTHING);
+                    bins[idx] = (smoothed[idx] * 255.0).round().clamp(0.0, 255.0) as u8;
+                }
+
+                emit_event(
+                    &app,
+                    EVENT_AUDIO_SPECTRUM,
+                    AudioSpectrumPayload { bins: bins.clone() },
+                );
+            }
+            std::thread::sleep(interval);
+        }
+    })
 }
 
 #[derive(Serialize, Clone)]
@@ -135,43 +142,21 @@ pub struct PillHoverPayload {
     pub hovering: bool,
 }
 
-struct PillHoverEmitter {
-    stop: Arc<AtomicBool>,
-    handle: Option<std::thread::JoinHandle<()>>,
-}
-
-impl PillHoverEmitter {
-    fn start(app: AppHandle<AppRuntime>) -> Self {
-        let stop = Arc::new(AtomicBool::new(false));
-        let stop_signal = Arc::clone(&stop);
-        let handle = std::thread::spawn(move || {
-            let interval = Duration::from_millis(50);
-            let mut last_emitted: Option<bool> = None;
-            while !stop_signal.load(Ordering::Relaxed) {
-                if let Some(hovering) = cursor_over_pill_window(&app)
-                    && last_emitted != Some(hovering)
-                {
-                    last_emitted = Some(hovering);
-                    emit_event(&app, EVENT_PILL_HOVER, PillHoverPayload { hovering });
-                }
-                std::thread::sleep(interval);
+fn start_hover_emitter(app: AppHandle<AppRuntime>) -> BackgroundEmitter {
+    BackgroundEmitter::spawn(move |stop_signal| {
+        let interval = Duration::from_millis(50);
+        let mut last_emitted: Option<bool> = None;
+        while !stop_signal.load(Ordering::Relaxed) {
+            if let Some(hovering) = cursor_over_pill_window(&app)
+                && last_emitted != Some(hovering)
+            {
+                last_emitted = Some(hovering);
+                emit_event(&app, EVENT_PILL_HOVER, PillHoverPayload { hovering });
             }
-            emit_event(&app, EVENT_PILL_HOVER, PillHoverPayload { hovering: false });
-        });
-        Self {
-            stop,
-            handle: Some(handle),
+            std::thread::sleep(interval);
         }
-    }
-
-    fn stop(mut self) {
-        self.stop.store(true, Ordering::Relaxed);
-        if let Some(handle) = self.handle.take() {
-            std::thread::spawn(move || {
-                let _ = handle.join();
-            });
-        }
-    }
+        emit_event(&app, EVENT_PILL_HOVER, PillHoverPayload { hovering: false });
+    })
 }
 
 fn cursor_over_pill_window(app: &AppHandle<AppRuntime>) -> Option<bool> {
@@ -198,8 +183,8 @@ pub struct PillController {
     hold_key_down: Mutex<bool>,
     paused_media_session: Mutex<Option<music::MediaSession>>,
     recorder: Arc<RecorderManager>,
-    audio_spectrum_emitter: Mutex<Option<AudioSpectrumEmitter>>,
-    hover_emitter: Mutex<Option<PillHoverEmitter>>,
+    audio_spectrum_emitter: Mutex<Option<BackgroundEmitter>>,
+    hover_emitter: Mutex<Option<BackgroundEmitter>>,
     recording_generation: AtomicU64,
     is_expanded: Mutex<bool>,
 }
@@ -244,7 +229,7 @@ impl PillController {
         if emitter.is_some() {
             return;
         }
-        *emitter = Some(AudioSpectrumEmitter::start(
+        *emitter = Some(start_spectrum_emitter(
             app.clone(),
             Arc::clone(&self.recorder),
         ));
@@ -261,7 +246,7 @@ impl PillController {
         if emitter.is_some() {
             return;
         }
-        *emitter = Some(PillHoverEmitter::start(app.clone()));
+        *emitter = Some(start_hover_emitter(app.clone()));
     }
 
     fn stop_hover_emitter(&self) {
@@ -1159,62 +1144,30 @@ pub fn hide_overlay(app: &AppHandle<AppRuntime>) {
 }
 
 fn position_overlay(window: &WebviewWindow<AppRuntime>) {
-    if let Ok(Some(monitor)) = window.current_monitor()
-        && let Ok(size) = window.outer_size()
-    {
-        let scale_factor = monitor.scale_factor();
-        let screen = monitor.size();
-        let mon_pos = monitor.position();
-        let x = mon_pos.x + (screen.width.saturating_sub(size.width) / 2) as i32;
-        let bottom_padding_physical = (85.0 * scale_factor) as i32;
-        let y = mon_pos.y + screen.height as i32 - size.height as i32 - bottom_padding_physical;
-        let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+    if let Ok(Some(monitor)) = window.current_monitor() {
+        place_on_monitor(window, &monitor);
     }
 }
 
 fn position_overlay_on_cursor_screen(window: &WebviewWindow<AppRuntime>) {
-    let cursor_pos = match window.cursor_position() {
-        Ok(pos) => pos,
-        Err(_) => {
-            position_overlay(window);
-            return;
-        }
-    };
-
-    let monitors = match window.available_monitors() {
-        Ok(m) => m,
-        Err(_) => {
-            position_overlay(window);
-            return;
-        }
-    };
-
-    let target_monitor = monitors.into_iter().find(|m| {
-        let pos = m.position();
-        let size = m.size();
-        cursor_pos.x >= pos.x as f64
-            && cursor_pos.x < (pos.x + size.width as i32) as f64
-            && cursor_pos.y >= pos.y as f64
-            && cursor_pos.y < (pos.y + size.height as i32) as f64
-    });
-
-    let monitor = match target_monitor {
-        Some(m) => m,
-        None => {
-            position_overlay(window);
-            return;
-        }
-    };
-
-    if let Ok(size) = window.outer_size() {
-        let scale_factor = monitor.scale_factor();
-        let mon_pos = monitor.position();
-        let mon_size = monitor.size();
-        let x = mon_pos.x + ((mon_size.width.saturating_sub(size.width)) / 2) as i32;
-        let bottom_padding_physical = (85.0 * scale_factor) as i32;
-        let y = mon_pos.y + mon_size.height as i32 - size.height as i32 - bottom_padding_physical;
-        let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+    match crate::toast::monitor_containing_cursor(window) {
+        Some(monitor) => place_on_monitor(window, &monitor),
+        None => position_overlay(window),
     }
+}
+
+/// Centers the window horizontally near the bottom edge of the monitor.
+fn place_on_monitor(window: &WebviewWindow<AppRuntime>, monitor: &tauri::Monitor) {
+    let Ok(size) = window.outer_size() else {
+        return;
+    };
+    let scale_factor = monitor.scale_factor();
+    let screen = monitor.size();
+    let mon_pos = monitor.position();
+    let x = mon_pos.x + (screen.width.saturating_sub(size.width) / 2) as i32;
+    let bottom_padding_physical = (85.0 * scale_factor) as i32;
+    let y = mon_pos.y + screen.height as i32 - size.height as i32 - bottom_padding_physical;
+    let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
 }
 
 pub fn start_hold_recording(app: &AppHandle<AppRuntime>) -> bool {
@@ -1225,8 +1178,9 @@ pub fn start_hold_recording(app: &AppHandle<AppRuntime>) -> bool {
     )
 }
 
-pub fn stop_hold_recording(app: &AppHandle<AppRuntime>) {
-    app.state::<AppState>().pill().handle_hold_release(app);
+#[tauri::command]
+pub fn stop_hold_recording(app: AppHandle<AppRuntime>) {
+    app.state::<AppState>().pill().handle_hold_release(&app);
 }
 
 fn microphone_input_kind(settings: &UserSettings) -> &'static str {

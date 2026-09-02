@@ -599,61 +599,41 @@ fn process_raw_samples(raw_samples: &[i16], sample_rate: u32, channels: u16) -> 
 
 pub const MIN_RECORDING_DURATION_MS: i64 = 300;
 
-pub struct ValidationConfig {
-    pub min_duration_ms: i64,
-    pub min_rms_energy: f32,
-    pub min_speech_percentage: f32,
-}
-
-impl Default for ValidationConfig {
-    fn default() -> Self {
-        Self {
-            min_duration_ms: MIN_RECORDING_DURATION_MS,
-            min_rms_energy: 0.0002,
-            min_speech_percentage: 3.0,
-        }
-    }
-}
+const MIN_RMS_ENERGY: f32 = 0.0002;
+const MIN_SPEECH_PERCENTAGE: f32 = 3.0;
 
 pub fn validate_recording(recording: &CompletedRecording) -> Result<(), RecordingRejectionReason> {
-    validate_recording_with_config(recording, &ValidationConfig::default())
-}
-
-pub fn validate_recording_with_config(
-    recording: &CompletedRecording,
-    config: &ValidationConfig,
-) -> Result<(), RecordingRejectionReason> {
     if recording.samples.is_empty() {
         return Err(RecordingRejectionReason::EmptyBuffer);
     }
 
     let duration_ms = (recording.ended_at - recording.started_at).num_milliseconds();
-    if duration_ms < config.min_duration_ms {
+    if duration_ms < MIN_RECORDING_DURATION_MS {
         return Err(RecordingRejectionReason::TooShort {
             duration_ms,
-            min_ms: config.min_duration_ms,
+            min_ms: MIN_RECORDING_DURATION_MS,
         });
     }
 
     let rms = calculate_rms_i16(&recording.samples);
-    if rms < config.min_rms_energy {
+    if rms < MIN_RMS_ENERGY {
         return Err(RecordingRejectionReason::TooQuiet {
             rms,
-            threshold: config.min_rms_energy,
+            threshold: MIN_RMS_ENERGY,
         });
     }
 
     let mut speech_percentage = recording.speech_percentage.unwrap_or_else(|| {
         speech_percentage_i16_with_mode(&recording.samples, recording.sample_rate, VadMode::Quality)
     });
-    if recording.speech_percentage.is_some() && speech_percentage < config.min_speech_percentage {
+    if recording.speech_percentage.is_some() && speech_percentage < MIN_SPEECH_PERCENTAGE {
         speech_percentage = speech_percentage_i16_with_mode(
             &recording.samples,
             recording.sample_rate,
             VadMode::Quality,
         );
     }
-    if speech_percentage < config.min_speech_percentage {
+    if speech_percentage < MIN_SPEECH_PERCENTAGE {
         return Err(RecordingRejectionReason::NoSpeechDetected);
     }
 
@@ -698,58 +678,6 @@ fn create_vad(sample_rate: u32, mode: VadMode) -> Option<Vad> {
     Some(Vad::new_with_rate_and_mode(rate, mode))
 }
 
-fn calculate_speech_percentage_with_mode(samples: &[f32], sample_rate: u32, mode: VadMode) -> f32 {
-    if samples.is_empty() {
-        return 0.0;
-    }
-
-    let vad_rate = match sample_rate {
-        8000 | 16000 | 32000 | 48000 => sample_rate,
-        _ => 16000,
-    };
-
-    let analysis = if vad_rate == sample_rate {
-        samples.to_vec()
-    } else {
-        resample_audio(samples, sample_rate, vad_rate)
-    };
-
-    let frame_ms = 30usize;
-    let frame_len = (vad_rate as usize * frame_ms) / 1000;
-    if frame_len == 0 || analysis.len() < frame_len {
-        return 0.0;
-    }
-
-    let analysis_i16: Vec<i16> = analysis
-        .iter()
-        .map(|s| (*s).clamp(-1.0, 1.0))
-        .map(|s| (s * i16::MAX as f32).round() as i16)
-        .collect();
-
-    let mut vad = match create_vad(vad_rate, mode) {
-        Some(instance) => instance,
-        None => return 100.0, // If VAD fails, assume it's valid
-    };
-
-    let mut speech_frames = 0;
-    let mut total_frames = 0;
-    for chunk in analysis_i16.chunks(frame_len) {
-        if chunk.len() < frame_len {
-            break;
-        }
-        total_frames += 1;
-        if vad.is_voice_segment(chunk).unwrap_or(false) {
-            speech_frames += 1;
-        }
-    }
-
-    if total_frames == 0 {
-        return 0.0;
-    }
-
-    (speech_frames as f32 / total_frames as f32) * 100.0
-}
-
 pub fn quiet_cut_index(samples: &[i16], sample_rate: u32) -> usize {
     let len = samples.len();
     let rate = sample_rate.max(1) as usize;
@@ -788,13 +716,18 @@ pub fn speech_percentage_i16_with_mode(samples: &[i16], sample_rate: u32, mode: 
         return calculate_speech_percentage_i16_with_mode(samples, sample_rate, mode);
     }
 
+    // The VAD only accepts a few rates; resample everything else to 16 kHz.
     let scale = 1.0 / i16::MAX as f32;
     let samples_f32: Vec<f32> = samples
         .iter()
         .map(|sample| *sample as f32 * scale)
         .collect();
+    let resampled: Vec<i16> = resample_audio(&samples_f32, sample_rate, 16000)
+        .iter()
+        .map(|s| (s.clamp(-1.0, 1.0) * i16::MAX as f32).round() as i16)
+        .collect();
 
-    calculate_speech_percentage_with_mode(&samples_f32, sample_rate, mode)
+    calculate_speech_percentage_i16_with_mode(&resampled, 16000, mode)
 }
 
 fn calculate_speech_percentage_i16_with_mode(

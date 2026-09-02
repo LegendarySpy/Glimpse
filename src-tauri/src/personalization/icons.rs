@@ -189,6 +189,7 @@ fn prune_orphan_website_icons(live_sites: &[String], cache_dir: &Path) {
     }
 }
 
+#[tauri::command]
 pub fn list_website_icons(
     sites: Vec<String>,
     app: AppHandle<AppRuntime>,
@@ -234,6 +235,7 @@ pub fn list_website_icons(
     Ok(icons)
 }
 
+#[tauri::command]
 pub fn list_installed_apps(app: AppHandle<AppRuntime>) -> Result<Vec<InstalledApp>, String> {
     #[cfg(target_os = "macos")]
     {

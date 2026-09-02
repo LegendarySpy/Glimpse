@@ -449,33 +449,19 @@ pub(crate) fn shortcuts_conflict(left: &Hotkey, right: &Hotkey) -> bool {
     left == right || is_modifier_only_prefix(left, right) || is_modifier_only_prefix(right, left)
 }
 
+const MODIFIER_GROUPS: [(Modifiers, Modifiers); 4] = [
+    (Modifiers::CMD_LEFT, Modifiers::CMD_RIGHT),
+    (Modifiers::CTRL_LEFT, Modifiers::CTRL_RIGHT),
+    (Modifiers::OPT_LEFT, Modifiers::OPT_RIGHT),
+    (Modifiers::SHIFT_LEFT, Modifiers::SHIFT_RIGHT),
+];
+
 fn is_modifier_only_prefix(prefix: &Hotkey, full: &Hotkey) -> bool {
     prefix.key.is_none()
         && !prefix.modifiers.is_empty()
-        && modifier_group_subset(
-            prefix.modifiers,
-            full.modifiers,
-            Modifiers::CMD_LEFT,
-            Modifiers::CMD_RIGHT,
-        )
-        && modifier_group_subset(
-            prefix.modifiers,
-            full.modifiers,
-            Modifiers::CTRL_LEFT,
-            Modifiers::CTRL_RIGHT,
-        )
-        && modifier_group_subset(
-            prefix.modifiers,
-            full.modifiers,
-            Modifiers::OPT_LEFT,
-            Modifiers::OPT_RIGHT,
-        )
-        && modifier_group_subset(
-            prefix.modifiers,
-            full.modifiers,
-            Modifiers::SHIFT_LEFT,
-            Modifiers::SHIFT_RIGHT,
-        )
+        && MODIFIER_GROUPS.iter().all(|(left, right)| {
+            modifier_group_subset(prefix.modifiers, full.modifiers, *left, *right)
+        })
         && (!prefix.modifiers.contains(Modifiers::FN) || full.modifiers.contains(Modifiers::FN))
         && (full.key.is_some() || prefix.modifiers != full.modifiers)
 }

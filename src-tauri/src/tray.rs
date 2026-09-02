@@ -10,7 +10,7 @@ use crate::speech::menu::{
 use crate::{AppRuntime, AppState, FEEDBACK_URL, SETTINGS_WINDOW_LABEL, audio};
 use parking_lot::Mutex;
 use std::sync::{OnceLock, atomic::Ordering};
-use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, SubmenuBuilder};
+use tauri::menu::{CheckMenuItemBuilder, Menu, MenuBuilder, MenuItem, Submenu, SubmenuBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
@@ -18,34 +18,41 @@ use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Windo
 use tauri::ActivationPolicy;
 use tauri_plugin_opener::OpenerExt;
 
-// On macOS, share mic constants with the app menu; on other platforms, define locally
-#[cfg(target_os = "macos")]
-use crate::platform::macos::menu::{MENU_ID_MIC_DEFAULT, MENU_ID_MIC_PREFIX};
-#[cfg(not(target_os = "macos"))]
-const MENU_ID_MIC_PREFIX: &str = "menu_mic_";
-#[cfg(not(target_os = "macos"))]
-const MENU_ID_MIC_DEFAULT: &str = "menu_mic_default";
+pub(crate) const MENU_ID_MIC_PREFIX: &str = "menu_mic_";
+pub(crate) const MENU_ID_MIC_DEFAULT: &str = "menu_mic_default";
 const MENU_ID_FEEDBACK: &str = "menu_send_feedback";
 const MENU_ID_CHECK_UPDATES: &str = "menu_check_updates";
 pub(crate) const EVENT_SETTINGS_RENDERER_READY: &str = "settings:renderer_ready";
 
-const EVENT_NAVIGATE_ABOUT: &str = "navigate:about";
-const EVENT_NAVIGATE_HISTORY: &str = "navigate:history";
-const EVENT_NAVIGATE_MODELS: &str = "navigate:models";
-const EVENT_NAVIGATE_ACCOUNT: &str = "navigate:account";
-
 #[derive(Clone, Copy)]
-enum SettingsNavigationTarget {
+pub(crate) enum SettingsPage {
     About,
     History,
     Models,
     Account,
+    Dictionary,
+    Personalization,
+    Library,
+}
+
+impl SettingsPage {
+    fn event(self) -> &'static str {
+        match self {
+            Self::About => "navigate:about",
+            Self::History => "navigate:history",
+            Self::Models => "navigate:models",
+            Self::Account => "navigate:account",
+            Self::Dictionary => "navigate:dictionary",
+            Self::Personalization => "navigate:personalization",
+            Self::Library => "navigate:library",
+        }
+    }
 }
 
 #[derive(Default)]
 struct PendingSettingsNavigation {
     renderer_ready: bool,
-    target: Option<SettingsNavigationTarget>,
+    target: Option<SettingsPage>,
 }
 
 fn pending_settings_navigation() -> &'static Mutex<PendingSettingsNavigation> {
@@ -62,20 +69,8 @@ fn flush_pending_settings_navigation(app: &AppHandle<AppRuntime>) {
         pending.target.take()
     };
 
-    match target {
-        Some(SettingsNavigationTarget::About) => {
-            let _ = app.emit(EVENT_NAVIGATE_ABOUT, ());
-        }
-        Some(SettingsNavigationTarget::History) => {
-            let _ = app.emit(EVENT_NAVIGATE_HISTORY, ());
-        }
-        Some(SettingsNavigationTarget::Models) => {
-            let _ = app.emit(EVENT_NAVIGATE_MODELS, ());
-        }
-        Some(SettingsNavigationTarget::Account) => {
-            let _ = app.emit(EVENT_NAVIGATE_ACCOUNT, ());
-        }
-        None => {}
+    if let Some(page) = target {
+        let _ = app.emit(page.event(), ());
     }
 }
 
@@ -84,68 +79,24 @@ pub(crate) fn mark_settings_renderer_ready(app: &AppHandle<AppRuntime>) {
     flush_pending_settings_navigation(app);
 }
 
-fn queue_settings_navigation(target: SettingsNavigationTarget) {
-    let mut pending = pending_settings_navigation().lock();
-    pending.target = Some(target);
-}
-
-fn open_settings_navigation(
+pub(crate) fn open_settings_page(
     app: &AppHandle<AppRuntime>,
-    target: SettingsNavigationTarget,
+    page: SettingsPage,
 ) -> tauri::Result<()> {
-    queue_settings_navigation(target);
+    pending_settings_navigation().lock().target = Some(page);
     if let Err(err) = toggle_settings_window(app) {
-        let mut pending = pending_settings_navigation().lock();
-        pending.target = None;
+        pending_settings_navigation().lock().target = None;
         return Err(err);
     }
     flush_pending_settings_navigation(app);
     Ok(())
 }
 
-pub(crate) fn open_settings_about(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
-    open_settings_navigation(app, SettingsNavigationTarget::About)
-}
-
-pub(crate) fn open_settings_history(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
-    open_settings_navigation(app, SettingsNavigationTarget::History)
-}
-
-pub(crate) fn open_settings_models(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
-    open_settings_navigation(app, SettingsNavigationTarget::Models)
-}
-
-pub(crate) fn open_settings_account(app: &AppHandle<AppRuntime>) -> tauri::Result<()> {
-    open_settings_navigation(app, SettingsNavigationTarget::Account)
-}
-
-fn build_tray_menu(
+pub(crate) fn build_microphone_submenu(
     app: &AppHandle<AppRuntime>,
     settings: &UserSettings,
-) -> tauri::Result<Menu<AppRuntime>> {
-    let strings = MenuStrings::resolve(settings);
-    let app_name = app.package_info().name.clone();
-    let mut menu = MenuBuilder::new(app);
-
-    let check_updates = MenuItem::with_id(
-        app,
-        MENU_ID_CHECK_UPDATES,
-        strings.get("native.menu.check_updates"),
-        true,
-        None::<&str>,
-    )?;
-    menu = menu.item(&check_updates);
-    menu = menu.separator();
-    let status_items = build_model_status_items(app, settings)?;
-    for item in &status_items {
-        menu = menu.item(item);
-    }
-    if !status_items.is_empty() {
-        menu = menu.separator();
-    }
-
-    menu = menu.item(&build_models_submenu(app, settings)?);
-
+    strings: &MenuStrings,
+) -> tauri::Result<Submenu<AppRuntime>> {
     let mut mic_submenu = SubmenuBuilder::new(app, strings.get("native.menu.microphone"));
     let default_mic = CheckMenuItemBuilder::with_id(
         MENU_ID_MIC_DEFAULT,
@@ -198,7 +149,37 @@ fn build_tray_menu(
             mic_submenu = mic_submenu.item(&unavailable);
         }
     }
-    menu = menu.item(&mic_submenu.build()?);
+    mic_submenu.build()
+}
+
+fn build_tray_menu(
+    app: &AppHandle<AppRuntime>,
+    settings: &UserSettings,
+) -> tauri::Result<Menu<AppRuntime>> {
+    let strings = MenuStrings::resolve(settings);
+    let app_name = app.package_info().name.clone();
+    let mut menu = MenuBuilder::new(app);
+
+    let check_updates = MenuItem::with_id(
+        app,
+        MENU_ID_CHECK_UPDATES,
+        strings.get("native.menu.check_updates"),
+        true,
+        None::<&str>,
+    )?;
+    menu = menu.item(&check_updates);
+    menu = menu.separator();
+    let status_items = build_model_status_items(app, settings)?;
+    for item in &status_items {
+        menu = menu.item(item);
+    }
+    if !status_items.is_empty() {
+        menu = menu.separator();
+    }
+
+    menu = menu.item(&build_models_submenu(app, settings)?);
+
+    menu = menu.item(&build_microphone_submenu(app, settings, &strings)?);
 
     menu = menu.separator();
     let recent_submenu = build_recent_transcriptions_menu(app, &strings)?;
@@ -296,7 +277,7 @@ fn handle_tray_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
                 {
                     tracing::error!("Failed to open Microsoft Store updates: {err}");
                 }
-            } else if let Err(err) = open_settings_about(app) {
+            } else if let Err(err) = open_settings_page(app, SettingsPage::About) {
                 tracing::error!("Failed to open settings for update check: {err}");
             }
         }
@@ -408,16 +389,10 @@ pub fn toggle_settings_window(app: &AppHandle<AppRuntime>) -> tauri::Result<()> 
             app,
             crate::toast::Payload {
                 toast_type: "success".to_string(),
-                title: None,
                 message: format!("Glimpse updated to v{current_version}."),
                 auto_dismiss: Some(true),
                 duration: Some(5000),
-                retry_id: None,
-                mode: None,
-                action: None,
-                action_label: None,
-                secondary_action: None,
-                secondary_action_label: None,
+                ..Default::default()
             },
         );
     }

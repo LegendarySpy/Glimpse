@@ -12,5 +12,5 @@ pub use types::EVENT_LIBRARY_RENDERER_READY;
 pub(crate) use types::default_item_kind;
 pub use types::{
     ExportFormat, LibraryFilter, LibraryImportOptions, LibraryItem, LibraryItemPatch,
-    LibraryItemStatus, Speaker, TranscriptSegment,
+    LibraryItemStatus, TranscriptSegment,
 };

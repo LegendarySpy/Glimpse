@@ -6,7 +6,7 @@ pub const WINDOW_LABEL: &str = "toast";
 pub const EVENT_SHOW: &str = "toast:show";
 pub const EVENT_HIDE: &str = "toast:hide";
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Default)]
 pub struct Payload {
     #[serde(rename = "type")]
     pub toast_type: String,
@@ -50,14 +50,7 @@ pub fn show(app: &AppHandle<AppRuntime>, toast_type: &str, title: Option<&str>, 
             toast_type: toast_type.to_string(),
             title: title.map(String::from),
             message: message.to_string(),
-            auto_dismiss: None,
-            duration: None,
-            retry_id: None,
-            mode: None,
-            action: None,
-            action_label: None,
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 }
@@ -76,14 +69,9 @@ pub fn show_with_action(
             toast_type: toast_type.to_string(),
             title: title.map(String::from),
             message: message.to_string(),
-            auto_dismiss: None,
-            duration: None,
-            retry_id: None,
-            mode: None,
             action: Some(action.to_string()),
             action_label: Some(action_label.to_string()),
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 }
@@ -134,7 +122,7 @@ fn target_toast_monitor(
     }
 }
 
-fn monitor_containing_cursor(window: &WebviewWindow<AppRuntime>) -> Option<Monitor> {
+pub(crate) fn monitor_containing_cursor(window: &WebviewWindow<AppRuntime>) -> Option<Monitor> {
     let cursor_pos = window.cursor_position().ok()?;
     window
         .available_monitors()
@@ -152,8 +140,6 @@ fn monitor_containing_cursor(window: &WebviewWindow<AppRuntime>) -> Option<Monit
 
 #[tauri::command]
 pub fn toast_dismissed(app: AppHandle<AppRuntime>) {
-    crate::auto_dictionary::clear_pending_suggestion();
-
     let state = app.state::<AppState>();
     if state.pill().status() == pill::PillStatus::Error {
         state.pill().reset(&app);
@@ -173,16 +159,12 @@ pub fn debug_show_toast(
         &app,
         Payload {
             toast_type,
-            title: None,
             message,
             auto_dismiss: Some(true),
             duration: Some(8000),
-            retry_id: None,
-            mode: None,
             action,
             action_label,
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 }
@@ -198,12 +180,7 @@ pub fn show_celebration_toast(app: AppHandle<AppRuntime>) {
             message: "Welcome to Glimpse Cloud!".to_string(),
             auto_dismiss: Some(true),
             duration: Some(6000),
-            retry_id: None,
-            mode: None,
-            action: None,
-            action_label: None,
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 }

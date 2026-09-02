@@ -98,16 +98,10 @@ pub fn copy_transcription_to_clipboard(app: &AppHandle<AppRuntime>, transcriptio
         app,
         toast::Payload {
             toast_type: "success".to_string(),
-            title: None,
             message: toast::native(app, "native.toast.copied"),
             auto_dismiss: Some(true),
             duration: Some(1200),
-            retry_id: None,
-            mode: None,
-            action: None,
-            action_label: None,
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 }
@@ -117,16 +111,10 @@ fn emit_copy_error_toast(app: &AppHandle<AppRuntime>, message: &str) {
         app,
         toast::Payload {
             toast_type: "error".to_string(),
-            title: None,
             message: message.to_string(),
             auto_dismiss: Some(true),
             duration: Some(1600),
-            retry_id: None,
-            mode: None,
-            action: None,
-            action_label: None,
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 }

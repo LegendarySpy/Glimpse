@@ -379,24 +379,13 @@ pub async fn activate_license(
         conditions: current_conditions(),
     };
 
-    let response = client
-        .post(format!(
-            "{}/v1/customer-portal/license-keys/activate",
-            polar_api_base()
-        ))
-        .json(&body)
-        .send()
-        .await
-        .map_err(|err| format!("Could not reach Polar: {err}"))?;
+    let response = polar_post("activate", &client, &body).await?;
 
     if !response.status().is_success() {
         return Err(polar_error_message(response.status().as_u16()).to_string());
     }
 
-    let activated = response
-        .json::<PolarActivationResponse>()
-        .await
-        .map_err(|err| format!("Polar returned an unreadable license response: {err}"))?;
+    let activated = read_polar_json::<PolarActivationResponse>(response).await?;
     validate_polar_license(&activated.license_key, None)?;
 
     write_license_key(store, Some(&key))?;
@@ -424,15 +413,7 @@ pub async fn refresh_license(
         conditions: current_conditions(),
     };
 
-    let response = client
-        .post(format!(
-            "{}/v1/customer-portal/license-keys/validate",
-            polar_api_base()
-        ))
-        .json(&body)
-        .send()
-        .await
-        .map_err(|err| format!("Could not reach Polar: {err}"))?;
+    let response = polar_post("validate", &client, &body).await?;
 
     let status = response.status();
     if !status.is_success() {
@@ -445,10 +426,7 @@ pub async fn refresh_license(
         return Err(polar_error_message(status.as_u16()).to_string());
     }
 
-    let validated = response
-        .json::<PolarLicenseResponse>()
-        .await
-        .map_err(|err| format!("Polar returned an unreadable license response: {err}"))?;
+    let validated = read_polar_json::<PolarLicenseResponse>(response).await?;
     if let Err(err) = validate_polar_license(&validated, activation_id.as_deref()) {
         revoke_cached_license_grant(store)?;
         return Err(err);
@@ -486,15 +464,7 @@ pub async fn deactivate_license(
             organization_id,
             activation_id,
         };
-        let response = client
-            .post(format!(
-                "{}/v1/customer-portal/license-keys/deactivate",
-                polar_api_base()
-            ))
-            .json(&body)
-            .send()
-            .await
-            .map_err(|err| format!("Could not reach Polar: {err}"))?;
+        let response = polar_post("deactivate", &client, &body).await?;
         let status = response.status();
         // 4xx beyond 404 still lets us clear locally: user explicitly asked to
         // deactivate this device and Polar's view will eventually catch up.
@@ -849,6 +819,31 @@ fn polar_organization_id() -> &'static str {
     option_env!("GLIMPSE_POLAR_ORGANIZATION_ID")
         .filter(|value| !value.trim().is_empty())
         .unwrap_or(DEFAULT_POLAR_ORGANIZATION_ID)
+}
+
+async fn polar_post<B: Serialize>(
+    verb: &str,
+    client: &Client,
+    body: &B,
+) -> Result<reqwest::Response, String> {
+    client
+        .post(format!(
+            "{}/v1/customer-portal/license-keys/{verb}",
+            polar_api_base()
+        ))
+        .json(body)
+        .send()
+        .await
+        .map_err(|err| format!("Could not reach Polar: {err}"))
+}
+
+async fn read_polar_json<T: serde::de::DeserializeOwned>(
+    response: reqwest::Response,
+) -> Result<T, String> {
+    response
+        .json::<T>()
+        .await
+        .map_err(|err| format!("Polar returned an unreadable license response: {err}"))
 }
 
 fn polar_api_base() -> &'static str {

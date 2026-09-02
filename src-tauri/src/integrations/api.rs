@@ -3,7 +3,7 @@
 use anyhow::{Result, bail};
 use serde_json::{Map, Value, json};
 
-use super::{client, coded, has_flag, output, str_flag, wants_help};
+use super::{client, has_flag, output, str_flag, wants_help};
 
 fn help() {
     super::print_command_help(
@@ -79,14 +79,8 @@ fn start_payload(args: &[String]) -> Result<Value> {
 }
 
 fn status(json: bool) -> Result<()> {
-    match client::try_request("api.status", json!({}))? {
-        Some(response) if response.ok => emit(response.data, json),
-        Some(response) => Err(coded(
-            3,
-            response
-                .error
-                .unwrap_or_else(|| "api status failed".to_string()),
-        )),
+    match client::try_request_data("api.status", json!({}), "api status failed")? {
+        Some(data) => emit(data, json),
         None => {
             if json {
                 output::print_json(&json!({ "ok": true, "running": false }));
@@ -100,11 +94,7 @@ fn status(json: bool) -> Result<()> {
 
 fn emit(data: Value, json: bool) -> Result<()> {
     if json {
-        let mut value = data;
-        if let Some(object) = value.as_object_mut() {
-            object.insert("ok".to_string(), Value::Bool(true));
-        }
-        output::print_json(&value);
+        output::print_json_ok(data);
     } else {
         let running = data
             .get("running")

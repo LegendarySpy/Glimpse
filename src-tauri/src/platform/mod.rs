@@ -2,8 +2,60 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-pub mod overlay;
-pub mod toast;
+/// Forwarders for a native panel (NSPanel on macOS, tool window on Windows).
+macro_rules! native_panel {
+    ($name:ident, $label:literal) => {
+        pub mod $name {
+            use crate::AppRuntime;
+            use tauri::{AppHandle, WebviewWindow};
+
+            pub fn init(app: &AppHandle<AppRuntime>, window: &WebviewWindow<AppRuntime>) {
+                #[cfg(target_os = "macos")]
+                if let Err(err) = crate::platform::macos::$name::init(app, window) {
+                    tracing::error!("Failed to initialize macOS {} panel: {err}", $label);
+                }
+                #[cfg(target_os = "windows")]
+                {
+                    let _ = app;
+                    if let Err(err) = crate::platform::windows::$name::init(window) {
+                        tracing::error!("Failed to initialize Windows {} surface: {err}", $label);
+                    }
+                }
+            }
+
+            pub fn show(app: &AppHandle<AppRuntime>, window: &WebviewWindow<AppRuntime>) {
+                #[cfg(target_os = "macos")]
+                if let Err(err) = crate::platform::macos::$name::show(app, window) {
+                    tracing::error!("Failed to show macOS {} panel: {err}", $label);
+                }
+                #[cfg(target_os = "windows")]
+                {
+                    let _ = app;
+                    if let Err(err) = crate::platform::windows::$name::show(window) {
+                        tracing::error!("Failed to show Windows {} surface: {err}", $label);
+                    }
+                }
+            }
+
+            pub fn hide(app: &AppHandle<AppRuntime>, window: &WebviewWindow<AppRuntime>) {
+                #[cfg(target_os = "macos")]
+                if let Err(err) = crate::platform::macos::$name::hide(app, window) {
+                    tracing::error!("Failed to hide macOS {} panel: {err}", $label);
+                }
+                #[cfg(target_os = "windows")]
+                {
+                    let _ = app;
+                    if let Err(err) = crate::platform::windows::$name::hide(window) {
+                        tracing::error!("Failed to hide Windows {} surface: {err}", $label);
+                    }
+                }
+            }
+        }
+    };
+}
+
+native_panel!(overlay, "overlay");
+native_panel!(toast, "toast");
 
 #[cfg(target_os = "macos")]
 pub mod macos;

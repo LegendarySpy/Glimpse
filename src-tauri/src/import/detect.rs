@@ -12,42 +12,53 @@ pub struct DetectedApp {
     pub name: String,
 }
 
-type DetectFn = fn(&Path) -> bool;
+struct Importer {
+    id: &'static str,
+    name: &'static str,
+    detect: fn(&Path) -> bool,
+    parse: fn(&Path) -> Result<ImportBundle, String>,
+}
 
-fn all_ids() -> Vec<(&'static str, &'static str, DetectFn)> {
-    vec![
-        (
-            aqua::ID,
-            aqua::DISPLAY_NAME,
-            aqua::detect as fn(&Path) -> bool,
-        ),
-        (
-            superwhisper::ID,
-            superwhisper::DISPLAY_NAME,
-            superwhisper::detect as fn(&Path) -> bool,
-        ),
-        (
-            wispr::ID,
-            wispr::DISPLAY_NAME,
-            wispr::detect as fn(&Path) -> bool,
-        ),
-        (
-            handy::ID,
-            handy::DISPLAY_NAME,
-            handy::detect as fn(&Path) -> bool,
-        ),
-    ]
+const IMPORTERS: &[Importer] = &[
+    Importer {
+        id: aqua::ID,
+        name: aqua::DISPLAY_NAME,
+        detect: aqua::detect,
+        parse: aqua::parse,
+    },
+    Importer {
+        id: superwhisper::ID,
+        name: superwhisper::DISPLAY_NAME,
+        detect: superwhisper::detect,
+        parse: superwhisper::parse,
+    },
+    Importer {
+        id: wispr::ID,
+        name: wispr::DISPLAY_NAME,
+        detect: wispr::detect,
+        parse: wispr::parse,
+    },
+    Importer {
+        id: handy::ID,
+        name: handy::DISPLAY_NAME,
+        detect: handy::detect,
+        parse: handy::parse,
+    },
+];
+
+fn importer(id: &str) -> Option<&'static Importer> {
+    IMPORTERS.iter().find(|importer| importer.id == id)
 }
 
 pub fn detect_apps(home: &Path) -> Vec<DetectedApp> {
-    all_ids()
-        .into_iter()
-        .filter(|(_, _, detect)| detect(home))
-        .filter_map(|(id, name, _)| {
-            let bundle = parse_app(id, home).ok()?;
+    IMPORTERS
+        .iter()
+        .filter(|importer| (importer.detect)(home))
+        .filter_map(|importer| {
+            let bundle = parse_app(importer.id, home).ok()?;
             bundle_has_content(&bundle).then(|| DetectedApp {
-                id: id.to_string(),
-                name: name.to_string(),
+                id: importer.id.to_string(),
+                name: importer.name.to_string(),
             })
         })
         .collect()
@@ -65,23 +76,12 @@ fn bundle_has_content(bundle: &ImportBundle) -> bool {
 }
 
 pub fn display_name(id: &str) -> &'static str {
-    match id {
-        aqua::ID => aqua::DISPLAY_NAME,
-        superwhisper::ID => superwhisper::DISPLAY_NAME,
-        wispr::ID => wispr::DISPLAY_NAME,
-        handy::ID => handy::DISPLAY_NAME,
-        _ => "Unknown app",
-    }
+    importer(id).map_or("Unknown app", |importer| importer.name)
 }
 
 pub fn parse_app(id: &str, home: &Path) -> Result<ImportBundle, String> {
-    let mut bundle = match id {
-        aqua::ID => aqua::parse(home),
-        superwhisper::ID => superwhisper::parse(home),
-        wispr::ID => wispr::parse(home),
-        handy::ID => handy::parse(home),
-        _ => return Err(format!("Unknown import source: {id}")),
-    }?;
+    let importer = importer(id).ok_or_else(|| format!("Unknown import source: {id}"))?;
+    let mut bundle = (importer.parse)(home)?;
 
     bundle.language = bundle
         .language

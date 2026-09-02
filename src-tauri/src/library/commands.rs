@@ -170,13 +170,7 @@ pub fn cancel_library_transcription(
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
     if state.remove_library_job(&id) {
-        let _ = state.storage().update_library_item(
-            &id,
-            LibraryItemPatch {
-                status: Some(LibraryItemStatus::Cancelled),
-                ..Default::default()
-            },
-        );
+        set_library_status(&state.storage(), &id, LibraryItemStatus::Cancelled);
         let _ = app.emit(
             EVENT_LIBRARY_ERROR,
             LibraryErrorPayload {
@@ -188,13 +182,7 @@ pub fn cancel_library_transcription(
         return Ok(());
     }
     state.cancel_library_transcription(&id);
-    let _ = state.storage().update_library_item(
-        &id,
-        LibraryItemPatch {
-            status: Some(LibraryItemStatus::Cancelling),
-            ..Default::default()
-        },
-    );
+    set_library_status(&state.storage(), &id, LibraryItemStatus::Cancelling);
     Ok(())
 }
 
@@ -228,13 +216,7 @@ pub fn retry_library_transcription(
         }
     };
 
-    let _ = storage.update_library_item(
-        &id,
-        LibraryItemPatch {
-            status: Some(LibraryItemStatus::Pending),
-            ..Default::default()
-        },
-    );
+    set_library_status(&storage, &id, LibraryItemStatus::Pending);
     schedule_library_job(&app, &state, LibraryJob { id, kind: job });
     Ok(())
 }
@@ -335,13 +317,7 @@ pub(crate) fn recover_interrupted_library_items(app: &AppHandle<AppRuntime>) {
     for item in items {
         match item.status {
             LibraryItemStatus::Cancelling => {
-                let _ = storage.update_library_item(
-                    &item.id,
-                    LibraryItemPatch {
-                        status: Some(LibraryItemStatus::Cancelled),
-                        ..Default::default()
-                    },
-                );
+                set_library_status(&storage, &item.id, LibraryItemStatus::Cancelled);
                 let _ = app.emit(
                     EVENT_LIBRARY_ERROR,
                     LibraryErrorPayload {
@@ -355,13 +331,7 @@ pub(crate) fn recover_interrupted_library_items(app: &AppHandle<AppRuntime>) {
             | LibraryItemStatus::Importing { .. }
             | LibraryItemStatus::Transcribing { .. } => match build_recovery_job(&item) {
                 Ok(kind) => {
-                    let _ = storage.update_library_item(
-                        &item.id,
-                        LibraryItemPatch {
-                            status: Some(LibraryItemStatus::Pending),
-                            ..Default::default()
-                        },
-                    );
+                    set_library_status(&storage, &item.id, LibraryItemStatus::Pending);
                     schedule_library_job(
                         app,
                         &state,
@@ -532,12 +502,24 @@ fn set_library_item_error(
     id: &str,
     message: &str,
 ) {
+    set_library_status(
+        storage,
+        id,
+        LibraryItemStatus::Error {
+            message: message.to_string(),
+        },
+    );
+}
+
+fn set_library_status(
+    storage: &std::sync::Arc<crate::storage::StorageManager>,
+    id: &str,
+    status: LibraryItemStatus,
+) {
     let _ = storage.update_library_item(
         id,
         LibraryItemPatch {
-            status: Some(LibraryItemStatus::Error {
-                message: message.to_string(),
-            }),
+            status: Some(status),
             ..Default::default()
         },
     );

@@ -123,34 +123,21 @@ fn validate_update_settings_args(args: &UpdateSettingsArgs) -> Result<(), String
         return Err("At least one recording mode must be enabled".into());
     }
 
+    let modes = [
+        ("Smart", args.smart_enabled, &args.shortcut_bindings.smart),
+        ("Hold", args.hold_enabled, &args.shortcut_bindings.hold),
+        (
+            "Toggle",
+            args.toggle_enabled,
+            &args.shortcut_bindings.toggle,
+        ),
+    ];
     let mut enabled_shortcuts: Vec<(&str, hotkeys::Hotkey)> = vec![];
-    collect_enabled_shortcuts(
-        &mut enabled_shortcuts,
-        "Smart",
-        args.smart_enabled,
-        &args.shortcut_bindings.smart,
-    )?;
-    collect_enabled_shortcuts(
-        &mut enabled_shortcuts,
-        "Hold",
-        args.hold_enabled,
-        &args.shortcut_bindings.hold,
-    )?;
-    collect_enabled_shortcuts(
-        &mut enabled_shortcuts,
-        "Toggle",
-        args.toggle_enabled,
-        &args.shortcut_bindings.toggle,
-    )?;
-
-    if args.smart_enabled && !enabled_shortcuts.iter().any(|(name, _)| *name == "Smart") {
-        return Err("Smart shortcut cannot be empty when enabled".into());
-    }
-    if args.hold_enabled && !enabled_shortcuts.iter().any(|(name, _)| *name == "Hold") {
-        return Err("Hold shortcut cannot be empty when enabled".into());
-    }
-    if args.toggle_enabled && !enabled_shortcuts.iter().any(|(name, _)| *name == "Toggle") {
-        return Err("Toggle shortcut cannot be empty when enabled".into());
+    for (name, enabled, bindings) in modes {
+        collect_enabled_shortcuts(&mut enabled_shortcuts, name, enabled, bindings)?;
+        if enabled && !enabled_shortcuts.iter().any(|(n, _)| *n == name) {
+            return Err(format!("{name} shortcut cannot be empty when enabled"));
+        }
     }
 
     for i in 0..enabled_shortcuts.len() {

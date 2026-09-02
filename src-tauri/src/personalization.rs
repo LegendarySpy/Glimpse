@@ -5,8 +5,6 @@ use std::collections::HashSet;
 use tauri::{AppHandle, Emitter};
 use uuid::Uuid;
 
-pub use icons::{InstalledApp, WebsiteIcon};
-
 use crate::settings::Personality;
 use crate::{AppRuntime, AppState, EVENT_SETTINGS_CHANGED};
 
@@ -135,17 +133,4 @@ pub fn set_personalities(
     }
 
     Ok(cleaned)
-}
-
-#[tauri::command]
-pub fn list_installed_apps(app: AppHandle<AppRuntime>) -> Result<Vec<InstalledApp>, String> {
-    icons::list_installed_apps(app)
-}
-
-#[tauri::command]
-pub fn list_website_icons(
-    sites: Vec<String>,
-    app: AppHandle<AppRuntime>,
-) -> Result<Vec<WebsiteIcon>, String> {
-    icons::list_website_icons(sites, app)
 }

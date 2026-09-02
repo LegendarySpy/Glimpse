@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use crate::storage::ImportedTranscription;
 
 use super::shared::{
-    ImportBundle, ModelHint, app_support_dir, map_model_family, open_sqlite_readonly, read_json,
-    sqlite_table_exists, translate_accelerator,
+    ImportBundle, ModelHint, app_support_dir, epoch_to_millis, map_model_family,
+    open_sqlite_readonly, read_json, sqlite_table_exists, translate_accelerator,
 };
 
 pub const ID: &str = "handy";
@@ -92,17 +92,12 @@ pub fn parse(home: &Path) -> Result<ImportBundle, String> {
             let Some(text) = text.filter(|t| !t.trim().is_empty()) else {
                 continue;
             };
-            let timestamp_ms = if timestamp < 100_000_000_000 {
-                timestamp * 1000
-            } else {
-                timestamp
-            };
+            let timestamp_ms = epoch_to_millis(timestamp);
             bundle
                 .transcripts
                 .push(ImportedTranscription { text, timestamp_ms });
         }
     }
-    bundle.transcript_count = bundle.transcripts.len() as u32;
 
     Ok(bundle)
 }

@@ -47,6 +47,19 @@ pub(crate) fn try_request(command: &str, args: Value) -> Result<Option<Response>
     Ok(Some(exchange(stream, command, args)?))
 }
 
+/// Like `try_request`, but unwraps the response: `Some(data)` on success,
+/// exit code 3 with the server's message on failure, `None` when not running.
+pub(crate) fn try_request_data(command: &str, args: Value, failure: &str) -> Result<Option<Value>> {
+    match try_request(command, args)? {
+        Some(response) if response.ok => Ok(Some(response.data)),
+        Some(response) => Err(coded(
+            3,
+            response.error.unwrap_or_else(|| failure.to_string()),
+        )),
+        None => Ok(None),
+    }
+}
+
 fn exchange(stream: Stream, command: &str, args: Value) -> Result<Response> {
     let request = Request::new(command, args);
     let mut line = serde_json::to_string(&request)?;

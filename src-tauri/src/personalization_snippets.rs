@@ -36,7 +36,7 @@ fn non_empty(value: &str) -> Option<String> {
     (!value.is_empty()).then(|| value.to_string())
 }
 
-fn extract_host(candidate: &str) -> Option<String> {
+pub(crate) fn extract_host(candidate: &str) -> Option<String> {
     let mut value = candidate.trim().to_lowercase();
     if value.is_empty() {
         return None;

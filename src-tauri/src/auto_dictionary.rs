@@ -23,13 +23,7 @@ const MAX_CHANGED_TOKENS: usize = 4;
 const MAX_DICTIONARY_ENTRIES: usize = 64;
 const MAX_IGNORED_SUGGESTIONS: usize = 128;
 
-static PENDING_SUGGESTION: OnceLock<Mutex<Option<PendingSuggestion>>> = OnceLock::new();
 static IGNORED_SUGGESTIONS: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
-
-#[derive(Clone)]
-struct PendingSuggestion {
-    value: String,
-}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Token {
@@ -96,21 +90,18 @@ pub(crate) fn start_after_paste(
                     return;
                 }
 
-                set_pending_suggestion(candidate.clone());
                 toast::emit_toast(
                     &app,
                     toast::Payload {
                         toast_type: "info".to_string(),
-                        title: None,
                         message: format!("Add \"{candidate}\" to dictionary?"),
                         auto_dismiss: Some(false),
-                        duration: None,
                         retry_id: Some(candidate.clone()),
-                        mode: None,
                         action: Some("accept_auto_dictionary_suggestion".to_string()),
                         action_label: Some("Add".to_string()),
                         secondary_action: Some("reject_auto_dictionary_suggestion".to_string()),
                         secondary_action_label: Some("Never".to_string()),
+                        ..Default::default()
                     },
                 );
                 return;
@@ -141,7 +132,6 @@ pub(crate) fn accept_auto_dictionary_suggestion(
         .persist_settings(settings)
         .map_err(|err| err.to_string())?;
     clear_ignored_suggestion(&suggestion);
-    clear_pending_suggestion_value(&suggestion);
 
     if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
         tracing::error!("Failed to emit settings change: {err}");
@@ -169,17 +159,12 @@ pub(crate) fn reject_auto_dictionary_suggestion(
         .persist_settings(settings)
         .map_err(|err| err.to_string())?;
     remember_ignored_suggestion(&suggestion);
-    clear_pending_suggestion_value(&suggestion);
 
     if let Err(err) = app.emit(EVENT_SETTINGS_CHANGED, &saved) {
         tracing::error!("Failed to emit settings change: {err}");
     }
 
     Ok(saved.auto_dictionary_ignored)
-}
-
-pub(crate) fn clear_pending_suggestion() {
-    let _ = take_pending_suggestion();
 }
 
 pub(crate) fn sync_ignored_dictionary_entries(dictionary_entries: &[String]) {
@@ -224,28 +209,6 @@ fn frames_match(
                 && (initial.2 - current.2).abs() < 2.0
         }
         _ => true,
-    }
-}
-
-fn pending_suggestion() -> &'static Mutex<Option<PendingSuggestion>> {
-    PENDING_SUGGESTION.get_or_init(|| Mutex::new(None))
-}
-
-fn set_pending_suggestion(value: String) {
-    *pending_suggestion().lock() = Some(PendingSuggestion { value });
-}
-
-fn take_pending_suggestion() -> Option<PendingSuggestion> {
-    pending_suggestion().lock().take()
-}
-
-fn clear_pending_suggestion_value(value: &str) {
-    let mut pending = pending_suggestion().lock();
-    if pending
-        .as_ref()
-        .is_some_and(|suggestion| suggestion.value == value)
-    {
-        *pending = None;
     }
 }
 

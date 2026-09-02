@@ -65,6 +65,7 @@ use tauri::async_runtime;
 use tauri::tray::TrayIcon;
 use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_deep_link::DeepLinkExt;
+use tray::SettingsPage;
 
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
@@ -217,11 +218,9 @@ fn handle_app_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
         MENU_ID_RECENT_TRANSCRIPTION_PREFIX, copy_transcription_to_clipboard,
     };
     use crate::speech::menu::handle_speech_menu_event;
-    use platform::macos::menu::{
-        MENU_ID_CHECK_UPDATES, MENU_ID_MIC_DEFAULT, MENU_ID_MIC_PREFIX, MENU_ID_REPORT_ISSUE,
-        MENU_ID_WEBSITE,
-    };
+    use platform::macos::menu::{MENU_ID_CHECK_UPDATES, MENU_ID_REPORT_ISSUE, MENU_ID_WEBSITE};
     use tauri_plugin_opener::OpenerExt;
+    use tray::{MENU_ID_MIC_DEFAULT, MENU_ID_MIC_PREFIX};
 
     if let Some(saved) = handle_speech_menu_event(app, id) {
         refresh_speech_menus(app, &saved);
@@ -230,7 +229,7 @@ fn handle_app_menu_event(app: &AppHandle<AppRuntime>, id: &str) {
 
     match id {
         MENU_ID_CHECK_UPDATES => {
-            let _ = tray::open_settings_about(app);
+            let _ = tray::open_settings_page(app, SettingsPage::About);
         }
         MENU_ID_WEBSITE => {
             let _ = app
@@ -626,8 +625,8 @@ pub fn run() {
             auto_dictionary::reject_auto_dictionary_suggestion,
             personalization::get_personalities,
             personalization::set_personalities,
-            personalization::list_installed_apps,
-            personalization::list_website_icons,
+            personalization::icons::list_installed_apps,
+            personalization::icons::list_website_icons,
             import::commands::detect_importable_apps,
             import::commands::preview_import,
             import::commands::apply_import,
@@ -679,7 +678,7 @@ pub fn run() {
             open_ffmpeg_install,
             complete_onboarding,
             start_hold_recording,
-            stop_hold_recording,
+            pill::stop_hold_recording,
             cancel_recording,
             view_recovered_transcriptions,
             copy_last_transcription,
@@ -1356,10 +1355,7 @@ fn open_input_monitoring_settings() -> Result<(), String> {
 
 #[tauri::command]
 fn open_llm_cleanup_settings(app: AppHandle<AppRuntime>) -> Result<(), String> {
-    tray::open_settings_models(&app).map_err(|err| {
-        tracing::error!("Failed to open settings window: {err}");
-        err.to_string()
-    })
+    open_settings_page(&app, SettingsPage::Models)
 }
 
 #[tauri::command]
@@ -1386,11 +1382,6 @@ fn start_hold_recording(app: AppHandle<AppRuntime>) -> Result<(), String> {
     } else {
         Err("Could not start recording".into())
     }
-}
-
-#[tauri::command]
-fn stop_hold_recording(app: AppHandle<AppRuntime>) {
-    pill::stop_hold_recording(&app);
 }
 
 #[tauri::command]
@@ -1666,17 +1657,20 @@ async fn fetch_remote_speech_models(
 }
 
 #[tauri::command]
-fn open_about_page(app: AppHandle<AppRuntime>) {
-    if let Err(err) = tray::open_settings_about(&app) {
-        tracing::error!("Failed to open settings window: {err}");
-    }
+fn open_about_page(app: AppHandle<AppRuntime>) -> Result<(), String> {
+    open_settings_page(&app, SettingsPage::About)
 }
 
 #[tauri::command]
-fn open_account_page(app: AppHandle<AppRuntime>) {
-    if let Err(err) = tray::open_settings_account(&app) {
+fn open_account_page(app: AppHandle<AppRuntime>) -> Result<(), String> {
+    open_settings_page(&app, SettingsPage::Account)
+}
+
+fn open_settings_page(app: &AppHandle<AppRuntime>, page: SettingsPage) -> Result<(), String> {
+    tray::open_settings_page(app, page).map_err(|err| {
         tracing::error!("Failed to open settings window: {err}");
-    }
+        err.to_string()
+    })
 }
 
 #[tauri::command]
@@ -2017,7 +2011,7 @@ pub(crate) fn recordings_root(app: &AppHandle<AppRuntime>) -> GlimpseResult<Path
 
 #[tauri::command]
 fn view_recovered_transcriptions(app: AppHandle<AppRuntime>) -> Result<(), String> {
-    tray::open_settings_history(&app).map_err(|err| err.to_string())
+    open_settings_page(&app, SettingsPage::History)
 }
 
 #[tauri::command]
@@ -2105,6 +2099,7 @@ fn preview_recording_prune_for_policy(
     count_or_prune_recordings(app, policy, Local::now(), RecordingPruneAction::Count)
 }
 
+#[derive(Clone, Copy)]
 enum RecordingPruneAction {
     Count,
     Delete,
@@ -2122,66 +2117,18 @@ fn count_or_prune_recordings(
     }
 
     let cutoff = settings::recording_prune_cutoff(policy, now);
-    let (count, _) = match action {
-        RecordingPruneAction::Count => count_prunable_recording_tree(&root, policy, cutoff)?,
-        RecordingPruneAction::Delete => prune_recording_tree(&root, policy, cutoff)?,
-    };
+    let (count, _) = walk_recording_tree(&root, policy, cutoff, action)?;
     Ok(count)
 }
 
-fn prune_recording_tree(
+fn walk_recording_tree(
     path: &Path,
     policy: RecordingPrunePolicy,
     cutoff: Option<DateTime<Local>>,
+    action: RecordingPruneAction,
 ) -> GlimpseResult<(u32, bool)> {
-    let mut deleted_count = 0;
-    let mut is_empty = true;
-
-    for entry in fs::read_dir(path)
-        .with_context(|| format!("Failed to read recordings directory {}", path.display()))?
-    {
-        let entry = entry?;
-        let child_path = entry.path();
-        let metadata = entry.metadata()?;
-
-        if metadata.is_dir() {
-            if is_pending_recordings_dir(&child_path) {
-                is_empty = false;
-                continue;
-            }
-            let (child_deleted, child_empty) = prune_recording_tree(&child_path, policy, cutoff)?;
-            deleted_count += child_deleted;
-            if child_empty {
-                fs::remove_dir(&child_path).with_context(|| {
-                    format!(
-                        "Failed to remove empty recordings directory {}",
-                        child_path.display()
-                    )
-                })?;
-            } else {
-                is_empty = false;
-            }
-            continue;
-        }
-
-        if should_prune_recording_file(&child_path, &metadata, policy, cutoff) {
-            fs::remove_file(&child_path)
-                .with_context(|| format!("Failed to remove recording {}", child_path.display()))?;
-            deleted_count += 1;
-        } else {
-            is_empty = false;
-        }
-    }
-
-    Ok((deleted_count, is_empty))
-}
-
-fn count_prunable_recording_tree(
-    path: &Path,
-    policy: RecordingPrunePolicy,
-    cutoff: Option<DateTime<Local>>,
-) -> GlimpseResult<(u32, bool)> {
-    let mut candidate_count = 0;
+    let delete = matches!(action, RecordingPruneAction::Delete);
+    let mut count = 0;
     let mut is_empty = true;
 
     for entry in fs::read_dir(path)
@@ -2197,22 +2144,34 @@ fn count_prunable_recording_tree(
                 continue;
             }
             let (child_count, child_empty) =
-                count_prunable_recording_tree(&child_path, policy, cutoff)?;
-            candidate_count += child_count;
+                walk_recording_tree(&child_path, policy, cutoff, action)?;
+            count += child_count;
             if !child_empty {
                 is_empty = false;
+            } else if delete {
+                fs::remove_dir(&child_path).with_context(|| {
+                    format!(
+                        "Failed to remove empty recordings directory {}",
+                        child_path.display()
+                    )
+                })?;
             }
             continue;
         }
 
         if should_prune_recording_file(&child_path, &metadata, policy, cutoff) {
-            candidate_count += 1;
+            if delete {
+                fs::remove_file(&child_path).with_context(|| {
+                    format!("Failed to remove recording {}", child_path.display())
+                })?;
+            }
+            count += 1;
         } else {
             is_empty = false;
         }
     }
 
-    Ok((candidate_count, is_empty))
+    Ok((count, is_empty))
 }
 
 fn is_pending_recordings_dir(path: &Path) -> bool {

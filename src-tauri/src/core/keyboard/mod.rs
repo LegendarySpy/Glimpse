@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not};
+use std::ops::{BitOr, BitOrAssign};
 use std::str::FromStr;
 use std::sync::Arc;
 use std::thread::JoinHandle;
@@ -184,12 +184,6 @@ impl Modifiers {
     }
 }
 
-impl Default for Modifiers {
-    fn default() -> Self {
-        Self::empty()
-    }
-}
-
 impl BitOr for Modifiers {
     type Output = Self;
 
@@ -201,28 +195,6 @@ impl BitOr for Modifiers {
 impl BitOrAssign for Modifiers {
     fn bitor_assign(&mut self, rhs: Self) {
         self.0 |= rhs.0;
-    }
-}
-
-impl BitAnd for Modifiers {
-    type Output = Self;
-
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Self(self.0 & rhs.0)
-    }
-}
-
-impl BitAndAssign for Modifiers {
-    fn bitand_assign(&mut self, rhs: Self) {
-        self.0 &= rhs.0;
-    }
-}
-
-impl Not for Modifiers {
-    type Output = Self;
-
-    fn not(self) -> Self::Output {
-        Self(!self.0)
     }
 }
 

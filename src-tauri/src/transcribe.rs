@@ -185,12 +185,7 @@ pub(crate) fn queue_transcription(
         match result {
             Ok(result) => {
                 if is_cancelled() {
-                    app_handle
-                        .state::<AppState>()
-                        .pill()
-                        .finish_processing(&app_handle);
-                    discard_pending_recording(saved_for_task.pending_path.as_deref());
-                    app_handle.state::<AppState>().set_pending_path(None);
+                    abort_transcription(&app_handle, saved_for_task.pending_path.as_deref(), false);
                     return;
                 }
 
@@ -206,12 +201,7 @@ pub(crate) fn queue_transcription(
                 }
 
                 if is_cancelled() {
-                    app_handle
-                        .state::<AppState>()
-                        .pill()
-                        .finish_processing(&app_handle);
-                    discard_pending_recording(saved_for_task.pending_path.as_deref());
-                    app_handle.state::<AppState>().set_pending_path(None);
+                    abort_transcription(&app_handle, saved_for_task.pending_path.as_deref(), false);
                     return;
                 }
 
@@ -261,23 +251,17 @@ pub(crate) fn queue_transcription(
                         return;
                     }
                     ProcessTranscriptOutcome::Cancelled => {
-                        app_handle
-                            .state::<AppState>()
-                            .pill()
-                            .finish_processing(&app_handle);
-                        discard_pending_recording(saved_for_task.pending_path.as_deref());
-                        app_handle.state::<AppState>().set_pending_path(None);
+                        abort_transcription(
+                            &app_handle,
+                            saved_for_task.pending_path.as_deref(),
+                            false,
+                        );
                         return;
                     }
                 };
 
                 if is_cancelled() {
-                    app_handle
-                        .state::<AppState>()
-                        .pill()
-                        .finish_processing(&app_handle);
-                    discard_pending_recording(saved_for_task.pending_path.as_deref());
-                    app_handle.state::<AppState>().set_pending_path(None);
+                    abort_transcription(&app_handle, saved_for_task.pending_path.as_deref(), false);
                     return;
                 }
 
@@ -429,16 +413,10 @@ pub(crate) fn recover_interrupted_recordings(app: &AppHandle<AppRuntime>) {
             &app,
             toast::Payload {
                 toast_type: "info".to_string(),
-                title: None,
                 message: toast::native(&app, "native.toast.recovering"),
                 auto_dismiss: Some(true),
                 duration: Some(30000),
-                retry_id: None,
-                mode: None,
-                action: None,
-                action_label: None,
-                secondary_action: None,
-                secondary_action_label: None,
+                ..Default::default()
             },
         );
 
@@ -480,13 +458,11 @@ pub(crate) fn recover_interrupted_recordings(app: &AppHandle<AppRuntime>) {
                     },
                 ),
                 auto_dismiss: Some(false),
-                duration: None,
-                retry_id: None,
-                mode: None,
                 action: Some("view_recovered_transcriptions".to_string()),
                 action_label: Some(toast::native(&app, "native.toast.view_history")),
                 secondary_action: Some("copy_last_transcription".to_string()),
                 secondary_action_label: Some("Copy".to_string()),
+                ..Default::default()
             },
         );
     });
@@ -1141,6 +1117,20 @@ fn emit_transcription_complete_with_cleanup(
     persisted
 }
 
+fn abort_transcription(
+    app: &AppHandle<AppRuntime>,
+    pending_path: Option<&Path>,
+    collapse_pill: bool,
+) {
+    if collapse_pill {
+        crate::pill::collapse_expanded_pill(app);
+    }
+    let state = app.state::<AppState>();
+    state.pill().finish_processing(app);
+    discard_pending_recording(pending_path);
+    state.set_pending_path(None);
+}
+
 fn discard_pending_recording(path: Option<&Path>) {
     if let Some(path) = path {
         let _ = std::fs::remove_file(path);
@@ -1168,16 +1158,10 @@ fn handle_empty_transcription(
         app,
         toast::Payload {
             toast_type: "warning".to_string(),
-            title: None,
             message: toast::native(app, "native.toast.no_words"),
             auto_dismiss: Some(true),
             duration: Some(3000),
-            retry_id: None,
-            mode: None,
-            action: None,
-            action_label: None,
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 
@@ -1223,16 +1207,11 @@ fn emit_auto_paste_error(
         app,
         toast::Payload {
             toast_type: "error".to_string(),
-            title: None,
             message,
             auto_dismiss: Some(true),
             duration: Some(3000),
-            retry_id: None,
             mode: Some("local".into()),
-            action: None,
-            action_label: None,
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 }
@@ -1309,16 +1288,9 @@ fn emit_transcription_error_inner(
             app,
             toast::Payload {
                 toast_type: "error".to_string(),
-                title: None,
                 message: toast_message,
-                auto_dismiss: None,
-                duration: None,
-                retry_id: None,
                 mode: Some("local".into()),
-                action: None,
-                action_label: None,
-                secondary_action: None,
-                secondary_action_label: None,
+                ..Default::default()
             },
         );
     }
@@ -1722,12 +1694,9 @@ fn maybe_warn_llm_issue(app: &AppHandle<AppRuntime>, is_edit_mode: bool, reason:
                 message: format!("{reason} Your selected text was left alone."),
                 auto_dismiss: Some(true),
                 duration: Some(10_000),
-                retry_id: None,
-                mode: None,
                 action: Some("open_llm_cleanup_settings".to_string()),
                 action_label: Some("Open Settings".to_string()),
-                secondary_action: None,
-                secondary_action_label: None,
+                ..Default::default()
             },
         );
     } else {
@@ -1855,13 +1824,7 @@ pub(crate) fn finalize_streaming_transcription(
         }
 
         if is_cancelled() {
-            crate::pill::collapse_expanded_pill(&app_handle);
-            app_handle
-                .state::<AppState>()
-                .pill()
-                .finish_processing(&app_handle);
-            discard_pending_recording(pending_path.as_deref());
-            app_handle.state::<AppState>().set_pending_path(None);
+            abort_transcription(&app_handle, pending_path.as_deref(), true);
             return;
         }
 
@@ -1888,25 +1851,13 @@ pub(crate) fn finalize_streaming_transcription(
                 return;
             }
             ProcessTranscriptOutcome::Cancelled => {
-                crate::pill::collapse_expanded_pill(&app_handle);
-                app_handle
-                    .state::<AppState>()
-                    .pill()
-                    .finish_processing(&app_handle);
-                discard_pending_recording(pending_path.as_deref());
-                app_handle.state::<AppState>().set_pending_path(None);
+                abort_transcription(&app_handle, pending_path.as_deref(), true);
                 return;
             }
         };
 
         if is_cancelled() {
-            crate::pill::collapse_expanded_pill(&app_handle);
-            app_handle
-                .state::<AppState>()
-                .pill()
-                .finish_processing(&app_handle);
-            discard_pending_recording(pending_path.as_deref());
-            app_handle.state::<AppState>().set_pending_path(None);
+            abort_transcription(&app_handle, pending_path.as_deref(), true);
             return;
         }
 
