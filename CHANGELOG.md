@@ -1,3 +1,12 @@
+1.1.3
+
+### Improvements
+
+- The news bell now sits inside the account pill on the Home screen, so the top corner is a little tidier.
+- A lot of code behind the scenes has been cleaned up, so Glimpse should run a little smoother.
+
+---
+
 1.1.2
 
 ### Improvements
