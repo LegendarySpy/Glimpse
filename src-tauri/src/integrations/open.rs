@@ -25,7 +25,6 @@ fn help() {
                 "OPTIONS",
                 &[
                     ("--tab <name>", "Settings tab: models, about, account."),
-                    ("--id <id>", "Item to open within the target view."),
                     ("--json", "Output machine-readable JSON."),
                 ],
             ),
@@ -40,14 +39,11 @@ pub(crate) fn run(args: &[String], json: bool) -> Result<()> {
     }
 
     let mut payload = json!({});
-    if let Some(target) = positionals(args, &["--tab", "--id"]).first() {
+    if let Some(target) = positionals(args, &["--tab"]).first() {
         payload["target"] = json!(target);
     }
     if let Some(tab) = str_flag(args, "--tab")? {
         payload["tab"] = json!(tab);
-    }
-    if let Some(id) = str_flag(args, "--id")? {
-        payload["id"] = json!(id);
     }
 
     let data = client::request_data("open", payload)?;

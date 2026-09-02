@@ -8,8 +8,8 @@
 // folder is shared with the real install, so leave the model manager alone
 // during a `--keep` session.
 //
-//   bun run screenshots              # dark theme, writes assets/readme/*.png
-//   bun run screenshots -- --theme light --out /tmp/shots
+//   bun run screenshots              # light theme, writes assets/readme/*.png
+//   bun run screenshots -- --theme dark --out /tmp/shots
 //   bun run screenshots -- --skip-build --keep
 //
 // macOS only. Needs the terminal to have Accessibility access (window sizing)
@@ -49,6 +49,9 @@ const TRANSCRIPTIONS = [
   "What other placeholder text can I say to fill this screen and give people reading this a great example?",
   "Remind me to water the plants before the weekend and pick up coffee beans on the way home.",
 ];
+
+// Shown in the account pill instead of the license holder's name.
+const ACCOUNT_NAME = "User";
 
 const DICTIONARY = ["Groq", "Tauri", "Electrobun"];
 
@@ -141,7 +144,7 @@ const flag = (name, fallback) => {
 const has = (name) => args.includes(name);
 
 const OUT_DIR = resolve(flag("--out", join(ROOT, "assets/readme")));
-const THEME = flag("--theme", "dark");
+const THEME = flag("--theme", "light");
 const SKIP_BUILD = has("--skip-build");
 const KEEP = has("--keep");
 
@@ -477,7 +480,11 @@ try {
 
   log("launching Glimpse with the demo home");
   app = Bun.spawn([BINARY], {
-    env: { ...process.env, HOME: sandboxHome },
+    env: {
+      ...process.env,
+      HOME: sandboxHome,
+      GLIMPSE_DEMO_ACCOUNT_NAME: ACCOUNT_NAME,
+    },
     stdout: "ignore",
     stderr: "ignore",
   });

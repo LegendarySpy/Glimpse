@@ -243,6 +243,17 @@ pub(crate) fn developer_license_bypass_active() -> bool {
     cfg!(debug_assertions) && option_env!("GLIMPSE_FORCE_LICENSE_GATE") != Some("1")
 }
 
+// Debug builds only. The README screenshot script sets it so the account pill
+// shows a placeholder instead of the real license holder.
+fn demo_account_name() -> Option<String> {
+    if !cfg!(debug_assertions) {
+        return None;
+    }
+    std::env::var("GLIMPSE_DEMO_ACCOUNT_NAME")
+        .ok()
+        .filter(|name| !name.trim().is_empty())
+}
+
 pub fn is_license_deep_link(raw_url: &str) -> bool {
     let Ok(url) = reqwest::Url::parse(raw_url) else {
         return false;
@@ -346,7 +357,8 @@ pub fn get_license_state(store: &SettingsStore) -> Result<LicenseState, String> 
         customer_email: grant
             .as_ref()
             .and_then(|grant| grant.customer_email.clone()),
-        customer_name: grant.as_ref().and_then(|grant| grant.customer_name.clone()),
+        customer_name: demo_account_name()
+            .or_else(|| grant.as_ref().and_then(|grant| grant.customer_name.clone())),
         last_validated_at: grant.as_ref().map(|grant| grant.last_validated_at.clone()),
         activated_at: grant.as_ref().and_then(|grant| grant.activated_at.clone()),
         purchased_at: grant.as_ref().and_then(|grant| grant.purchased_at.clone()),
