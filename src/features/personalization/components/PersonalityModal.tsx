@@ -504,7 +504,7 @@ const PersonalityModal = ({
             <div className="flex items-center gap-1">
               <button
                 onClick={onDelete}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-content-muted hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-content-muted hover:bg-red-500/10 hover:text-red-400 transition-colors"
                 title={t({
                   id: "personalization.modal.delete_mode",
                   message: "Delete mode",
@@ -518,7 +518,7 @@ const PersonalityModal = ({
               </button>
               <button
                 onClick={onClose}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-content-muted hover:bg-surface-elevated hover:text-content-secondary transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-content-muted hover:bg-surface-elevated hover:text-content-secondary transition-colors"
                 aria-label={t({
                   id: "personalization.modal.close",
                   message: "Close modal",

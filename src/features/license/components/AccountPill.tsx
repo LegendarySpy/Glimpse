@@ -1,5 +1,4 @@
 import { useLingui } from "@lingui/react/macro";
-import { User } from "@phosphor-icons/react";
 import { useLicenseState } from "../queries";
 
 interface AccountPillProps {
@@ -22,14 +21,9 @@ const AccountPill = ({ onClick }: AccountPillProps) => {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-9 items-center gap-2 rounded-full border border-border-primary bg-surface-surface pl-1.5 pr-3 shadow-[var(--shadow-sm)] transition-colors hover:border-border-secondary hover:bg-[var(--surface-interactive)]"
+      className="flex h-full items-center rounded-r-full pl-2.5 pr-3 ui-text-meta ui-color-secondary transition-colors hover:bg-[var(--surface-interactive)] hover:text-content-primary"
     >
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-secondary bg-surface-elevated">
-        <User size={14} className="text-content-muted" aria-hidden="true" />
-      </span>
-      <span className="ui-text-meta ui-color-secondary max-w-[110px] truncate">
-        {label}
-      </span>
+      <span className="max-w-[110px] truncate">{label}</span>
     </button>
   );
 };

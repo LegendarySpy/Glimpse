@@ -1,6 +1,6 @@
 [package]
 name = "Glimpse"
-version = "1.1.2"
+version = "1.1.3"
 description = "Open-source voice-to-text productivity app built with Tauri"
 authors = ["Glimpse HQ"]
 edition = "2024"
@@ -43,10 +43,10 @@ crossbeam-channel = "0.5"
 webrtc-vad = "0.4"
 rustfft = "6"
 reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
-posthog-rs = { version = "0.24", default-features = false, features = ["async-client"] }
+posthog-rs = { version = "0.25", default-features = false, features = ["async-client"] }
 arboard = "3"
-glimpse-speech = { git = "https://github.com/glimpse-hq/Glimpse-Speech.git", rev = "000b8733dd5b504b187d374c86e380aa48347c79", features = ["whisper", "nvidia", "api", "cli", "remote", "cleanup-apple", "apple-speech"] }
-uuid = { version = "1.24.1", features = ["v4"] }
+glimpse-speech = { git = "https://github.com/glimpse-hq/Glimpse-Speech.git", rev = "c6807f4088c3dfdd88099e3eb3415a58c0cf886d", features = ["whisper", "nvidia", "api", "cli", "remote", "cleanup-apple", "apple-speech"] }
+uuid = { version = "1.26.0", features = ["v4"] }
 aes-gcm = "0.11"
 pbkdf2 = "0.13"
 sha2 = "0.11"

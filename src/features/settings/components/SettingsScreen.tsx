@@ -325,7 +325,7 @@ const SettingsErrorBanner = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.12, ease: "easeOut" }}
-          className={`rounded-lg border border-error/20 bg-error/5 px-2 py-1.5 ${
+          className={`rounded-md border border-error/20 bg-error/5 px-2 py-1.5 ${
             sourceTab
               ? "cursor-pointer transition-colors hover:bg-error/10"
               : ""

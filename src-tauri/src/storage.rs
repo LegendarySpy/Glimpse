@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::library::{LibraryFilter, LibraryItem, LibraryItemPatch};
+use crate::transcribe::count_words;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TranscriptionRecord {
@@ -193,16 +194,61 @@ impl StorageManager {
         id_override: Option<String>,
         timestamp_override: Option<DateTime<Local>>,
     ) -> Result<TranscriptionRecord> {
+        self.save_record(
+            text,
+            None,
+            audio_path,
+            status,
+            error_message,
+            metadata,
+            id_override,
+            timestamp_override,
+        )
+    }
+
+    pub fn save_transcription_with_cleanup(
+        &self,
+        raw_text: String,
+        cleaned_text: String,
+        audio_path: String,
+        metadata: TranscriptionMetadata,
+        id_override: Option<String>,
+        timestamp_override: Option<DateTime<Local>>,
+    ) -> Result<TranscriptionRecord> {
+        self.save_record(
+            cleaned_text,
+            Some(raw_text),
+            audio_path,
+            TranscriptionStatus::Success,
+            None,
+            metadata,
+            id_override,
+            timestamp_override,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn save_record(
+        &self,
+        text: String,
+        raw_text: Option<String>,
+        audio_path: String,
+        status: TranscriptionStatus,
+        error_message: Option<String>,
+        metadata: TranscriptionMetadata,
+        id_override: Option<String>,
+        timestamp_override: Option<DateTime<Local>>,
+    ) -> Result<TranscriptionRecord> {
         let record = TranscriptionRecord {
             id: id_override.unwrap_or_else(|| Uuid::new_v4().to_string()),
             timestamp: timestamp_override.unwrap_or_else(Local::now),
             text,
-            raw_text: None,
+            llm_cleaned: raw_text.is_some(),
+            raw_text,
             audio_available: !audio_path.is_empty(),
             audio_path,
             status,
             error_message,
-            llm_cleaned: false,
             speech_model: metadata.speech_model,
             llm_model: metadata.llm_model,
             word_count: metadata.word_count,
@@ -217,40 +263,6 @@ impl StorageManager {
         if matches!(record.status, TranscriptionStatus::Success) {
             Self::record_dictation(&conn, record.word_count, record.audio_duration_seconds)?;
         }
-        Ok(record)
-    }
-
-    pub fn save_transcription_with_cleanup(
-        &self,
-        raw_text: String,
-        cleaned_text: String,
-        audio_path: String,
-        metadata: TranscriptionMetadata,
-        id_override: Option<String>,
-        timestamp_override: Option<DateTime<Local>>,
-    ) -> Result<TranscriptionRecord> {
-        let record = TranscriptionRecord {
-            id: id_override.unwrap_or_else(|| Uuid::new_v4().to_string()),
-            timestamp: timestamp_override.unwrap_or_else(Local::now),
-            text: cleaned_text,
-            raw_text: Some(raw_text),
-            audio_available: !audio_path.is_empty(),
-            audio_path,
-            status: TranscriptionStatus::Success,
-            error_message: None,
-            llm_cleaned: true,
-            speech_model: metadata.speech_model,
-            llm_model: metadata.llm_model,
-            word_count: metadata.word_count,
-            audio_duration_seconds: metadata.audio_duration_seconds,
-            synced: metadata.synced,
-            mode_id: metadata.mode_id,
-            mode_name: metadata.mode_name,
-        };
-
-        let conn = self.connection.lock();
-        Self::insert_record(&conn, &record)?;
-        Self::record_dictation(&conn, record.word_count, record.audio_duration_seconds)?;
         Ok(record)
     }
 
@@ -472,30 +484,7 @@ impl StorageManager {
     }
 
     pub fn get_recent_transcriptions(&self, limit: usize) -> Result<Vec<TranscriptionRecord>> {
-        if limit == 0 {
-            return Ok(Vec::new());
-        }
-
-        let mut records = {
-            let conn = self.connection.lock();
-            let mut stmt = conn.prepare(
-                "SELECT id, timestamp, text, raw_text, audio_path, status, error_message, llm_cleaned,
-                        speech_model, llm_model, word_count, audio_duration_seconds, synced, mode_id, mode_name
-                 FROM transcriptions
-                 WHERE status = ?1 AND text <> ''
-                 ORDER BY timestamp DESC
-                 LIMIT ?2",
-            )?;
-
-            stmt.query_map(
-                params![TranscriptionStatus::Success.as_str(), limit as i64],
-                Self::record_from_row,
-            )?
-            .collect::<rusqlite::Result<Vec<_>>>()?
-        };
-
-        Self::resolve_audio_availability(&mut records);
-        Ok(records)
+        self.get_recent_transcriptions_page(limit, 0)
     }
 
     pub fn get_recent_transcriptions_page(
@@ -1083,10 +1072,6 @@ impl StorageManager {
         let conn = self.connection.lock();
         crate::library::repo::get_library_tags(&conn)
     }
-}
-
-fn count_words(text: &str) -> u32 {
-    crate::transcribe::count_words(text)
 }
 
 #[cfg(test)]

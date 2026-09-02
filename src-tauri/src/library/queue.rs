@@ -516,11 +516,11 @@ fn transcribe_library_item(
     };
 
     if matches!(ready_model.engine, model_manager::LocalModelEngine::Whisper) {
-        transcribe_whisper_chunked(&run, &audio_path, &wav_info)
+        transcribe_chunked(&run, &audio_path, &wav_info, ChunkStrategy::Whisper)
     } else if wav_info.duration_seconds <= (DIRECT_TRANSCRIBE_MINUTES as f32 * 60.0) {
         transcribe_direct(&run, &audio_path)
     } else {
-        transcribe_parakeet_chunked(&run, &audio_path, &wav_info)
+        transcribe_chunked(&run, &audio_path, &wav_info, ChunkStrategy::Parakeet)
     }
 }
 
@@ -611,190 +611,34 @@ fn transcribe_direct(run: &LocalRun, audio_path: &Path) -> Result<LibraryTranscr
     })
 }
 
-fn transcribe_whisper_chunked(
-    run: &LocalRun,
-    audio_path: &Path,
-    wav_info: &WavInfo,
-) -> Result<LibraryTranscriptionResult> {
-    let sample_rate = run.sample_rate;
-    let transcriber = run.state.local_transcriber();
-    let plan = ChunkPlan::new(
-        WHISPER_CHUNK_SECONDS as usize,
-        WHISPER_CHUNK_OVERLAP_SECONDS as usize,
-        sample_rate,
-    );
-
-    let mut total_chunks =
-        compute_total_chunks(wav_info.total_samples, plan.chunk_size, plan.step).max(1);
-    let mut full_text = String::new();
-    let mut merged_segments: Vec<TranscriptSegment> = Vec::new();
-    let mut merged_words: Vec<TranscriptSegment> = Vec::new();
-    let mut last_end_ms: u64 = 0;
-    let mut chunk_index: u32 = 0;
-
-    stream_wav_chunks(
-        audio_path,
-        plan.chunk_size,
-        plan.overlap,
-        |start_idx, chunk| {
-            if run.token.is_cancelled() {
-                return Err(cancelled_error());
-            }
-
-            chunk_index = chunk_index.saturating_add(1);
-            let remaining = wav_info
-                .total_samples
-                .saturating_sub(start_idx + chunk.len());
-            total_chunks = total_chunks.max(chunk_index + u32::from(remaining > 0));
-            if chunk_below_speech_gate(chunk, sample_rate) {
-                let progress =
-                    ((start_idx + chunk.len()) as f32 / wav_info.total_samples as f32).min(1.0);
-                report_progress(
-                    run.app,
-                    run.state.storage(),
-                    &run.item.id,
-                    LibraryProgressUpdate::with_chunk_counts(progress, chunk_index, total_chunks),
-                );
-                return Ok(());
-            }
-            let result = transcriber.transcribe_with_segments(
-                run.model,
-                chunk,
-                sample_rate,
-                run.dictionary,
-                Some(run.language),
-            )?;
-            if run.token.is_cancelled() {
-                return Err(cancelled_error());
-            }
-
-            let regions = glimpse_speech::vad::speech_regions(chunk, sample_rate);
-            let in_speech = |start_ms: u64, end_ms: u64| match regions.as_deref() {
-                Some(regions) => transcription_api::overlaps_speech(
-                    start_ms as f32 / 1000.0,
-                    end_ms as f32 / 1000.0,
-                    regions,
-                ),
-                None => true,
-            };
-
-            let chunk_text = transcription_api::keep_spoken_segments(
-                &result.transcript,
-                result.segments.as_deref(),
-                regions.as_deref(),
-            );
-            let mut appended_text = None;
-            if !chunk_text.trim().is_empty() {
-                let deduped = transcribe::dedupe_overlap_text(&full_text, &chunk_text);
-                if !deduped.trim().is_empty() {
-                    let appended = append_library_chunk(&mut full_text, &deduped);
-                    appended_text = Some(appended);
-                }
-            }
-
-            let mut new_segments: Vec<TranscriptSegment> = Vec::new();
-            if let Some(segments) = result.segments {
-                let offset = offset_ms(start_idx, sample_rate);
-                for seg in convert_segments_to_ms(&segments) {
-                    let start_ms = seg.start_ms + offset;
-                    let end_ms = seg.end_ms + offset;
-                    if end_ms <= last_end_ms || !in_speech(seg.start_ms, seg.end_ms) {
-                        continue;
-                    }
-                    let new_segment = TranscriptSegment {
-                        start_ms,
-                        end_ms,
-                        text: seg.text,
-                        speaker_id: None,
-                    };
-                    merged_segments.push(new_segment.clone());
-                    new_segments.push(new_segment);
-                    last_end_ms = end_ms;
-                }
-            }
-
-            if let Some(words) = result.words {
-                let offset = offset_ms(start_idx, sample_rate);
-                let spoken: Vec<_> = convert_segments_to_ms(&words)
-                    .into_iter()
-                    .filter(|w| in_speech(w.start_ms, w.end_ms))
-                    .collect();
-
-                let skip = if start_idx == 0 {
-                    0
-                } else {
-                    let appended_words = appended_text
-                        .as_deref()
-                        .map_or(0, |t| t.split_whitespace().count());
-                    spoken.len().saturating_sub(appended_words)
-                };
-                for word in spoken.into_iter().skip(skip) {
-                    merged_words.push(TranscriptSegment {
-                        start_ms: word.start_ms + offset,
-                        end_ms: word.end_ms + offset,
-                        text: word.text,
-                        speaker_id: None,
-                    });
-                }
-            }
-
-            let progress =
-                ((start_idx + chunk.len()) as f32 / wav_info.total_samples as f32).min(1.0);
-            let transcript_patch = appended_text.as_ref().map(|_| full_text.clone());
-            let segments_patch = if new_segments.is_empty() {
-                None
-            } else {
-                Some(merged_segments.clone())
-            };
-            let chunk_segments = if new_segments.is_empty() {
-                None
-            } else {
-                Some(new_segments)
-            };
-
-            report_progress(
-                run.app,
-                run.state.storage(),
-                &run.item.id,
-                LibraryProgressUpdate {
-                    progress,
-                    current_chunk: chunk_index,
-                    total_chunks,
-                    transcript: transcript_patch,
-                    segments: segments_patch,
-                    chunk_text: appended_text,
-                    chunk_segments,
-                },
-            );
-            Ok(())
-        },
-    )?;
-
-    Ok(LibraryTranscriptionResult {
-        transcript: full_text.trim().to_string(),
-        segments: if merged_segments.is_empty() {
-            None
-        } else {
-            Some(merged_segments)
-        },
-        words: (!merged_words.is_empty()).then_some(merged_words),
-        speech_model: None,
-        speakers: None,
-    })
+#[derive(Clone, Copy)]
+enum ChunkStrategy {
+    /// Short chunks with VAD gating; whisper hallucinates on silence.
+    Whisper,
+    /// Long chunks, no VAD; overlap words are trimmed by count and timestamp.
+    Parakeet,
 }
 
-fn transcribe_parakeet_chunked(
+fn transcribe_chunked(
     run: &LocalRun,
     audio_path: &Path,
     wav_info: &WavInfo,
+    strategy: ChunkStrategy,
 ) -> Result<LibraryTranscriptionResult> {
     let sample_rate = run.sample_rate;
     let transcriber = run.state.local_transcriber();
-    let plan = ChunkPlan::new(
-        MAX_CHUNK_MINUTES as usize * 60,
-        CHUNK_OVERLAP_SECONDS as usize,
-        sample_rate,
-    );
+    let plan = match strategy {
+        ChunkStrategy::Whisper => ChunkPlan::new(
+            WHISPER_CHUNK_SECONDS as usize,
+            WHISPER_CHUNK_OVERLAP_SECONDS as usize,
+            sample_rate,
+        ),
+        ChunkStrategy::Parakeet => ChunkPlan::new(
+            MAX_CHUNK_MINUTES as usize * 60,
+            CHUNK_OVERLAP_SECONDS as usize,
+            sample_rate,
+        ),
+    };
 
     let mut total_chunks =
         compute_total_chunks(wav_info.total_samples, plan.chunk_size, plan.step).max(1);
@@ -819,9 +663,9 @@ fn transcribe_parakeet_chunked(
                 .total_samples
                 .saturating_sub(start_idx + chunk.len());
             total_chunks = total_chunks.max(chunk_index + u32::from(remaining > 0));
+            let progress =
+                ((start_idx + chunk.len()) as f32 / wav_info.total_samples as f32).min(1.0);
             if chunk_below_speech_gate(chunk, sample_rate) {
-                let progress =
-                    ((start_idx + chunk.len()) as f32 / wav_info.total_samples as f32).min(1.0);
                 report_progress(
                     run.app,
                     run.state.storage(),
@@ -841,24 +685,42 @@ fn transcribe_parakeet_chunked(
                 return Err(cancelled_error());
             }
 
-            let chunk_text = result.transcript;
+            let regions = match strategy {
+                ChunkStrategy::Whisper => glimpse_speech::vad::speech_regions(chunk, sample_rate),
+                ChunkStrategy::Parakeet => None,
+            };
+            let in_speech = |start_ms: u64, end_ms: u64| match regions.as_deref() {
+                Some(regions) => transcription_api::overlaps_speech(
+                    start_ms as f32 / 1000.0,
+                    end_ms as f32 / 1000.0,
+                    regions,
+                ),
+                None => true,
+            };
+
+            let chunk_text = transcription_api::keep_spoken_segments(
+                &result.transcript,
+                result.segments.as_deref(),
+                regions.as_deref(),
+            );
             let mut kept_words = 0usize;
             let mut appended_text = None;
             if !chunk_text.trim().is_empty() {
                 let deduped = transcribe::dedupe_overlap_text(&full_text, &chunk_text);
                 if !deduped.trim().is_empty() {
-                    kept_words = deduped.split_whitespace().count();
-                    appended_text = Some(append_library_chunk(&mut full_text, &deduped));
+                    let appended = append_library_chunk(&mut full_text, &deduped);
+                    kept_words = appended.split_whitespace().count();
+                    appended_text = Some(appended);
                 }
             }
 
+            let offset = offset_ms(start_idx, sample_rate);
             let mut new_segments: Vec<TranscriptSegment> = Vec::new();
             if let Some(segments) = result.segments {
-                let offset = offset_ms(start_idx, sample_rate);
                 for seg in convert_segments_to_ms(&segments) {
                     let start_ms = seg.start_ms + offset;
                     let end_ms = seg.end_ms + offset;
-                    if end_ms <= last_end_ms {
+                    if end_ms <= last_end_ms || !in_speech(seg.start_ms, seg.end_ms) {
                         continue;
                     }
                     let new_segment = TranscriptSegment {
@@ -874,23 +736,31 @@ fn transcribe_parakeet_chunked(
             }
 
             if let Some(words) = result.words {
-                let offset = offset_ms(start_idx, sample_rate);
-                let converted = convert_segments_to_ms(&words);
-                let exact_skip = (chunk_text.split_whitespace().count() == converted.len())
-                    .then(|| converted.len().saturating_sub(kept_words));
-                let chunk_word_floor = last_word_end_ms;
-                for (index, word) in converted.into_iter().enumerate() {
-                    let start_ms = word.start_ms + offset;
-                    let end_ms = word.end_ms + offset;
-                    if matches!(exact_skip, Some(skip) if index < skip) {
-                        continue;
+                let spoken: Vec<_> = convert_segments_to_ms(&words)
+                    .into_iter()
+                    .filter(|w| in_speech(w.start_ms, w.end_ms))
+                    .collect();
+                let overlap_words = spoken.len().saturating_sub(kept_words);
+                let skip = match strategy {
+                    ChunkStrategy::Whisper if start_idx == 0 => 0,
+                    ChunkStrategy::Whisper => overlap_words,
+                    ChunkStrategy::Parakeet
+                        if chunk_text.split_whitespace().count() == spoken.len() =>
+                    {
+                        overlap_words
                     }
-                    if end_ms <= chunk_word_floor {
+                    ChunkStrategy::Parakeet => 0,
+                };
+                let word_floor =
+                    matches!(strategy, ChunkStrategy::Parakeet).then_some(last_word_end_ms);
+                for word in spoken.into_iter().skip(skip) {
+                    let end_ms = word.end_ms + offset;
+                    if word_floor.is_some_and(|floor| end_ms <= floor) {
                         continue;
                     }
                     last_word_end_ms = last_word_end_ms.max(end_ms);
                     merged_words.push(TranscriptSegment {
-                        start_ms,
+                        start_ms: word.start_ms + offset,
                         end_ms,
                         text: word.text,
                         speaker_id: None,
@@ -898,18 +768,11 @@ fn transcribe_parakeet_chunked(
                 }
             }
 
-            let progress =
-                ((start_idx + chunk.len()) as f32 / wav_info.total_samples as f32).min(1.0);
             let transcript_patch = appended_text.as_ref().map(|_| full_text.clone());
-            let segments_patch = if new_segments.is_empty() {
-                None
+            let (segments_patch, chunk_segments) = if new_segments.is_empty() {
+                (None, None)
             } else {
-                Some(merged_segments.clone())
-            };
-            let chunk_segments = if new_segments.is_empty() {
-                None
-            } else {
-                Some(new_segments)
+                (Some(merged_segments.clone()), Some(new_segments))
             };
             report_progress(
                 run.app,
@@ -931,11 +794,7 @@ fn transcribe_parakeet_chunked(
 
     Ok(LibraryTranscriptionResult {
         transcript: full_text.trim().to_string(),
-        segments: if merged_segments.is_empty() {
-            None
-        } else {
-            Some(merged_segments)
-        },
+        segments: (!merged_segments.is_empty()).then_some(merged_segments),
         words: (!merged_words.is_empty()).then_some(merged_words),
         speech_model: None,
         speakers: None,

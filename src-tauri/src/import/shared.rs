@@ -191,10 +191,41 @@ pub fn parse_datetime_millis(raw: &str) -> Option<i64> {
     }
 
     if let Ok(n) = s.parse::<i64>() {
-        return Some(if n < 100_000_000_000 { n * 1000 } else { n });
+        return Some(epoch_to_millis(n));
     }
 
     None
+}
+
+/// Epoch values below the year 5138 in milliseconds are treated as seconds.
+pub fn epoch_to_millis(raw: i64) -> i64 {
+    if raw < 100_000_000_000 {
+        raw * 1000
+    } else {
+        raw
+    }
+}
+
+/// First non-empty string among `keys`, trimmed.
+pub fn json_text(value: &serde_json::Value, keys: &[&str]) -> Option<String> {
+    keys.iter()
+        .find_map(|key| value.get(*key).and_then(|v| v.as_str()))
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+}
+
+/// Timestamp in millis from the first present key, accepting date strings or epoch numbers.
+/// Falls back to now.
+pub fn json_timestamp_ms(value: &serde_json::Value, keys: &[&str]) -> i64 {
+    keys.iter()
+        .find_map(|key| value.get(*key))
+        .and_then(|v| match v {
+            serde_json::Value::String(s) => parse_datetime_millis(s),
+            serde_json::Value::Number(n) => n.as_i64().map(epoch_to_millis),
+            _ => None,
+        })
+        .unwrap_or_else(|| chrono::Local::now().timestamp_millis())
 }
 
 pub fn read_json(path: &Path) -> Option<serde_json::Value> {

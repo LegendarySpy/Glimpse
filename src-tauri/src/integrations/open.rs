@@ -14,14 +14,17 @@ fn help() {
                 "ARGUMENTS",
                 &[
                     ("settings", "Open the main window (default)."),
-                    ("history", "Open the history view."),
+                    ("home", "Open the home view (history is an alias)."),
+                    ("dictionary", "Open the dictionary view."),
+                    ("personalization", "Open the personalization view."),
+                    ("library", "Open the library view."),
                     ("models", "Open the models view."),
                 ],
             ),
             (
                 "OPTIONS",
                 &[
-                    ("--tab <name>", "Settings tab: general, models, history."),
+                    ("--tab <name>", "Settings tab: models, about, account."),
                     ("--id <id>", "Item to open within the target view."),
                     ("--json", "Output machine-readable JSON."),
                 ],

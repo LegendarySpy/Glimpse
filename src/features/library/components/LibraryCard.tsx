@@ -438,7 +438,7 @@ const LibraryCard = ({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: -4 }}
                         transition={{ duration: 0.12 }}
-                        className="absolute left-0 top-full mt-1 z-[120] w-36 rounded-md border border-[var(--color-border-secondary)] bg-[var(--color-bg-overlay)] shadow-lg shadow-[var(--color-shadow-soft-40)] overflow-hidden"
+                        className="absolute left-0 top-full mt-1 z-[120] w-36 rounded-lg border border-[var(--color-border-secondary)] bg-[var(--color-bg-overlay)] shadow-lg shadow-[var(--color-shadow-soft-40)] overflow-hidden"
                       >
                         <div className="max-h-36 overflow-y-auto custom-scrollbar">
                           {filteredTagOptions.length > 0 ? (

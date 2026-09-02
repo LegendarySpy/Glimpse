@@ -1,3 +1,4 @@
+use crate::personalization_snippets::extract_host;
 use crate::settings::{Personality, UserSettings};
 use crate::{
     accessibility_context, permissions,
@@ -8,35 +9,6 @@ use crate::{
 pub struct ModeContextMode {
     pub name: String,
     pub instructions: Vec<String>,
-}
-
-fn extract_host(candidate: &str) -> Option<String> {
-    let mut value = candidate.trim().to_lowercase();
-    if value.is_empty() {
-        return None;
-    }
-
-    if let Some(index) = value.find("://") {
-        value = value[(index + 3)..].to_string();
-    }
-
-    let end_index = value.find(['/', '?', '#']).unwrap_or(value.len());
-    let host_port = &value[..end_index];
-    let host_port = host_port.split('@').next_back().unwrap_or(host_port);
-    let host = if let Some(rest) = host_port.strip_prefix('[') {
-        rest.find(']')
-            .map(|end| &rest[..end])
-            .unwrap_or_else(|| host_port.split(':').next().unwrap_or(host_port))
-    } else {
-        host_port.split(':').next().unwrap_or(host_port)
-    };
-    let host = host.trim_start_matches("www.");
-
-    if host.is_empty() {
-        None
-    } else {
-        Some(host.to_string())
-    }
 }
 
 fn site_matches(url: &str, site: &str) -> bool {

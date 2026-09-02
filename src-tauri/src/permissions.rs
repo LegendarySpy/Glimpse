@@ -4,45 +4,15 @@
 mod macos {
     use std::process::Command;
     use std::sync::atomic::{AtomicBool, Ordering};
-    #[cfg(debug_assertions)]
-    use tracing::debug;
 
     /// Check if accessibility (AX) permission is granted.
-    /// Uses AXIsProcessTrusted() from ApplicationServices framework.
     pub fn check_accessibility_permission() -> bool {
-        if let Some(result) = check_accessibility_native() {
-            return result;
-        }
-
-        check_accessibility_osascript()
-    }
-
-    /// Native check using AXIsProcessTrusted
-    fn check_accessibility_native() -> Option<bool> {
         #[link(name = "ApplicationServices", kind = "framework")]
         unsafe extern "C" {
             fn AXIsProcessTrusted() -> u8;
         }
 
-        let result = unsafe { AXIsProcessTrusted() };
-        Some(result != 0)
-    }
-
-    /// Fallback check using osascript to test if we can send keystrokes
-    fn check_accessibility_osascript() -> bool {
-        let output = Command::new("osascript")
-            .args(["-e", "tell application \"System Events\" to return 1"])
-            .output();
-
-        match output {
-            Ok(result) => {
-                let success = result.status.success();
-                #[cfg(debug_assertions)]
-                debug!(success, "accessibility osascript permission check");
-                success
-            }
-            Err(_) => false,
-        }
+        unsafe { AXIsProcessTrusted() != 0 }
     }
 
     /// Open System Settings to the Accessibility privacy pane.

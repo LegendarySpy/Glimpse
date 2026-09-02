@@ -215,8 +215,9 @@ fn looks_like_flag(value: &str) -> bool {
     value.starts_with("--") || (value.starts_with('-') && value.len() > 1)
 }
 
-/// The value following `flag`, or an error if it's missing or another flag.
-fn flag_value<'a>(args: &'a [String], flag: &str) -> Result<Option<&'a str>> {
+/// Parse a `--flag <value>` string option. Errors if the value is missing or is
+/// itself another flag; returns None only when the flag is absent.
+pub(crate) fn str_flag<'a>(args: &'a [String], flag: &str) -> Result<Option<&'a str>> {
     let Some(idx) = args.iter().position(|arg| arg == flag) else {
         return Ok(None);
     };
@@ -231,18 +232,12 @@ fn flag_value<'a>(args: &'a [String], flag: &str) -> Result<Option<&'a str>> {
 
 /// Parse a `--flag <value>` integer option. Returns the default if absent.
 pub(crate) fn usize_flag(args: &[String], flag: &str, default: usize) -> Result<usize> {
-    match flag_value(args, flag)? {
+    match str_flag(args, flag)? {
         Some(value) => value
             .parse::<usize>()
             .map_err(|_| anyhow::anyhow!("{flag} must be a non-negative integer")),
         None => Ok(default),
     }
-}
-
-/// Parse a `--flag <value>` string option. Errors if the value is missing or is
-/// itself another flag; returns None only when the flag is absent.
-pub(crate) fn str_flag<'a>(args: &'a [String], flag: &str) -> Result<Option<&'a str>> {
-    flag_value(args, flag)
 }
 
 pub(crate) fn has_flag(args: &[String], flag: &str) -> bool {

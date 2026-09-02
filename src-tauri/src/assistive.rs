@@ -48,31 +48,7 @@ pub fn get_selected_text_ax() -> Option<String> {
         macos_ax::SelectionProbe::Empty => return None,
         macos_ax::SelectionProbe::Text(_) | macos_ax::SelectionProbe::Unknown => {}
     }
-
-    let mut clipboard = Clipboard::new().ok()?;
-
-    let backup = ClipboardBackup::capture(&mut clipboard);
-
-    if clipboard.clear().is_err() {
-        backup.restore(&mut clipboard);
-        return None;
-    }
-    thread::sleep(Duration::from_millis(5));
-
-    if send_copy_keystroke().is_err() {
-        backup.restore(&mut clipboard);
-        return None;
-    }
-    thread::sleep(Duration::from_millis(50));
-
-    let text = clipboard.get_text().ok();
-
-    backup.restore(&mut clipboard);
-
-    match text {
-        Some(t) if !t.trim().is_empty() => Some(t),
-        _ => None,
-    }
+    copy_selection_via_clipboard(Duration::from_millis(50))
 }
 
 #[cfg(target_os = "macos")]
@@ -423,20 +399,23 @@ mod windows_uia {
 }
 
 #[cfg(target_os = "macos")]
-fn send_copy_keystroke() -> Result<()> {
-    const C_KEY: CGKeyCode = 8;
+const COPY_KEY: CGKeyCode = 8;
+#[cfg(target_os = "macos")]
+const PASTE_KEY: CGKeyCode = 9;
 
+#[cfg(target_os = "macos")]
+fn send_shortcut_keystroke(key: CGKeyCode) -> Result<()> {
     let source = CGEventSource::new(CGEventSourceStateID::CombinedSessionState)
         .map_err(|_| anyhow!("Failed to create CGEventSource"))?;
 
-    let key_down = CGEvent::new_keyboard_event(source.clone(), C_KEY, true)
+    let key_down = CGEvent::new_keyboard_event(source.clone(), key, true)
         .map_err(|_| anyhow!("Failed to create key-down event"))?;
     key_down.set_flags(CGEventFlags::CGEventFlagCommand);
     key_down.post(CGEventTapLocation::HID);
 
     thread::sleep(Duration::from_millis(5));
 
-    let key_up = CGEvent::new_keyboard_event(source, C_KEY, false)
+    let key_up = CGEvent::new_keyboard_event(source, key, false)
         .map_err(|_| anyhow!("Failed to create key-up event"))?;
     key_up.set_flags(CGEventFlags::empty());
     key_up.post(CGEventTapLocation::HID);
@@ -446,44 +425,29 @@ fn send_copy_keystroke() -> Result<()> {
 
 #[cfg(target_os = "windows")]
 pub fn get_selected_text_ax() -> Option<String> {
-    let mut clipboard = Clipboard::new().ok()?;
-
-    let backup = ClipboardBackup::capture(&mut clipboard);
-
-    if clipboard.clear().is_err() {
-        backup.restore(&mut clipboard);
-        return None;
-    }
-    thread::sleep(Duration::from_millis(5));
-
-    if send_copy_keystroke().is_err() {
-        backup.restore(&mut clipboard);
-        return None;
-    }
-    thread::sleep(Duration::from_millis(80));
-
-    let text = clipboard.get_text().ok();
-
-    backup.restore(&mut clipboard);
-
-    match text {
-        Some(t) if !t.trim().is_empty() => Some(t),
-        _ => None,
-    }
+    copy_selection_via_clipboard(Duration::from_millis(80))
 }
 
 #[cfg(target_os = "windows")]
-fn send_copy_keystroke() -> Result<()> {
+const COPY_KEY: VIRTUAL_KEY = VK_C;
+#[cfg(target_os = "windows")]
+const PASTE_KEY: VIRTUAL_KEY = VK_V;
+
+#[cfg(target_os = "windows")]
+fn send_shortcut_keystroke(key: VIRTUAL_KEY) -> Result<()> {
     let inputs = [
         keyboard_input(VK_CONTROL, KEYBD_EVENT_FLAGS(0)),
-        keyboard_input(VK_C, KEYBD_EVENT_FLAGS(0)),
-        keyboard_input(VK_C, KEYEVENTF_KEYUP),
+        keyboard_input(key, KEYBD_EVENT_FLAGS(0)),
+        keyboard_input(key, KEYEVENTF_KEYUP),
         keyboard_input(VK_CONTROL, KEYEVENTF_KEYUP),
     ];
 
     let sent = unsafe { SendInput(&inputs, std::mem::size_of::<INPUT>() as i32) };
     if sent != inputs.len() as u32 {
-        return Err(anyhow!("Failed to send Ctrl+C copy keystroke"));
+        return Err(anyhow!(
+            "Failed to send Ctrl keystroke for virtual key {}",
+            key.0
+        ));
     }
 
     Ok(())
@@ -500,7 +464,7 @@ pub fn paste_text(text: &str) -> Result<()> {
 
     thread::sleep(Duration::from_millis(10));
 
-    let paste_result = send_paste_keystroke();
+    let paste_result = send_shortcut_keystroke(PASTE_KEY);
 
     thread::spawn(move || {
         thread::sleep(Duration::from_millis(300));
@@ -552,6 +516,32 @@ fn should_restore_after_paste(clipboard: &mut Clipboard, inserted_text: &str) ->
 }
 
 #[cfg(any(target_os = "macos", target_os = "windows"))]
+fn copy_selection_via_clipboard(settle: Duration) -> Option<String> {
+    let mut clipboard = Clipboard::new().ok()?;
+    let backup = ClipboardBackup::capture(&mut clipboard);
+
+    if clipboard.clear().is_err() {
+        backup.restore(&mut clipboard);
+        return None;
+    }
+    thread::sleep(Duration::from_millis(5));
+
+    if send_shortcut_keystroke(COPY_KEY).is_err() {
+        backup.restore(&mut clipboard);
+        return None;
+    }
+    thread::sleep(settle);
+
+    let text = clipboard.get_text().ok();
+    backup.restore(&mut clipboard);
+
+    match text {
+        Some(t) if !t.trim().is_empty() => Some(t),
+        _ => None,
+    }
+}
+
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 struct ClipboardBackup {
     text: Option<String>,
     html: Option<String>,
@@ -599,45 +589,6 @@ impl ClipboardBackup {
             let _ = clipboard.clear();
         }
     }
-}
-
-#[cfg(target_os = "macos")]
-fn send_paste_keystroke() -> Result<()> {
-    const V_KEY: CGKeyCode = 9;
-
-    let source = CGEventSource::new(CGEventSourceStateID::CombinedSessionState)
-        .map_err(|_| anyhow!("Failed to create CGEventSource"))?;
-
-    let key_down = CGEvent::new_keyboard_event(source.clone(), V_KEY, true)
-        .map_err(|_| anyhow!("Failed to create key-down event"))?;
-    key_down.set_flags(CGEventFlags::CGEventFlagCommand);
-    key_down.post(CGEventTapLocation::HID);
-
-    thread::sleep(Duration::from_millis(5));
-
-    let key_up = CGEvent::new_keyboard_event(source, V_KEY, false)
-        .map_err(|_| anyhow!("Failed to create key-up event"))?;
-    key_up.set_flags(CGEventFlags::empty());
-    key_up.post(CGEventTapLocation::HID);
-
-    Ok(())
-}
-
-#[cfg(target_os = "windows")]
-fn send_paste_keystroke() -> Result<()> {
-    let inputs = [
-        keyboard_input(VK_CONTROL, KEYBD_EVENT_FLAGS(0)),
-        keyboard_input(VK_V, KEYBD_EVENT_FLAGS(0)),
-        keyboard_input(VK_V, KEYEVENTF_KEYUP),
-        keyboard_input(VK_CONTROL, KEYEVENTF_KEYUP),
-    ];
-
-    let sent = unsafe { SendInput(&inputs, std::mem::size_of::<INPUT>() as i32) };
-    if sent != inputs.len() as u32 {
-        return Err(anyhow!("Failed to send Ctrl+V paste keystroke"));
-    }
-
-    Ok(())
 }
 
 #[cfg(target_os = "windows")]

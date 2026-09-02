@@ -236,37 +236,7 @@ pub fn short_retry_delay(error: &RemoteError) -> Option<Duration> {
 }
 
 pub fn llm_issue_message(error: &RemoteError) -> String {
-    match error.kind {
-        RemoteErrorKind::RateLimited => {
-            if let Some(retry_after) = error.retry_after {
-                let seconds = retry_after.as_secs().max(1);
-                format!(
-                    "Language model rate limit reached (retry in about {seconds} second{}).",
-                    if seconds == 1 { "" } else { "s" }
-                )
-            } else {
-                "Language model rate limit reached.".to_string()
-            }
-        }
-        RemoteErrorKind::QuotaExceeded => "Language model quota exceeded.".to_string(),
-        RemoteErrorKind::Unauthorized => {
-            "Language model API key is invalid or expired.".to_string()
-        }
-        RemoteErrorKind::InvalidRequest => {
-            if error.message.trim().is_empty() {
-                "Language model rejected the request.".to_string()
-            } else {
-                format!(
-                    "Language model rejected the request: {}.",
-                    error.message.trim()
-                )
-            }
-        }
-        RemoteErrorKind::NotFound => "Language model endpoint or model was not found.".to_string(),
-        RemoteErrorKind::UpstreamUnavailable | RemoteErrorKind::Other => {
-            "Language model unreachable.".to_string()
-        }
-    }
+    crate::speech::remote::issue_message("Language model", error)
 }
 
 #[derive(Debug, Clone, Copy)]

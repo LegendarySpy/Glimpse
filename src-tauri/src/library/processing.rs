@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::io::{BufRead, BufReader, BufWriter, ErrorKind};
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, Stdio};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
@@ -510,7 +510,7 @@ fn decode_with_native_then_ffmpeg(
         Err(err) if is_cancelled_error(&err) => Err(err),
         Err(native_err) => {
             let _ = fs::remove_file(output);
-            let Some(ffmpeg) = find_ffmpeg_in_path() else {
+            let Some(ffmpeg) = find_tool_in_path("ffmpeg") else {
                 return Err(anyhow!(
                     "{native_err}. FFmpeg fallback is unavailable for this codec."
                 ));
@@ -874,39 +874,34 @@ fn convert_with_ffmpeg(
     duration_ms: Option<u64>,
     mut progress_cb: Option<&mut dyn FnMut(f32)>,
 ) -> Result<()> {
-    if let Some(token) = token
-        && token.is_cancelled()
-    {
+    let is_cancelled = || token.is_some_and(CancellationToken::is_cancelled);
+    if is_cancelled() {
         return Err(cancelled_error());
     }
 
-    if duration_ms.is_some() && progress_cb.is_some() {
-        let mut child = Command::new(ffmpeg)
-            .arg("-y")
-            .arg("-nostdin")
-            .arg("-loglevel")
-            .arg("error")
-            .arg("-progress")
-            .arg("pipe:1")
-            .arg("-nostats")
-            .arg("-i")
-            .arg(input)
-            .arg("-vn")
-            .arg("-acodec")
-            .arg("pcm_s16le")
-            .arg("-ar")
-            .arg(TARGET_SAMPLE_RATE.to_string())
-            .arg("-ac")
-            .arg("1")
-            .arg(output)
+    let report_progress = duration_ms.is_some() && progress_cb.is_some();
+    let mut command = Command::new(ffmpeg);
+    command.args(["-y", "-nostdin", "-loglevel", "error"]);
+    if report_progress {
+        command
+            .args(["-progress", "pipe:1", "-nostats"])
             .stdout(Stdio::piped())
-            .stderr(Stdio::null())
-            .spawn()
-            .map_err(|err| match err.kind() {
-                ErrorKind::NotFound => anyhow!("FFmpeg not found on PATH."),
-                _ => anyhow!("Failed to run ffmpeg: {err}"),
-            })?;
+            .stderr(Stdio::null());
+    }
+    command
+        .arg("-i")
+        .arg(input)
+        .args(["-vn", "-acodec", "pcm_s16le", "-ar"])
+        .arg(TARGET_SAMPLE_RATE.to_string())
+        .args(["-ac", "1"])
+        .arg(output);
 
+    let mut child = command.spawn().map_err(|err| match err.kind() {
+        ErrorKind::NotFound => anyhow!("FFmpeg not found on PATH."),
+        _ => anyhow!("Failed to run ffmpeg: {err}"),
+    })?;
+
+    if report_progress {
         let mut reader = BufReader::new(
             child
                 .stdout
@@ -918,12 +913,8 @@ fn convert_with_ffmpeg(
         let mut line = String::new();
 
         loop {
-            if let Some(token) = token
-                && token.is_cancelled()
-            {
-                let _ = child.kill();
-                let _ = child.wait();
-                let _ = fs::remove_file(output);
+            if is_cancelled() {
+                abort_ffmpeg(&mut child, output);
                 return Err(cancelled_error());
             }
 
@@ -945,74 +936,44 @@ fn convert_with_ffmpeg(
                 }
             }
         }
-
-        let status = child
-            .wait()
-            .map_err(|err| anyhow!("Failed to run ffmpeg: {err}"))?;
-        if let Some(token) = token
-            && token.is_cancelled()
-        {
-            let _ = fs::remove_file(output);
-            return Err(cancelled_error());
+    } else {
+        loop {
+            if is_cancelled() {
+                abort_ffmpeg(&mut child, output);
+                return Err(cancelled_error());
+            }
+            match child.try_wait() {
+                Ok(Some(_)) => break,
+                Ok(None) => thread::sleep(Duration::from_millis(200)),
+                Err(err) => {
+                    abort_ffmpeg(&mut child, output);
+                    return Err(anyhow!("Failed to run ffmpeg: {err}"));
+                }
+            }
         }
-        if !status.success() {
-            let _ = fs::remove_file(output);
-            return Err(anyhow!("ffmpeg conversion failed"));
-        }
-        if let Some(cb) = progress_cb.as_mut() {
-            cb(1.0);
-        }
-        return Ok(());
     }
 
-    let mut child = Command::new(ffmpeg)
-        .arg("-y")
-        .arg("-nostdin")
-        .arg("-loglevel")
-        .arg("error")
-        .arg("-i")
-        .arg(input)
-        .arg("-vn")
-        .arg("-acodec")
-        .arg("pcm_s16le")
-        .arg("-ar")
-        .arg(TARGET_SAMPLE_RATE.to_string())
-        .arg("-ac")
-        .arg("1")
-        .arg(output)
-        .spawn()
-        .map_err(|err| match err.kind() {
-            ErrorKind::NotFound => anyhow!("FFmpeg not found on PATH."),
-            _ => anyhow!("Failed to run ffmpeg: {err}"),
-        })?;
-    let status = loop {
-        if let Some(token) = token
-            && token.is_cancelled()
-        {
-            let _ = child.kill();
-            let _ = child.wait();
-            let _ = fs::remove_file(output);
-            return Err(cancelled_error());
-        }
-
-        match child.try_wait() {
-            Ok(Some(status)) => break status,
-            Ok(None) => {
-                thread::sleep(Duration::from_millis(200));
-            }
-            Err(err) => {
-                let _ = child.kill();
-                let _ = fs::remove_file(output);
-                return Err(anyhow!("Failed to run ffmpeg: {err}"));
-            }
-        }
-    };
-
+    let status = child
+        .wait()
+        .map_err(|err| anyhow!("Failed to run ffmpeg: {err}"))?;
+    if is_cancelled() {
+        let _ = fs::remove_file(output);
+        return Err(cancelled_error());
+    }
     if !status.success() {
         let _ = fs::remove_file(output);
         return Err(anyhow!("ffmpeg conversion failed"));
     }
+    if report_progress && let Some(cb) = progress_cb.as_mut() {
+        cb(1.0);
+    }
     Ok(())
+}
+
+fn abort_ffmpeg(child: &mut Child, output: &Path) {
+    let _ = child.kill();
+    let _ = child.wait();
+    let _ = fs::remove_file(output);
 }
 
 fn find_binary_in_path(file_name: &str, fallback_dirs: &[&str]) -> Option<PathBuf> {
@@ -1033,11 +994,11 @@ fn find_binary_in_path(file_name: &str, fallback_dirs: &[&str]) -> Option<PathBu
     None
 }
 
-fn find_ffmpeg_in_path() -> Option<PathBuf> {
+fn find_tool_in_path(name: &str) -> Option<PathBuf> {
     let file_name = if cfg!(target_os = "windows") {
-        "ffmpeg.exe"
+        format!("{name}.exe")
     } else {
-        "ffmpeg"
+        name.to_string()
     };
     let fallback_dirs: &[&str] = if cfg!(target_os = "macos") {
         &[
@@ -1049,30 +1010,11 @@ fn find_ffmpeg_in_path() -> Option<PathBuf> {
     } else {
         &["/usr/local/bin", "/usr/bin"]
     };
-    find_binary_in_path(file_name, fallback_dirs)
-}
-
-fn find_ffprobe_in_path() -> Option<PathBuf> {
-    let file_name = if cfg!(target_os = "windows") {
-        "ffprobe.exe"
-    } else {
-        "ffprobe"
-    };
-    let fallback_dirs: &[&str] = if cfg!(target_os = "macos") {
-        &[
-            "/opt/homebrew/bin",
-            "/usr/local/bin",
-            "/opt/local/bin",
-            "/usr/bin",
-        ]
-    } else {
-        &["/usr/local/bin", "/usr/bin"]
-    };
-    find_binary_in_path(file_name, fallback_dirs)
+    find_binary_in_path(&file_name, fallback_dirs)
 }
 
 pub(crate) fn probe_media_duration_ms(path: &Path) -> Option<u64> {
-    if let Some(ffprobe) = find_ffprobe_in_path() {
+    if let Some(ffprobe) = find_tool_in_path("ffprobe") {
         let output = Command::new(ffprobe)
             .arg("-v")
             .arg("error")

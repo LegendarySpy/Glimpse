@@ -114,16 +114,8 @@ pub(crate) fn run(_identifier: &str, args: &[String], json: bool) -> Result<()> 
             payload["cleanup"] = json!(cleanup);
         }
 
-        let data = match client::try_request("transcribe", payload)? {
-            Some(response) if response.ok => response.data,
-            Some(response) => {
-                return Err(coded(
-                    3,
-                    response
-                        .error
-                        .unwrap_or_else(|| "transcription failed".to_string()),
-                ));
-            }
+        let data = match client::try_request_data("transcribe", payload, "transcription failed")? {
+            Some(data) => data,
             None => {
                 return Err(coded(
                     2,

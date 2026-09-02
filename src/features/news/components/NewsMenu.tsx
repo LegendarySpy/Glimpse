@@ -56,19 +56,19 @@ const NewsMenu = () => {
   const [lead, ...rest] = items;
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="flex h-full">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={isOpen}
         aria-label={title}
-        className="ui-button-ghost relative flex h-9 w-9 items-center justify-center rounded-lg text-content-muted hover:text-content-primary transition-colors"
+        className="relative flex h-full w-9 items-center justify-center rounded-l-full text-content-muted transition-colors hover:bg-[var(--surface-interactive)] hover:text-content-primary"
       >
-        <Bell size={20} weight="regular" aria-hidden="true" />
+        <Bell size={18} weight="regular" aria-hidden="true" />
         {unreadCount > 0 && (
           <span
             aria-hidden="true"
-            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full"
+            className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full"
             style={{ backgroundColor: "var(--color-accent)" }}
           />
         )}

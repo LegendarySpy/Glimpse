@@ -6,8 +6,8 @@ use crate::settings::{Personality, Replacement};
 use crate::storage::ImportedTranscription;
 
 use super::shared::{
-    ImportBundle, ModelHint, app_support_dir, dedup_transcripts, map_model_family,
-    open_sqlite_readonly, parse_datetime_millis, read_json, sqlite_table_exists,
+    ImportBundle, ModelHint, app_support_dir, dedup_transcripts, json_text, json_timestamp_ms,
+    map_model_family, open_sqlite_readonly, parse_datetime_millis, read_json, sqlite_table_exists,
 };
 
 pub const ID: &str = "superwhisper";
@@ -125,36 +125,14 @@ pub fn parse(home: &Path) -> Result<ImportBundle, String> {
 
     bundle.transcripts.extend(current_db_transcripts(home));
     dedup_transcripts(&mut bundle.transcripts);
-    bundle.transcript_count = bundle.transcripts.len() as u32;
 
     Ok(bundle)
 }
 
 fn recording_transcript(meta_path: &Path) -> Option<ImportedTranscription> {
     let meta = read_json(meta_path)?;
-    let text = ["result", "text", "llmResult", "processedResult"]
-        .iter()
-        .find_map(|key| meta.get(*key).and_then(|v| v.as_str()))
-        .map(str::trim)
-        .filter(|s| !s.is_empty())?
-        .to_string();
-
-    let timestamp_ms = ["datetime", "timestamp", "date"]
-        .iter()
-        .find_map(|key| meta.get(*key))
-        .and_then(|v| match v {
-            serde_json::Value::String(s) => parse_datetime_millis(s),
-            serde_json::Value::Number(n) => n.as_i64().map(|raw| {
-                if raw < 100_000_000_000 {
-                    raw * 1000
-                } else {
-                    raw
-                }
-            }),
-            _ => None,
-        })
-        .unwrap_or_else(|| chrono::Local::now().timestamp_millis());
-
+    let text = json_text(&meta, &["result", "text", "llmResult", "processedResult"])?;
+    let timestamp_ms = json_timestamp_ms(&meta, &["datetime", "timestamp", "date"]);
     Some(ImportedTranscription { text, timestamp_ms })
 }
 

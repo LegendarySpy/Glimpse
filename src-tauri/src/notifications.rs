@@ -120,16 +120,12 @@ pub fn evaluate_after_use(app: &AppHandle<AppRuntime>) {
         app,
         toast::Payload {
             toast_type: "info".to_string(),
-            title: None,
             message,
             auto_dismiss: Some(true),
             duration: Some(9000),
-            retry_id: None,
-            mode: None,
             action: Some("open_account_page".to_string()),
             action_label: Some(action_label.to_string()),
-            secondary_action: None,
-            secondary_action_label: None,
+            ..Default::default()
         },
     );
 

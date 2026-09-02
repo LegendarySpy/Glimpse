@@ -6,6 +6,7 @@ use tauri::{AppHandle, Manager};
 
 use super::ipc::{Request, Response};
 use crate::settings::Replacement;
+use crate::tray::SettingsPage;
 use crate::{AppRuntime, AppState};
 
 pub(crate) fn dispatch(app: &AppHandle<AppRuntime>, request: &Request) -> Response {
@@ -134,13 +135,19 @@ fn open(app: &AppHandle<AppRuntime>, args: &Value) -> Result<Value, String> {
         .unwrap_or("settings");
     let tab = args.get("tab").and_then(Value::as_str);
 
-    let result = match (target, tab) {
-        ("history", _) => crate::tray::open_settings_history(app),
-        ("models", _) | ("settings", Some("models")) => crate::tray::open_settings_models(app),
-        ("settings", Some("history")) => crate::tray::open_settings_history(app),
-        ("settings", Some("about")) => crate::tray::open_settings_about(app),
-        // No dedicated deep-link for the library yet; just bring up the app.
-        _ => crate::tray::toggle_settings_window(app),
+    let page = match (target, tab) {
+        ("home", _) | ("history", _) | ("settings", Some("history")) => Some(SettingsPage::History),
+        ("dictionary", _) => Some(SettingsPage::Dictionary),
+        ("personalization", _) => Some(SettingsPage::Personalization),
+        ("library", _) => Some(SettingsPage::Library),
+        ("models", _) | ("settings", Some("models")) => Some(SettingsPage::Models),
+        ("settings", Some("about")) => Some(SettingsPage::About),
+        ("settings", Some("account")) => Some(SettingsPage::Account),
+        _ => None,
+    };
+    let result = match page {
+        Some(page) => crate::tray::open_settings_page(app, page),
+        None => crate::tray::toggle_settings_window(app),
     };
     result.map_err(|err| err.to_string())?;
     Ok(json!({ "opened": target }))
