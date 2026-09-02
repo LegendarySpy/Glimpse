@@ -183,7 +183,7 @@ const FAQModal = ({ isOpen, onClose }: FAQModalProps) => {
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors"
+                className="p-1.5 rounded-md text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors"
                 aria-label={t({
                   id: "faq.close_aria",
                   message: "Close FAQ",

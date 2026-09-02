@@ -334,7 +334,7 @@ export function ImportStep({
         )}
 
         {!showAppPicker && sourceName && (
-          <div className="relative mb-4 inline-flex items-center gap-2 rounded-xl border border-border-primary bg-surface-secondary px-3 py-1.5">
+          <div className="relative mb-4 inline-flex items-center gap-2 rounded-lg border border-border-primary bg-surface-secondary px-3 py-1.5">
             <DotMatrix
               rows={1}
               cols={3}

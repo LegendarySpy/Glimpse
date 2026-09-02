@@ -299,7 +299,7 @@ function WhatsNewModal({ isOpen, onClose }: WhatsNewModalProps) {
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors"
+                className="p-1.5 rounded-md text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors"
               >
                 <X size={16} />
               </button>

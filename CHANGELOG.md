@@ -3,6 +3,7 @@
 ### Improvements
 
 - The news bell now sits inside the account pill on the Home screen, so the top corner is a little tidier.
+- Small buttons and menus across Settings, Personalization, Library and the What's New and FAQ windows now share the same corner rounding.
 - A lot of code behind the scenes has been cleaned up, so Glimpse should run a little smoother.
 
 ---

@@ -438,7 +438,7 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
               id: "personalization.new_mode",
               message: "New mode",
             })}
-            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-content-primary px-3.5 py-1.5 ui-text-button-sm font-semibold text-surface-secondary transition-all hover:bg-content-secondary shadow-[0_3px_0_-1px_rgba(255,255,255,0.25),inset_0_1px_0_0_rgba(255,255,255,0.1)] active:translate-y-[1px] active:shadow-none"
+            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-content-primary px-3.5 py-1.5 ui-text-button-sm font-semibold text-surface-secondary transition-all hover:bg-content-secondary shadow-[0_3px_0_-1px_rgba(255,255,255,0.25),inset_0_1px_0_0_rgba(255,255,255,0.1)] active:translate-y-[1px] active:shadow-none"
           >
             <Plus size={13} aria-hidden="true" />
             {t({
@@ -853,7 +853,7 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
                 <button
                   type="button"
                   onClick={() => setPendingDeletePersonality(null)}
-                  className="rounded-lg border border-border-primary bg-surface-surface px-3 py-1.5 ui-text-button ui-color-primary hover:bg-surface-elevated transition-colors"
+                  className="rounded-lg border border-border-primary bg-surface-surface px-4 py-2 ui-text-button ui-color-primary hover:bg-surface-elevated transition-colors"
                 >
                   {t({
                     id: "personalization.cancel",
@@ -863,7 +863,7 @@ const PersonalizationView = ({ isActive = true }: { isActive?: boolean }) => {
                 <button
                   type="button"
                   onClick={confirmDeleteMode}
-                  className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 ui-text-button font-semibold ui-color-error-soft hover:bg-red-500/15 transition-colors"
+                  className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 ui-text-button font-semibold ui-color-error-soft hover:bg-red-500/15 transition-colors"
                 >
                   {t({
                     id: "personalization.delete",

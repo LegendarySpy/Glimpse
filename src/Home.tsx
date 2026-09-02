@@ -155,6 +155,7 @@ const Home = () => {
     null,
   );
   const licenseGateActiveRef = useRef(false);
+  const licenseLoadedRef = useRef(false);
 
   const { data: settings } = useSettings();
   const { data: updateStatus } = useUpdateStatus();
@@ -207,28 +208,6 @@ const Home = () => {
     }
   }, [licenseGateActive, licenseState]);
 
-  useEffect(() => {
-    licenseGateActiveRef.current = licenseGateActive;
-    if (
-      !licenseGateActive &&
-      (activeView === "brain" || activeView === "library")
-    ) {
-      setActiveView("home");
-      setDragActive(false);
-      setPendingImportPaths(null);
-    }
-  }, [activeView, licenseGateActive]);
-
-  const wideLights = isMac && (appInfoData?.os_major ?? 26) >= 26;
-  const collapsedWidth = wideLights ? 78 : 68;
-  const sidebarIconPl = wideLights ? 21 : isWindows ? 16 : 17;
-  const sidebarWidth = isSidebarCollapsed ? collapsedWidth : 200;
-
-  const updateLocalApiStatus = useCallback((status: LocalApiStatus) => {
-    cachedLocalApiStatus = status;
-    setLocalApiStatus(status);
-  }, []);
-
   const openAccountSettings = useCallback(
     (source: PurchaseSource = "settings_account") => {
       if (source !== "settings_account") {
@@ -240,6 +219,38 @@ const Home = () => {
     },
     [],
   );
+
+  // A gated view requested (from the CLI) before the license state has loaded.
+  const pendingGatedViewRef = useRef<"brain" | "library" | null>(null);
+
+  useEffect(() => {
+    licenseGateActiveRef.current = licenseGateActive;
+    licenseLoadedRef.current = licenseState !== undefined;
+    if (licenseState && pendingGatedViewRef.current) {
+      const view = pendingGatedViewRef.current;
+      pendingGatedViewRef.current = null;
+      if (licenseGateActive) setActiveView(view);
+      else openAccountSettings("sidebar_lock");
+    }
+    if (
+      !licenseGateActive &&
+      (activeView === "brain" || activeView === "library")
+    ) {
+      setActiveView("home");
+      setDragActive(false);
+      setPendingImportPaths(null);
+    }
+  }, [activeView, licenseGateActive, licenseState, openAccountSettings]);
+
+  const wideLights = isMac && (appInfoData?.os_major ?? 26) >= 26;
+  const collapsedWidth = wideLights ? 78 : 68;
+  const sidebarIconPl = wideLights ? 21 : isWindows ? 16 : 17;
+  const sidebarWidth = isSidebarCollapsed ? collapsedWidth : 200;
+
+  const updateLocalApiStatus = useCallback((status: LocalApiStatus) => {
+    cachedLocalApiStatus = status;
+    setLocalApiStatus(status);
+  }, []);
 
   const openLocalApiSettings = useCallback(() => {
     setSettingsTab(activeLicense ? "api" : "account");
@@ -277,6 +288,7 @@ const Home = () => {
     let unlistenHistory: UnlistenFn | null = null;
     let unlistenModels: UnlistenFn | null = null;
     let unlistenAccount: UnlistenFn | null = null;
+    let unlistenViews: UnlistenFn[] = [];
     let unlistenDragEnter: UnlistenFn | null = null;
     let unlistenDragOver: UnlistenFn | null = null;
     let unlistenDragLeave: UnlistenFn | null = null;
@@ -321,7 +333,37 @@ const Home = () => {
       else unlistenAccount = fn;
     });
 
-    Promise.all([navigateReady, historyReady, modelsReady, accountReady])
+    const viewsReady = (
+      [
+        ["navigate:dictionary", "dictionary"],
+        ["navigate:personalization", "brain"],
+        ["navigate:library", "library"],
+      ] as const
+    ).map(([event, view]) =>
+      listen(event, () => {
+        setIsSettingsOpen(false);
+        if (view === "dictionary") {
+          setActiveView(view);
+        } else if (!licenseLoadedRef.current) {
+          pendingGatedViewRef.current = view;
+        } else if (licenseGateActiveRef.current) {
+          setActiveView(view);
+        } else {
+          openAccountSettings("sidebar_lock");
+        }
+      }).then((fn) => {
+        if (cancelled) fn();
+        else unlistenViews.push(fn);
+      }),
+    );
+
+    Promise.all([
+      navigateReady,
+      historyReady,
+      modelsReady,
+      accountReady,
+      ...viewsReady,
+    ])
       .then(() => {
         if (!cancelled) {
           emit("settings:renderer_ready").catch(() => {});
@@ -409,6 +451,8 @@ const Home = () => {
       unlistenHistory?.();
       unlistenModels?.();
       unlistenAccount?.();
+      unlistenViews.forEach((fn) => fn());
+      unlistenViews = [];
       unlistenDragEnter?.();
       unlistenDragOver?.();
       unlistenDragLeave?.();
@@ -904,9 +948,13 @@ const Home = () => {
         <div data-tauri-drag-region className="h-8 w-full shrink-0" />
 
         {homeViewActive && (
-          <div className="absolute right-6 top-10 z-40 flex items-center gap-2">
-            <AccountPill onClick={() => openAccountSettings("home_pill")} />
+          <div className="absolute right-6 top-10 z-40 flex h-9 items-center overflow-visible rounded-full border border-border-primary bg-surface-surface shadow-[var(--shadow-sm)]">
             <NewsMenu />
+            <div
+              aria-hidden="true"
+              className="h-4 w-px shrink-0 bg-border-primary"
+            />
+            <AccountPill onClick={() => openAccountSettings("home_pill")} />
           </div>
         )}
 
